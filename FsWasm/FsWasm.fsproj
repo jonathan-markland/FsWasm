@@ -9,4 +9,9 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FsWasmLibrary\FsWasmLibrary.fsproj" />
+    <ProjectReference Include="..\WasmSerialiser\WasmSerialiser.csproj" />
+  </ItemGroup>
+
 </Project>

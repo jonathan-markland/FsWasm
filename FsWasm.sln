@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.27703.2047
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsWasm", "FsWasm\FsWasm.fsproj", "{0F30049B-EC16-43DF-9929-B66C80BE602C}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsWasmLibrary", "FsWasmLibrary\FsWasmLibrary.fsproj", "{47528A77-583D-4A39-B5B0-3F10614C84DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WasmSerialiser", "WasmSerialiser\WasmSerialiser.csproj", "{115B2A1C-0E2F-43CC-9EE0-1E1BE9DCE19D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{0F30049B-EC16-43DF-9929-B66C80BE602C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F30049B-EC16-43DF-9929-B66C80BE602C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F30049B-EC16-43DF-9929-B66C80BE602C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47528A77-583D-4A39-B5B0-3F10614C84DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47528A77-583D-4A39-B5B0-3F10614C84DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47528A77-583D-4A39-B5B0-3F10614C84DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47528A77-583D-4A39-B5B0-3F10614C84DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{115B2A1C-0E2F-43CC-9EE0-1E1BE9DCE19D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{115B2A1C-0E2F-43CC-9EE0-1E1BE9DCE19D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{115B2A1C-0E2F-43CC-9EE0-1E1BE9DCE19D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{115B2A1C-0E2F-43CC-9EE0-1E1BE9DCE19D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
