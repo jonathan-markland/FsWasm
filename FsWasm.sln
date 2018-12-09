@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2047
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsWasm", "FsWasm\FsWasm.fsproj", "{0F30049B-EC16-43DF-9929-B66C80BE602C}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsWasm", "FsWasm\FsWasm.fsproj", "{0F30049B-EC16-43DF-9929-B66C80BE602C}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsWasmLibrary", "FsWasmLibrary\FsWasmLibrary.fsproj", "{47528A77-583D-4A39-B5B0-3F10614C84DF}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsWasmLibrary", "FsWasmLibrary\FsWasmLibrary.fsproj", "{47528A77-583D-4A39-B5B0-3F10614C84DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WasmSerialiser", "WasmSerialiser\WasmSerialiser.csproj", "{115B2A1C-0E2F-43CC-9EE0-1E1BE9DCE19D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WasmSerialiser", "WasmSerialiser\WasmSerialiser.csproj", "{115B2A1C-0E2F-43CC-9EE0-1E1BE9DCE19D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F2F3B675-9CE0-4AA1-A608-EA27BC47CA01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
