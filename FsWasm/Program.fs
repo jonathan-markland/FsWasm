@@ -2,6 +2,7 @@
 open System
 open System.IO
 open FsWasmLibrary.Wasm
+open System.Reflection.Metadata.Ecma335
 
 // Interfacing the BinaryReader:
 
@@ -12,6 +13,7 @@ let ReadLeb64   (r:WasmSerialiser.BinaryReader) = r.ReadLebUnsigned64()
 let ReadFloat32 (r:WasmSerialiser.BinaryReader) = r.ReadFloat32()
 let ReadFloat64 (r:WasmSerialiser.BinaryReader) = r.ReadDouble64()
 let ReadName    (r:WasmSerialiser.BinaryReader) = r.ReadString()
+let ReadBytes   (r:WasmSerialiser.BinaryReader) = r.ReadByteVector()
 
 // Interfacing the BinaryReader with Wasm type wrappers, for convenience:
 
@@ -82,7 +84,7 @@ let ReadExportDesc r =
         | 0x01uy -> ExpTable_01(r |> ReadTableIdx)
         | 0x02uy -> ExpMem_02(r |> ReadMemIdx)
         | 0x03uy -> ExpGlobal_03(r |> ReadGlobalIdx)
-        | _ -> failwith "Unrecoginsed ExportDesc code"
+        | _ -> failwith "Unrecognised ExportDesc code"
 
 let ReadValType (r:WasmSerialiser.BinaryReader) =
     match r.ReadByte() with
@@ -106,9 +108,12 @@ let ReadMemArg (r:WasmSerialiser.BinaryReader) =
     let o = r |> ReadWasmU32
     { Align=a; Offset=o }
 
-let ReadMem r = 
+let ReadMemType r =
     let memLimits = r |> ReadLimits
-    let memType = { MemLim=memLimits }
+    { MemLim=memLimits }
+
+let ReadMem r = 
+    let memType = r |> ReadMemType
     { MemType=memType }
 
 let ReadFuncType r =
@@ -117,10 +122,13 @@ let ReadFuncType r =
     let funcOutputs = r |> ReadVector ReadValType
     { FuncInputs=funcInputs; FuncOutputs=funcOutputs }
 
-let ReadTable r =
+let ReadTableType r = 
     r |> ExpectByte 0x70uy   // There is only one kind defined.
     let tableLimits = r |> ReadLimits
-    let tableType = { ElementType=AnyFunc_70; TableLim=tableLimits }
+    { ElementType=AnyFunc_70; TableLim=tableLimits }
+
+let ReadTable r =
+    let tableType = r |> ReadTableType
     { TableType=tableType }
 
 let ReadGlobalType r = 
@@ -135,6 +143,14 @@ let ReadBlockType (r:WasmSerialiser.BinaryReader) =
     else
         let valType = r |> ReadValType
         BlockValType(valType)
+
+let ReadImportDesc r =
+    match r |> ReadByte with
+        | 0x00uy -> ImpFunc_00(r |> ReadTypeIdx)
+        | 0x01uy -> ImpTable_01(r |> ReadTableType)
+        | 0x02uy -> ImpMem_02(r |> ReadMemType)
+        | 0x03uy -> ImpGlobal_03(r |> ReadGlobalType)
+        | _ -> failwith "Unrecognised ImportDesc code"
 
 // Instructions
 
@@ -404,15 +420,41 @@ let ReadCode r =
     let theFunc = r |> ReadFunc
     { Size=codeSize; Code=theFunc }
 
+let ReadImport r = 
+    let moduleName = r |> ReadName
+    let importName = r |> ReadName
+    let importDesc = r |> ReadImportDesc
+    { Mod=moduleName; nm=importName; d=importDesc }
+
+let ReadElem r =
+    let tableIdx = r |> ReadTableIdx
+    let elemExpr = r |> ReadExpr
+    let funcIdxArray = r |> ReadVector ReadFuncIdx
+    { TableIndex=tableIdx; Offset=elemExpr; Init=funcIdxArray }
+
+let ReadData r =
+    let memIdx = r |> ReadMemIdx
+    let offsetExpr = r |> ReadExpr
+    let dataBytes = r |> ReadBytes
+    { DataMemoryIndex=memIdx; OffsetExpr=offsetExpr; InitImage=dataBytes }
+
 // Read Wasm Sections
 
 let ReadTypeSec   r = r |> ReadVector ReadFuncType
+let ReadImportSec r = r |> ReadVector ReadImport
 let ReadFuncSec   r = r |> ReadVector ReadTypeIdx
 let ReadTableSec  r = r |> ReadVector ReadTable
 let ReadMemSec    r = r |> ReadVector ReadMem
 let ReadGlobalSec r = r |> ReadVector ReadGlobal
 let ReadExportSec r = r |> ReadVector ReadExport
 let ReadCodeSec   r = r |> ReadVector ReadCode
+
+let ReadStartSec  r = 
+    let startFuncIdx = r |> ReadFuncIdx
+    { StartFuncIdx=startFuncIdx }
+
+let ReadElemSec r = r |> ReadVector ReadElem
+let ReadDataSec r = r |> ReadVector ReadData
 
 // Main
 
@@ -423,17 +465,20 @@ let main argv =
     
     let theReader = new WasmSerialiser.BinaryReader(fileImage)
 
-    let magic1 = theReader.ReadByte()
-    let magic2 = theReader.ReadByte()
-    let magic3 = theReader.ReadByte()
-    let magic4 = theReader.ReadByte()
-    let magic5 = theReader.ReadByte()
-    let magic6 = theReader.ReadByte()
-    let magic7 = theReader.ReadByte()
-    let magic8 = theReader.ReadByte()
+    let magic1 = theReader |> ReadByte
+    let magic2 = theReader |> ReadByte
+    let magic3 = theReader |> ReadByte
+    let magic4 = theReader |> ReadByte
+    let magic5 = theReader |> ReadByte
+    let magic6 = theReader |> ReadByte
+    let magic7 = theReader |> ReadByte
+    let magic8 = theReader |> ReadByte
 
     let sec1 = theReader |> ReadSectionHeader
     let dat1 = theReader |> ReadTypeSec
+
+    let sec2 = theReader |> ReadSectionHeader
+    let dat2 = theReader |> ReadImportSec
 
     let sec3 = theReader |> ReadSectionHeader
     let dat3 = theReader |> ReadFuncSec
@@ -450,8 +495,17 @@ let main argv =
     let sec7 = theReader |> ReadSectionHeader
     let dat7 = theReader |> ReadExportSec
 
+    let sec8 = theReader |> ReadSectionHeader
+    let dat8 = theReader |> ReadStartSec
+
+    let sec9 = theReader |> ReadSectionHeader
+    let dat9 = theReader |> ReadElemSec
+
     let sec10 = theReader |> ReadSectionHeader
     let dat10 = theReader |> ReadCodeSec
+
+    let sec11 = theReader |> ReadSectionHeader
+    let dat11 = theReader |> ReadDataSec
 
     printfn "Hello World from F#!"
     0 // return an integer exit code

@@ -248,7 +248,7 @@ module Wasm =
     type Mem = { MemType:MemType }
     type Global = { GlobalType:GlobalType; InitExpr:Expr_0B }
     type Export = { nm:Name; d:ExportDesc }
-    type Start = { x:FuncIdx }
+    type Start = { StartFuncIdx:FuncIdx }
     type Elem = { TableIndex:TableIdx; Offset:Expr_0B; Init:FuncIdx array }
     type Code = { Size:U32; Code:Func }
     type Data = { DataMemoryIndex:MemIdx; OffsetExpr:Expr_0B; InitImage:byte array }
@@ -291,17 +291,17 @@ module Wasm =
         // following allows these to be preserved
         // if the file is saved out:
 
-        Custom1:  CustomSec list; Types:TypeSec;
-        Custom2:  CustomSec list; Imports:ImportSec;
-        Custom3:  CustomSec list; Funcs:FuncSec;
-        Custom4:  CustomSec list; Tables:TableSec;
-        Custom5:  CustomSec list; Mems:MemSec;
-        Custom6:  CustomSec list; Globals:GlobalSec;
-        Custom7:  CustomSec list; Exports:ExportSec;
-        Custom8:  CustomSec list; Start:StartSec;
-        Custom9:  CustomSec list; Elems:ElemSec;
-        Custom10: CustomSec list; Codes:CodeSec;
-        Custom11: CustomSec list; Datas:DataSec;
-        Custom12: CustomSec list }
+        Custom1:  CustomSec[]; Types:TypeSec;
+        Custom2:  CustomSec[]; Imports:ImportSec;
+        Custom3:  CustomSec[]; Funcs:FuncSec;
+        Custom4:  CustomSec[]; Tables:TableSec;
+        Custom5:  CustomSec[]; Mems:MemSec;
+        Custom6:  CustomSec[]; Globals:GlobalSec;
+        Custom7:  CustomSec[]; Exports:ExportSec;
+        Custom8:  CustomSec[]; Start:StartSec;
+        Custom9:  CustomSec[]; Elems:ElemSec;
+        Custom10: CustomSec[]; Codes:CodeSec;
+        Custom11: CustomSec[]; Datas:DataSec;
+        Custom12: CustomSec[] }
 
         
