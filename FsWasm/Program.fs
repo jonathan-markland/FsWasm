@@ -13,9 +13,17 @@ let ReadFloat32 (r:WasmSerialiser.BinaryReader) = r.ReadFloat32()
 let ReadFloat64 (r:WasmSerialiser.BinaryReader) = r.ReadDouble64()
 let ReadName    (r:WasmSerialiser.BinaryReader) = r.ReadString()
 
+// Interfacing the BinaryReader with Wasm type wrappers, for convenience:
+
+let ReadWasmI32 r = WasmI32(int (r |> ReadLeb32))
+let ReadWasmU32 r = WasmU32(r |> ReadLeb32)
+let ReadWasmI64 r = WasmI64(int64 (r |> ReadLeb64))
+let ReadWasmF32 r = WasmF32(r |> ReadFloat32)
+let ReadWasmF64 r = WasmF64(r |> ReadFloat64)
+
 // Generic parsing assistance
 
-let ReadSequence (f:WasmSerialiser.BinaryReader -> 'a) (r:WasmSerialiser.BinaryReader) =
+let ReadSequence (f:WasmSerialiser.BinaryReader -> 'a) r =
     let mutable elementCount = r |> ReadLeb32
     seq { while elementCount > 0u 
     do
@@ -41,24 +49,24 @@ let rec ForEachRecognised readX actionToDo r =
 
 // Read WASM indexes
 
-let ReadTypeIdx   r = WasmTypeIdx(WasmU32(r |> ReadLeb32))
-let ReadFuncIdx   r = WasmFuncIdx(WasmU32(r |> ReadLeb32))
-let ReadTableIdx  r = WasmTableIdx(WasmU32(r |> ReadLeb32))
-let ReadMemIdx    r = WasmMemIdx(WasmU32(r |> ReadLeb32))
-let ReadGlobalIdx r = WasmGlobalIdx(WasmU32(r |> ReadLeb32))
-let ReadLocalIdx  r = WasmLocalIdx(WasmU32(r |> ReadLeb32))
-let ReadLabelIdx  r = WasmLabelIdx(WasmU32(r |> ReadLeb32))
+let ReadTypeIdx   r = WasmTypeIdx  (r |> ReadWasmU32)
+let ReadFuncIdx   r = WasmFuncIdx  (r |> ReadWasmU32)
+let ReadTableIdx  r = WasmTableIdx (r |> ReadWasmU32)
+let ReadMemIdx    r = WasmMemIdx   (r |> ReadWasmU32)
+let ReadGlobalIdx r = WasmGlobalIdx(r |> ReadWasmU32)
+let ReadLocalIdx  r = WasmLocalIdx (r |> ReadWasmU32)
+let ReadLabelIdx  r = WasmLabelIdx (r |> ReadWasmU32)
 
 // Wasm basic reading
 
 let ReadLimits r =
     match r |> ReadByte with
         | 0x00uy -> 
-            let n = WasmU32(r |> ReadLeb32)
+            let n = r |> ReadWasmU32
             { Min=n; Max=None }
         | 0x01uy ->
-            let n = WasmU32(r |> ReadLeb32)
-            let m = WasmU32(r |> ReadLeb32)
+            let n = r |> ReadWasmU32
+            let m = r |> ReadWasmU32
             { Min=n; Max=Some(m) }
         | _ -> failwith "Unknown limit type code"
 
@@ -94,8 +102,8 @@ let ReadSectionHeader (r:WasmSerialiser.BinaryReader) =
 // Wasm Type reading
 
 let ReadMemArg (r:WasmSerialiser.BinaryReader) =
-    let a = WasmU32(r |> ReadLeb32)
-    let o = WasmU32(r |> ReadLeb32)
+    let a = r |> ReadWasmU32
+    let o = r |> ReadWasmU32
     { Align=a; Offset=o }
 
 let ReadMem r = 
@@ -226,10 +234,10 @@ and ReadInstr (r:WasmSerialiser.BinaryReader) =
 
         // 5.4.5  Numeric Instructions
 
-        | 0x41uy -> Some(I32Const_41(WasmI32 (int (r |> ReadLeb32))))
-        | 0x42uy -> Some(I64Const_42(WasmI64 (int64 (r |> ReadLeb64))))
-        | 0x43uy -> Some(F32Const_43(WasmF32 (r |> ReadFloat32)))
-        | 0x44uy -> Some(F64Const_44(WasmF64 (r |> ReadFloat64)))
+        | 0x41uy -> Some(I32Const_41(r |> ReadWasmI32))
+        | 0x42uy -> Some(I64Const_42(r |> ReadWasmI64))
+        | 0x43uy -> Some(F32Const_43(r |> ReadWasmF32))
+        | 0x44uy -> Some(F64Const_44(r |> ReadWasmF64))
 
         | 0x45uy -> Some(I32Eqz_45)
         | 0x46uy -> Some(I32Eq_46)
@@ -382,7 +390,7 @@ let ReadExport r =
     { nm=exportName; d=exportDesc }
 
 let ReadLocals r =
-    let numRepeats = WasmU32(r |> ReadLeb32)
+    let numRepeats = r |> ReadWasmU32
     let theType = r |> ReadValType
     { NumRepeats=numRepeats; LocalsType=theType }
 
@@ -392,7 +400,7 @@ let ReadFunc r =
     { Locals=theLocals; Body=theExpr }
 
 let ReadCode r = 
-    let codeSize = WasmU32(r |> ReadLeb32)
+    let codeSize = r |> ReadWasmU32
     let theFunc = r |> ReadFunc
     { Size=codeSize; Code=theFunc }
 
