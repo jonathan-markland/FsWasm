@@ -243,44 +243,30 @@ module Wasm =
 
     type Custom = { Name:Name; Data:byte array }
     type Import = { Mod:Name; nm:Name; d:ImportDesc }
-    type Func = { Locals:Locals array; Body:Expr_0B }
-    type Table = { TableType:TableType }
-    type Mem = { MemType:MemType }
+    type Func   = { Locals:Locals array; Body:Expr_0B }
+    type Table  = { TableType:TableType }
+    type Mem    = { MemType:MemType }
     type Global = { GlobalType:GlobalType; InitExpr:Expr_0B }
     type Export = { nm:Name; d:ExportDesc }
-    type Start = { StartFuncIdx:FuncIdx }
-    type Elem = { TableIndex:TableIdx; Offset:Expr_0B; Init:FuncIdx array }
-    type Code = { Size:U32; Code:Func }
-    type Data = { DataMemoryIndex:MemIdx; OffsetExpr:Expr_0B; InitImage:byte array }
+    type Start  = { StartFuncIdx:FuncIdx }
+    type Elem   = { TableIndex:TableIdx; Offset:Expr_0B; Init:FuncIdx array }
+    type Code   = { Size:U32; Code:Func }
+    type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:Expr_0B; InitImage:byte array }
 
-    type CustomSec = Custom
-    type TypeSec = FuncType_60 list
-    type ImportSec = Import list
-    type FuncSec = TypeIdx list
-    type TableSec = Table list
-    type MemSec = Mem list
-    type GlobalSec = Global list
-    type ExportSec = Export list
-    type StartSec = Start option
-    type ElemSec = Elem list
-    type CodeSec = Code list
-    type DataSec = Data list
+    type CustomSec = WasmCustomSec of Custom
+    type TypeSec   = WasmTypeSec of FuncType_60 array
+    type ImportSec = WasmImportSec of Import array
+    type FuncSec   = WasmFuncSec of TypeIdx array
+    type TableSec  = WasmTableSec of Table array
+    type MemSec    = WasmMemSec of Mem array
+    type GlobalSec = WasmGlobalSec of Global array
+    type ExportSec = WasmExportSec of Export array
+    type StartSec  = WasmStartSec of Start
+    type ElemSec   = WasmElemSec of Elem array
+    type CodeSec   = WasmCodeSec of Code array
+    type DataSec   = WasmDataSec of Data array
 
-    (* type Section =
-        | CustomSec_0 of CustomSec
-        | TypeSec_1 of TypeSec
-        | ImportSec_2 of ImportSec
-        | FuncSec_3 of FuncSec
-        | TableSec_4 of TableSec
-        | MemSec_5 of MemSec
-        | GlobalSec_6 of GlobalSec
-        | ExportSec_7 of ExportSec
-        | StartSec_8 of StartSec
-        | ElemSec_9 of ElemSec
-        | CodeSec_10 of CodeSec
-        | DataSec_11 of DataSec *)
-
-    type Magic = U32
+    type Magic   = U32
     type Version = U32
 
     type Module = { Magic: Magic;

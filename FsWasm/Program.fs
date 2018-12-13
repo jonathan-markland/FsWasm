@@ -440,21 +440,26 @@ let ReadData r =
 
 // Read Wasm Sections
 
-let ReadTypeSec   r = r |> ReadVector ReadFuncType
-let ReadImportSec r = r |> ReadVector ReadImport
-let ReadFuncSec   r = r |> ReadVector ReadTypeIdx
-let ReadTableSec  r = r |> ReadVector ReadTable
-let ReadMemSec    r = r |> ReadVector ReadMem
-let ReadGlobalSec r = r |> ReadVector ReadGlobal
-let ReadExportSec r = r |> ReadVector ReadExport
-let ReadCodeSec   r = r |> ReadVector ReadCode
+let ReadCustomSec r = 
+    let customName = r |> ReadName
+    let customBytes = r |> ReadBytes
+    WasmCustomSec({ Name=customName; Data=customBytes })
+
+let ReadTypeSec   r = WasmTypeSec(r |> ReadVector ReadFuncType)
+let ReadImportSec r = WasmImportSec(r |> ReadVector ReadImport)
+let ReadFuncSec   r = WasmFuncSec(r |> ReadVector ReadTypeIdx)
+let ReadTableSec  r = WasmTableSec(r |> ReadVector ReadTable)
+let ReadMemSec    r = WasmMemSec(r |> ReadVector ReadMem)
+let ReadGlobalSec r = WasmGlobalSec(r |> ReadVector ReadGlobal)
+let ReadExportSec r = WasmExportSec(r |> ReadVector ReadExport)
+let ReadCodeSec   r = WasmCodeSec(r |> ReadVector ReadCode)
 
 let ReadStartSec  r = 
     let startFuncIdx = r |> ReadFuncIdx
-    { StartFuncIdx=startFuncIdx }
+    WasmStartSec({ StartFuncIdx=startFuncIdx })
 
-let ReadElemSec r = r |> ReadVector ReadElem
-let ReadDataSec r = r |> ReadVector ReadData
+let ReadElemSec r = WasmElemSec(r |> ReadVector ReadElem)
+let ReadDataSec r = WasmDataSec(r |> ReadVector ReadData)
 
 // Main
 
