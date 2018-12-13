@@ -39,12 +39,22 @@ namespace WasmSerialiser
             return resultValue;
         }
 
-        public byte UnsureIfByteOrLeb()
+        public void SkipByte()
+        {
+            ++_readOffset;
+        }
+
+        public void Reverse(uint n)
+        {
+            _readOffset -= n;
+        }
+
+        /*public byte UnsureIfByteOrLeb()
         {
             var thisByte = ReadByte();
             if (thisByte < 0x80) return thisByte;
             throw new Exception("UnsureIfByteOrLeb():  Found byte that could be either.  Must resolve by reading spec!");
-        }
+        }*/
 
 
 

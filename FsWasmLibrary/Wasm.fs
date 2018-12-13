@@ -4,30 +4,30 @@ open System
 
 module Wasm =
 
-    type I32 = int
-    type I64 = int64
-    type U32 = uint32
-    type F32 = float32
-    type F64 = float
+    type I32 = WasmI32 of int
+    type I64 = WasmI64 of int64
+    type U32 = WasmU32 of uint32
+    type F32 = WasmF32 of float32
+    type F64 = WasmF64 of float
 
     type Mut = Const_00 | Var_01
     type Limits = { Min:U32; Max:U32 option }
 
     type ValType = I32_7F | I64_7E | F32_7D | F64_7C
     type BlockType = EmptyBlockType_40 | BlockValType of ValType
-    type FuncType_60 = { FuncInputs: ValType list; FuncOutputs: ValType list }
+    type FuncType_60 = { FuncInputs: ValType[]; FuncOutputs: ValType[] }
     type MemType = { MemLim:Limits }
     type ElemType = AnyFunc_70
     type TableType = { ElementType:ElemType; TableLim:Limits }
     type GlobalType = { Type:ValType; Mutability:Mut }
 
-    type TypeIdx = U32
-    type FuncIdx = U32
-    type TableIdx = U32
-    type MemIdx = U32
-    type GlobalIdx = U32
-    type LocalIdx = U32
-    type LabelIdx = U32
+    type TypeIdx = WasmTypeIdx of U32
+    type FuncIdx = WasmFuncIdx of U32
+    type TableIdx = WasmTableIdx of U32
+    type MemIdx = WasmMemIdx of U32
+    type GlobalIdx = WasmGlobalIdx of U32
+    type LocalIdx = WasmLocalIdx of U32
+    type LabelIdx = WasmLabelIdx of U32
 
     type MemArg = { Align:U32; Offset:U32 } 
 
@@ -37,18 +37,16 @@ module Wasm =
 
         | Unreachable_00
         | Nop_01
-        | Block_02_0B of t:BlockType * ins:Instr list
-        | Loop_03_0B of t:BlockType * ins:Instr list
-        | If_04_0B of t:BlockType * ins:Instr list
-        | IfElse_04_05_0B of t:BlockType * If:Instr list * Else:Instr list
+        | Block_02_0B of t:BlockType * ins:Instr array
+        | Loop_03_0B of t:BlockType * ins:Instr array
+        | If_04_0B of t:BlockType * ins:Instr array
+        | IfElse_04_05_0B of t:BlockType * If:Instr array * Else:Instr array
         | Br_0C of LabelIndex:LabelIdx
         | BrIf_0D of LabelIndex:LabelIdx
-        | BrTable_0E of LabelIdx list * LabelIdx
+        | BrTable_0E of LabelIdx array * LabelIdx
         | Return_0F
         | Call_10 of FuncIdx
         | CallIndirect_11_00 of TypeIdx
-        | SetLocal of U32
-        | I32Load of flags:U32 * offset:U32
 
         // 5.4.2  Parameteric Instructions
 
@@ -225,7 +223,7 @@ module Wasm =
 
     // 5.4.6  Expressions
 
-    type Expr_0B = Instr list
+    type Expr_0B = Instr[]
 
     type Name = string
 
@@ -236,22 +234,22 @@ module Wasm =
         | ImpGlobal_03 of GlobalType
 
     type ExportDesc = 
-        | ExpFunc_00 of TypeIdx
-        | ExpTable_01 of TableType
-        | ExpMem_02 of MemType
-        | ExpGlobal_03 of GlobalType
+        | ExpFunc_00 of FuncIdx
+        | ExpTable_01 of TableIdx
+        | ExpMem_02 of MemIdx
+        | ExpGlobal_03 of GlobalIdx
 
-    type Locals = { n:U32; t:ValType }
+    type Locals = { NumRepeats:U32; LocalsType:ValType }
 
     type Custom = { Name:Name; Data:byte array }
     type Import = { Mod:Name; nm:Name; d:ImportDesc }
-    type Func = { Locals:Locals list; Body:Expr_0B }
+    type Func = { Locals:Locals array; Body:Expr_0B }
     type Table = { TableType:TableType }
     type Mem = { MemType:MemType }
     type Global = { GlobalType:GlobalType; InitExpr:Expr_0B }
     type Export = { nm:Name; d:ExportDesc }
     type Start = { x:FuncIdx }
-    type Elem = { TableIndex:TableIdx; Offset:Expr_0B; Init:FuncIdx list }
+    type Elem = { TableIndex:TableIdx; Offset:Expr_0B; Init:FuncIdx array }
     type Code = { Size:U32; Code:Func }
     type Data = { DataMemoryIndex:MemIdx; OffsetExpr:Expr_0B; InitImage:byte array }
 
