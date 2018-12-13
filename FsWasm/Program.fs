@@ -1,11 +1,10 @@
 ﻿
-open System
 open System.IO
 open FsWasmLibrary.Wasm
-open System.Reflection.Metadata.Ecma335
 
 // Interfacing the BinaryReader:
 
+let EOF         (r:WasmSerialiser.BinaryReader) = r.EndOfFile
 let ReadByte    (r:WasmSerialiser.BinaryReader) = r.ReadByte()
 let PeekByte    (r:WasmSerialiser.BinaryReader) = r.PeekByte()
 let ReadLeb32   (r:WasmSerialiser.BinaryReader) = r.ReadLebUnsigned32()
@@ -48,6 +47,11 @@ let rec ForEachRecognised readX actionToDo r =
             ForEachRecognised readX actionToDo r
         | None -> 
             ignore
+
+let MakeArrayWhileSome (recordReaderFunc:'readerType -> 'recordType option) theReader =
+    let newList = new ResizeArray<'recordType>()
+    ForEachRecognised recordReaderFunc (fun newRecord -> newList.Add newRecord) theReader |> ignore
+    newList.ToArray()
 
 // Read WASM indexes
 
@@ -156,9 +160,7 @@ let ReadImportDesc r =
 
 let rec ReadInstrList r =
 
-    let newList = new ResizeArray<Instr>()
-    ForEachRecognised ReadInstr (fun x -> newList.Add x) r |> ignore
-    newList.ToArray()
+    r |> MakeArrayWhileSome ReadInstr
 
 and ReadInstr (r:WasmSerialiser.BinaryReader) =
 
@@ -461,6 +463,81 @@ let ReadStartSec  r =
 let ReadElemSec r = WasmElemSec(r |> ReadVector ReadElem)
 let ReadDataSec r = WasmDataSec(r |> ReadVector ReadData)
 
+// Read section
+
+let TryReadSpecificNumberedSection sectionReader codeOfRequiredSection r =
+    match EOF r with
+        | true -> None
+        | false ->
+            let backtrackPos = r.ReadOffset
+            let thisHeader = r |> ReadSectionHeader
+            match thisHeader with
+                | (n, _) when n = byte codeOfRequiredSection -> 
+                    Some(r |> sectionReader)
+                | _ -> 
+                    r.ReadOffset <- backtrackPos
+                    None
+
+let ReadOptionalCustomSec r = 
+    r |> TryReadSpecificNumberedSection ReadCustomSec 0
+
+let ReadCustomSecArray r =
+    r |> MakeArrayWhileSome ReadOptionalCustomSec
+
+let ReadCustomThenTrySpecificSection sectionReader codeOfRequiredSection r =
+    let optionalCustomSecArray = r |> ReadCustomSecArray
+    let optionalSection = r |> TryReadSpecificNumberedSection sectionReader codeOfRequiredSection
+    (optionalCustomSecArray, optionalSection)
+
+// Read module
+
+let ReadModule r =
+
+    // Magic stamp:
+    
+    r |> ExpectByte 0uy
+    r |> ExpectByte 97uy
+    r |> ExpectByte 115uy
+    r |> ExpectByte 109uy
+
+    // Version 1:
+
+    r |> ExpectByte 1uy
+    r |> ExpectByte 0uy
+    r |> ExpectByte 0uy
+    r |> ExpectByte 0uy
+
+    // Read sections:
+
+    let sec1  = r |> ReadCustomThenTrySpecificSection ReadTypeSec 1 
+    let sec2  = r |> ReadCustomThenTrySpecificSection ReadImportSec 2
+    let sec3  = r |> ReadCustomThenTrySpecificSection ReadFuncSec 3
+    let sec4  = r |> ReadCustomThenTrySpecificSection ReadTableSec 4
+    let sec5  = r |> ReadCustomThenTrySpecificSection ReadMemSec 5
+    let sec6  = r |> ReadCustomThenTrySpecificSection ReadGlobalSec 6
+    let sec7  = r |> ReadCustomThenTrySpecificSection ReadExportSec 7
+    let sec8  = r |> ReadCustomThenTrySpecificSection ReadStartSec 8
+    let sec9  = r |> ReadCustomThenTrySpecificSection ReadElemSec 9
+    let sec10 = r |> ReadCustomThenTrySpecificSection ReadCodeSec 10
+    let sec11 = r |> ReadCustomThenTrySpecificSection ReadDataSec 11
+    let finalCustom = r |> ReadCustomSecArray
+
+    // Return loaded result:
+
+    {   Custom1 = fst sec1; Types=snd sec1;
+        Custom2 = fst sec1; Imports=snd sec2;
+        Custom3 = fst sec1; Funcs=snd sec3;
+        Custom4 = fst sec1; Tables=snd sec4;
+        Custom5 = fst sec1; Mems=snd sec5;
+        Custom6 = fst sec1; Globals=snd sec6;
+        Custom7 = fst sec1; Exports=snd sec7;
+        Custom8 = fst sec1; Start=snd sec8;
+        Custom9 = fst sec1; Elems=snd sec9;
+        Custom10 = fst sec1; Codes=snd sec10;
+        Custom11 = fst sec1; Datas=snd sec11;
+        Custom12 = finalCustom;
+    }
+
 // Main
 
 [<EntryPoint>]
@@ -468,49 +545,9 @@ let main argv =
 
     let fileImage = File.ReadAllBytes("program (1).wasm");
     
-    let theReader = new WasmSerialiser.BinaryReader(fileImage)
+    let r = new WasmSerialiser.BinaryReader(fileImage)
 
-    let magic1 = theReader |> ReadByte
-    let magic2 = theReader |> ReadByte
-    let magic3 = theReader |> ReadByte
-    let magic4 = theReader |> ReadByte
-    let magic5 = theReader |> ReadByte
-    let magic6 = theReader |> ReadByte
-    let magic7 = theReader |> ReadByte
-    let magic8 = theReader |> ReadByte
-
-    let sec1 = theReader |> ReadSectionHeader
-    let dat1 = theReader |> ReadTypeSec
-
-    let sec2 = theReader |> ReadSectionHeader
-    let dat2 = theReader |> ReadImportSec
-
-    let sec3 = theReader |> ReadSectionHeader
-    let dat3 = theReader |> ReadFuncSec
-
-    let sec4 = theReader |> ReadSectionHeader
-    let dat4 = theReader |> ReadTableSec
-
-    let sec5 = theReader |> ReadSectionHeader
-    let dat5 = theReader |> ReadMemSec
-
-    let sec6 = theReader |> ReadSectionHeader
-    let dat6 = theReader |> ReadGlobalSec
-
-    let sec7 = theReader |> ReadSectionHeader
-    let dat7 = theReader |> ReadExportSec
-
-    let sec8 = theReader |> ReadSectionHeader
-    let dat8 = theReader |> ReadStartSec
-
-    let sec9 = theReader |> ReadSectionHeader
-    let dat9 = theReader |> ReadElemSec
-
-    let sec10 = theReader |> ReadSectionHeader
-    let dat10 = theReader |> ReadCodeSec
-
-    let sec11 = theReader |> ReadSectionHeader
-    let dat11 = theReader |> ReadDataSec
+    let thisModule = r |> ReadModule
 
     printfn "Hello World from F#!"
     0 // return an integer exit code

@@ -269,25 +269,24 @@ module Wasm =
     type Magic   = U32
     type Version = U32
 
-    type Module = { Magic: Magic;
-        Version: Version;
+    type Module = {
 
         // The spec allows custom sections to appear
         // between all the regular sections.  The
         // following allows these to be preserved
         // if the file is saved out:
 
-        Custom1:  CustomSec[]; Types:TypeSec;
-        Custom2:  CustomSec[]; Imports:ImportSec;
-        Custom3:  CustomSec[]; Funcs:FuncSec;
-        Custom4:  CustomSec[]; Tables:TableSec;
-        Custom5:  CustomSec[]; Mems:MemSec;
-        Custom6:  CustomSec[]; Globals:GlobalSec;
-        Custom7:  CustomSec[]; Exports:ExportSec;
-        Custom8:  CustomSec[]; Start:StartSec;
-        Custom9:  CustomSec[]; Elems:ElemSec;
-        Custom10: CustomSec[]; Codes:CodeSec;
-        Custom11: CustomSec[]; Datas:DataSec;
+        Custom1:  CustomSec[]; Types:TypeSec option;
+        Custom2:  CustomSec[]; Imports:ImportSec option;
+        Custom3:  CustomSec[]; Funcs:FuncSec option;
+        Custom4:  CustomSec[]; Tables:TableSec option;
+        Custom5:  CustomSec[]; Mems:MemSec option;
+        Custom6:  CustomSec[]; Globals:GlobalSec option;
+        Custom7:  CustomSec[]; Exports:ExportSec option;
+        Custom8:  CustomSec[]; Start:StartSec option;
+        Custom9:  CustomSec[]; Elems:ElemSec option;
+        Custom10: CustomSec[]; Codes:CodeSec option;
+        Custom11: CustomSec[]; Datas:DataSec option;
         Custom12: CustomSec[] }
 
         

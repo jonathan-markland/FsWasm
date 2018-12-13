@@ -20,6 +20,7 @@ namespace WasmSerialiser
         public uint ReadOffset
         {
             get { return _readOffset; }
+            set { _readOffset = value; }
         }
 
         public bool EndOfFile
