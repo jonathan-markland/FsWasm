@@ -55,17 +55,17 @@ let MakeArrayWhileSome (recordReaderFunc:'readerType -> 'recordType option) theR
 
 // Read WASM indexes
 
-let ReadTypeIdx   r = WasmTypeIdx  (r |> U32)
-let ReadFuncIdx   r = WasmFuncIdx  (r |> U32)
-let ReadTableIdx  r = WasmTableIdx (r |> U32)
-let ReadMemIdx    r = WasmMemIdx   (r |> U32)
-let ReadGlobalIdx r = WasmGlobalIdx(r |> U32)
-let ReadLocalIdx  r = WasmLocalIdx (r |> U32)
-let ReadLabelIdx  r = WasmLabelIdx (r |> U32)
+let TypeIdx   r = WasmTypeIdx  (r |> U32)
+let FuncIdx   r = WasmFuncIdx  (r |> U32)
+let TableIdx  r = WasmTableIdx (r |> U32)
+let MemIdx    r = WasmMemIdx   (r |> U32)
+let GlobalIdx r = WasmGlobalIdx(r |> U32)
+let LocalIdx  r = WasmLocalIdx (r |> U32)
+let LabelIdx  r = WasmLabelIdx (r |> U32)
 
 // Wasm basic reading
 
-let ReadLimits r =
+let Limits r =
     match r |> Byte with
         | 0x00uy -> 
             let n = r |> U32
@@ -76,21 +76,21 @@ let ReadLimits r =
             { LimitMin=n; LimitMax=Some(m) }
         | _ -> failwith "Unknown limit type code"
 
-let ReadMut r =
+let Mutability r =
     match r |> Byte with
         | 0x00uy -> Const_00
         | 0x01uy -> Var_01
         | _ -> failwith "Unknown mutability type code"
 
-let ReadExportDesc r =
+let ExportDesc r =
     match r |> Byte with
-        | 0x00uy -> ExpFunc_00(r |> ReadFuncIdx)
-        | 0x01uy -> ExpTable_01(r |> ReadTableIdx)
-        | 0x02uy -> ExpMem_02(r |> ReadMemIdx)
-        | 0x03uy -> ExpGlobal_03(r |> ReadGlobalIdx)
+        | 0x00uy -> ExpFunc_00(r |> FuncIdx)
+        | 0x01uy -> ExpTable_01(r |> TableIdx)
+        | 0x02uy -> ExpMem_02(r |> MemIdx)
+        | 0x03uy -> ExpGlobal_03(r |> GlobalIdx)
         | _ -> failwith "Unrecognised ExportDesc code"
 
-let ReadValType (r:WasmSerialiser.BinaryReader) =
+let ValType (r:WasmSerialiser.BinaryReader) =
     match r.ReadByte() with
         | 0x7Fuy -> I32_7F
         | 0x7Euy -> I64_7E
@@ -100,69 +100,69 @@ let ReadValType (r:WasmSerialiser.BinaryReader) =
 
 // Wasm file reading assistance
 
-let ReadSectionHeader (r:WasmSerialiser.BinaryReader) =
+let SectionHeader (r:WasmSerialiser.BinaryReader) =
     let sectionType = r.ReadByte()
     let sectionLength = r |> Leb32
     (sectionType, sectionLength)
 
 // Wasm Type reading
 
-let ReadMemArg (r:WasmSerialiser.BinaryReader) =
+let MemArg (r:WasmSerialiser.BinaryReader) =
     let a = r |> U32
     let o = r |> U32
     { Align=a; Offset=o }
 
-let ReadMemType r =
-    let memLimits = r |> ReadLimits
+let MemType r =
+    let memLimits = r |> Limits
     { MemoryLimits=memLimits }
 
-let ReadMem r = 
-    let memType = r |> ReadMemType
+let Mem r = 
+    let memType = r |> MemType
     { MemType=memType }
 
-let ReadFuncType r =
+let FuncType r =
     r |> ExpectByte 0x60uy
-    let funcInputs = r |> Vector ReadValType
-    let funcOutputs = r |> Vector ReadValType
+    let funcInputs = r |> Vector ValType
+    let funcOutputs = r |> Vector ValType
     { ParameterTypes=funcInputs; ReturnTypes=funcOutputs }
 
-let ReadTableType r = 
+let TableType r = 
     r |> ExpectByte 0x70uy   // There is only one kind defined.
-    let tableLimits = r |> ReadLimits
+    let tableLimits = r |> Limits
     { TableElementType=AnyFunc_70; TableLimits=tableLimits }
 
-let ReadTable r =
-    let tableType = r |> ReadTableType
+let Table r =
+    let tableType = r |> TableType
     { TableType=tableType }
 
-let ReadGlobalType r = 
-    let globalType = r |> ReadValType
-    let globalMutability = r |> ReadMut
+let GlobalType r = 
+    let globalType = r |> ValType
+    let globalMutability = r |> Mutability
     { GlobalType=globalType; GlobalMutability=globalMutability }
 
-let ReadBlockType (r:WasmSerialiser.BinaryReader) =
+let BlockType (r:WasmSerialiser.BinaryReader) =
     if r.PeekByte() = 0x40uy then 
         r.SkipByte()
         EmptyBlockType_40
     else
-        let valType = r |> ReadValType
+        let valType = r |> ValType
         BlockValType(valType)
 
-let ReadImportDesc r =
+let ImportDesc r =
     match r |> Byte with
-        | 0x00uy -> ImpFunc_00(r |> ReadTypeIdx)
-        | 0x01uy -> ImpTable_01(r |> ReadTableType)
-        | 0x02uy -> ImpMem_02(r |> ReadMemType)
-        | 0x03uy -> ImpGlobal_03(r |> ReadGlobalType)
+        | 0x00uy -> ImpFunc_00(r |> TypeIdx)
+        | 0x01uy -> ImpTable_01(r |> TableType)
+        | 0x02uy -> ImpMem_02(r |> MemType)
+        | 0x03uy -> ImpGlobal_03(r |> GlobalType)
         | _ -> failwith "Unrecognised ImportDesc code"
 
 // Instructions
 
-let rec ReadInstrList r =
+let rec InstructionList r =
 
-    r |> MakeArrayWhileSome ReadInstr
+    r |> MakeArrayWhileSome Instruction
 
-and ReadInstr (r:WasmSerialiser.BinaryReader) =
+and Instruction (r:WasmSerialiser.BinaryReader) =
 
     let then00 (code, (r:WasmSerialiser.BinaryReader)) =
         r |> ExpectByte 0x00uy
@@ -177,36 +177,36 @@ and ReadInstr (r:WasmSerialiser.BinaryReader) =
         | 0x01uy -> Some(Nop_01)
 
         | 0x02uy -> 
-            let blockType = r |> ReadBlockType
-            let subBlock = r |> ReadInstrList
+            let blockType = r |> BlockType
+            let subBlock = r |> InstructionList
             Some(Block_02_0B(blockType, subBlock))
 
         | 0x03uy -> 
-            let blockType = r |> ReadBlockType
-            let subBlock = r |> ReadInstrList
+            let blockType = r |> BlockType
+            let subBlock = r |> InstructionList
             Some(Loop_03_0B(blockType, subBlock))
 
         | 0x04uy -> 
-            let blockType = r |> ReadBlockType
-            let ifBlock = r |> ReadInstrList
+            let blockType = r |> BlockType
+            let ifBlock = r |> InstructionList
             let elseByte = r |> Byte
             if not (elseByte = 0x05uy) then
                 Some(If_04_0B(blockType, ifBlock))
             else
-                let elseBlock = r |> ReadInstrList
+                let elseBlock = r |> InstructionList
                 Some(IfElse_04_05_0B(blockType, ifBlock, elseBlock))
 
-        | 0x0Cuy -> Some(Br_0C (r |> ReadLabelIdx))
-        | 0x0Duy -> Some(BrIf_0D (r |> ReadLabelIdx))
+        | 0x0Cuy -> Some(Br_0C (r |> LabelIdx))
+        | 0x0Duy -> Some(BrIf_0D (r |> LabelIdx))
 
         | 0x0Euy -> 
-            let tableContent = r |> Vector ReadLabelIdx
-            let labelIdx = r |> ReadLabelIdx
+            let tableContent = r |> Vector LabelIdx
+            let labelIdx = r |> LabelIdx
             Some(BrTable_0E(tableContent, labelIdx))
 
         | 0x0Fuy -> Some(Return_0F)
-        | 0x10uy -> Some(Call_10(r |> ReadFuncIdx))
-        | 0x11uy -> Some(CallIndirect_11_00(r |> ReadTypeIdx))
+        | 0x10uy -> Some(Call_10(r |> FuncIdx))
+        | 0x11uy -> Some(CallIndirect_11_00(r |> TypeIdx))
 
         // 5.4.2  Parameteric Instructions
 
@@ -215,37 +215,37 @@ and ReadInstr (r:WasmSerialiser.BinaryReader) =
 
         // 5.4.3  Variable Instructions
 
-        | 0x20uy -> Some(GetLocal_20(r |> ReadLocalIdx))
-        | 0x21uy -> Some(SetLocal_21(r |> ReadLocalIdx))
-        | 0x22uy -> Some(TeeLocal_22(r |> ReadLocalIdx))
-        | 0x23uy -> Some(GetGlobal_23(r |> ReadGlobalIdx))
-        | 0x24uy -> Some(SetGlobal_24(r |> ReadGlobalIdx))
+        | 0x20uy -> Some(GetLocal_20(r |> LocalIdx))
+        | 0x21uy -> Some(SetLocal_21(r |> LocalIdx))
+        | 0x22uy -> Some(TeeLocal_22(r |> LocalIdx))
+        | 0x23uy -> Some(GetGlobal_23(r |> GlobalIdx))
+        | 0x24uy -> Some(SetGlobal_24(r |> GlobalIdx))
 
         // 5.4.4  Memory Instructions
 
-        | 0x28uy -> Some(I32Load_28(r |> ReadMemArg))
-        | 0x29uy -> Some(I64Load_29(r |> ReadMemArg))
-        | 0x2Auy -> Some(F32Load_2A(r |> ReadMemArg))
-        | 0x2Buy -> Some(F64Load_2B(r |> ReadMemArg))
-        | 0x2Cuy -> Some(I32Load8s_2C(r |> ReadMemArg))
-        | 0x2Duy -> Some(I32Load8u_2D(r |> ReadMemArg))
-        | 0x2Euy -> Some(I32Load16s_2E(r |> ReadMemArg))
-        | 0x2Fuy -> Some(I32Load16u_2F(r |> ReadMemArg))
-        | 0x30uy -> Some(I64Load8s_30(r |> ReadMemArg))
-        | 0x31uy -> Some(I64Load8u_31(r |> ReadMemArg))
-        | 0x32uy -> Some(I64Load16s_32(r |> ReadMemArg))
-        | 0x33uy -> Some(I64Load16u_33(r |> ReadMemArg))
-        | 0x34uy -> Some(I64Load32s_34(r |> ReadMemArg))
-        | 0x35uy -> Some(I64Load32u_35(r |> ReadMemArg))
-        | 0x36uy -> Some(I32Store_36(r |> ReadMemArg))
-        | 0x37uy -> Some(I64Store_37(r |> ReadMemArg))
-        | 0x38uy -> Some(F32Store_38(r |> ReadMemArg))
-        | 0x39uy -> Some(F64Store_39(r |> ReadMemArg))
-        | 0x3Auy -> Some(I32Store8_3A(r |> ReadMemArg))
-        | 0x3Buy -> Some(I32Store16_3B(r |> ReadMemArg))
-        | 0x3Cuy -> Some(I64Store8_3C(r |> ReadMemArg))
-        | 0x3Duy -> Some(I64Store16_3D(r |> ReadMemArg))
-        | 0x3Euy -> Some(I64Store32_3E(r |> ReadMemArg))
+        | 0x28uy -> Some(I32Load_28(r |> MemArg))
+        | 0x29uy -> Some(I64Load_29(r |> MemArg))
+        | 0x2Auy -> Some(F32Load_2A(r |> MemArg))
+        | 0x2Buy -> Some(F64Load_2B(r |> MemArg))
+        | 0x2Cuy -> Some(I32Load8s_2C(r |> MemArg))
+        | 0x2Duy -> Some(I32Load8u_2D(r |> MemArg))
+        | 0x2Euy -> Some(I32Load16s_2E(r |> MemArg))
+        | 0x2Fuy -> Some(I32Load16u_2F(r |> MemArg))
+        | 0x30uy -> Some(I64Load8s_30(r |> MemArg))
+        | 0x31uy -> Some(I64Load8u_31(r |> MemArg))
+        | 0x32uy -> Some(I64Load16s_32(r |> MemArg))
+        | 0x33uy -> Some(I64Load16u_33(r |> MemArg))
+        | 0x34uy -> Some(I64Load32s_34(r |> MemArg))
+        | 0x35uy -> Some(I64Load32u_35(r |> MemArg))
+        | 0x36uy -> Some(I32Store_36(r |> MemArg))
+        | 0x37uy -> Some(I64Store_37(r |> MemArg))
+        | 0x38uy -> Some(F32Store_38(r |> MemArg))
+        | 0x39uy -> Some(F64Store_39(r |> MemArg))
+        | 0x3Auy -> Some(I32Store8_3A(r |> MemArg))
+        | 0x3Buy -> Some(I32Store16_3B(r |> MemArg))
+        | 0x3Cuy -> Some(I64Store8_3C(r |> MemArg))
+        | 0x3Duy -> Some(I64Store16_3D(r |> MemArg))
+        | 0x3Euy -> Some(I64Store32_3E(r |> MemArg))
 
         | 0x3Fuy -> (Some(MemorySize_3F_00), r) |> then00
         | 0x40uy -> (Some(GrowMemory_40_00), r) |> then00
@@ -393,23 +393,23 @@ and ReadInstr (r:WasmSerialiser.BinaryReader) =
             None
 
 let ReadExpr r =
-    let instrList = r |> ReadInstrList
+    let instrList = r |> InstructionList
     r |> ExpectByte 0x0Buy
     instrList
 
 let ReadGlobal r =
-    let globalType = r |> ReadGlobalType
+    let globalType = r |> GlobalType
     let initialisationExpression = r |> ReadExpr
     { GlobalType=globalType; InitExpr=initialisationExpression }
 
 let ReadExport r = 
     let exportName = r |> NameString
-    let exportDesc = r |> ReadExportDesc
+    let exportDesc = r |> ExportDesc
     { nm=exportName; d=exportDesc }
 
 let ReadLocals r =
     let numRepeats = r |> U32
-    let theType = r |> ReadValType
+    let theType = r |> ValType
     { NumRepeats=numRepeats; LocalsType=theType }
 
 let ReadFunc r = 
@@ -425,17 +425,17 @@ let ReadCode r =
 let ReadImport r = 
     let moduleName = r |> NameString
     let importName = r |> NameString
-    let importDesc = r |> ReadImportDesc
+    let importDesc = r |> ImportDesc
     { Mod=moduleName; nm=importName; d=importDesc }
 
 let ReadElem r =
-    let tableIdx = r |> ReadTableIdx
+    let tableIdx = r |> TableIdx
     let elemExpr = r |> ReadExpr
-    let funcIdxArray = r |> Vector ReadFuncIdx
+    let funcIdxArray = r |> Vector FuncIdx
     { TableIndex=tableIdx; Offset=elemExpr; Init=funcIdxArray }
 
 let ReadData r =
-    let memIdx = r |> ReadMemIdx
+    let memIdx = r |> MemIdx
     let offsetExpr = r |> ReadExpr
     let dataBytes = r |> Bytes
     { DataMemoryIndex=memIdx; OffsetExpr=offsetExpr; InitImage=dataBytes }
@@ -447,17 +447,17 @@ let ReadCustomSec r =
     let customBytes = r |> Bytes
     WasmCustomSec({ Name=customName; Data=customBytes })
 
-let ReadTypeSec   r = WasmTypeSec(r |> Vector ReadFuncType)
+let ReadTypeSec   r = WasmTypeSec(r |> Vector FuncType)
 let ReadImportSec r = WasmImportSec(r |> Vector ReadImport)
-let ReadFuncSec   r = WasmFuncSec(r |> Vector ReadTypeIdx)
-let ReadTableSec  r = WasmTableSec(r |> Vector ReadTable)
-let ReadMemSec    r = WasmMemSec(r |> Vector ReadMem)
+let ReadFuncSec   r = WasmFuncSec(r |> Vector TypeIdx)
+let ReadTableSec  r = WasmTableSec(r |> Vector Table)
+let ReadMemSec    r = WasmMemSec(r |> Vector Mem)
 let ReadGlobalSec r = WasmGlobalSec(r |> Vector ReadGlobal)
 let ReadExportSec r = WasmExportSec(r |> Vector ReadExport)
 let ReadCodeSec   r = WasmCodeSec(r |> Vector ReadCode)
 
 let ReadStartSec  r = 
-    let startFuncIdx = r |> ReadFuncIdx
+    let startFuncIdx = r |> FuncIdx
     WasmStartSec({ StartFuncIdx=startFuncIdx })
 
 let ReadElemSec r = WasmElemSec(r |> Vector ReadElem)
@@ -470,7 +470,7 @@ let TryReadSpecificNumberedSection sectionReader codeOfRequiredSection r =
         | true -> None
         | false ->
             let backtrackPos = r.ReadOffset
-            let thisHeader = r |> ReadSectionHeader
+            let thisHeader = r |> SectionHeader
             match thisHeader with
                 | (n, _) when n = byte codeOfRequiredSection -> 
                     Some(r |> sectionReader)
