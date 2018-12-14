@@ -69,11 +69,11 @@ let ReadLimits r =
     match r |> ReadByte with
         | 0x00uy -> 
             let n = r |> ReadWasmU32
-            { Min=n; Max=None }
+            { LimitMin=n; LimitMax=None }
         | 0x01uy ->
             let n = r |> ReadWasmU32
             let m = r |> ReadWasmU32
-            { Min=n; Max=Some(m) }
+            { LimitMin=n; LimitMax=Some(m) }
         | _ -> failwith "Unknown limit type code"
 
 let ReadMut r =
@@ -114,7 +114,7 @@ let ReadMemArg (r:WasmSerialiser.BinaryReader) =
 
 let ReadMemType r =
     let memLimits = r |> ReadLimits
-    { MemLim=memLimits }
+    { MemoryLimits=memLimits }
 
 let ReadMem r = 
     let memType = r |> ReadMemType
@@ -124,12 +124,12 @@ let ReadFuncType r =
     r |> ExpectByte 0x60uy
     let funcInputs = r |> ReadVector ReadValType
     let funcOutputs = r |> ReadVector ReadValType
-    { FuncInputs=funcInputs; FuncOutputs=funcOutputs }
+    { ParameterTypes=funcInputs; ReturnTypes=funcOutputs }
 
 let ReadTableType r = 
     r |> ExpectByte 0x70uy   // There is only one kind defined.
     let tableLimits = r |> ReadLimits
-    { ElementType=AnyFunc_70; TableLimits=tableLimits }
+    { TableElementType=AnyFunc_70; TableLimits=tableLimits }
 
 let ReadTable r =
     let tableType = r |> ReadTableType
@@ -138,7 +138,7 @@ let ReadTable r =
 let ReadGlobalType r = 
     let globalType = r |> ReadValType
     let globalMutability = r |> ReadMut
-    { ValType=globalType; Mutability=globalMutability }
+    { GlobalType=globalType; GlobalMutability=globalMutability }
 
 let ReadBlockType (r:WasmSerialiser.BinaryReader) =
     if r.PeekByte() = 0x40uy then 

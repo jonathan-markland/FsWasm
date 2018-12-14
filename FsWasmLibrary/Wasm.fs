@@ -11,15 +11,15 @@ module Wasm =
     type F64 = WasmF64 of float
 
     type Mutability  = Const_00 | Var_01
-    type Limits      = { Min:U32; Max:U32 option }
+    type Limits      = { LimitMin:U32; LimitMax:U32 option }
 
     type ValType     = I32_7F | I64_7E | F32_7D | F64_7C
     type BlockType   = EmptyBlockType_40 | BlockValType of ValType
-    type FuncType_60 = { FuncInputs: ValType[]; FuncOutputs: ValType[] }
-    type MemoryType  = { MemLim:Limits }
+    type FuncType_60 = { ParameterTypes: ValType[]; ReturnTypes: ValType[] }
+    type MemoryType  = { MemoryLimits:Limits }
     type ElementType = AnyFunc_70
-    type TableType   = { ElementType:ElementType; TableLimits:Limits }
-    type GlobalType  = { ValType:ValType; Mutability:Mutability }
+    type TableType   = { TableElementType:ElementType; TableLimits:Limits }
+    type GlobalType  = { GlobalType:ValType; GlobalMutability:Mutability }
 
     type TypeIdx   = WasmTypeIdx of U32
     type FuncIdx   = WasmFuncIdx of U32
