@@ -176,6 +176,8 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
         r |> ExpectByte 0x00uy
         code
 
+    let expectEnd r = r |> ExpectByte 0x0Buy
+
     let opcodeByte = r |> Byte
 
     match opcodeByte with
@@ -187,22 +189,28 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
         | 0x02uy -> 
             let blockType = r |> BlockType
             let subBlock = r |> InstructionList
+            r |> expectEnd
             Some(Block(blockType, subBlock))
 
         | 0x03uy -> 
             let blockType = r |> BlockType
             let subBlock = r |> InstructionList
+            r |> expectEnd
             Some(Loop(blockType, subBlock))
 
         | 0x04uy -> 
             let blockType = r |> BlockType
-            let ifBlock = r |> InstructionList
-            let elseByte = r |> Byte
-            if not (elseByte = 0x05uy) then
-                Some(If(blockType, ifBlock))
-            else
-                let elseBlock = r |> InstructionList
-                Some(IfElse(blockType, ifBlock, elseBlock))
+            let ifInstructions = r |> InstructionList
+            let endOrElse = r |> Byte   // 0x05 or 0x0B
+            match endOrElse with
+                | 0x05uy ->
+                    let elseInstructions = r |> InstructionList
+                    r |> expectEnd
+                    Some(IfElse(blockType, ifInstructions, elseInstructions))
+                | 0x0Buy ->
+                    Some(If(blockType, ifInstructions))
+                | _ ->
+                    ParseFailWith "END or ELSE expected after IF instructions, unexpected byte" endOrElse r
 
         | 0x0Cuy -> Some(Br (r |> LabelIdx))
         | 0x0Duy -> Some(BrIf (r |> LabelIdx))
@@ -315,86 +323,86 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
         | 0x71uy -> Some(I32And)
         | 0x72uy -> Some(I32Or)
         | 0x73uy -> Some(I32Xor)
-        | 0x74uy -> Some(I32Shl_74)
-        | 0x75uy -> Some(I32Shr_s_75)
-        | 0x76uy -> Some(I32Shr_u_76)
-        | 0x77uy -> Some(I32Rotl_77)
-        | 0x78uy -> Some(I32Rotr_78)
-        | 0x79uy -> Some(I64Clz_79)
-        | 0x7Auy -> Some(I64Ctz_7A)
-        | 0x7Buy -> Some(I64PopCnt_7B)
-        | 0x7Cuy -> Some(I64Add_7C)
-        | 0x7Duy -> Some(I64Sub_7D)
-        | 0x7Euy -> Some(I64Mul_7E)
-        | 0x7Fuy -> Some(I64Div_s_7F)
+        | 0x74uy -> Some(I32Shl)
+        | 0x75uy -> Some(I32Shr_s)
+        | 0x76uy -> Some(I32Shr_u)
+        | 0x77uy -> Some(I32Rotl)
+        | 0x78uy -> Some(I32Rotr)
+        | 0x79uy -> Some(I64Clz)
+        | 0x7Auy -> Some(I64Ctz)
+        | 0x7Buy -> Some(I64PopCnt)
+        | 0x7Cuy -> Some(I64Add)
+        | 0x7Duy -> Some(I64Sub)
+        | 0x7Euy -> Some(I64Mul)
+        | 0x7Fuy -> Some(I64Div_s)
 
-        | 0x80uy -> Some(I64Div_u_80)
-        | 0x81uy -> Some(I64Rem_s_81)
-        | 0x82uy -> Some(I64Rem_u_82)
-        | 0x83uy -> Some(I64And_83)
-        | 0x84uy -> Some(I64Or_84)
-        | 0x85uy -> Some(I64Xor_85)
-        | 0x86uy -> Some(I64Shl_86)
-        | 0x87uy -> Some(I64Shr_s_87)
-        | 0x88uy -> Some(I64Shr_u_88)
-        | 0x89uy -> Some(I64Rotl_89)
-        | 0x8Auy -> Some(I64Rotr_8A)
-        | 0x8Buy -> Some(F32Abs_8B)
-        | 0x8Cuy -> Some(F32Neg_8C)
-        | 0x8Duy -> Some(F32Ceil_8D)
-        | 0x8Euy -> Some(F32Floor_8E)
-        | 0x8Fuy -> Some(F32Trunc_8F)
+        | 0x80uy -> Some(I64Div_u)
+        | 0x81uy -> Some(I64Rem_s)
+        | 0x82uy -> Some(I64Rem_u)
+        | 0x83uy -> Some(I64And)
+        | 0x84uy -> Some(I64Or)
+        | 0x85uy -> Some(I64Xor)
+        | 0x86uy -> Some(I64Shl)
+        | 0x87uy -> Some(I64Shr_s)
+        | 0x88uy -> Some(I64Shr_u)
+        | 0x89uy -> Some(I64Rotl)
+        | 0x8Auy -> Some(I64Rotr)
+        | 0x8Buy -> Some(F32Abs)
+        | 0x8Cuy -> Some(F32Neg)
+        | 0x8Duy -> Some(F32Ceil)
+        | 0x8Euy -> Some(F32Floor)
+        | 0x8Fuy -> Some(F32Trunc)
 
-        | 0x90uy -> Some(F32Nearest_90)
-        | 0x91uy -> Some(F32Sqrt_91)
-        | 0x92uy -> Some(F32Add_92)
-        | 0x93uy -> Some(F32Sub_93)
-        | 0x94uy -> Some(F32Mul_94)
-        | 0x95uy -> Some(F32Div_95)
-        | 0x96uy -> Some(F32Min_96)
-        | 0x97uy -> Some(F32Max_97)
-        | 0x98uy -> Some(F32CopySign_98)
-        | 0x99uy -> Some(F64Abs_99)
-        | 0x9Auy -> Some(F64Neg_9A)
-        | 0x9Buy -> Some(F64Ceil_9B)
-        | 0x9Cuy -> Some(F64Floor_9C)
-        | 0x9Duy -> Some(F64Trunc_9D)
-        | 0x9Euy -> Some(F64Nearest_9E)
-        | 0x9Fuy -> Some(F64Sqrt_9F)
+        | 0x90uy -> Some(F32Nearest)
+        | 0x91uy -> Some(F32Sqrt)
+        | 0x92uy -> Some(F32Add)
+        | 0x93uy -> Some(F32Sub)
+        | 0x94uy -> Some(F32Mul)
+        | 0x95uy -> Some(F32Div)
+        | 0x96uy -> Some(F32Min)
+        | 0x97uy -> Some(F32Max)
+        | 0x98uy -> Some(F32CopySign)
+        | 0x99uy -> Some(F64Abs)
+        | 0x9Auy -> Some(F64Neg)
+        | 0x9Buy -> Some(F64Ceil)
+        | 0x9Cuy -> Some(F64Floor)
+        | 0x9Duy -> Some(F64Trunc)
+        | 0x9Euy -> Some(F64Nearest)
+        | 0x9Fuy -> Some(F64Sqrt)
 
-        | 0xA0uy -> Some(F64Add_A0)
-        | 0xA1uy -> Some(F64Sub_A1)
-        | 0xA2uy -> Some(F64Mul_A2)
-        | 0xA3uy -> Some(F64Div_A3)
-        | 0xA4uy -> Some(F64Min_A4)
-        | 0xA5uy -> Some(F64Max_A5)
-        | 0xA6uy -> Some(F64CopySign_A6)
-        | 0xA7uy -> Some(I32Wrap_I64_A7)
-        | 0xA8uy -> Some(I32Trunc_s_F32_A8)
-        | 0xA9uy -> Some(I32Trunc_u_F32_A9)
-        | 0xAAuy -> Some(I32Trunc_s_F64_AA)
-        | 0xABuy -> Some(I32Trunc_u_F64_AB)
-        | 0xACuy -> Some(I64Extend_s_i32_AC)
-        | 0xADuy -> Some(I64Extend_u_i32_AD)
-        | 0xAEuy -> Some(I64Trunc_s_F32_AE)
-        | 0xAFuy -> Some(I64Trunc_u_F32_AF)
+        | 0xA0uy -> Some(F64Add)
+        | 0xA1uy -> Some(F64Sub)
+        | 0xA2uy -> Some(F64Mul)
+        | 0xA3uy -> Some(F64Div)
+        | 0xA4uy -> Some(F64Min)
+        | 0xA5uy -> Some(F64Max)
+        | 0xA6uy -> Some(F64CopySign)
+        | 0xA7uy -> Some(I32Wrap_I64)
+        | 0xA8uy -> Some(I32Trunc_s_F32)
+        | 0xA9uy -> Some(I32Trunc_u_F32)
+        | 0xAAuy -> Some(I32Trunc_s_F64)
+        | 0xABuy -> Some(I32Trunc_u_F64)
+        | 0xACuy -> Some(I64Extend_s_i32)
+        | 0xADuy -> Some(I64Extend_u_i32)
+        | 0xAEuy -> Some(I64Trunc_s_F32)
+        | 0xAFuy -> Some(I64Trunc_u_F32)
 
-        | 0xB0uy -> Some(I64Trunc_s_F64_B0)
-        | 0xB1uy -> Some(I64Trunc_u_F64_B1)
-        | 0xB2uy -> Some(F32Convert_s_i32_B2)
-        | 0xB3uy -> Some(F32Convert_u_i32_B3)
-        | 0xB4uy -> Some(F32Convert_s_i64_B4)
-        | 0xB5uy -> Some(F32Convert_u_i64_B5)
-        | 0xB6uy -> Some(F32Demote_F64_B6)
-        | 0xB7uy -> Some(F64Convert_s_i32_B7)
-        | 0xB8uy -> Some(F64Convert_u_i32_B8)
-        | 0xB9uy -> Some(F64Convert_s_i64_B9)
-        | 0xBAuy -> Some(F64Convert_u_i64_BA)
-        | 0xBBuy -> Some(F64Promote_F32_BB)
-        | 0xBCuy -> Some(I32Reinterpret_F32_BC)
-        | 0xBDuy -> Some(I64Reinterpret_F64_BD)
-        | 0xBEuy -> Some(F32Reinterpret_i32_BE)
-        | 0xBFuy -> Some(F64Reinterpret_i64_BF)
+        | 0xB0uy -> Some(I64Trunc_s_F64)
+        | 0xB1uy -> Some(I64Trunc_u_F64)
+        | 0xB2uy -> Some(F32Convert_s_i32)
+        | 0xB3uy -> Some(F32Convert_u_i32)
+        | 0xB4uy -> Some(F32Convert_s_i64)
+        | 0xB5uy -> Some(F32Convert_u_i64)
+        | 0xB6uy -> Some(F32Demote_F64)
+        | 0xB7uy -> Some(F64Convert_s_i32)
+        | 0xB8uy -> Some(F64Convert_u_i32)
+        | 0xB9uy -> Some(F64Convert_s_i64)
+        | 0xBAuy -> Some(F64Convert_u_i64)
+        | 0xBBuy -> Some(F64Promote_F32)
+        | 0xBCuy -> Some(I32Reinterpret_F32)
+        | 0xBDuy -> Some(I64Reinterpret_F64)
+        | 0xBEuy -> Some(F32Reinterpret_i32)
+        | 0xBFuy -> Some(F64Reinterpret_i64)
         
         | _ -> 
             r.Reverse(1u)
