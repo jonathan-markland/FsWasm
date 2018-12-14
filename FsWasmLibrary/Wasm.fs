@@ -13,11 +13,11 @@ module Wasm =
     type Mutability  = Const_00 | Var_01
     type Limits      = { LimitMin:U32; LimitMax:U32 option }
 
-    type ValType     = I32_7F | I64_7E | F32_7D | F64_7C
-    type BlockType   = EmptyBlockType_40 | BlockValType of ValType
+    type ValType     = I32Type | I64Type | F32Type | F64Type                  // 7F 7E 7D 7C resp.
+    type BlockType   = EmptyBlockType | BlockValType of ValType
     type FuncType_60 = { ParameterTypes:ValType[]; ReturnTypes:ValType[] }
     type MemoryType  = { MemoryLimits:Limits }
-    type ElementType = AnyFunc_70
+    type ElementType = AnyFuncType
     type TableType   = { TableElementType:ElementType; TableLimits:Limits }
     type GlobalType  = { GlobalType:ValType; GlobalMutability:Mutability }
 
@@ -35,116 +35,119 @@ module Wasm =
 
         // 5.4.1  Control Instructions
 
-        | Unreachable_00
-        | Nop_01
-        | Block_02_0B        of t:BlockType * ins:Instr array
-        | Loop_03_0B         of t:BlockType * ins:Instr array
-        | If_04_0B           of t:BlockType * ins:Instr array
-        | IfElse_04_05_0B    of t:BlockType * If:Instr array * Else:Instr array
-        | Br_0C              of LabelIndex:LabelIdx
-        | BrIf_0D            of LabelIndex:LabelIdx
-        | BrTable_0E         of LabelIdx array * LabelIdx
-        | Return_0F
-        | Call_10            of FuncIdx
-        | CallIndirect_11_00 of TypeIdx
+        | Unreachable  // 00
+        | Nop          // 01
+        | Block        of t:BlockType * ins:Instr array  // 02 0B
+        | Loop         of t:BlockType * ins:Instr array  // 03 0B
+        | If           of t:BlockType * ins:Instr array  // 04 0B
+        | IfElse       of t:BlockType * If:Instr array * Else:Instr array  // 04 05 0B
+        | Br           of LabelIndex:LabelIdx  // 0C
+        | BrIf         of LabelIndex:LabelIdx  // 0D
+        | BrTable      of LabelIdx array * LabelIdx  // 0E
+        | Return
+        | Call         of FuncIdx   // 10
+        | CallIndirect of TypeIdx   // 11 00
 
         // 5.4.2  Parameteric Instructions
 
-        | Drop_1A
-        | Select_1B
+        | Drop    // 1A
+        | Select  // 1B
 
         // 5.4.3  Variable Instructions
 
-        | GetLocal_20 of LocalIdx
-        | SetLocal_21 of LocalIdx
-        | TeeLocal_22 of LocalIdx
-        | GetGlobal_23 of GlobalIdx
-        | SetGlobal_24 of GlobalIdx
+        | GetLocal  of LocalIdx    // 20
+        | SetLocal  of LocalIdx    // 21
+        | TeeLocal  of LocalIdx    // 22
+        | GetGlobal of GlobalIdx   // 23
+        | SetGlobal of GlobalIdx   // 24
 
         // 5.4.4  Memory Instructions
 
-        | I32Load_28 of MemArg
-        | I64Load_29 of MemArg
-        | F32Load_2A of MemArg
-        | F64Load_2B of MemArg
-        | I32Load8s_2C of MemArg
-        | I32Load8u_2D of MemArg
-        | I32Load16s_2E of MemArg
-        | I32Load16u_2F of MemArg
-        | I64Load8s_30 of MemArg
-        | I64Load8u_31 of MemArg
-        | I64Load16s_32 of MemArg
-        | I64Load16u_33 of MemArg
-        | I64Load32s_34 of MemArg
-        | I64Load32u_35 of MemArg
-        | I32Store_36 of MemArg
-        | I64Store_37 of MemArg
-        | F32Store_38 of MemArg
-        | F64Store_39 of MemArg
-        | I32Store8_3A of MemArg
-        | I32Store16_3B of MemArg
-        | I64Store8_3C of MemArg
-        | I64Store16_3D of MemArg
-        | I64Store32_3E of MemArg
+        | I32Load of MemArg     // 28
+        | I64Load of MemArg
+        | F32Load of MemArg
+        | F64Load of MemArg
+        | I32Load8s of MemArg   // 2C
+        | I32Load8u of MemArg
+        | I32Load16s of MemArg
+        | I32Load16u of MemArg
+        | I64Load8s of MemArg   // 30
+        | I64Load8u of MemArg
+        | I64Load16s of MemArg
+        | I64Load16u of MemArg
+        | I64Load32s of MemArg  // 34
+        | I64Load32u of MemArg
+        | I32Store of MemArg
+        | I64Store of MemArg
+        | F32Store of MemArg    // 38
+        | F64Store of MemArg
+        | I32Store8 of MemArg
+        | I32Store16 of MemArg
+        | I64Store8 of MemArg   // 3C
+        | I64Store16 of MemArg
+        | I64Store32 of MemArg
 
-        | MemorySize_3F_00
-        | GrowMemory_40_00
+        | MemorySize    // 3F 00
+        | GrowMemory    // 40 00
 
         // 5.4.5  Numeric Instructions
 
-        | I32Const_41 of I32
-        | I64Const_42 of I64
-        | F32Const_43 of F32
-        | F64Const_44 of F64
+        | I32Const of I32  // 41
+        | I64Const of I64  // 42
+        | F32Const of F32  // 43
+        | F64Const of F64  // 44
 
-        | I32Eqz_45 
-        | I32Eq_46 
-        | I32Ne_47 
-        | I32Lt_s_48 
-        | I32Lt_u_49 
-        | I32Gt_s_4A 
-        | I32Gt_u_4B 
-        | I32Le_s_4C 
-        | I32Le_u_4D 
-        | I32Ge_s_4E 
-        | I32Ge_u_4F 
-        | I64Eqz_50 
-        | I64Eq_51 
-        | I64Ne_52 
-        | I64Lt_s_53 
-        | I64Lt_u_54 
-        | I64Gt_s_55 
-        | I64Gt_u_56 
-        | I64Le_s_57 
-        | I64Le_u_58 
-        | I64Ge_s_59 
-        | I64Ge_u_5A 
-        | F32Eq_5B 
-        | F32Ne_5C 
-        | F32Lt_5D 
-        | F32Gt_5E 
-        | F32Le_5F 
-        | F32Ge_60 
-        | F64Eq_61 
-        | F64Ne_62 
-        | F64Lt_63 
-        | F64Gt_64 
-        | F64Le_65 
-        | F64Ge_66 
-        | I32Clz_67 
-        | I32Ctz_68 
-        | I32PopCnt_69 
-        | I32Add_6A 
-        | I32Sub_6B 
-        | I32Mul_6C 
-        | I32Div_s_6D 
-        | I32Div_u_6E 
-        | I32Rem_s_6F 
-        | I32Rem_u_70 
-        | I32And_71 
-        | I32Or_72 
-        | I32Xor_73 
-        | I32Shl_74 
+        | I32Eqz 
+        | I32Eq 
+        | I32Ne 
+        | I32Lt_s 
+        | I32Lt_u 
+        | I32Gt_s 
+        | I32Gt_u 
+        | I32Le_s 
+        | I32Le_u 
+        | I32Ge_s 
+        | I32Ge_u 
+
+        | I64Eqz   // 50
+        | I64Eq 
+        | I64Ne 
+        | I64Lt_s 
+        | I64Lt_u 
+        | I64Gt_s 
+        | I64Gt_u 
+        | I64Le_s 
+        | I64Le_u 
+        | I64Ge_s 
+        | I64Ge_u 
+        | F32Eq 
+        | F32Ne 
+        | F32Lt 
+        | F32Gt 
+        | F32Le
+        
+        | F32Ge   // 60
+        | F64Eq 
+        | F64Ne 
+        | F64Lt 
+        | F64Gt
+        | F64Le 
+        | F64Ge 
+        | I32Clz 
+        | I32Ctz 
+        | I32PopCnt 
+        | I32Add 
+        | I32Sub 
+        | I32Mul 
+        | I32Div_s 
+        | I32Div_u 
+        | I32Rem_s 
+
+        | I32Rem_u    // 70
+        | I32And 
+        | I32Or 
+        | I32Xor 
+        | I32Shl_74
         | I32Shr_s_75 
         | I32Shr_u_76 
         | I32Rotl_77 

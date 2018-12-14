@@ -35,7 +35,7 @@ let Vector f r =
     Seq.toArray (r |> ReadSequence f)
 
 let ExpectByte theByte (r:WasmSerialiser.BinaryReader) =
-    if r.ReadByte() = theByte 
+    if (r |> Byte) = theByte 
     then ()
     else failwith "Missing byte"  // TODO: elaborate all such messages
 
@@ -49,9 +49,9 @@ let rec ForEachRecognised readX actionToDo r =
             ignore
 
 let MakeArrayWhileSome (recordReaderFunc:'readerType -> 'recordType option) theReader =
-    let newList = new ResizeArray<'recordType>()
-    ForEachRecognised recordReaderFunc (fun newRecord -> newList.Add newRecord) theReader |> ignore
-    newList.ToArray()
+    let container = new ResizeArray<'recordType>()
+    ForEachRecognised recordReaderFunc (fun newRecord -> container.Add newRecord) theReader |> ignore
+    container.ToArray()
 
 // Read WASM indexes
 
@@ -65,43 +65,50 @@ let LabelIdx  r = WasmLabelIdx (r |> U32)
 
 // Wasm basic reading
 
+let ParseFailWith msg b (r:WasmSerialiser.BinaryReader) =
+    failwith (sprintf "%s (%d) at file offset %d" msg b r.ReadOffset)
+
 let Limits r =
-    match r |> Byte with
+    let b = r |> Byte
+    match b with
         | 0x00uy -> 
-            let n = r |> U32
-            { LimitMin=n; LimitMax=None }
+            let lmin = r |> U32
+            { LimitMin=lmin; LimitMax=None }
         | 0x01uy ->
-            let n = r |> U32
-            let m = r |> U32
-            { LimitMin=n; LimitMax=Some(m) }
-        | _ -> failwith "Unknown limit type code"
+            let lmin = r |> U32
+            let lmax = r |> U32
+            { LimitMin=lmin; LimitMax=Some(lmax) }
+        | _ -> ParseFailWith "Unknown limit type code byte" b r
 
 let Mutability r =
-    match r |> Byte with
+    let b = r |> Byte
+    match b with
         | 0x00uy -> Const_00
         | 0x01uy -> Var_01
-        | _ -> failwith "Unknown mutability type code"
+        | _ -> ParseFailWith "Unknown mutability type code byte" b r
 
 let ExportDesc r =
-    match r |> Byte with
+    let b = r |> Byte
+    match b with
         | 0x00uy -> ExpFunc_00(r |> FuncIdx)
         | 0x01uy -> ExpTable_01(r |> TableIdx)
         | 0x02uy -> ExpMem_02(r |> MemIdx)
         | 0x03uy -> ExpGlobal_03(r |> GlobalIdx)
-        | _ -> failwith "Unrecognised ExportDesc code"
+        | _ -> ParseFailWith "Unrecognised ExportDesc code byte" b r
 
 let ValType (r:WasmSerialiser.BinaryReader) =
-    match r.ReadByte() with
-        | 0x7Fuy -> I32_7F
-        | 0x7Euy -> I64_7E
-        | 0x7Duy -> F32_7D
-        | 0x7Cuy -> F64_7C
-        | _ -> failwith "Unrecognised valtype byte"  // TODO: elaborate
+    let b = r |> Byte
+    match b with
+        | 0x7Fuy -> I32Type
+        | 0x7Euy -> I64Type
+        | 0x7Duy -> F32Type
+        | 0x7Cuy -> F64Type
+        | _ -> ParseFailWith "Unrecognised valtype byte" b r
 
 // Wasm file reading assistance
 
 let SectionHeader (r:WasmSerialiser.BinaryReader) =
-    let sectionType = r.ReadByte()
+    let sectionType = r |> Byte
     let sectionLength = r |> Leb32
     (sectionType, sectionLength)
 
@@ -129,7 +136,7 @@ let FuncType r =
 let TableType r = 
     r |> ExpectByte 0x70uy   // There is only one kind defined.
     let tableLimits = r |> Limits
-    { TableElementType=AnyFunc_70; TableLimits=tableLimits }
+    { TableElementType=AnyFuncType; TableLimits=tableLimits }
 
 let Table r =
     let tableType = r |> TableType
@@ -143,18 +150,19 @@ let GlobalType r =
 let BlockType (r:WasmSerialiser.BinaryReader) =
     if r.PeekByte() = 0x40uy then 
         r.SkipByte()
-        EmptyBlockType_40
+        EmptyBlockType
     else
         let valType = r |> ValType
         BlockValType(valType)
 
 let ImportDesc r =
-    match r |> Byte with
+    let b = r |> Byte
+    match b with
         | 0x00uy -> ImpFunc_00(r |> TypeIdx)
         | 0x01uy -> ImpTable_01(r |> TableType)
         | 0x02uy -> ImpMem_02(r |> MemType)
         | 0x03uy -> ImpGlobal_03(r |> GlobalType)
-        | _ -> failwith "Unrecognised ImportDesc code"
+        | _ -> ParseFailWith "Unrecognised ImportDesc code byte" b r
 
 // Instructions
 
@@ -172,141 +180,141 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
 
     match opcodeByte with
 
-        | 0x00uy -> Some(Unreachable_00)
+        | 0x00uy -> Some(Unreachable)
 
-        | 0x01uy -> Some(Nop_01)
+        | 0x01uy -> Some(Nop)
 
         | 0x02uy -> 
             let blockType = r |> BlockType
             let subBlock = r |> InstructionList
-            Some(Block_02_0B(blockType, subBlock))
+            Some(Block(blockType, subBlock))
 
         | 0x03uy -> 
             let blockType = r |> BlockType
             let subBlock = r |> InstructionList
-            Some(Loop_03_0B(blockType, subBlock))
+            Some(Loop(blockType, subBlock))
 
         | 0x04uy -> 
             let blockType = r |> BlockType
             let ifBlock = r |> InstructionList
             let elseByte = r |> Byte
             if not (elseByte = 0x05uy) then
-                Some(If_04_0B(blockType, ifBlock))
+                Some(If(blockType, ifBlock))
             else
                 let elseBlock = r |> InstructionList
-                Some(IfElse_04_05_0B(blockType, ifBlock, elseBlock))
+                Some(IfElse(blockType, ifBlock, elseBlock))
 
-        | 0x0Cuy -> Some(Br_0C (r |> LabelIdx))
-        | 0x0Duy -> Some(BrIf_0D (r |> LabelIdx))
+        | 0x0Cuy -> Some(Br (r |> LabelIdx))
+        | 0x0Duy -> Some(BrIf (r |> LabelIdx))
 
         | 0x0Euy -> 
             let tableContent = r |> Vector LabelIdx
             let labelIdx = r |> LabelIdx
-            Some(BrTable_0E(tableContent, labelIdx))
+            Some(BrTable(tableContent, labelIdx))
 
-        | 0x0Fuy -> Some(Return_0F)
-        | 0x10uy -> Some(Call_10(r |> FuncIdx))
-        | 0x11uy -> Some(CallIndirect_11_00(r |> TypeIdx))
+        | 0x0Fuy -> Some(Return)
+        | 0x10uy -> Some(Call(r |> FuncIdx))
+        | 0x11uy -> Some(CallIndirect(r |> TypeIdx))
 
         // 5.4.2  Parameteric Instructions
 
-        | 0x1Auy -> Some(Drop_1A)
-        | 0x1Buy -> Some(Select_1B)
+        | 0x1Auy -> Some(Drop)
+        | 0x1Buy -> Some(Select)
 
         // 5.4.3  Variable Instructions
 
-        | 0x20uy -> Some(GetLocal_20(r |> LocalIdx))
-        | 0x21uy -> Some(SetLocal_21(r |> LocalIdx))
-        | 0x22uy -> Some(TeeLocal_22(r |> LocalIdx))
-        | 0x23uy -> Some(GetGlobal_23(r |> GlobalIdx))
-        | 0x24uy -> Some(SetGlobal_24(r |> GlobalIdx))
+        | 0x20uy -> Some(GetLocal(r |> LocalIdx))
+        | 0x21uy -> Some(SetLocal(r |> LocalIdx))
+        | 0x22uy -> Some(TeeLocal(r |> LocalIdx))
+        | 0x23uy -> Some(GetGlobal(r |> GlobalIdx))
+        | 0x24uy -> Some(SetGlobal(r |> GlobalIdx))
 
         // 5.4.4  Memory Instructions
 
-        | 0x28uy -> Some(I32Load_28(r |> MemArg))
-        | 0x29uy -> Some(I64Load_29(r |> MemArg))
-        | 0x2Auy -> Some(F32Load_2A(r |> MemArg))
-        | 0x2Buy -> Some(F64Load_2B(r |> MemArg))
-        | 0x2Cuy -> Some(I32Load8s_2C(r |> MemArg))
-        | 0x2Duy -> Some(I32Load8u_2D(r |> MemArg))
-        | 0x2Euy -> Some(I32Load16s_2E(r |> MemArg))
-        | 0x2Fuy -> Some(I32Load16u_2F(r |> MemArg))
-        | 0x30uy -> Some(I64Load8s_30(r |> MemArg))
-        | 0x31uy -> Some(I64Load8u_31(r |> MemArg))
-        | 0x32uy -> Some(I64Load16s_32(r |> MemArg))
-        | 0x33uy -> Some(I64Load16u_33(r |> MemArg))
-        | 0x34uy -> Some(I64Load32s_34(r |> MemArg))
-        | 0x35uy -> Some(I64Load32u_35(r |> MemArg))
-        | 0x36uy -> Some(I32Store_36(r |> MemArg))
-        | 0x37uy -> Some(I64Store_37(r |> MemArg))
-        | 0x38uy -> Some(F32Store_38(r |> MemArg))
-        | 0x39uy -> Some(F64Store_39(r |> MemArg))
-        | 0x3Auy -> Some(I32Store8_3A(r |> MemArg))
-        | 0x3Buy -> Some(I32Store16_3B(r |> MemArg))
-        | 0x3Cuy -> Some(I64Store8_3C(r |> MemArg))
-        | 0x3Duy -> Some(I64Store16_3D(r |> MemArg))
-        | 0x3Euy -> Some(I64Store32_3E(r |> MemArg))
+        | 0x28uy -> Some(I32Load(r |> MemArg))
+        | 0x29uy -> Some(I64Load(r |> MemArg))
+        | 0x2Auy -> Some(F32Load(r |> MemArg))
+        | 0x2Buy -> Some(F64Load(r |> MemArg))
+        | 0x2Cuy -> Some(I32Load8s(r |> MemArg))
+        | 0x2Duy -> Some(I32Load8u(r |> MemArg))
+        | 0x2Euy -> Some(I32Load16s(r |> MemArg))
+        | 0x2Fuy -> Some(I32Load16u(r |> MemArg))
+        | 0x30uy -> Some(I64Load8s(r |> MemArg))
+        | 0x31uy -> Some(I64Load8u(r |> MemArg))
+        | 0x32uy -> Some(I64Load16s(r |> MemArg))
+        | 0x33uy -> Some(I64Load16u(r |> MemArg))
+        | 0x34uy -> Some(I64Load32s(r |> MemArg))
+        | 0x35uy -> Some(I64Load32u(r |> MemArg))
+        | 0x36uy -> Some(I32Store(r |> MemArg))
+        | 0x37uy -> Some(I64Store(r |> MemArg))
+        | 0x38uy -> Some(F32Store(r |> MemArg))
+        | 0x39uy -> Some(F64Store(r |> MemArg))
+        | 0x3Auy -> Some(I32Store8(r |> MemArg))
+        | 0x3Buy -> Some(I32Store16(r |> MemArg))
+        | 0x3Cuy -> Some(I64Store8(r |> MemArg))
+        | 0x3Duy -> Some(I64Store16(r |> MemArg))
+        | 0x3Euy -> Some(I64Store32(r |> MemArg))
 
-        | 0x3Fuy -> (Some(MemorySize_3F_00), r) |> then00
-        | 0x40uy -> (Some(GrowMemory_40_00), r) |> then00
+        | 0x3Fuy -> (Some(MemorySize), r) |> then00
+        | 0x40uy -> (Some(GrowMemory), r) |> then00
 
         // 5.4.5  Numeric Instructions
 
-        | 0x41uy -> Some(I32Const_41(r |> I32))
-        | 0x42uy -> Some(I64Const_42(r |> I64))
-        | 0x43uy -> Some(F32Const_43(r |> F32))
-        | 0x44uy -> Some(F64Const_44(r |> F64))
+        | 0x41uy -> Some(I32Const(r |> I32))
+        | 0x42uy -> Some(I64Const(r |> I64))
+        | 0x43uy -> Some(F32Const(r |> F32))
+        | 0x44uy -> Some(F64Const(r |> F64))
 
-        | 0x45uy -> Some(I32Eqz_45)
-        | 0x46uy -> Some(I32Eq_46)
-        | 0x47uy -> Some(I32Ne_47)
-        | 0x48uy -> Some(I32Lt_s_48)
-        | 0x49uy -> Some(I32Lt_u_49)
-        | 0x4Auy -> Some(I32Gt_s_4A)
-        | 0x4Buy -> Some(I32Gt_u_4B)
-        | 0x4Cuy -> Some(I32Le_s_4C)
-        | 0x4Duy -> Some(I32Le_u_4D)
-        | 0x4Euy -> Some(I32Ge_s_4E)
-        | 0x4Fuy -> Some(I32Ge_u_4F)
+        | 0x45uy -> Some(I32Eqz)
+        | 0x46uy -> Some(I32Eq)
+        | 0x47uy -> Some(I32Ne)
+        | 0x48uy -> Some(I32Lt_s)
+        | 0x49uy -> Some(I32Lt_u)
+        | 0x4Auy -> Some(I32Gt_s)
+        | 0x4Buy -> Some(I32Gt_u)
+        | 0x4Cuy -> Some(I32Le_s)
+        | 0x4Duy -> Some(I32Le_u)
+        | 0x4Euy -> Some(I32Ge_s)
+        | 0x4Fuy -> Some(I32Ge_u)
 
-        | 0x50uy -> Some(I64Eqz_50)
-        | 0x51uy -> Some(I64Eq_51)
-        | 0x52uy -> Some(I64Ne_52)
-        | 0x53uy -> Some(I64Lt_s_53)
-        | 0x54uy -> Some(I64Lt_u_54)
-        | 0x55uy -> Some(I64Gt_s_55)
-        | 0x56uy -> Some(I64Gt_u_56)
-        | 0x57uy -> Some(I64Le_s_57)
-        | 0x58uy -> Some(I64Le_u_58)
-        | 0x59uy -> Some(I64Ge_s_59)
-        | 0x5Auy -> Some(I64Ge_u_5A)
-        | 0x5Buy -> Some(F32Eq_5B)
-        | 0x5Cuy -> Some(F32Ne_5C)
-        | 0x5Duy -> Some(F32Lt_5D)
-        | 0x5Euy -> Some(F32Gt_5E)
-        | 0x5Fuy -> Some(F32Le_5F)
+        | 0x50uy -> Some(I64Eqz)
+        | 0x51uy -> Some(I64Eq)
+        | 0x52uy -> Some(I64Ne)
+        | 0x53uy -> Some(I64Lt_s)
+        | 0x54uy -> Some(I64Lt_u)
+        | 0x55uy -> Some(I64Gt_s)
+        | 0x56uy -> Some(I64Gt_u)
+        | 0x57uy -> Some(I64Le_s)
+        | 0x58uy -> Some(I64Le_u)
+        | 0x59uy -> Some(I64Ge_s)
+        | 0x5Auy -> Some(I64Ge_u)
+        | 0x5Buy -> Some(F32Eq)
+        | 0x5Cuy -> Some(F32Ne)
+        | 0x5Duy -> Some(F32Lt)
+        | 0x5Euy -> Some(F32Gt)
+        | 0x5Fuy -> Some(F32Le)
 
-        | 0x60uy -> Some(F32Ge_60)
-        | 0x61uy -> Some(F64Eq_61)
-        | 0x62uy -> Some(F64Ne_62)
-        | 0x63uy -> Some(F64Lt_63)
-        | 0x64uy -> Some(F64Gt_64)
-        | 0x65uy -> Some(F64Le_65)
-        | 0x66uy -> Some(F64Ge_66)
-        | 0x67uy -> Some(I32Clz_67)
-        | 0x68uy -> Some(I32Ctz_68)
-        | 0x69uy -> Some(I32PopCnt_69)
-        | 0x6Auy -> Some(I32Add_6A)
-        | 0x6Buy -> Some(I32Sub_6B)
-        | 0x6Cuy -> Some(I32Mul_6C)
-        | 0x6Duy -> Some(I32Div_s_6D)
-        | 0x6Euy -> Some(I32Div_u_6E)
-        | 0x6Fuy -> Some(I32Rem_s_6F)
+        | 0x60uy -> Some(F32Ge)
+        | 0x61uy -> Some(F64Eq)
+        | 0x62uy -> Some(F64Ne)
+        | 0x63uy -> Some(F64Lt)
+        | 0x64uy -> Some(F64Gt)
+        | 0x65uy -> Some(F64Le)
+        | 0x66uy -> Some(F64Ge)
+        | 0x67uy -> Some(I32Clz)
+        | 0x68uy -> Some(I32Ctz)
+        | 0x69uy -> Some(I32PopCnt)
+        | 0x6Auy -> Some(I32Add)
+        | 0x6Buy -> Some(I32Sub)
+        | 0x6Cuy -> Some(I32Mul)
+        | 0x6Duy -> Some(I32Div_s)
+        | 0x6Euy -> Some(I32Div_u)
+        | 0x6Fuy -> Some(I32Rem_s)
 
-        | 0x70uy -> Some(I32Rem_u_70)
-        | 0x71uy -> Some(I32And_71)
-        | 0x72uy -> Some(I32Or_72)
-        | 0x73uy -> Some(I32Xor_73)
+        | 0x70uy -> Some(I32Rem_u)
+        | 0x71uy -> Some(I32And)
+        | 0x72uy -> Some(I32Or)
+        | 0x73uy -> Some(I32Xor)
         | 0x74uy -> Some(I32Shl_74)
         | 0x75uy -> Some(I32Shr_s_75)
         | 0x76uy -> Some(I32Shr_u_76)
@@ -447,21 +455,21 @@ let CustomSec r =
     let customBytes = r |> Bytes
     WasmCustomSec({ Name=customName; Data=customBytes })
 
-let TypeSec   r = WasmTypeSec(r |> Vector FuncType)
-let ImportSec r = WasmImportSec(r |> Vector Import)
-let FunctionSec   r = WasmFuncSec(r |> Vector TypeIdx)
-let TableSec  r = WasmTableSec(r |> Vector Table)
-let MemSec    r = WasmMemSec(r |> Vector Mem)
-let GlobalSec r = WasmGlobalSec(r |> Vector Global)
-let ExportSec r = WasmExportSec(r |> Vector Export)
-let CodeSec   r = WasmCodeSec(r |> Vector Code)
+let TypeSec     r = WasmTypeSec(r |> Vector FuncType)
+let ImportSec   r = WasmImportSec(r |> Vector Import)
+let FunctionSec r = WasmFuncSec(r |> Vector TypeIdx)
+let TableSec    r = WasmTableSec(r |> Vector Table)
+let MemSec      r = WasmMemSec(r |> Vector Mem)
+let GlobalSec   r = WasmGlobalSec(r |> Vector Global)
+let ExportSec   r = WasmExportSec(r |> Vector Export)
+let CodeSec     r = WasmCodeSec(r |> Vector Code)
 
-let StartSec  r = 
+let StartSec    r = 
     let startFuncIdx = r |> FuncIdx
     WasmStartSec({ StartFuncIdx=startFuncIdx })
 
-let ElementSec r = WasmElemSec(r |> Vector Element)
-let DataSec r = WasmDataSec(r |> Vector Data)
+let ElementSec  r = WasmElemSec(r |> Vector Element)
+let DataSec     r = WasmDataSec(r |> Vector Data)
 
 // Read section
 
