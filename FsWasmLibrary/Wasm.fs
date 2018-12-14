@@ -10,7 +10,7 @@ module Wasm =
     type F32 = WasmF32 of float32
     type F64 = WasmF64 of float
 
-    type Mutability  = Const_00 | Var_01
+    type Mutability  = Constant | Variable      // 00 01 resp.
     type Limits      = { LimitMin:U32; LimitMax:U32 option }
 
     type ValType     = I32Type | I64Type | F32Type | F64Type                  // 7F 7E 7D 7C resp.
@@ -232,7 +232,7 @@ module Wasm =
 
     // 5.4.6  Expressions
 
-    type Expr_0B = Instr[]
+    type InstructionArray = Instr[]
 
     type Name = string
 
@@ -251,16 +251,16 @@ module Wasm =
     type Locals = { NumRepeats:U32; LocalsType:ValType }
 
     type Custom = { Name:Name; Data:byte array }
-    type Import = { ImportModule:Name; ImportName:Name; ImportDesc:ImportDesc }
-    type Func   = { Locals:Locals array; Body:Expr_0B }
+    type Import = { ImportModuleName:Name; ImportName:Name; ImportDesc:ImportDesc }
+    type Func   = { Locals:Locals array; Body:InstructionArray }
     type Table  = { TableType:TableType }
     type Mem    = { MemType:MemoryType }
-    type Global = { GlobalType:GlobalType; InitExpr:Expr_0B }
+    type Global = { GlobalType:GlobalType; InitExpr:InstructionArray }
     type Export = { ExportName:Name; ExportDesc:ExportDesc }
     type Start  = { StartFuncIdx:FuncIdx }
-    type Elem   = { TableIndex:TableIdx; Offset:Expr_0B; Init:FuncIdx array }
-    type Code   = { Size:U32; Code:Func }
-    type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:Expr_0B; InitImage:byte array }
+    type Elem   = { TableIndex:TableIdx; OffsetExpr:InstructionArray; Init:FuncIdx array }
+    type Code   = { CodeSize:U32; Function:Func }
+    type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:InstructionArray; InitImageBytes:byte array }
 
     type CustomSec = WasmCustomSec of Custom
     type TypeSec   = WasmTypeSec   of FuncType_60 array

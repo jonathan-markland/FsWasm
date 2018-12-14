@@ -24,6 +24,9 @@ let F64 r = WasmF64(r |> Float64)
 
 // Generic parsing assistance
 
+let ParseFailWith messageText byteThatWasRead (r:WasmSerialiser.BinaryReader) =
+    failwith (sprintf "%s (%d) at file offset %d" messageText byteThatWasRead r.ReadOffset)
+
 let ReadSequence (f:WasmSerialiser.BinaryReader -> 'a) r =
     let mutable elementCount = r |> Leb32
     seq { while elementCount > 0u 
@@ -65,9 +68,6 @@ let LabelIdx  r = WasmLabelIdx (r |> U32)
 
 // Wasm basic reading
 
-let ParseFailWith msg b (r:WasmSerialiser.BinaryReader) =
-    failwith (sprintf "%s (%d) at file offset %d" msg b r.ReadOffset)
-
 let Limits r =
     let b = r |> Byte
     match b with
@@ -83,8 +83,8 @@ let Limits r =
 let Mutability r =
     let b = r |> Byte
     match b with
-        | 0x00uy -> Const_00
-        | 0x01uy -> Var_01
+        | 0x00uy -> Constant
+        | 0x01uy -> Variable
         | _ -> ParseFailWith "Unknown mutability type code byte" b r
 
 let ExportDesc r =
@@ -120,40 +120,40 @@ let MemArg (r:WasmSerialiser.BinaryReader) =
     { Align=a; Offset=o }
 
 let MemType r =
-    let memLimits = r |> Limits
-    { MemoryLimits=memLimits }
+    let l = r |> Limits
+    { MemoryLimits=l }
 
 let Mem r = 
-    let memType = r |> MemType
-    { MemType=memType }
+    let t = r |> MemType
+    { MemType=t }
 
 let FuncType r =
     r |> ExpectByte 0x60uy
-    let funcInputs = r |> Vector ValType
-    let funcOutputs = r |> Vector ValType
-    { ParameterTypes=funcInputs; ReturnTypes=funcOutputs }
+    let i = r |> Vector ValType
+    let o = r |> Vector ValType
+    { ParameterTypes=i; ReturnTypes=o }
 
 let TableType r = 
     r |> ExpectByte 0x70uy   // There is only one kind defined.
-    let tableLimits = r |> Limits
-    { TableElementType=AnyFuncType; TableLimits=tableLimits }
+    let l = r |> Limits
+    { TableElementType=AnyFuncType; TableLimits=l }
 
 let Table r =
-    let tableType = r |> TableType
-    { TableType=tableType }
+    let t = r |> TableType
+    { TableType=t }
 
 let GlobalType r = 
-    let globalType = r |> ValType
-    let globalMutability = r |> Mutability
-    { GlobalType=globalType; GlobalMutability=globalMutability }
+    let t = r |> ValType
+    let m = r |> Mutability
+    { GlobalType=t; GlobalMutability=m }
 
 let BlockType (r:WasmSerialiser.BinaryReader) =
     if r.PeekByte() = 0x40uy then 
         r.SkipByte()
         EmptyBlockType
     else
-        let valType = r |> ValType
-        BlockValType(valType)
+        let t = r |> ValType
+        BlockValType(t)
 
 let ImportDesc r =
     let b = r |> Byte
@@ -164,10 +164,12 @@ let ImportDesc r =
         | 0x03uy -> ImportGlobal(r |> GlobalType)
         | _ -> ParseFailWith "Unrecognised ImportDesc code byte" b r
 
+let ExpectEnd r = 
+    r |> ExpectByte 0x0Buy
+
 // Instructions
 
 let rec InstructionList r =
-
     r |> MakeArrayWhileSome Instruction
 
 and Instruction (r:WasmSerialiser.BinaryReader) =
@@ -176,7 +178,6 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
         r |> ExpectByte 0x00uy
         code
 
-    let expectEnd r = r |> ExpectByte 0x0Buy
     let opcodeByte = r |> Byte
 
     match opcodeByte with
@@ -186,16 +187,16 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
         | 0x01uy -> Some(Nop)
 
         | 0x02uy -> 
-            let blockType = r |> BlockType
-            let subBlock = r |> InstructionList
-            r |> expectEnd
-            Some(Block(blockType, subBlock))
+            let t = r |> BlockType
+            let l = r |> InstructionList
+            r |> ExpectEnd
+            Some(Block(t, l))
 
         | 0x03uy -> 
-            let blockType = r |> BlockType
-            let subBlock = r |> InstructionList
-            r |> expectEnd
-            Some(Loop(blockType, subBlock))
+            let t = r |> BlockType
+            let l = r |> InstructionList
+            r |> ExpectEnd
+            Some(Loop(t, l))
 
         | 0x04uy -> 
             let blockType = r |> BlockType
@@ -204,7 +205,7 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
             match endOrElse with
                 | 0x05uy ->
                     let elseInstructions = r |> InstructionList
-                    r |> expectEnd
+                    r |> ExpectEnd
                     Some(IfElse(blockType, ifInstructions, elseInstructions))
                 | 0x0Buy ->
                     Some(If(blockType, ifInstructions))
@@ -215,9 +216,9 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
         | 0x0Duy -> Some(BrIf (r |> LabelIdx))
 
         | 0x0Euy -> 
-            let tableContent = r |> Vector LabelIdx
-            let labelIdx = r |> LabelIdx
-            Some(BrTable(tableContent, labelIdx))
+            let v = r |> Vector LabelIdx
+            let i = r |> LabelIdx
+            Some(BrTable(v, i))
 
         | 0x0Fuy -> Some(Return)
         | 0x10uy -> Some(Call(r |> FuncIdx))
@@ -408,59 +409,59 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
             None
 
 let Expression r =
-    let instrList = r |> InstructionList
-    r |> ExpectByte 0x0Buy
-    instrList
+    let l = r |> InstructionList
+    r |> ExpectEnd
+    l
 
 let Global r =
-    let globalType = r |> GlobalType
-    let initialisationExpression = r |> Expression
-    { GlobalType=globalType; InitExpr=initialisationExpression }
+    let t = r |> GlobalType
+    let e = r |> Expression
+    { GlobalType=t; InitExpr=e }
 
 let Export r = 
-    let exportName = r |> NameString
-    let exportDesc = r |> ExportDesc
-    { ExportName=exportName; ExportDesc=exportDesc }
+    let s = r |> NameString
+    let d = r |> ExportDesc
+    { ExportName=s; ExportDesc=d }
 
 let LocalVariables r =
-    let numRepeats = r |> U32
-    let theType = r |> ValType
-    { NumRepeats=numRepeats; LocalsType=theType }
+    let n = r |> U32
+    let t = r |> ValType
+    { NumRepeats=n; LocalsType=t }
 
 let Function r = 
-    let theLocals = r |> Vector LocalVariables
-    let theExpr = r |> Expression
-    { Locals=theLocals; Body=theExpr }
+    let l = r |> Vector LocalVariables
+    let e = r |> Expression
+    { Locals=l; Body=e }
 
 let Code r = 
-    let codeSize = r |> U32
-    let theFunc = r |> Function
-    { Size=codeSize; Code=theFunc }
+    let s = r |> U32
+    let f = r |> Function
+    { CodeSize=s; Function=f }
 
 let Import r = 
-    let moduleName = r |> NameString
-    let importName = r |> NameString
-    let importDesc = r |> ImportDesc
-    { ImportModule=moduleName; ImportName=importName; ImportDesc=importDesc }
+    let ms = r |> NameString
+    let is = r |> NameString
+    let id = r |> ImportDesc
+    { ImportModuleName=ms; ImportName=is; ImportDesc=id }
 
 let Element r =
-    let tableIdx = r |> TableIdx
-    let elemExpr = r |> Expression
-    let funcIdxArray = r |> Vector FuncIdx
-    { TableIndex=tableIdx; Offset=elemExpr; Init=funcIdxArray }
+    let i = r |> TableIdx
+    let e = r |> Expression
+    let v = r |> Vector FuncIdx
+    { TableIndex=i; OffsetExpr=e; Init=v }
 
 let Data r =
-    let memIdx = r |> MemIdx
-    let offsetExpr = r |> Expression
-    let dataBytes = r |> Bytes
-    { DataMemoryIndex=memIdx; OffsetExpr=offsetExpr; InitImage=dataBytes }
+    let i = r |> MemIdx
+    let e = r |> Expression
+    let b = r |> Bytes
+    { DataMemoryIndex=i; OffsetExpr=e; InitImageBytes=b }
 
 // Read Wasm Sections
 
 let CustomSec r = 
-    let customName = r |> NameString
-    let customBytes = r |> Bytes
-    WasmCustomSec({ Name=customName; Data=customBytes })
+    let s = r |> NameString
+    let b = r |> Bytes
+    WasmCustomSec({ Name=s; Data=b })
 
 let TypeSec     r = WasmTypeSec(r |> Vector FuncType)
 let ImportSec   r = WasmImportSec(r |> Vector Import)
@@ -472,8 +473,8 @@ let ExportSec   r = WasmExportSec(r |> Vector Export)
 let CodeSec     r = WasmCodeSec(r |> Vector Code)
 
 let StartSec    r = 
-    let startFuncIdx = r |> FuncIdx
-    WasmStartSec({ StartFuncIdx=startFuncIdx })
+    let i = r |> FuncIdx
+    WasmStartSec({ StartFuncIdx=i })
 
 let ElementSec  r = WasmElemSec(r |> Vector Element)
 let DataSec     r = WasmDataSec(r |> Vector Data)
