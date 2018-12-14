@@ -71,6 +71,7 @@ module Wasm =
         | I32Load8u of MemArg
         | I32Load16s of MemArg
         | I32Load16u of MemArg
+
         | I64Load8s of MemArg   // 30
         | I64Load8u of MemArg
         | I64Load16s of MemArg
@@ -236,26 +237,26 @@ module Wasm =
     type Name = string
 
     type ImportDesc = 
-        | ImpFunc_00   of TypeIdx
-        | ImpTable_01  of TableType
-        | ImpMem_02    of MemoryType
-        | ImpGlobal_03 of GlobalType
+        | ImportFunc   of TypeIdx
+        | ImportTable  of TableType
+        | ImportMemory of MemoryType
+        | ImportGlobal of GlobalType
 
     type ExportDesc = 
-        | ExpFunc_00   of FuncIdx
-        | ExpTable_01  of TableIdx
-        | ExpMem_02    of MemIdx
-        | ExpGlobal_03 of GlobalIdx
+        | ExportFunc   of FuncIdx
+        | ExportTable  of TableIdx
+        | ExportMemory of MemIdx
+        | ExportGlobal of GlobalIdx
 
     type Locals = { NumRepeats:U32; LocalsType:ValType }
 
     type Custom = { Name:Name; Data:byte array }
-    type Import = { Mod:Name; nm:Name; d:ImportDesc }
+    type Import = { ImportModule:Name; ImportName:Name; ImportDesc:ImportDesc }
     type Func   = { Locals:Locals array; Body:Expr_0B }
     type Table  = { TableType:TableType }
     type Mem    = { MemType:MemoryType }
     type Global = { GlobalType:GlobalType; InitExpr:Expr_0B }
-    type Export = { nm:Name; d:ExportDesc }
+    type Export = { ExportName:Name; ExportDesc:ExportDesc }
     type Start  = { StartFuncIdx:FuncIdx }
     type Elem   = { TableIndex:TableIdx; Offset:Expr_0B; Init:FuncIdx array }
     type Code   = { Size:U32; Code:Func }

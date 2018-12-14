@@ -90,10 +90,10 @@ let Mutability r =
 let ExportDesc r =
     let b = r |> Byte
     match b with
-        | 0x00uy -> ExpFunc_00(r |> FuncIdx)
-        | 0x01uy -> ExpTable_01(r |> TableIdx)
-        | 0x02uy -> ExpMem_02(r |> MemIdx)
-        | 0x03uy -> ExpGlobal_03(r |> GlobalIdx)
+        | 0x00uy -> ExportFunc(r |> FuncIdx)
+        | 0x01uy -> ExportTable(r |> TableIdx)
+        | 0x02uy -> ExportMemory(r |> MemIdx)
+        | 0x03uy -> ExportGlobal(r |> GlobalIdx)
         | _ -> ParseFailWith "Unrecognised ExportDesc code byte" b r
 
 let ValType (r:WasmSerialiser.BinaryReader) =
@@ -158,10 +158,10 @@ let BlockType (r:WasmSerialiser.BinaryReader) =
 let ImportDesc r =
     let b = r |> Byte
     match b with
-        | 0x00uy -> ImpFunc_00(r |> TypeIdx)
-        | 0x01uy -> ImpTable_01(r |> TableType)
-        | 0x02uy -> ImpMem_02(r |> MemType)
-        | 0x03uy -> ImpGlobal_03(r |> GlobalType)
+        | 0x00uy -> ImportFunc(r |> TypeIdx)
+        | 0x01uy -> ImportTable(r |> TableType)
+        | 0x02uy -> ImportMemory(r |> MemType)
+        | 0x03uy -> ImportGlobal(r |> GlobalType)
         | _ -> ParseFailWith "Unrecognised ImportDesc code byte" b r
 
 // Instructions
@@ -177,7 +177,6 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
         code
 
     let expectEnd r = r |> ExpectByte 0x0Buy
-
     let opcodeByte = r |> Byte
 
     match opcodeByte with
@@ -421,7 +420,7 @@ let Global r =
 let Export r = 
     let exportName = r |> NameString
     let exportDesc = r |> ExportDesc
-    { nm=exportName; d=exportDesc }
+    { ExportName=exportName; ExportDesc=exportDesc }
 
 let LocalVariables r =
     let numRepeats = r |> U32
@@ -442,7 +441,7 @@ let Import r =
     let moduleName = r |> NameString
     let importName = r |> NameString
     let importDesc = r |> ImportDesc
-    { Mod=moduleName; nm=importName; d=importDesc }
+    { ImportModule=moduleName; ImportName=importName; ImportDesc=importDesc }
 
 let Element r =
     let tableIdx = r |> TableIdx
