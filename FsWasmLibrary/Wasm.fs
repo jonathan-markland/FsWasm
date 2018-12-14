@@ -10,16 +10,16 @@ module Wasm =
     type F32 = WasmF32 of float32
     type F64 = WasmF64 of float
 
-    type Mut         = Const_00 | Var_01
+    type Mutability  = Const_00 | Var_01
     type Limits      = { Min:U32; Max:U32 option }
 
     type ValType     = I32_7F | I64_7E | F32_7D | F64_7C
     type BlockType   = EmptyBlockType_40 | BlockValType of ValType
     type FuncType_60 = { FuncInputs: ValType[]; FuncOutputs: ValType[] }
-    type MemType     = { MemLim:Limits }
-    type ElemType    = AnyFunc_70
-    type TableType   = { ElementType:ElemType; TableLim:Limits }
-    type GlobalType  = { Type:ValType; Mutability:Mut }
+    type MemoryType  = { MemLim:Limits }
+    type ElementType = AnyFunc_70
+    type TableType   = { ElementType:ElementType; TableLimits:Limits }
+    type GlobalType  = { ValType:ValType; Mutability:Mutability }
 
     type TypeIdx   = WasmTypeIdx of U32
     type FuncIdx   = WasmFuncIdx of U32
@@ -230,7 +230,7 @@ module Wasm =
     type ImportDesc = 
         | ImpFunc_00   of TypeIdx
         | ImpTable_01  of TableType
-        | ImpMem_02    of MemType
+        | ImpMem_02    of MemoryType
         | ImpGlobal_03 of GlobalType
 
     type ExportDesc = 
@@ -245,7 +245,7 @@ module Wasm =
     type Import = { Mod:Name; nm:Name; d:ImportDesc }
     type Func   = { Locals:Locals array; Body:Expr_0B }
     type Table  = { TableType:TableType }
-    type Mem    = { MemType:MemType }
+    type Mem    = { MemType:MemoryType }
     type Global = { GlobalType:GlobalType; InitExpr:Expr_0B }
     type Export = { nm:Name; d:ExportDesc }
     type Start  = { StartFuncIdx:FuncIdx }

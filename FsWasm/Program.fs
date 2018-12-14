@@ -129,7 +129,7 @@ let ReadFuncType r =
 let ReadTableType r = 
     r |> ExpectByte 0x70uy   // There is only one kind defined.
     let tableLimits = r |> ReadLimits
-    { ElementType=AnyFunc_70; TableLim=tableLimits }
+    { ElementType=AnyFunc_70; TableLimits=tableLimits }
 
 let ReadTable r =
     let tableType = r |> ReadTableType
@@ -138,7 +138,7 @@ let ReadTable r =
 let ReadGlobalType r = 
     let globalType = r |> ReadValType
     let globalMutability = r |> ReadMut
-    { Type=globalType; Mutability=globalMutability }
+    { ValType=globalType; Mutability=globalMutability }
 
 let ReadBlockType (r:WasmSerialiser.BinaryReader) =
     if r.PeekByte() = 0x40uy then 
