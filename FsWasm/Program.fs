@@ -5,33 +5,33 @@ open FsWasmLibrary.Wasm
 // Interfacing the BinaryReader:
 
 let EOF         (r:WasmSerialiser.BinaryReader) = r.EndOfFile
-let ReadByte    (r:WasmSerialiser.BinaryReader) = r.ReadByte()
+let Byte        (r:WasmSerialiser.BinaryReader) = r.ReadByte()
 let PeekByte    (r:WasmSerialiser.BinaryReader) = r.PeekByte()
-let ReadLeb32   (r:WasmSerialiser.BinaryReader) = r.ReadLebUnsigned32()
-let ReadLeb64   (r:WasmSerialiser.BinaryReader) = r.ReadLebUnsigned64()
-let ReadFloat32 (r:WasmSerialiser.BinaryReader) = r.ReadFloat32()
-let ReadFloat64 (r:WasmSerialiser.BinaryReader) = r.ReadDouble64()
-let ReadName    (r:WasmSerialiser.BinaryReader) = r.ReadString()
-let ReadBytes   (r:WasmSerialiser.BinaryReader) = r.ReadByteVector()
+let Leb32       (r:WasmSerialiser.BinaryReader) = r.ReadLebUnsigned32()
+let Leb64       (r:WasmSerialiser.BinaryReader) = r.ReadLebUnsigned64()
+let Float32     (r:WasmSerialiser.BinaryReader) = r.ReadFloat32()
+let Float64     (r:WasmSerialiser.BinaryReader) = r.ReadDouble64()
+let NameString  (r:WasmSerialiser.BinaryReader) = r.ReadString()
+let Bytes       (r:WasmSerialiser.BinaryReader) = r.ReadByteVector()
 
 // Interfacing the BinaryReader with Wasm type wrappers, for convenience:
 
-let ReadWasmI32 r = WasmI32(int (r |> ReadLeb32))
-let ReadWasmU32 r = WasmU32(r |> ReadLeb32)
-let ReadWasmI64 r = WasmI64(int64 (r |> ReadLeb64))
-let ReadWasmF32 r = WasmF32(r |> ReadFloat32)
-let ReadWasmF64 r = WasmF64(r |> ReadFloat64)
+let ReadWasmI32 r = WasmI32(int (r |> Leb32))
+let ReadWasmU32 r = WasmU32(r |> Leb32)
+let ReadWasmI64 r = WasmI64(int64 (r |> Leb64))
+let ReadWasmF32 r = WasmF32(r |> Float32)
+let ReadWasmF64 r = WasmF64(r |> Float64)
 
 // Generic parsing assistance
 
 let ReadSequence (f:WasmSerialiser.BinaryReader -> 'a) r =
-    let mutable elementCount = r |> ReadLeb32
+    let mutable elementCount = r |> Leb32
     seq { while elementCount > 0u 
     do
         elementCount <- elementCount - 1u
         yield r |> f }
 
-let ReadVector f r = 
+let Vector f r = 
     Seq.toArray (r |> ReadSequence f)
 
 let ExpectByte theByte (r:WasmSerialiser.BinaryReader) =
@@ -66,7 +66,7 @@ let ReadLabelIdx  r = WasmLabelIdx (r |> ReadWasmU32)
 // Wasm basic reading
 
 let ReadLimits r =
-    match r |> ReadByte with
+    match r |> Byte with
         | 0x00uy -> 
             let n = r |> ReadWasmU32
             { LimitMin=n; LimitMax=None }
@@ -77,13 +77,13 @@ let ReadLimits r =
         | _ -> failwith "Unknown limit type code"
 
 let ReadMut r =
-    match r |> ReadByte with
+    match r |> Byte with
         | 0x00uy -> Const_00
         | 0x01uy -> Var_01
         | _ -> failwith "Unknown mutability type code"
 
 let ReadExportDesc r =
-    match r |> ReadByte with
+    match r |> Byte with
         | 0x00uy -> ExpFunc_00(r |> ReadFuncIdx)
         | 0x01uy -> ExpTable_01(r |> ReadTableIdx)
         | 0x02uy -> ExpMem_02(r |> ReadMemIdx)
@@ -102,7 +102,7 @@ let ReadValType (r:WasmSerialiser.BinaryReader) =
 
 let ReadSectionHeader (r:WasmSerialiser.BinaryReader) =
     let sectionType = r.ReadByte()
-    let sectionLength = r |> ReadLeb32
+    let sectionLength = r |> Leb32
     (sectionType, sectionLength)
 
 // Wasm Type reading
@@ -122,8 +122,8 @@ let ReadMem r =
 
 let ReadFuncType r =
     r |> ExpectByte 0x60uy
-    let funcInputs = r |> ReadVector ReadValType
-    let funcOutputs = r |> ReadVector ReadValType
+    let funcInputs = r |> Vector ReadValType
+    let funcOutputs = r |> Vector ReadValType
     { ParameterTypes=funcInputs; ReturnTypes=funcOutputs }
 
 let ReadTableType r = 
@@ -149,7 +149,7 @@ let ReadBlockType (r:WasmSerialiser.BinaryReader) =
         BlockValType(valType)
 
 let ReadImportDesc r =
-    match r |> ReadByte with
+    match r |> Byte with
         | 0x00uy -> ImpFunc_00(r |> ReadTypeIdx)
         | 0x01uy -> ImpTable_01(r |> ReadTableType)
         | 0x02uy -> ImpMem_02(r |> ReadMemType)
@@ -168,7 +168,7 @@ and ReadInstr (r:WasmSerialiser.BinaryReader) =
         r |> ExpectByte 0x00uy
         code
 
-    let opcodeByte = r |> ReadByte
+    let opcodeByte = r |> Byte
 
     match opcodeByte with
 
@@ -189,7 +189,7 @@ and ReadInstr (r:WasmSerialiser.BinaryReader) =
         | 0x04uy -> 
             let blockType = r |> ReadBlockType
             let ifBlock = r |> ReadInstrList
-            let elseByte = r |> ReadByte
+            let elseByte = r |> Byte
             if not (elseByte = 0x05uy) then
                 Some(If_04_0B(blockType, ifBlock))
             else
@@ -200,7 +200,7 @@ and ReadInstr (r:WasmSerialiser.BinaryReader) =
         | 0x0Duy -> Some(BrIf_0D (r |> ReadLabelIdx))
 
         | 0x0Euy -> 
-            let tableContent = r |> ReadVector ReadLabelIdx
+            let tableContent = r |> Vector ReadLabelIdx
             let labelIdx = r |> ReadLabelIdx
             Some(BrTable_0E(tableContent, labelIdx))
 
@@ -403,7 +403,7 @@ let ReadGlobal r =
     { GlobalType=globalType; InitExpr=initialisationExpression }
 
 let ReadExport r = 
-    let exportName = r |> ReadName
+    let exportName = r |> NameString
     let exportDesc = r |> ReadExportDesc
     { nm=exportName; d=exportDesc }
 
@@ -413,7 +413,7 @@ let ReadLocals r =
     { NumRepeats=numRepeats; LocalsType=theType }
 
 let ReadFunc r = 
-    let theLocals = r |> ReadVector ReadLocals
+    let theLocals = r |> Vector ReadLocals
     let theExpr = r |> ReadExpr
     { Locals=theLocals; Body=theExpr }
 
@@ -423,45 +423,45 @@ let ReadCode r =
     { Size=codeSize; Code=theFunc }
 
 let ReadImport r = 
-    let moduleName = r |> ReadName
-    let importName = r |> ReadName
+    let moduleName = r |> NameString
+    let importName = r |> NameString
     let importDesc = r |> ReadImportDesc
     { Mod=moduleName; nm=importName; d=importDesc }
 
 let ReadElem r =
     let tableIdx = r |> ReadTableIdx
     let elemExpr = r |> ReadExpr
-    let funcIdxArray = r |> ReadVector ReadFuncIdx
+    let funcIdxArray = r |> Vector ReadFuncIdx
     { TableIndex=tableIdx; Offset=elemExpr; Init=funcIdxArray }
 
 let ReadData r =
     let memIdx = r |> ReadMemIdx
     let offsetExpr = r |> ReadExpr
-    let dataBytes = r |> ReadBytes
+    let dataBytes = r |> Bytes
     { DataMemoryIndex=memIdx; OffsetExpr=offsetExpr; InitImage=dataBytes }
 
 // Read Wasm Sections
 
 let ReadCustomSec r = 
-    let customName = r |> ReadName
-    let customBytes = r |> ReadBytes
+    let customName = r |> NameString
+    let customBytes = r |> Bytes
     WasmCustomSec({ Name=customName; Data=customBytes })
 
-let ReadTypeSec   r = WasmTypeSec(r |> ReadVector ReadFuncType)
-let ReadImportSec r = WasmImportSec(r |> ReadVector ReadImport)
-let ReadFuncSec   r = WasmFuncSec(r |> ReadVector ReadTypeIdx)
-let ReadTableSec  r = WasmTableSec(r |> ReadVector ReadTable)
-let ReadMemSec    r = WasmMemSec(r |> ReadVector ReadMem)
-let ReadGlobalSec r = WasmGlobalSec(r |> ReadVector ReadGlobal)
-let ReadExportSec r = WasmExportSec(r |> ReadVector ReadExport)
-let ReadCodeSec   r = WasmCodeSec(r |> ReadVector ReadCode)
+let ReadTypeSec   r = WasmTypeSec(r |> Vector ReadFuncType)
+let ReadImportSec r = WasmImportSec(r |> Vector ReadImport)
+let ReadFuncSec   r = WasmFuncSec(r |> Vector ReadTypeIdx)
+let ReadTableSec  r = WasmTableSec(r |> Vector ReadTable)
+let ReadMemSec    r = WasmMemSec(r |> Vector ReadMem)
+let ReadGlobalSec r = WasmGlobalSec(r |> Vector ReadGlobal)
+let ReadExportSec r = WasmExportSec(r |> Vector ReadExport)
+let ReadCodeSec   r = WasmCodeSec(r |> Vector ReadCode)
 
 let ReadStartSec  r = 
     let startFuncIdx = r |> ReadFuncIdx
     WasmStartSec({ StartFuncIdx=startFuncIdx })
 
-let ReadElemSec r = WasmElemSec(r |> ReadVector ReadElem)
-let ReadDataSec r = WasmDataSec(r |> ReadVector ReadData)
+let ReadElemSec r = WasmElemSec(r |> Vector ReadElem)
+let ReadDataSec r = WasmDataSec(r |> Vector ReadData)
 
 // Read section
 
