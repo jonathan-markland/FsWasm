@@ -392,76 +392,76 @@ and Instruction (r:WasmSerialiser.BinaryReader) =
             r.Reverse(1u)
             None
 
-let ReadExpr r =
+let Expression r =
     let instrList = r |> InstructionList
     r |> ExpectByte 0x0Buy
     instrList
 
-let ReadGlobal r =
+let Global r =
     let globalType = r |> GlobalType
-    let initialisationExpression = r |> ReadExpr
+    let initialisationExpression = r |> Expression
     { GlobalType=globalType; InitExpr=initialisationExpression }
 
-let ReadExport r = 
+let Export r = 
     let exportName = r |> NameString
     let exportDesc = r |> ExportDesc
     { nm=exportName; d=exportDesc }
 
-let ReadLocals r =
+let LocalVariables r =
     let numRepeats = r |> U32
     let theType = r |> ValType
     { NumRepeats=numRepeats; LocalsType=theType }
 
-let ReadFunc r = 
-    let theLocals = r |> Vector ReadLocals
-    let theExpr = r |> ReadExpr
+let Function r = 
+    let theLocals = r |> Vector LocalVariables
+    let theExpr = r |> Expression
     { Locals=theLocals; Body=theExpr }
 
-let ReadCode r = 
+let Code r = 
     let codeSize = r |> U32
-    let theFunc = r |> ReadFunc
+    let theFunc = r |> Function
     { Size=codeSize; Code=theFunc }
 
-let ReadImport r = 
+let Import r = 
     let moduleName = r |> NameString
     let importName = r |> NameString
     let importDesc = r |> ImportDesc
     { Mod=moduleName; nm=importName; d=importDesc }
 
-let ReadElem r =
+let Element r =
     let tableIdx = r |> TableIdx
-    let elemExpr = r |> ReadExpr
+    let elemExpr = r |> Expression
     let funcIdxArray = r |> Vector FuncIdx
     { TableIndex=tableIdx; Offset=elemExpr; Init=funcIdxArray }
 
-let ReadData r =
+let Data r =
     let memIdx = r |> MemIdx
-    let offsetExpr = r |> ReadExpr
+    let offsetExpr = r |> Expression
     let dataBytes = r |> Bytes
     { DataMemoryIndex=memIdx; OffsetExpr=offsetExpr; InitImage=dataBytes }
 
 // Read Wasm Sections
 
-let ReadCustomSec r = 
+let CustomSec r = 
     let customName = r |> NameString
     let customBytes = r |> Bytes
     WasmCustomSec({ Name=customName; Data=customBytes })
 
-let ReadTypeSec   r = WasmTypeSec(r |> Vector FuncType)
-let ReadImportSec r = WasmImportSec(r |> Vector ReadImport)
-let ReadFuncSec   r = WasmFuncSec(r |> Vector TypeIdx)
-let ReadTableSec  r = WasmTableSec(r |> Vector Table)
-let ReadMemSec    r = WasmMemSec(r |> Vector Mem)
-let ReadGlobalSec r = WasmGlobalSec(r |> Vector ReadGlobal)
-let ReadExportSec r = WasmExportSec(r |> Vector ReadExport)
-let ReadCodeSec   r = WasmCodeSec(r |> Vector ReadCode)
+let TypeSec   r = WasmTypeSec(r |> Vector FuncType)
+let ImportSec r = WasmImportSec(r |> Vector Import)
+let FunctionSec   r = WasmFuncSec(r |> Vector TypeIdx)
+let TableSec  r = WasmTableSec(r |> Vector Table)
+let MemSec    r = WasmMemSec(r |> Vector Mem)
+let GlobalSec r = WasmGlobalSec(r |> Vector Global)
+let ExportSec r = WasmExportSec(r |> Vector Export)
+let CodeSec   r = WasmCodeSec(r |> Vector Code)
 
-let ReadStartSec  r = 
+let StartSec  r = 
     let startFuncIdx = r |> FuncIdx
     WasmStartSec({ StartFuncIdx=startFuncIdx })
 
-let ReadElemSec r = WasmElemSec(r |> Vector ReadElem)
-let ReadDataSec r = WasmDataSec(r |> Vector ReadData)
+let ElementSec r = WasmElemSec(r |> Vector Element)
+let DataSec r = WasmDataSec(r |> Vector Data)
 
 // Read section
 
@@ -478,20 +478,20 @@ let TryReadSpecificNumberedSection sectionReader codeOfRequiredSection r =
                     r.ReadOffset <- backtrackPos
                     None
 
-let ReadOptionalCustomSec r = 
-    r |> TryReadSpecificNumberedSection ReadCustomSec 0
+let OptionalCustomSec r = 
+    r |> TryReadSpecificNumberedSection CustomSec 0
 
-let ReadCustomSecArray r =
-    r |> MakeArrayWhileSome ReadOptionalCustomSec
+let CustomSecArray r =
+    r |> MakeArrayWhileSome OptionalCustomSec
 
-let ReadCustomThenTrySpecificSection sectionReader codeOfRequiredSection r =
-    let optionalCustomSecArray = r |> ReadCustomSecArray
+let CustomSecThenTrySpecificSection sectionReader codeOfRequiredSection r =
+    let optionalCustomSecArray = r |> CustomSecArray
     let optionalSection = r |> TryReadSpecificNumberedSection sectionReader codeOfRequiredSection
     (optionalCustomSecArray, optionalSection)
 
 // Read module
 
-let ReadModule r =
+let Module r =
 
     // Magic stamp:
     
@@ -509,32 +509,32 @@ let ReadModule r =
 
     // Read sections:
 
-    let sec1  = r |> ReadCustomThenTrySpecificSection ReadTypeSec 1 
-    let sec2  = r |> ReadCustomThenTrySpecificSection ReadImportSec 2
-    let sec3  = r |> ReadCustomThenTrySpecificSection ReadFuncSec 3
-    let sec4  = r |> ReadCustomThenTrySpecificSection ReadTableSec 4
-    let sec5  = r |> ReadCustomThenTrySpecificSection ReadMemSec 5
-    let sec6  = r |> ReadCustomThenTrySpecificSection ReadGlobalSec 6
-    let sec7  = r |> ReadCustomThenTrySpecificSection ReadExportSec 7
-    let sec8  = r |> ReadCustomThenTrySpecificSection ReadStartSec 8
-    let sec9  = r |> ReadCustomThenTrySpecificSection ReadElemSec 9
-    let sec10 = r |> ReadCustomThenTrySpecificSection ReadCodeSec 10
-    let sec11 = r |> ReadCustomThenTrySpecificSection ReadDataSec 11
-    let finalCustom = r |> ReadCustomSecArray
+    let sec1  = r |> CustomSecThenTrySpecificSection TypeSec 1 
+    let sec2  = r |> CustomSecThenTrySpecificSection ImportSec 2
+    let sec3  = r |> CustomSecThenTrySpecificSection FunctionSec 3
+    let sec4  = r |> CustomSecThenTrySpecificSection TableSec 4
+    let sec5  = r |> CustomSecThenTrySpecificSection MemSec 5
+    let sec6  = r |> CustomSecThenTrySpecificSection GlobalSec 6
+    let sec7  = r |> CustomSecThenTrySpecificSection ExportSec 7
+    let sec8  = r |> CustomSecThenTrySpecificSection StartSec 8
+    let sec9  = r |> CustomSecThenTrySpecificSection ElementSec 9
+    let sec10 = r |> CustomSecThenTrySpecificSection CodeSec 10
+    let sec11 = r |> CustomSecThenTrySpecificSection DataSec 11
+    let finalCustom = r |> CustomSecArray
 
     // Return loaded result:
 
     {   Custom1 = fst sec1; Types=snd sec1;
-        Custom2 = fst sec1; Imports=snd sec2;
-        Custom3 = fst sec1; Funcs=snd sec3;
-        Custom4 = fst sec1; Tables=snd sec4;
-        Custom5 = fst sec1; Mems=snd sec5;
-        Custom6 = fst sec1; Globals=snd sec6;
-        Custom7 = fst sec1; Exports=snd sec7;
-        Custom8 = fst sec1; Start=snd sec8;
-        Custom9 = fst sec1; Elems=snd sec9;
-        Custom10 = fst sec1; Codes=snd sec10;
-        Custom11 = fst sec1; Datas=snd sec11;
+        Custom2 = fst sec2; Imports=snd sec2;
+        Custom3 = fst sec3; Funcs=snd sec3;
+        Custom4 = fst sec4; Tables=snd sec4;
+        Custom5 = fst sec5; Mems=snd sec5;
+        Custom6 = fst sec6; Globals=snd sec6;
+        Custom7 = fst sec7; Exports=snd sec7;
+        Custom8 = fst sec8; Start=snd sec8;
+        Custom9 = fst sec9; Elems=snd sec9;
+        Custom10 = fst sec10; Codes=snd sec10;
+        Custom11 = fst sec11; Datas=snd sec11;
         Custom12 = finalCustom;
     }
 
@@ -545,7 +545,7 @@ let main argv =
 
     let fileImage = File.ReadAllBytes("program (1).wasm");
     let r = new WasmSerialiser.BinaryReader(fileImage)
-    let thisModule = r |> ReadModule
+    let thisModule = r |> Module
 
     printfn "Hello World from F#!"
     0 // return an integer exit code
