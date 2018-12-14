@@ -10,24 +10,24 @@ module Wasm =
     type F32 = WasmF32 of float32
     type F64 = WasmF64 of float
 
-    type Mut = Const_00 | Var_01
-    type Limits = { Min:U32; Max:U32 option }
+    type Mut         = Const_00 | Var_01
+    type Limits      = { Min:U32; Max:U32 option }
 
-    type ValType = I32_7F | I64_7E | F32_7D | F64_7C
-    type BlockType = EmptyBlockType_40 | BlockValType of ValType
+    type ValType     = I32_7F | I64_7E | F32_7D | F64_7C
+    type BlockType   = EmptyBlockType_40 | BlockValType of ValType
     type FuncType_60 = { FuncInputs: ValType[]; FuncOutputs: ValType[] }
-    type MemType = { MemLim:Limits }
-    type ElemType = AnyFunc_70
-    type TableType = { ElementType:ElemType; TableLim:Limits }
-    type GlobalType = { Type:ValType; Mutability:Mut }
+    type MemType     = { MemLim:Limits }
+    type ElemType    = AnyFunc_70
+    type TableType   = { ElementType:ElemType; TableLim:Limits }
+    type GlobalType  = { Type:ValType; Mutability:Mut }
 
-    type TypeIdx = WasmTypeIdx of U32
-    type FuncIdx = WasmFuncIdx of U32
-    type TableIdx = WasmTableIdx of U32
-    type MemIdx = WasmMemIdx of U32
+    type TypeIdx   = WasmTypeIdx of U32
+    type FuncIdx   = WasmFuncIdx of U32
+    type TableIdx  = WasmTableIdx of U32
+    type MemIdx    = WasmMemIdx of U32
     type GlobalIdx = WasmGlobalIdx of U32
-    type LocalIdx = WasmLocalIdx of U32
-    type LabelIdx = WasmLabelIdx of U32
+    type LocalIdx  = WasmLocalIdx of U32
+    type LabelIdx  = WasmLabelIdx of U32
 
     type MemArg = { Align:U32; Offset:U32 } 
 
@@ -37,15 +37,15 @@ module Wasm =
 
         | Unreachable_00
         | Nop_01
-        | Block_02_0B of t:BlockType * ins:Instr array
-        | Loop_03_0B of t:BlockType * ins:Instr array
-        | If_04_0B of t:BlockType * ins:Instr array
-        | IfElse_04_05_0B of t:BlockType * If:Instr array * Else:Instr array
-        | Br_0C of LabelIndex:LabelIdx
-        | BrIf_0D of LabelIndex:LabelIdx
-        | BrTable_0E of LabelIdx array * LabelIdx
+        | Block_02_0B        of t:BlockType * ins:Instr array
+        | Loop_03_0B         of t:BlockType * ins:Instr array
+        | If_04_0B           of t:BlockType * ins:Instr array
+        | IfElse_04_05_0B    of t:BlockType * If:Instr array * Else:Instr array
+        | Br_0C              of LabelIndex:LabelIdx
+        | BrIf_0D            of LabelIndex:LabelIdx
+        | BrTable_0E         of LabelIdx array * LabelIdx
         | Return_0F
-        | Call_10 of FuncIdx
+        | Call_10            of FuncIdx
         | CallIndirect_11_00 of TypeIdx
 
         // 5.4.2  Parameteric Instructions
@@ -228,15 +228,15 @@ module Wasm =
     type Name = string
 
     type ImportDesc = 
-        | ImpFunc_00 of TypeIdx
-        | ImpTable_01 of TableType
-        | ImpMem_02 of MemType
+        | ImpFunc_00   of TypeIdx
+        | ImpTable_01  of TableType
+        | ImpMem_02    of MemType
         | ImpGlobal_03 of GlobalType
 
     type ExportDesc = 
-        | ExpFunc_00 of FuncIdx
-        | ExpTable_01 of TableIdx
-        | ExpMem_02 of MemIdx
+        | ExpFunc_00   of FuncIdx
+        | ExpTable_01  of TableIdx
+        | ExpMem_02    of MemIdx
         | ExpGlobal_03 of GlobalIdx
 
     type Locals = { NumRepeats:U32; LocalsType:ValType }
@@ -254,17 +254,17 @@ module Wasm =
     type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:Expr_0B; InitImage:byte array }
 
     type CustomSec = WasmCustomSec of Custom
-    type TypeSec   = WasmTypeSec of FuncType_60 array
+    type TypeSec   = WasmTypeSec   of FuncType_60 array
     type ImportSec = WasmImportSec of Import array
-    type FuncSec   = WasmFuncSec of TypeIdx array
-    type TableSec  = WasmTableSec of Table array
-    type MemSec    = WasmMemSec of Mem array
+    type FuncSec   = WasmFuncSec   of TypeIdx array
+    type TableSec  = WasmTableSec  of Table array
+    type MemSec    = WasmMemSec    of Mem array
     type GlobalSec = WasmGlobalSec of Global array
     type ExportSec = WasmExportSec of Export array
-    type StartSec  = WasmStartSec of Start
-    type ElemSec   = WasmElemSec of Elem array
-    type CodeSec   = WasmCodeSec of Code array
-    type DataSec   = WasmDataSec of Data array
+    type StartSec  = WasmStartSec  of Start
+    type ElemSec   = WasmElemSec   of Elem array
+    type CodeSec   = WasmCodeSec   of Code array
+    type DataSec   = WasmDataSec   of Data array
 
     type Magic   = U32
     type Version = U32
