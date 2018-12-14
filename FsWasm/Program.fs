@@ -544,9 +544,7 @@ let ReadModule r =
 let main argv =
 
     let fileImage = File.ReadAllBytes("program (1).wasm");
-    
     let r = new WasmSerialiser.BinaryReader(fileImage)
-
     let thisModule = r |> ReadModule
 
     printfn "Hello World from F#!"

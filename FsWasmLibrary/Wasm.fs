@@ -15,7 +15,7 @@ module Wasm =
 
     type ValType     = I32_7F | I64_7E | F32_7D | F64_7C
     type BlockType   = EmptyBlockType_40 | BlockValType of ValType
-    type FuncType_60 = { ParameterTypes: ValType[]; ReturnTypes: ValType[] }
+    type FuncType_60 = { ParameterTypes:ValType[]; ReturnTypes:ValType[] }
     type MemoryType  = { MemoryLimits:Limits }
     type ElementType = AnyFunc_70
     type TableType   = { TableElementType:ElementType; TableLimits:Limits }
