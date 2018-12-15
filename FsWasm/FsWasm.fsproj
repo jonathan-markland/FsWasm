@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="UnitTestSerialiser.fs" />
+    <None Include="program %283%29.wasm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="program %282%29.wasm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -17,8 +21,6 @@
     </None>
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <ProjectReference Include="..\FsWasmLibrary\FsWasmLibrary.fsproj" />
