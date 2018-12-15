@@ -101,26 +101,26 @@ module Wasm =
         | I32Eqz 
         | I32Eq 
         | I32Ne 
-        | I32Lt_s 
-        | I32Lt_u 
-        | I32Gt_s 
-        | I32Gt_u 
-        | I32Le_s 
-        | I32Le_u 
-        | I32Ge_s 
-        | I32Ge_u 
+        | I32Lts 
+        | I32Ltu 
+        | I32Gts 
+        | I32Gtu 
+        | I32Les 
+        | I32Leu 
+        | I32Ges 
+        | I32Geu 
 
         | I64Eqz   // 50
         | I64Eq 
         | I64Ne 
-        | I64Lt_s 
-        | I64Lt_u 
-        | I64Gt_s 
-        | I64Gt_u 
-        | I64Le_s 
-        | I64Le_u 
-        | I64Ge_s 
-        | I64Ge_u 
+        | I64Lts 
+        | I64Ltu 
+        | I64Gts 
+        | I64Gtu 
+        | I64Les 
+        | I64Leu 
+        | I64Ges 
+        | I64Geu 
         | F32Eq 
         | F32Ne 
         | F32Lt 
@@ -140,17 +140,17 @@ module Wasm =
         | I32Add 
         | I32Sub 
         | I32Mul 
-        | I32Div_s 
-        | I32Div_u 
-        | I32Rem_s 
+        | I32Divs 
+        | I32Divu 
+        | I32Rems 
 
-        | I32Rem_u    // 70
+        | I32Remu    // 70
         | I32And 
         | I32Or 
         | I32Xor 
         | I32Shl
-        | I32Shr_s
-        | I32Shr_u
+        | I32Shrs
+        | I32Shru
         | I32Rotl
         | I32Rotr
         | I64Clz
@@ -159,17 +159,17 @@ module Wasm =
         | I64Add
         | I64Sub
         | I64Mul
-        | I64Div_s
+        | I64Divs
 
-        | I64Div_u   // 80
-        | I64Rem_s
-        | I64Rem_u
+        | I64Divu   // 80
+        | I64Rems
+        | I64Remu
         | I64And
         | I64Or
         | I64Xor
         | I64Shl
-        | I64Shr_s
-        | I64Shr_u
+        | I64Shrs
+        | I64Shru
         | I64Rotl
         | I64Rotr
         | F32Abs
@@ -202,33 +202,32 @@ module Wasm =
         | F64Min
         | F64Max
         | F64CopySign
-        | I32Wrap_I64 
-        | I32Trunc_s_F32 
-        | I32Trunc_u_F32 
-        | I32Trunc_s_F64 
-        | I32Trunc_u_F64 
-        | I64Extend_s_i32 
-        | I64Extend_u_i32 
-        | I64Trunc_s_F32 
-        | I64Trunc_u_F32 
+        | I32WrapI64 
+        | I32TruncsF32 
+        | I32TruncuF32 
+        | I32TruncsF64 
+        | I32TruncuF64 
+        | I64ExtendsI32 
+        | I64ExtenduI32 
+        | I64TruncsF32 
+        | I64TruncuF32 
 
-
-        | I64Trunc_s_F64   // B0
-        | I64Trunc_u_F64 
-        | F32Convert_s_i32 
-        | F32Convert_u_i32 
-        | F32Convert_s_i64 
-        | F32Convert_u_i64 
-        | F32Demote_F64 
-        | F64Convert_s_i32 
-        | F64Convert_u_i32 
-        | F64Convert_s_i64 
-        | F64Convert_u_i64 
-        | F64Promote_F32 
-        | I32Reinterpret_F32  
-        | I64Reinterpret_F64  
-        | F32Reinterpret_i32  
-        | F64Reinterpret_i64 
+        | I64TruncsF64   // B0
+        | I64TruncuF64 
+        | F32ConvertsI32 
+        | F32ConvertuI32 
+        | F32ConvertsI64 
+        | F32ConvertuI64 
+        | F32DemoteF64 
+        | F64ConvertsI32 
+        | F64ConvertuI32 
+        | F64ConvertsI64 
+        | F64ConvertuI64 
+        | F64PromoteF32 
+        | I32ReinterpretF32  
+        | I64ReinterpretF64  
+        | F32ReinterpretI32  
+        | F64ReinterpretI64 
 
     // 5.4.6  Expressions
 
