@@ -559,9 +559,11 @@ let Module r =
 [<EntryPoint>]
 let main argv =
 
-    let fileImage = File.ReadAllBytes("program (1).wasm");
+    let fileImage = File.ReadAllBytes("program (2).wasm");
     let r = new WasmSerialiser.BinaryReader(fileImage)
     let thisModule = r |> Module
+
+    let serialisedToFsText = sprintf "%A" thisModule
 
     printfn "Hello World from F#!"
     0 // return an integer exit code

@@ -15,19 +15,19 @@ module Wasm =
 
     type ValType     = I32Type | I64Type | F32Type | F64Type                  // 7F 7E 7D 7C resp.
     type BlockType   = EmptyBlockType | BlockValType of ValType
-    type FuncType_60 = { ParameterTypes:ValType[]; ReturnTypes:ValType[] }
+    type FuncType    = { ParameterTypes:ValType[]; ReturnTypes:ValType[] }
     type MemoryType  = { MemoryLimits:Limits }
     type ElementType = AnyFuncType
     type TableType   = { TableElementType:ElementType; TableLimits:Limits }
     type GlobalType  = { GlobalType:ValType; GlobalMutability:Mutability }
 
-    type TypeIdx   = WasmTypeIdx of U32
-    type FuncIdx   = WasmFuncIdx of U32
-    type TableIdx  = WasmTableIdx of U32
-    type MemIdx    = WasmMemIdx of U32
+    type TypeIdx   = WasmTypeIdx   of U32
+    type FuncIdx   = WasmFuncIdx   of U32
+    type TableIdx  = WasmTableIdx  of U32
+    type MemIdx    = WasmMemIdx    of U32
     type GlobalIdx = WasmGlobalIdx of U32
-    type LocalIdx  = WasmLocalIdx of U32
-    type LabelIdx  = WasmLabelIdx of U32
+    type LocalIdx  = WasmLocalIdx  of U32
+    type LabelIdx  = WasmLabelIdx  of U32
 
     type MemArg = { Align:U32; Offset:U32 } 
 
@@ -37,12 +37,12 @@ module Wasm =
 
         | Unreachable  // 00
         | Nop          // 01
-        | Block        of t:BlockType * ins:Instr array  // 02 0B
-        | Loop         of t:BlockType * ins:Instr array  // 03 0B
-        | If           of t:BlockType * ins:Instr array  // 04 0B
-        | IfElse       of t:BlockType * If:Instr array * Else:Instr array  // 04 05 0B
-        | Br           of LabelIndex:LabelIdx  // 0C
-        | BrIf         of LabelIndex:LabelIdx  // 0D
+        | Block        of BlockType * Instr array  // 02 0B
+        | Loop         of BlockType * Instr array  // 03 0B
+        | If           of BlockType * Instr array  // 04 0B
+        | IfElse       of BlockType * If:Instr array * Else:Instr array  // 04 05 0B
+        | Br           of LabelIdx  // 0C
+        | BrIf         of LabelIdx  // 0D
         | BrTable      of LabelIdx array * LabelIdx  // 0E
         | Return
         | Call         of FuncIdx   // 10
@@ -262,7 +262,7 @@ module Wasm =
     type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:InstructionArray; InitImageBytes:byte array }
 
     type CustomSec = WasmCustomSec of Custom
-    type TypeSec   = WasmTypeSec   of FuncType_60 array
+    type TypeSec   = WasmTypeSec   of FuncType array
     type ImportSec = WasmImportSec of Import array
     type FuncSec   = WasmFuncSec   of TypeIdx array
     type TableSec  = WasmTableSec  of Table array
