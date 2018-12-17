@@ -4,11 +4,11 @@ open System
 
 module Wasm =
 
-    type I32 = WasmI32 of int
-    type I64 = WasmI64 of int64
-    type U32 = WasmU32 of uint32
-    type F32 = WasmF32 of float32
-    type F64 = WasmF64 of float
+    type I32 = I32 of int
+    type I64 = I64 of int64
+    type U32 = U32 of uint32
+    type F32 = F32 of float32
+    type F64 = F64 of float
 
     type Mutability  = Constant | Variable      // 00 01 resp.
     type Limits      = { LimitMin:U32; LimitMax:U32 option }
@@ -21,13 +21,13 @@ module Wasm =
     type TableType   = { TableElementType:ElementType; TableLimits:Limits }
     type GlobalType  = { GlobalType:ValType; GlobalMutability:Mutability }
 
-    type TypeIdx   = WasmTypeIdx   of U32
-    type FuncIdx   = WasmFuncIdx   of U32
-    type TableIdx  = WasmTableIdx  of U32
-    type MemIdx    = WasmMemIdx    of U32
-    type GlobalIdx = WasmGlobalIdx of U32
-    type LocalIdx  = WasmLocalIdx  of U32
-    type LabelIdx  = WasmLabelIdx  of U32
+    type TypeIdx   = TypeIdx   of U32
+    type FuncIdx   = FuncIdx   of U32
+    type TableIdx  = TableIdx  of U32
+    type MemIdx    = MemIdx    of U32
+    type GlobalIdx = GlobalIdx of U32
+    type LocalIdx  = LocalIdx  of U32
+    type LabelIdx  = LabelIdx  of U32
 
     type MemArg = { Align:U32; Offset:U32 } 
 
@@ -261,18 +261,18 @@ module Wasm =
     type Code   = { CodeSize:U32; Function:Func }
     type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:InstructionArray; InitImageBytes:byte array }
 
-    type CustomSec = WasmCustomSec of Custom
-    type TypeSec   = WasmTypeSec   of FuncType array
-    type ImportSec = WasmImportSec of Import array
-    type FuncSec   = WasmFuncSec   of TypeIdx array
-    type TableSec  = WasmTableSec  of Table array
-    type MemSec    = WasmMemSec    of Mem array
-    type GlobalSec = WasmGlobalSec of Global array
-    type ExportSec = WasmExportSec of Export array
-    type StartSec  = WasmStartSec  of Start
-    type ElemSec   = WasmElemSec   of Elem array
-    type CodeSec   = WasmCodeSec   of Code array
-    type DataSec   = WasmDataSec   of Data array
+    type CustomSec = CustomSec of Custom
+    type TypeSec   = TypeSec   of FuncType array
+    type ImportSec = ImportSec of Import array
+    type FuncSec   = FuncSec   of TypeIdx array
+    type TableSec  = TableSec  of Table array
+    type MemSec    = MemSec    of Mem array
+    type GlobalSec = GlobalSec of Global array
+    type ExportSec = ExportSec of Export array
+    type StartSec  = StartSec  of Start
+    type ElemSec   = ElemSec   of Elem array
+    type CodeSec   = CodeSec   of Code array
+    type DataSec   = DataSec   of Data array
 
     type Magic   = U32
     type Version = U32

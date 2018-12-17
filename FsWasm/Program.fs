@@ -16,11 +16,11 @@ let Bytes       (r:WasmSerialiser.BinaryReader) = r.ReadByteVector()
 
 // Interfacing the BinaryReader with Wasm type wrappers, for convenience:
 
-let I32 r = WasmI32(int (r |> Leb32))
-let U32 r = WasmU32(r |> Leb32)
-let I64 r = WasmI64(int64 (r |> Leb64))
-let F32 r = WasmF32(r |> Float32)
-let F64 r = WasmF64(r |> Float64)
+let I32 r = I32(int (r |> Leb32))
+let U32 r = U32(r |> Leb32)
+let I64 r = I64(int64 (r |> Leb64))
+let F32 r = F32(r |> Float32)
+let F64 r = F64(r |> Float64)
 
 // Generic parsing assistance
 
@@ -58,13 +58,13 @@ let MakeArrayWhileSome (recordReaderFunc:'readerType -> 'recordType option) theR
 
 // Read WASM indexes
 
-let TypeIdx   r = WasmTypeIdx  (r |> U32)
-let FuncIdx   r = WasmFuncIdx  (r |> U32)
-let TableIdx  r = WasmTableIdx (r |> U32)
-let MemIdx    r = WasmMemIdx   (r |> U32)
-let GlobalIdx r = WasmGlobalIdx(r |> U32)
-let LocalIdx  r = WasmLocalIdx (r |> U32)
-let LabelIdx  r = WasmLabelIdx (r |> U32)
+let TypeIdx   r = TypeIdx  (r |> U32)
+let FuncIdx   r = FuncIdx  (r |> U32)
+let TableIdx  r = TableIdx (r |> U32)
+let MemIdx    r = MemIdx   (r |> U32)
+let GlobalIdx r = GlobalIdx(r |> U32)
+let LocalIdx  r = LocalIdx (r |> U32)
+let LabelIdx  r = LabelIdx (r |> U32)
 
 // Wasm basic reading
 
@@ -461,23 +461,23 @@ let Data r =
 let CustomSec r = 
     let s = r |> NameString
     let b = r |> Bytes
-    WasmCustomSec({ Name=s; Data=b })
+    CustomSec({ Name=s; Data=b })
 
-let TypeSec     r = WasmTypeSec(r |> Vector FuncType)
-let ImportSec   r = WasmImportSec(r |> Vector Import)
-let FunctionSec r = WasmFuncSec(r |> Vector TypeIdx)
-let TableSec    r = WasmTableSec(r |> Vector Table)
-let MemSec      r = WasmMemSec(r |> Vector Mem)
-let GlobalSec   r = WasmGlobalSec(r |> Vector Global)
-let ExportSec   r = WasmExportSec(r |> Vector Export)
-let CodeSec     r = WasmCodeSec(r |> Vector Code)
+let TypeSec     r = TypeSec(r |> Vector FuncType)
+let ImportSec   r = ImportSec(r |> Vector Import)
+let FunctionSec r = FuncSec(r |> Vector TypeIdx)
+let TableSec    r = TableSec(r |> Vector Table)
+let MemSec      r = MemSec(r |> Vector Mem)
+let GlobalSec   r = GlobalSec(r |> Vector Global)
+let ExportSec   r = ExportSec(r |> Vector Export)
+let CodeSec     r = CodeSec(r |> Vector Code)
 
 let StartSec    r = 
     let i = r |> FuncIdx
-    WasmStartSec({ StartFuncIdx=i })
+    StartSec({ StartFuncIdx=i })
 
-let ElementSec  r = WasmElemSec(r |> Vector Element)
-let DataSec     r = WasmDataSec(r |> Vector Data)
+let ElementSec  r = ElemSec(r |> Vector Element)
+let DataSec     r = DataSec(r |> Vector Data)
 
 // Read section
 

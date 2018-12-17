@@ -52,7 +52,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
             let addLocals (locals:Locals) =
                 match locals.NumRepeats with
-                    | WasmU32(repeatCounter) -> addIndividualLocal repeatCounter locals.LocalsType
+                    | U32(repeatCounter) -> addIndividualLocal repeatCounter locals.LocalsType
 
             localsArray |> Array.iter addLocals
 
@@ -118,7 +118,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             codeArray |> Array.iteri addCodeDetail 
 
         match optionalCodeSec with
-            | Some(WasmCodeSec(codeArray)) -> addCodeArray codeArray
+            | Some(CodeSec(codeArray)) -> addCodeArray codeArray
             | _ -> ()
 
     let AddModule theModule =
