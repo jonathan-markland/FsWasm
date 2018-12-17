@@ -11,25 +11,30 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         sb.Append t |> ignore
         sb.AppendLine "" |> ignore
 
-    let AddObject obj =
+    let Title (t:string) =
         sb.AppendLine "" |> ignore
         sb.AppendLine "" |> ignore
-        sb.Append (sprintf "%A" obj) |> ignore
+        sb.Append "--- " |> ignore
+        sb.Append t |> ignore
+        sb.AppendLine " ---" |> ignore
         sb.AppendLine "" |> ignore
 
-    let AddQuickly optionalObj =
+    let AddObject obj =
+        sb.Append (sprintf "%A" obj) |> ignore
+
+    let AddOptionalObject optionalObj =
         match optionalObj with
             | None -> ()
             | Some(X) -> AddObject X
 
-    let AddArraySection cs =
-        // TODO: I want to dump the array with numbering down the side, and using %A for each element.
-        match cs with   
-            | [|xs|] -> AddQuickly (Some(xs))   // TODO: did I only match the first element?
-            | _ -> ()
+    let AddArraySection sectionTitle sectionArray =
+        sectionArray |> Array.iteri (fun i X -> 
+            Title (sprintf "%s [%d]" sectionTitle i)
+            AddObject X)
 
-    let AddGeneric g =
-        AddQuickly g
+    let AddGenericSection sectionTitle genericSection =
+        Title (sprintf "%s" sectionTitle)
+        AddOptionalObject genericSection
 
     let AddCodeSec (optionalCodeSec:CodeSec option) =
 
@@ -106,46 +111,42 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         let addCodeArray codeArray =
 
             let addCodeDetail i (c:Code) =
-                Text ""
-                Text (sprintf "--- Code instance [%d] of %A bytes ---" i (c.CodeSize))
+                Title (sprintf "Code section [%d] of %A bytes" i (c.CodeSize))
                 addLocals c.Function.Locals
                 addBody c.Function.Body
 
             codeArray |> Array.iteri addCodeDetail 
 
         match optionalCodeSec with
-            | Some(WasmCodeSec(codeArray)) -> 
-                addCodeArray codeArray
-                ()
+            | Some(WasmCodeSec(codeArray)) -> addCodeArray codeArray
             | _ -> ()
 
     let AddModule theModule =
-        AddArraySection theModule.Custom1   
-        AddGeneric theModule.Types
-        AddArraySection theModule.Custom2   
-        AddGeneric theModule.Imports
-        AddArraySection theModule.Custom3   
-        AddGeneric theModule.Funcs
-        AddArraySection theModule.Custom4   
-        AddGeneric theModule.Tables
-        AddArraySection theModule.Custom5   
-        AddGeneric theModule.Mems
-        AddArraySection theModule.Custom6   
-        AddGeneric theModule.Globals
-        AddArraySection theModule.Custom7   
-        AddGeneric theModule.Exports
-        AddArraySection theModule.Custom8   
-        AddGeneric theModule.Start
-        AddArraySection theModule.Custom9   
-        AddGeneric theModule.Elems
-        AddArraySection theModule.Custom10  
-        AddCodeSec theModule.Codes
-        AddArraySection theModule.Custom11  
-        AddGeneric theModule.Datas
-        AddArraySection theModule.Custom12  
 
-    Text "Unit test serialisation for: "
-    Text fileName
+        AddArraySection "Custom section #1"  theModule.Custom1   
+        AddGenericSection "Types section" theModule.Types
+        AddArraySection "Custom section #2"  theModule.Custom2   
+        AddGenericSection "Imports section" theModule.Imports
+        AddArraySection "Custom section #3"  theModule.Custom3   
+        AddGenericSection "Funcs section" theModule.Funcs
+        AddArraySection "Custom section #4"  theModule.Custom4   
+        AddGenericSection "Tables section" theModule.Tables
+        AddArraySection "Custom section #5"  theModule.Custom5   
+        AddGenericSection "Mems section" theModule.Mems
+        AddArraySection "Custom section #6"  theModule.Custom6   
+        AddGenericSection "Globals section" theModule.Globals
+        AddArraySection "Custom section #7"  theModule.Custom7   
+        AddGenericSection "Exports section" theModule.Exports
+        AddArraySection "Custom section #8"  theModule.Custom8   
+        AddGenericSection "Start section" theModule.Start
+        AddArraySection "Custom section #9"  theModule.Custom9   
+        AddGenericSection "Elems section" theModule.Elems
+        AddArraySection "Custom section #10"  theModule.Custom10  
+        AddCodeSec theModule.Codes
+        AddArraySection "Custom section #11"  theModule.Custom11  
+        AddGenericSection "Data section" theModule.Datas
+        AddArraySection "Custom section #12"  theModule.Custom12  
+
+    Title ("Unit test serialisation for: " + fileName)
     AddModule m
     sb.ToString ()
-      
