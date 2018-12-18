@@ -7,6 +7,12 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     let sb = new StringBuilder ()
 
+    let NewLine () =
+        sb.AppendLine() |> ignore
+
+    let Add (t:string) = 
+        sb.Append t |> ignore
+
     let Text (t:string) = 
         sb.Append t |> ignore
         sb.AppendLine "" |> ignore
@@ -35,6 +41,72 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
     let AddGenericSection sectionTitle genericSection =
         Title (sprintf "%s" sectionTitle)
         AddOptionalObject genericSection
+
+    // TYPE SECTION
+
+    let PrettyValType = 
+        function
+        | I32Type -> "I32"
+        | I64Type -> "I64"
+        | F32Type -> "F32"
+        | F64Type -> "F64"
+
+    let AddValType vt =
+        Add (PrettyValType vt)
+        Add " "
+
+    let AddValTypes vts =
+        vts |> Array.iter AddValType
+
+    let AddFuncType ft =
+        AddValTypes ft.ParameterTypes
+        Add "-> "
+        AddValTypes ft.ReturnTypes
+
+    let AddTypeSecEntry i ft =
+        Add (sprintf "TypeSec[%d] = " i)
+        AddFuncType ft
+
+    let AddTypeSec (optionalTypeSec:TypeSec option) =
+
+        Title "Types section"
+
+        let addArray a =
+            a |> Array.iteri 
+                (fun i ft ->
+                    AddTypeSecEntry i ft
+                    NewLine ())
+
+        match optionalTypeSec with
+            | Some(TypeSec(a)) -> addArray a
+            | _ -> ()
+        
+    // FUNC SECTION  (which we indirect through the TypeSec to show the signatures)
+
+    let AddFuncSecEntry i ti (fta:FuncType array) =
+        Add (sprintf "FuncSec[%d] => " i)
+        match ti with
+            | TypeIdx(U32(j)) when int j < fta.Length -> 
+                AddTypeSecEntry (int j) fta.[int j]
+            | _ -> Add "Error: Out of range type index"
+
+    let AddFuncSec optionalFuncSec optionalTypeSec =
+
+        Title "Funcs section"
+
+        let addArray (tia, fta) =
+            tia |> Array.iteri 
+                (fun i ti ->
+                    AddFuncSecEntry i ti fta
+                    NewLine ())
+
+        match optionalFuncSec, optionalTypeSec with
+            | Some(FuncSec(a)), Some(TypeSec(b)) -> addArray (a,b)
+            | Some(FuncSec(_)), _ -> Text "Error: Missing TypeSec but FuncSec present"
+            | _ -> ()
+        
+
+    // CODE SECTION
 
     let AddCodeSec (optionalCodeSec:CodeSec option) =
 
@@ -124,11 +196,13 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
     let AddModule theModule =
 
         AddArraySection "Custom section #1"  theModule.Custom1   
-        AddGenericSection "Types section" theModule.Types
+        AddTypeSec theModule.Types
+        // AddGenericSection "Types section" theModule.Types
         AddArraySection "Custom section #2"  theModule.Custom2   
         AddGenericSection "Imports section" theModule.Imports
         AddArraySection "Custom section #3"  theModule.Custom3   
-        AddGenericSection "Funcs section" theModule.Funcs
+        AddFuncSec theModule.Funcs theModule.Types
+        //AddGenericSection "Funcs section" theModule.Funcs
         AddArraySection "Custom section #4"  theModule.Custom4   
         AddGenericSection "Tables section" theModule.Tables
         AddArraySection "Custom section #5"  theModule.Custom5   
