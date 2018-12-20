@@ -249,6 +249,33 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             | Some(MemSec(a)) -> addArray a
             | _ -> ()
 
+    // EXPORT SECTION
+    (*
+    let AddExportSecEntry i (ti:Export) =
+        Add (sprintf "ExportSec[%d] => " i)
+        match ti with
+            | {ExportName=n; ExportDesc=d} -> 
+                Add (sprintf "%s == " n)
+                match d with
+                    | ExportFunc(FuncIdx(U32(i)))     -> AddFuncSecEntry i funcTypeArray
+                    | ExportTable(TableIdx(U32(i)))   -> AddTableSecEntry i table
+                    | ExportMemory(MemIdx(U32(i)))    -> AddMemSecEntry i
+                    | ExportGlobal(GlobalIdx(U32(i))) -> AddGlobalIdx
+
+    let AddExportSec optionalExportSec =
+
+        Title "Exports section"
+
+        let addArray (tia:Export array) =
+            tia |> Array.iteri 
+                (fun i ti ->
+                    AddExportSecEntry i ti
+                    NewLine ())
+
+        match optionalExportSec with
+            | Some(ExportSec(a)) -> addArray a
+            | _ -> ()
+            *)
     // MODULE        
 
     let AddModule theModule =
@@ -272,6 +299,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         AddGenericSection "Globals section" theModule.Globals
 
         AddArraySection "Custom section #7"  theModule.Custom7   
+        // TODO: AddExportSec theModule.Exports  // 
         AddGenericSection "Exports section" theModule.Exports
 
         AddArraySection "Custom section #8"  theModule.Custom8   
