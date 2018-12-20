@@ -74,48 +74,53 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         Add (sprintf "TypeSec[%d] = " i)
         AddFuncType ft
 
-    let AddTypeSec (optionalTypeSec:TypeSec option) =
+    let AddTypeSec tso =
 
         Title "Types section"
 
-        let addArray a =
-            a |> Array.iteri 
-                (fun i ft ->
-                    AddTypeSecEntry i ft
-                    NewLine ())
+        match tso with
 
-        match optionalTypeSec with
-            | Some(TypeSec(a)) -> addArray a
+            | Some(TypeSec(a)) -> 
+                a |> Array.iteri 
+                    (fun i ft ->
+                        AddTypeSecEntry i ft
+                        NewLine ())
+
             | _ -> ()
         
     // FUNC SECTION  (which we indirect through the TypeSec to show the signatures)
 
-    let AddFuncSecEntry i ti (fta:FuncType array) =
-        Add (sprintf "FuncSec[%d] => " i)
-        match ti with
-            | TypeIdx(U32(j)) when int j < fta.Length -> 
-                AddTypeSecEntry (int j) fta.[int j]
-            | _ -> Add "Error: Out of range type index"
+    let AddFuncSecEntry i ti tso =
 
-    let AddFuncSec optionalFuncSec optionalTypeSec =
+        Add (sprintf "FuncSec[%d] => " i)
+    
+        match ti,tso with
+
+            | TypeIdx(U32(j)), Some(TypeSec(fta)) 
+                when int j < fta.Length -> 
+                    AddTypeSecEntry (int j) fta.[int j]
+
+            | _ -> Add "Error: Out of range type index, or missing TypeSec"
+
+
+
+    let AddFuncSec fso tso =
 
         Title "Funcs section"
 
-        let addArray (tia, fta) =
-            tia |> Array.iteri 
-                (fun i ti ->
-                    AddFuncSecEntry i ti fta
+        match fso with
+
+            | Some(FuncSec(a)) -> 
+                a |> Array.iteri (fun i ti ->
+                    AddFuncSecEntry i ti tso
                     NewLine ())
 
-        match optionalFuncSec, optionalTypeSec with
-            | Some(FuncSec(a)), Some(TypeSec(b)) -> addArray (a,b)
-            | Some(FuncSec(_)), _ -> Text "Error: Missing TypeSec but FuncSec present"
             | _ -> ()
         
 
     // CODE SECTION
 
-    let AddCodeSec (optionalCodeSec:CodeSec option) =
+    let AddCodeSec (cso:CodeSec option) =
 
         // LOCALS
 
@@ -187,17 +192,17 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
         // CODE
 
-        let addCodeArray codeArray =
+        match cso with
 
-            let addCodeDetail i (c:Code) =
-                Title (sprintf "Code section [%d] of %A bytes" i (c.CodeSize))
-                addLocals c.Function.Locals
-                addBody c.Function.Body
+            | Some(CodeSec(codeArray)) ->
 
-            codeArray |> Array.iteri addCodeDetail 
+                let addCodeDetail i (c:Code) =
+                    Title (sprintf "Code section [%d] of %A bytes" i (c.CodeSize))
+                    addLocals c.Function.Locals
+                    addBody c.Function.Body
 
-        match optionalCodeSec with
-            | Some(CodeSec(codeArray)) -> addCodeArray codeArray
+                codeArray |> Array.iteri addCodeDetail 
+
             | _ -> ()
 
     // TABLE SECTION
@@ -215,14 +220,14 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
         Title "Tables section"
 
-        let addArray (tia:Table array) =
-            tia |> Array.iteri 
-                (fun i ti ->
-                    AddTableSecEntry i ti
-                    NewLine ())
-
         match optionalTableSec with
-            | Some(TableSec(a)) -> addArray a
+
+            | Some(TableSec(a)) ->
+                a |> Array.iteri 
+                    (fun i ti ->
+                        AddTableSecEntry i ti
+                        NewLine ())
+
             | _ -> ()
 
     // MEMS SECTION
@@ -239,14 +244,14 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
         Title "Mems section"
 
-        let addArray (tia:Mem array) =
-            tia |> Array.iteri 
-                (fun i ti ->
-                    AddMemSecEntry i ti
-                    NewLine ())
-
         match optionalMemSec with
-            | Some(MemSec(a)) -> addArray a
+
+            | Some(MemSec(a)) ->
+                a |> Array.iteri 
+                    (fun i ti ->
+                        AddMemSecEntry i ti
+                        NewLine ())
+
             | _ -> ()
 
     // EXPORT SECTION
@@ -276,6 +281,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             | Some(ExportSec(a)) -> addArray a
             | _ -> ()
             *)
+
     // MODULE        
 
     let AddModule theModule =
