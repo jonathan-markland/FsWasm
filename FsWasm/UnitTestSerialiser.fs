@@ -196,29 +196,38 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
     let AddModule theModule =
 
         AddArraySection "Custom section #1"  theModule.Custom1   
-        AddTypeSec theModule.Types
-        // AddGenericSection "Types section" theModule.Types
+        AddTypeSec theModule.Types  // AddGenericSection "Types section" theModule.Types
+
         AddArraySection "Custom section #2"  theModule.Custom2   
         AddGenericSection "Imports section" theModule.Imports
+
         AddArraySection "Custom section #3"  theModule.Custom3   
-        AddFuncSec theModule.Funcs theModule.Types
-        //AddGenericSection "Funcs section" theModule.Funcs
+        AddFuncSec theModule.Funcs theModule.Types //AddGenericSection "Funcs section" theModule.Funcs
+
         AddArraySection "Custom section #4"  theModule.Custom4   
         AddGenericSection "Tables section" theModule.Tables
+
         AddArraySection "Custom section #5"  theModule.Custom5   
         AddGenericSection "Mems section" theModule.Mems
+
         AddArraySection "Custom section #6"  theModule.Custom6   
         AddGenericSection "Globals section" theModule.Globals
+
         AddArraySection "Custom section #7"  theModule.Custom7   
         AddGenericSection "Exports section" theModule.Exports
+
         AddArraySection "Custom section #8"  theModule.Custom8   
         AddGenericSection "Start section" theModule.Start
+
         AddArraySection "Custom section #9"  theModule.Custom9   
         AddGenericSection "Elems section" theModule.Elems
+
         AddArraySection "Custom section #10"  theModule.Custom10  
         AddCodeSec theModule.Codes
+
         AddArraySection "Custom section #11"  theModule.Custom11  
         AddGenericSection "Data section" theModule.Datas
+
         AddArraySection "Custom section #12"  theModule.Custom12  
 
     Title ("Unit test serialisation for: " + fileName)
