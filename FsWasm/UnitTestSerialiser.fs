@@ -262,10 +262,13 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     // GLOBAL SECTION
 
-    let AddGlobalType (t:GlobalType) (e:InstructionArray) =
+    let AddGlobalType (t:GlobalType) =
         Add (PrettyMutability t.GlobalMutability)
         Add ":"
         Add (PrettyValType t.GlobalType)
+
+    let AddGlobalTypeAndInstructions (t:GlobalType) (e:InstructionArray) =
+        AddGlobalType t
         NewLine ()
         AddBody e
         NewLine ()
@@ -274,7 +277,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
     let AddGlobalSecEntry i (ti:Global) =
         Add (sprintf "GlobalSec[%d] => " i)
         match ti with
-            | {GlobalType=t; InitExpr=e} -> AddGlobalType t e
+            | {GlobalType=t; InitExpr=e} -> AddGlobalTypeAndInstructions t e
 
     let AddGlobalSec gso =
 
@@ -290,6 +293,40 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
             | _ -> ()
 
+
+    // IMPORT SECTION
+
+    let AddImportSecEntry i ti fso tso tao meo glo =
+
+        Add (sprintf "ImportSec[%d] => " i)
+        
+        match ti with
+            | {ImportModuleName=m; ImportName=n; ImportDesc=d} -> 
+                Add (sprintf "from %s import %s == " m n)
+                match d with
+
+                    | ImportFunc(TypeIdx(U32(ti))) -> 
+                        match tso with
+                            | Some(TypeSec(ts)) -> AddTypeSecEntry (int ti) ts.[(int ti)]
+                            | _ -> Add "Cannot show imported function because TypeSec is missing."
+
+                    | ImportTable(tt)  -> AddTableType tt
+                    | ImportMemory(mt) -> AddMemType mt
+                    | ImportGlobal(gt) -> AddGlobalType gt 
+
+    let AddImportSec imo fso tso tao meo glo =
+
+        Title "Imports section"
+
+        let addArray (tia:Import array) =
+            tia |> Array.iteri 
+                (fun i ti ->
+                    AddImportSecEntry i ti fso tso tao meo glo
+                    NewLine ())
+
+        match imo with
+            | Some(ImportSec(a)) -> addArray a
+            | _ -> ()
 
     // EXPORT SECTION
 
@@ -345,7 +382,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         AddTypeSec theModule.Types  // AddGenericSection "Types section" theModule.Types
 
         AddArraySection "Custom section #2"  theModule.Custom2   
-        AddGenericSection "Imports section" theModule.Imports
+        AddImportSec theModule.Imports theModule.Funcs theModule.Types theModule.Tables theModule.Mems theModule.Globals// AddGenericSection "Imports section" theModule.Imports
 
         AddArraySection "Custom section #3"  theModule.Custom3   
         AddFuncSec theModule.Funcs theModule.Types //AddGenericSection "Funcs section" theModule.Funcs
