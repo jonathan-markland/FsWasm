@@ -260,34 +260,6 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
             | _ -> ()
 
-    // EXPORT SECTION
-    (*
-    let AddExportSecEntry i (ti:Export) =
-        Add (sprintf "ExportSec[%d] => " i)
-        match ti with
-            | {ExportName=n; ExportDesc=d} -> 
-                Add (sprintf "%s == " n)
-                match d with
-                    | ExportFunc(FuncIdx(U32(i)))     -> AddFuncSecEntry i funcTypeArray
-                    | ExportTable(TableIdx(U32(i)))   -> AddTableSecEntry i table
-                    | ExportMemory(MemIdx(U32(i)))    -> AddMemSecEntry i
-                    | ExportGlobal(GlobalIdx(U32(i))) -> AddGlobalSecEntry i
-
-    let AddExportSec optionalExportSec =
-
-        Title "Exports section"
-
-        let addArray (tia:Export array) =
-            tia |> Array.iteri 
-                (fun i ti ->
-                    AddExportSecEntry i ti
-                    NewLine ())
-
-        match optionalExportSec with
-            | Some(ExportSec(a)) -> addArray a
-            | _ -> ()
-            *)
-
     // GLOBAL SECTION
 
     let AddGlobalType (t:GlobalType) (e:InstructionArray) =
@@ -319,6 +291,52 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             | _ -> ()
 
 
+    // EXPORT SECTION
+
+    let AddExportSecEntry i ti fso tso tao meo glo =
+
+        Add (sprintf "ExportSec[%d] => " i)
+        
+        match ti with
+            | {ExportName=n; ExportDesc=d} -> 
+                Add (sprintf "%s == " n)
+                match d with
+
+                    | ExportFunc(FuncIdx(U32(fi))) -> 
+                        match fso with
+                            | Some(FuncSec(fs)) -> AddFuncSecEntry (int fi) fs.[(int fi)] tso
+                            | _ -> Add "Cannot show exported function because FuncSec is missing."
+
+                    | ExportTable(TableIdx(U32(ti))) -> 
+                        match tao with
+                            | Some(TableSec(ts)) -> AddTableSecEntry (int ti) ts.[(int ti)]
+                            | _ -> Add "Cannot show exported table because TableSec is missing."
+
+                    | ExportMemory(MemIdx(U32(mi))) -> 
+                        match meo with
+                            | Some(MemSec(ms)) -> AddMemSecEntry (int mi) ms.[(int mi)]
+                            | _ -> Add "Cannot show exported memory because MemSec is missing."
+
+                    | ExportGlobal(GlobalIdx(U32(gi))) -> 
+                        match glo with
+                            | Some(GlobalSec(gs)) -> AddGlobalSecEntry (int gi) gs.[(int gi)]
+                            | _ -> Add "Cannot show exported global because GlobalSec is missing."
+
+    let AddExportSec exo fso tso tao meo glo =
+
+        Title "Exports section"
+
+        let addArray (tia:Export array) =
+            tia |> Array.iteri 
+                (fun i ti ->
+                    AddExportSecEntry i ti fso tso tao meo glo
+                    NewLine ())
+
+        match exo with
+            | Some(ExportSec(a)) -> addArray a
+            | _ -> ()
+
+
     // MODULE        
 
     let AddModule theModule =
@@ -342,8 +360,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         AddGlobalSec theModule.Globals  // AddGenericSection "Globals section" theModule.Globals
 
         AddArraySection "Custom section #7"  theModule.Custom7   
-        // TODO: AddExportSec theModule.Exports  // 
-        AddGenericSection "Exports section" theModule.Exports
+        AddExportSec theModule.Exports theModule.Funcs theModule.Types theModule.Tables theModule.Mems theModule.Globals  // AddGenericSection "Exports section" theModule.Exports
 
         AddArraySection "Custom section #8"  theModule.Custom8   
         AddGenericSection "Start section" theModule.Start
