@@ -42,6 +42,13 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         Title (sprintf "%s" sectionTitle)
         AddOptionalObject genericSection
 
+    // COMMON
+
+    let AddLimits l =
+        match l with
+            | { LimitMin=U32(m); LimitMax=None }         -> Add (sprintf "[|%d|]" m)
+            | { LimitMin=U32(a); LimitMax=Some(U32(b)) } -> Add (sprintf "[|%d..%d|]" a b)
+
     // TYPE SECTION
 
     let PrettyValType = 
@@ -193,6 +200,57 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             | Some(CodeSec(codeArray)) -> addCodeArray codeArray
             | _ -> ()
 
+    // TABLE SECTION
+
+    let AddTableType (t:TableType) =
+        Add (sprintf "%A " t.TableElementType)
+        AddLimits t.TableLimits
+
+    let AddTableSecEntry i (ti:Table) =
+        Add (sprintf "TableSec[%d] => " i)
+        match ti with
+            | {TableType=t} -> AddTableType t
+
+    let AddTableSec optionalTableSec =
+
+        Title "Tables section"
+
+        let addArray (tia:Table array) =
+            tia |> Array.iteri 
+                (fun i ti ->
+                    AddTableSecEntry i ti
+                    NewLine ())
+
+        match optionalTableSec with
+            | Some(TableSec(a)) -> addArray a
+            | _ -> ()
+
+    // MEMS SECTION
+
+    let AddMemType (t:MemoryType) =
+        AddLimits t.MemoryLimits
+
+    let AddMemSecEntry i (ti:Mem) =
+        Add (sprintf "MemSec[%d] => " i)
+        match ti with
+            | {MemType=t} -> AddMemType t
+
+    let AddMemSec optionalMemSec =
+
+        Title "Mems section"
+
+        let addArray (tia:Mem array) =
+            tia |> Array.iteri 
+                (fun i ti ->
+                    AddMemSecEntry i ti
+                    NewLine ())
+
+        match optionalMemSec with
+            | Some(MemSec(a)) -> addArray a
+            | _ -> ()
+
+    // MODULE        
+
     let AddModule theModule =
 
         AddArraySection "Custom section #1"  theModule.Custom1   
@@ -205,10 +263,10 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         AddFuncSec theModule.Funcs theModule.Types //AddGenericSection "Funcs section" theModule.Funcs
 
         AddArraySection "Custom section #4"  theModule.Custom4   
-        AddGenericSection "Tables section" theModule.Tables
+        AddTableSec theModule.Tables  // AddGenericSection "Tables section" theModule.Tables
 
         AddArraySection "Custom section #5"  theModule.Custom5   
-        AddGenericSection "Mems section" theModule.Mems
+        AddMemSec theModule.Mems  // AddGenericSection "Mems section" theModule.Mems
 
         AddArraySection "Custom section #6"  theModule.Custom6   
         AddGenericSection "Globals section" theModule.Globals
