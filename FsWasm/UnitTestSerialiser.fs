@@ -49,7 +49,10 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             | { LimitMin=U32(m); LimitMax=None }         -> Add (sprintf "[|%d|]" m)
             | { LimitMin=U32(a); LimitMax=Some(U32(b)) } -> Add (sprintf "[|%d..%d|]" a b)
 
-    // TYPE SECTION
+    let PrettyMutability =
+        function 
+        | Constant -> "const"
+        | Variable -> "var"
 
     let PrettyValType = 
         function
@@ -57,6 +60,8 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         | I64Type -> "I64"
         | F32Type -> "F32"
         | F64Type -> "F64"
+
+    // TYPE SECTION
 
     let AddValType vt =
         Add (PrettyValType vt)
@@ -118,9 +123,60 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             | _ -> ()
         
 
+    // BODY
+
+    let AddBody instructionsArray =
+
+        let mutable ip = 0
+        let mutable indent = 0
+
+        let addLine s =
+            sb.Append (sprintf "  %3d | " ip) |> ignore
+            sb.Append (new string(' ', (indent * 2))) |> ignore
+            sb.AppendLine s |> ignore
+            ip <- ip + 1
+
+        let rec addInstructions instructionsArray =
+
+            let isShortForm instruction =
+                match instruction with 
+                    | Block(_) -> false
+                    | Loop(_) -> false
+                    | If(_) -> false
+                    | IfElse(_) -> false
+                    | _ -> true
+
+            let subList opCode blockType subInstructions =
+                let blockIndex = ip
+                addLine (sprintf "%s %A" opCode blockType)
+                indent <- indent + 1
+                addInstructions subInstructions
+                // addLine (sprintf "End %s (%d)" opCode blockIndex)
+                indent <- indent - 1
+
+            let addLongForm instruction =
+                match instruction with 
+                    | Block(b,a)    -> subList "Block" b a
+                    | Loop(b,a)     -> subList "Loop" b a
+                    | If(b,a)       -> subList "If" b a
+                    | IfElse(b,i,e) -> 
+                        subList "If..." b i
+                        subList "...Else" b e
+                    | _ -> ()
+
+            let addInstruction instruction =
+                if isShortForm instruction
+                then addLine (sprintf "%A" instruction)
+                else addLongForm instruction
+
+            instructionsArray |> Array.iter addInstruction
+
+        addInstructions instructionsArray
+
+
     // CODE SECTION
 
-    let AddCodeSec (cso:CodeSec option) =
+    let AddCodeSec cso =
 
         // LOCALS
 
@@ -140,56 +196,6 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
             localsArray |> Array.iter addLocals
 
-        // BODY
-
-        let addBody instructionsArray =
-
-            let mutable ip = 0
-            let mutable indent = 0
-
-            let addLine s =
-                sb.Append (sprintf "  %3d | " ip) |> ignore
-                sb.Append (new string(' ', (indent * 2))) |> ignore
-                sb.AppendLine s |> ignore
-                ip <- ip + 1
-
-            let rec addInstructions instructionsArray =
-
-                let isShortForm instruction =
-                    match instruction with 
-                        | Block(_) -> false
-                        | Loop(_) -> false
-                        | If(_) -> false
-                        | IfElse(_) -> false
-                        | _ -> true
-
-                let subList opCode blockType subInstructions =
-                    let blockIndex = ip
-                    addLine (sprintf "%s %A" opCode blockType)
-                    indent <- indent + 1
-                    addInstructions subInstructions
-                    // addLine (sprintf "End %s (%d)" opCode blockIndex)
-                    indent <- indent - 1
-
-                let addLongForm instruction =
-                    match instruction with 
-                        | Block(b,a)    -> subList "Block" b a
-                        | Loop(b,a)     -> subList "Loop" b a
-                        | If(b,a)       -> subList "If" b a
-                        | IfElse(b,i,e) -> 
-                            subList "If..." b i
-                            subList "...Else" b e
-                        | _ -> ()
-
-                let addInstruction instruction =
-                    if isShortForm instruction
-                    then addLine (sprintf "%A" instruction)
-                    else addLongForm instruction
-
-                instructionsArray |> Array.iter addInstruction
-
-            addInstructions instructionsArray
-
         // CODE
 
         match cso with
@@ -199,7 +205,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 let addCodeDetail i (c:Code) =
                     Title (sprintf "Code section [%d] of %A bytes" i (c.CodeSize))
                     addLocals c.Function.Locals
-                    addBody c.Function.Body
+                    AddBody c.Function.Body
 
                 codeArray |> Array.iteri addCodeDetail 
 
@@ -265,7 +271,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     | ExportFunc(FuncIdx(U32(i)))     -> AddFuncSecEntry i funcTypeArray
                     | ExportTable(TableIdx(U32(i)))   -> AddTableSecEntry i table
                     | ExportMemory(MemIdx(U32(i)))    -> AddMemSecEntry i
-                    | ExportGlobal(GlobalIdx(U32(i))) -> AddGlobalIdx
+                    | ExportGlobal(GlobalIdx(U32(i))) -> AddGlobalSecEntry i
 
     let AddExportSec optionalExportSec =
 
@@ -281,6 +287,37 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             | Some(ExportSec(a)) -> addArray a
             | _ -> ()
             *)
+
+    // GLOBAL SECTION
+
+    let AddGlobalType (t:GlobalType) (e:InstructionArray) =
+        Add (PrettyMutability t.GlobalMutability)
+        Add ":"
+        Add (PrettyValType t.GlobalType)
+        NewLine ()
+        AddBody e
+        NewLine ()
+        NewLine ()
+
+    let AddGlobalSecEntry i (ti:Global) =
+        Add (sprintf "GlobalSec[%d] => " i)
+        match ti with
+            | {GlobalType=t; InitExpr=e} -> AddGlobalType t e
+
+    let AddGlobalSec gso =
+
+        Title "Globals section"
+
+        match gso with
+
+            | Some(GlobalSec(a)) ->
+                a |> Array.iteri 
+                    (fun i ti ->
+                        AddGlobalSecEntry i ti
+                        NewLine ())
+
+            | _ -> ()
+
 
     // MODULE        
 
@@ -302,7 +339,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         AddMemSec theModule.Mems  // AddGenericSection "Mems section" theModule.Mems
 
         AddArraySection "Custom section #6"  theModule.Custom6   
-        AddGenericSection "Globals section" theModule.Globals
+        AddGlobalSec theModule.Globals  // AddGenericSection "Globals section" theModule.Globals
 
         AddArraySection "Custom section #7"  theModule.Custom7   
         // TODO: AddExportSec theModule.Exports  // 
