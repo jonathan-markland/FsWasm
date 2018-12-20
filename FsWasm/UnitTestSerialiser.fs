@@ -61,6 +61,12 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         | F32Type -> "F32"
         | F64Type -> "F64"
 
+    let AddByteArray a =
+        
+        a |> Array.iteri (fun i b -> 
+            Add (sprintf "%02x " b)
+            if (i &&& 15) = 15 then Text "")
+
     // TYPE SECTION
 
     let AddValType vt =
@@ -411,6 +417,32 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                         NewLine ())
             | _ -> ()
 
+    // DATA SECTION
+
+    let AddDataSecEntry i ti =
+
+        Add (sprintf "DataSec[%d] => " i)
+        
+        match ti with
+
+            | { DataMemoryIndex=MemIdx(U32(mi)); OffsetExpr=e; InitImageBytes=imageData } ->
+                
+                Text (sprintf "Memory [%d] offset expr =" mi)
+                AddBody e
+                AddByteArray imageData
+
+    let AddDataSec eso =
+
+        Title "Data section"
+
+        match eso with
+            | Some(DataSec(a)) -> 
+                a |> Array.iteri 
+                    (fun i ti ->
+                        AddDataSecEntry i ti
+                        NewLine ())
+            | _ -> ()
+
 
     // MODULE        
 
@@ -447,7 +479,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         AddCodeSec theModule.Codes
 
         AddArraySection "Custom section #11"  theModule.Custom11  
-        AddGenericSection "Data section" theModule.Datas
+        AddDataSec theModule.Datas  // AddGenericSection "Data section" theModule.Datas
 
         AddArraySection "Custom section #12"  theModule.Custom12  
 
