@@ -1,6 +1,7 @@
 ﻿
 open System.IO
 open FsWasmLibrary.Wasm
+open FsWasmLibrary.WasmAlgorithms
 
 // Interfacing the BinaryReader:
 
@@ -559,10 +560,14 @@ let Module r =
 [<EntryPoint>]
 let main argv =
 
-    let fileName = "program (3).wasm"
+    let fileName = "program (4).wasm"
     let fileImage = File.ReadAllBytes fileName
     let r = new WasmSerialiser.BinaryReader(fileImage)
     let thisModule = r |> Module
+    let convenientTables = thisModule |> GetConvenientLookupTables
+
+    // Obtain the array that TypeIdx values really index.
+
 
     let unitTestString = UnitTestSerialiser.ModuleToUnitTestString fileName thisModule
 

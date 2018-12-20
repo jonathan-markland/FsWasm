@@ -7,6 +7,9 @@
 
   <ItemGroup>
     <Compile Include="UnitTestSerialiser.fs" />
+    <None Include="program %284%29.wasm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="program %283%29.wasm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

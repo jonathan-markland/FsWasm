@@ -22,10 +22,10 @@ module Wasm =
     type GlobalType  = { GlobalType:ValType; GlobalMutability:Mutability }
 
     type TypeIdx   = TypeIdx   of U32
-    type FuncIdx   = FuncIdx   of U32
-    type TableIdx  = TableIdx  of U32
-    type MemIdx    = MemIdx    of U32
-    type GlobalIdx = GlobalIdx of U32
+    type FuncIdx   = FuncIdx   of U32  // Indexes into any ImportFuncs first, then the FuncSec
+    type TableIdx  = TableIdx  of U32  // Indexes into any ImportTables first, then the TableSec
+    type MemIdx    = MemIdx    of U32  // Indexes into any ImportMems first, then the MemSec
+    type GlobalIdx = GlobalIdx of U32  // Indexes into any ImportGlobals first, then the GlobalSec
     type LocalIdx  = LocalIdx  of U32
     type LabelIdx  = LabelIdx  of U32
 

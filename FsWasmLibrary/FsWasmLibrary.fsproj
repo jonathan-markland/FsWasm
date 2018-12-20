@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="Wasm.fs" />
+    <Compile Include="WasmAlgorithms.fs" />
   </ItemGroup>
 
 </Project>

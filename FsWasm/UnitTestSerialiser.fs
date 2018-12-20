@@ -2,6 +2,7 @@
 
 open System.Text
 open FsWasmLibrary.Wasm
+open FsWasmLibrary
 
 let ModuleToUnitTestString (fileName:string) (m:Module) =
 
@@ -97,7 +98,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                         AddTypeSecEntry i ft
                         NewLine ())
 
-            | _ -> ()
+            | None -> ()
         
     // FUNC SECTION  (which we indirect through the TypeSec to show the signatures)
 
@@ -126,7 +127,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     AddFuncSecEntry i ti tso
                     NewLine ())
 
-            | _ -> ()
+            | None -> ()
         
 
     // BODY
@@ -215,7 +216,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
                 codeArray |> Array.iteri addCodeDetail 
 
-            | _ -> ()
+            | None -> ()
 
     // TABLE SECTION
 
@@ -240,12 +241,13 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                         AddTableSecEntry i ti
                         NewLine ())
 
-            | _ -> ()
+            | None -> ()
 
     // MEMS SECTION
 
     let AddMemType (t:MemoryType) =
         AddLimits t.MemoryLimits
+        Add " x 64KB"
 
     let AddMemSecEntry i (ti:Mem) =
         Add (sprintf "MemSec[%d] => " i)
@@ -264,7 +266,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                         AddMemSecEntry i ti
                         NewLine ())
 
-            | _ -> ()
+            | None -> ()
 
     // GLOBAL SECTION
 
@@ -297,7 +299,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                         AddGlobalSecEntry i ti
                         NewLine ())
 
-            | _ -> ()
+            | None -> ()
 
 
     // IMPORT SECTION
@@ -314,7 +316,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     | ImportFunc(TypeIdx(U32(ti))) -> 
                         match tso with
                             | Some(TypeSec(ts)) -> AddTypeSecEntry (int ti) ts.[(int ti)]
-                            | _ -> Add "Cannot show imported function because TypeSec is missing."
+                            | None -> Add "Cannot show imported function because TypeSec is missing."
 
                     | ImportTable(tt)  -> AddTableType tt
                     | ImportMemory(mt) -> AddMemType mt
@@ -330,7 +332,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     (fun i ti ->
                         AddImportSecEntry i ti fso tso tao meo glo
                         NewLine ())
-            | _ -> ()
+            | None -> ()
 
     // EXPORT SECTION
 
@@ -346,22 +348,22 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     | ExportFunc(FuncIdx(U32(fi))) -> 
                         match fso with
                             | Some(FuncSec(fs)) -> AddFuncSecEntry (int fi) fs.[(int fi)] tso
-                            | _ -> Add "Cannot show exported function because FuncSec is missing."
+                            | None -> Add "Cannot show exported function because FuncSec is missing."
 
                     | ExportTable(TableIdx(U32(ti))) -> 
                         match tao with
                             | Some(TableSec(ts)) -> AddTableSecEntry (int ti) ts.[(int ti)]
-                            | _ -> Add "Cannot show exported table because TableSec is missing."
+                            | None -> Add "Cannot show exported table because TableSec is missing."
 
                     | ExportMemory(MemIdx(U32(mi))) -> 
                         match meo with
                             | Some(MemSec(ms)) -> AddMemSecEntry (int mi) ms.[(int mi)]
-                            | _ -> Add "Cannot show exported memory because MemSec is missing."
+                            | None -> Add "Cannot show exported memory because MemSec is missing."
 
                     | ExportGlobal(GlobalIdx(U32(gi))) -> 
                         match glo with
                             | Some(GlobalSec(gs)) -> AddGlobalSecEntry (int gi) gs.[(int gi)]
-                            | _ -> Add "Cannot show exported global because GlobalSec is missing."
+                            | None -> Add "Cannot show exported global because GlobalSec is missing."
 
     let AddExportSec exo fso tso tao meo glo =
 
@@ -373,7 +375,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     (fun i ti ->
                         AddExportSecEntry i ti fso tso tao meo glo
                         NewLine ())
-            | _ -> ()
+            | None -> ()
 
     // START
 
@@ -385,8 +387,8 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             | Some(StartSec({ StartFuncIdx=FuncIdx(U32(sfi)) })) -> 
                 match tso with
                     | Some(TypeSec(ts)) -> AddTypeSecEntry (int sfi) ts.[(int sfi)]
-                    | _ -> Add "Cannot show start function because TypeSec is missing."
-            | _ -> ()
+                    | None -> Add "Cannot show start function because TypeSec is missing."
+            | None -> ()
 
     // ELEM SECTION
 
@@ -415,7 +417,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     (fun i ti ->
                         AddElemSecEntry i ti
                         NewLine ())
-            | _ -> ()
+            | None -> ()
 
     // DATA SECTION
 
@@ -441,12 +443,14 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     (fun i ti ->
                         AddDataSecEntry i ti
                         NewLine ())
-            | _ -> ()
+            | None -> ()
 
 
     // MODULE        
 
     let AddModule theModule =
+
+        let convenientTables = theModule |> WasmAlgorithms.GetConvenientLookupTables  // TODO: use to fix references
 
         AddArraySection "Custom section #1"  theModule.Custom1   
         AddTypeSec theModule.Types  // AddGenericSection "Types section" theModule.Types
