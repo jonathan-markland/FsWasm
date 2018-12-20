@@ -318,14 +318,12 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
         Title "Imports section"
 
-        let addArray (tia:Import array) =
-            tia |> Array.iteri 
-                (fun i ti ->
-                    AddImportSecEntry i ti fso tso tao meo glo
-                    NewLine ())
-
         match imo with
-            | Some(ImportSec(a)) -> addArray a
+            | Some(ImportSec(a)) ->
+                a |> Array.iteri 
+                    (fun i ti ->
+                        AddImportSecEntry i ti fso tso tao meo glo
+                        NewLine ())
             | _ -> ()
 
     // EXPORT SECTION
@@ -363,14 +361,54 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
         Title "Exports section"
 
-        let addArray (tia:Export array) =
-            tia |> Array.iteri 
-                (fun i ti ->
-                    AddExportSecEntry i ti fso tso tao meo glo
-                    NewLine ())
-
         match exo with
-            | Some(ExportSec(a)) -> addArray a
+            | Some(ExportSec(a)) -> 
+                a |> Array.iteri 
+                    (fun i ti ->
+                        AddExportSecEntry i ti fso tso tao meo glo
+                        NewLine ())
+            | _ -> ()
+
+    // START
+
+    let AddStartSec sto tso =
+
+        Title "Start section"
+
+        match sto with
+            | Some(StartSec({ StartFuncIdx=FuncIdx(U32(sfi)) })) -> 
+                match tso with
+                    | Some(TypeSec(ts)) -> AddTypeSecEntry (int sfi) ts.[(int sfi)]
+                    | _ -> Add "Cannot show start function because TypeSec is missing."
+            | _ -> ()
+
+    // ELEM SECTION
+
+    let AddElemSecEntry i ti =
+
+        Add (sprintf "ElemSec[%d] => " i)
+        
+        match ti with
+
+            | { TableIndex=TableIdx(U32(ti)); OffsetExpr=e; Init=fa } ->
+                
+                Text (sprintf "In table %d, expr =" ti)
+                AddBody e
+                fa |> Array.iteri (fun i fidx -> 
+                        match fidx with 
+                            | FuncIdx(U32(fi)) -> 
+                                Add (sprintf "Table[%d][expr+%d] = FuncSec[%d]" ti i fi))
+
+    let AddElemSec eso =
+
+        Title "Elems section"
+
+        match eso with
+            | Some(ElemSec(a)) -> 
+                a |> Array.iteri 
+                    (fun i ti ->
+                        AddElemSecEntry i ti
+                        NewLine ())
             | _ -> ()
 
 
@@ -400,10 +438,10 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         AddExportSec theModule.Exports theModule.Funcs theModule.Types theModule.Tables theModule.Mems theModule.Globals  // AddGenericSection "Exports section" theModule.Exports
 
         AddArraySection "Custom section #8"  theModule.Custom8   
-        AddGenericSection "Start section" theModule.Start
+        AddStartSec theModule.Start theModule.Types  // AddGenericSection "Start section" theModule.Start
 
         AddArraySection "Custom section #9"  theModule.Custom9   
-        AddGenericSection "Elems section" theModule.Elems
+        AddElemSec theModule.Elems  // AddGenericSection "Elems section" theModule.Elems
 
         AddArraySection "Custom section #10"  theModule.Custom10  
         AddCodeSec theModule.Codes
