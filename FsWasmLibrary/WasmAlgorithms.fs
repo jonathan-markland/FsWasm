@@ -17,81 +17,49 @@ module WasmAlgorithms =
 
         let typeIdxArray = 
 
-            let a1 = 
-                match thisModule.Imports with
-                    | None -> [||]
-                    | Some(ImportSec(importArray)) ->
-                        importArray |> Array.choose (fun thisImport -> 
-                            match thisImport with
-                                | {ImportDesc=ImportFunc(x)} -> Some(x)
-                                | _ -> None)
+            let importedFuncs = 
+                thisModule.Imports |> Array.choose (fun thisImport -> 
+                    match thisImport with
+                        | {ImportDesc=ImportFunc(x)} -> Some(x)
+                        | _ -> None)
 
-            let a2 = 
-                match thisModule.Funcs with
-                    | None -> [||]
-                    | Some(FuncSec(xs)) -> xs
-
-            Array.append a1 a2
+            Array.append importedFuncs thisModule.Funcs
 
         // Tables
 
         let tableArray = 
 
-            let a1 = 
-                match thisModule.Imports with
-                    | None -> [||]
-                    | Some(ImportSec(importArray)) ->
-                        importArray |> Array.choose (fun thisImport -> 
-                            match thisImport with
-                                | {ImportDesc=ImportTable(x)} -> Some({TableType=x}) // TODO: didn't want this final re-wrapping
-                                | _ -> None)
+            let importedTables = 
+                thisModule.Imports |> Array.choose (fun thisImport -> 
+                    match thisImport with
+                        | {ImportDesc=ImportTable(x)} -> Some({TableType=x}) // TODO: didn't want this final re-wrapping
+                        | _ -> None)
 
-            let a2 = 
-                match thisModule.Tables with
-                    | None -> [||]
-                    | Some(TableSec(xs)) -> xs
-
-            Array.append a1 a2
+            Array.append importedTables thisModule.Tables
 
         // Memory
 
         let memoryArray = 
 
-            let a1 = 
-                match thisModule.Imports with
-                    | None -> [||]
-                    | Some(ImportSec(importArray)) ->
-                        importArray |> Array.choose (fun thisImport -> 
-                            match thisImport with
-                                | {ImportDesc=ImportMemory(x)} -> Some({MemType=x}) // TODO: didn't want this final re-wrapping
-                                | _ -> None)
+            let importedMemory = 
+                thisModule.Imports |> Array.choose (fun thisImport -> 
+                    match thisImport with
+                        | {ImportDesc=ImportMemory(x)} -> Some({MemType=x}) // TODO: didn't want this final re-wrapping
+                        | _ -> None)
 
-            let a2 = 
-                match thisModule.Mems with
-                    | None -> [||]
-                    | Some(MemSec(xs)) -> xs
-
-            Array.append a1 a2
+            Array.append importedMemory thisModule.Mems
 
         // Global
 
         let globalArray = 
 
-            let a1 = 
-                match thisModule.Imports with
-                    | None -> [||]
-                    | Some(ImportSec(importArray)) ->
-                        importArray |> Array.choose (fun thisImport -> 
-                            match thisImport with
-                                | {ImportDesc=ImportGlobal(x)} -> Some({GlobalType=x; InitExpr=[||]}) // TODO: didn't want this final re-wrapping
-                                | _ -> None)
+            let importedGlobals = 
+                thisModule.Imports |> Array.choose (fun thisImport -> 
+                    match thisImport with
+                        | {ImportDesc=ImportGlobal(x)} -> Some({GlobalType=x; InitExpr=[||]}) // TODO: didn't want this final re-wrapping
+                        | _ -> None)
 
-            let a2 = 
-                match thisModule.Globals with
-                    | None -> [||]
-                    | Some(GlobalSec(xs)) -> xs
-
-            Array.append a1 a2
+            Array.append importedGlobals thisModule.Globals
 
         // Return the above:
 

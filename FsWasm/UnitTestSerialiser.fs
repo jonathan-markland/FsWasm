@@ -86,48 +86,28 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         Add (sprintf "TypeSec[%d] = " i)
         AddFuncType ft
 
-    let AddTypeSec tso =
-
+    let AddTypeSec ts =
         Title "Types section"
-
-        match tso with
-
-            | Some(TypeSec(a)) -> 
-                a |> Array.iteri 
-                    (fun i ft ->
-                        AddTypeSecEntry i ft
-                        NewLine ())
-
-            | None -> ()
+        ts |> Array.iteri 
+            (fun i ft ->
+                AddTypeSecEntry i ft
+                NewLine ())
         
     // FUNC SECTION  (which we indirect through the TypeSec to show the signatures)
 
-    let AddFuncSecEntry i ti tso =
-
+    let AddFuncSecEntry i ti (ts:FuncType[]) =
         Add (sprintf "FuncSec[%d] => " i)
-    
-        match ti,tso with
-
-            | TypeIdx(U32(j)), Some(TypeSec(fta)) 
-                when int j < fta.Length -> 
-                    AddTypeSecEntry (int j) fta.[int j]
-
+        match ti with
+            | TypeIdx(U32(j))
+                when int j < ts.Length -> 
+                    AddTypeSecEntry (int j) ts.[int j]
             | _ -> Add "Error: Out of range type index, or missing TypeSec"
 
-
-
-    let AddFuncSec fso tso =
-
+    let AddFuncSec fs ts =
         Title "Funcs section"
-
-        match fso with
-
-            | Some(FuncSec(a)) -> 
-                a |> Array.iteri (fun i ti ->
-                    AddFuncSecEntry i ti tso
-                    NewLine ())
-
-            | None -> ()
+        fs |> Array.iteri (fun i ti ->
+            AddFuncSecEntry i ti ts
+            NewLine ())
         
 
     // BODY
@@ -205,18 +185,12 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
         // CODE
 
-        match cso with
+        let addCodeDetail i (c:Code) =
+            Title (sprintf "Code section [%d] of %A bytes" i (c.CodeSize))
+            addLocals c.Function.Locals
+            AddBody c.Function.Body
 
-            | Some(CodeSec(codeArray)) ->
-
-                let addCodeDetail i (c:Code) =
-                    Title (sprintf "Code section [%d] of %A bytes" i (c.CodeSize))
-                    addLocals c.Function.Locals
-                    AddBody c.Function.Body
-
-                codeArray |> Array.iteri addCodeDetail 
-
-            | None -> ()
+        cso |> Array.iteri addCodeDetail 
 
     // TABLE SECTION
 
@@ -224,24 +198,17 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         Add (sprintf "%A " t.TableElementType)
         AddLimits t.TableLimits
 
-    let AddTableSecEntry i (ti:Table) =
+    let AddTableSecEntry i (thisTable:Table) =
         Add (sprintf "TableSec[%d] => " i)
-        match ti with
+        match thisTable with
             | {TableType=t} -> AddTableType t
 
-    let AddTableSec optionalTableSec =
-
+    let AddTableSec tables =
         Title "Tables section"
-
-        match optionalTableSec with
-
-            | Some(TableSec(a)) ->
-                a |> Array.iteri 
-                    (fun i ti ->
-                        AddTableSecEntry i ti
-                        NewLine ())
-
-            | None -> ()
+        tables |> Array.iteri 
+            (fun i ti ->
+                AddTableSecEntry i ti
+                NewLine ())
 
     // MEMS SECTION
 
@@ -249,24 +216,17 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         AddLimits t.MemoryLimits
         Add " x 64KB"
 
-    let AddMemSecEntry i (ti:Mem) =
+    let AddMemSecEntry i (thisMem:Mem) =
         Add (sprintf "MemSec[%d] => " i)
-        match ti with
+        match thisMem with
             | {MemType=t} -> AddMemType t
 
-    let AddMemSec optionalMemSec =
-
+    let AddMemSec mems =
         Title "Mems section"
-
-        match optionalMemSec with
-
-            | Some(MemSec(a)) ->
-                a |> Array.iteri 
-                    (fun i ti ->
-                        AddMemSecEntry i ti
-                        NewLine ())
-
-            | None -> ()
+        mems |> Array.iteri 
+            (fun i ti ->
+                AddMemSecEntry i ti
+                NewLine ())
 
     // GLOBAL SECTION
 
@@ -282,168 +242,104 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         NewLine ()
         NewLine ()
 
-    let AddGlobalSecEntry i (ti:Global) =
+    let AddGlobalSecEntry i (thisGlobal:Global) =
         Add (sprintf "GlobalSec[%d] => " i)
-        match ti with
+        match thisGlobal with
             | {GlobalType=t; InitExpr=e} -> AddGlobalTypeAndInstructions t e
 
-    let AddGlobalSec gso =
-
+    let AddGlobalSec globals =
         Title "Globals section"
-
-        match gso with
-
-            | Some(GlobalSec(a)) ->
-                a |> Array.iteri 
-                    (fun i ti ->
-                        AddGlobalSecEntry i ti
-                        NewLine ())
-
-            | None -> ()
+        globals |> Array.iteri 
+            (fun i thisGlobal ->
+                AddGlobalSecEntry i thisGlobal
+                NewLine ())
 
 
     // IMPORT SECTION
 
-    let AddImportSecEntry i ti fso tso tao meo glo =
-
+    let AddImportSecEntry i thisImport (types:FuncType[]) =
         Add (sprintf "ImportSec[%d] => " i)
-        
-        match ti with
+        match thisImport with
             | {ImportModuleName=m; ImportName=n; ImportDesc=d} -> 
                 Add (sprintf "from %s import %s == " m n)
                 match d with
-
-                    | ImportFunc(TypeIdx(U32(ti))) -> 
-                        match tso with
-                            | Some(TypeSec(ts)) -> AddTypeSecEntry (int ti) ts.[(int ti)]
-                            | None -> Add "Cannot show imported function because TypeSec is missing."
-
+                    | ImportFunc(TypeIdx(U32(ti))) -> AddTypeSecEntry (int ti) types.[(int ti)]
                     | ImportTable(tt)  -> AddTableType tt
                     | ImportMemory(mt) -> AddMemType mt
                     | ImportGlobal(gt) -> AddGlobalType gt 
 
-    let AddImportSec imo fso tso tao meo glo =
-
+    let AddImportSec imports types =
         Title "Imports section"
-
-        match imo with
-            | Some(ImportSec(a)) ->
-                a |> Array.iteri 
-                    (fun i ti ->
-                        AddImportSecEntry i ti fso tso tao meo glo
-                        NewLine ())
-            | None -> ()
+        imports |> Array.iteri 
+            (fun i thisImport ->
+                AddImportSecEntry i thisImport types
+                NewLine ())
 
     // EXPORT SECTION
 
-    let AddExportSecEntry i ti fso tso tao meo glo =
-
+    let AddExportSecEntry i ti (functions:TypeIdx[]) (types:FuncType[]) (tables:Table[]) (mems:Mem[]) (globals:Global[]) =
         Add (sprintf "ExportSec[%d] => " i)
-        
         match ti with
             | {ExportName=n; ExportDesc=d} -> 
                 Add (sprintf "%s == " n)
                 match d with
+                    | ExportFunc(FuncIdx(U32(fi)))     -> AddFuncSecEntry   (int fi) functions.[(int fi)] types
+                    | ExportTable(TableIdx(U32(ti)))   -> AddTableSecEntry  (int ti) tables.[(int ti)]
+                    | ExportMemory(MemIdx(U32(mi)))    -> AddMemSecEntry    (int mi) mems.[(int mi)]
+                    | ExportGlobal(GlobalIdx(U32(gi))) -> AddGlobalSecEntry (int gi) globals.[(int gi)]
 
-                    | ExportFunc(FuncIdx(U32(fi))) -> 
-                        match fso with
-                            | Some(FuncSec(fs)) -> AddFuncSecEntry (int fi) fs.[(int fi)] tso
-                            | None -> Add "Cannot show exported function because FuncSec is missing."
-
-                    | ExportTable(TableIdx(U32(ti))) -> 
-                        match tao with
-                            | Some(TableSec(ts)) -> AddTableSecEntry (int ti) ts.[(int ti)]
-                            | None -> Add "Cannot show exported table because TableSec is missing."
-
-                    | ExportMemory(MemIdx(U32(mi))) -> 
-                        match meo with
-                            | Some(MemSec(ms)) -> AddMemSecEntry (int mi) ms.[(int mi)]
-                            | None -> Add "Cannot show exported memory because MemSec is missing."
-
-                    | ExportGlobal(GlobalIdx(U32(gi))) -> 
-                        match glo with
-                            | Some(GlobalSec(gs)) -> AddGlobalSecEntry (int gi) gs.[(int gi)]
-                            | None -> Add "Cannot show exported global because GlobalSec is missing."
-
-    let AddExportSec exo fso tso tao meo glo =
-
+    let AddExportSec exports functions types tables mems globals =
         Title "Exports section"
-
-        match exo with
-            | Some(ExportSec(a)) -> 
-                a |> Array.iteri 
-                    (fun i ti ->
-                        AddExportSecEntry i ti fso tso tao meo glo
-                        NewLine ())
-            | None -> ()
+        exports |> Array.iteri 
+            (fun i ti ->
+                AddExportSecEntry i ti functions types tables mems globals
+                NewLine ())
 
     // START
 
-    let AddStartSec sto tso =
-
+    let AddStartSec sto (types:FuncType[]) =
         Title "Start section"
-
         match sto with
-            | Some(StartSec({ StartFuncIdx=FuncIdx(U32(sfi)) })) -> 
-                match tso with
-                    | Some(TypeSec(ts)) -> AddTypeSecEntry (int sfi) ts.[(int sfi)]
-                    | None -> Add "Cannot show start function because TypeSec is missing."
+            | Some({ StartFuncIdx=FuncIdx(U32(sfi)) }) -> 
+                AddTypeSecEntry (int sfi) types.[(int sfi)]
             | None -> ()
 
     // ELEM SECTION
 
-    let AddElemSecEntry i ti =
-
+    let AddElemSecEntry i thisElem =
         Add (sprintf "ElemSec[%d] => " i)
-        
-        match ti with
-
+        match thisElem with
             | { TableIndex=TableIdx(U32(ti)); OffsetExpr=e; Init=fa } ->
-                
                 Text (sprintf "In table %d, expr =" ti)
                 AddBody e
                 fa |> Array.iteri (fun i fidx -> 
-                        match fidx with 
-                            | FuncIdx(U32(fi)) -> 
-                                Add (sprintf "Table[%d][expr+%d] = FuncSec[%d]" ti i fi))
+                    match fidx with 
+                        | FuncIdx(U32(fi)) -> 
+                            Add (sprintf "Table[%d][expr+%d] = FuncSec[%d]" ti i fi))
 
-    let AddElemSec eso =
-
+    let AddElemSec elems =
         Title "Elems section"
-
-        match eso with
-            | Some(ElemSec(a)) -> 
-                a |> Array.iteri 
-                    (fun i ti ->
-                        AddElemSecEntry i ti
-                        NewLine ())
-            | None -> ()
+        elems |> Array.iteri 
+            (fun i thisElem ->
+                AddElemSecEntry i thisElem
+                NewLine ())
 
     // DATA SECTION
 
-    let AddDataSecEntry i ti =
-
+    let AddDataSecEntry i thisData =
         Add (sprintf "DataSec[%d] => " i)
-        
-        match ti with
-
+        match thisData with
             | { DataMemoryIndex=MemIdx(U32(mi)); OffsetExpr=e; InitImageBytes=imageData } ->
-                
                 Text (sprintf "Memory [%d] offset expr =" mi)
                 AddBody e
                 AddByteArray imageData
 
-    let AddDataSec eso =
-
+    let AddDataSec datas =
         Title "Data section"
-
-        match eso with
-            | Some(DataSec(a)) -> 
-                a |> Array.iteri 
-                    (fun i ti ->
-                        AddDataSecEntry i ti
-                        NewLine ())
-            | None -> ()
+        datas |> Array.iteri 
+            (fun i thisData ->
+                AddDataSecEntry i thisData
+                NewLine ())
 
 
     // MODULE        
@@ -453,37 +349,37 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         let convenientTables = theModule |> WasmAlgorithms.GetConvenientLookupTables  // TODO: use to fix references
 
         AddArraySection "Custom section #1"  theModule.Custom1   
-        AddTypeSec theModule.Types  // AddGenericSection "Types section" theModule.Types
+        AddTypeSec theModule.Types
 
         AddArraySection "Custom section #2"  theModule.Custom2   
-        AddImportSec theModule.Imports theModule.Funcs theModule.Types theModule.Tables theModule.Mems theModule.Globals// AddGenericSection "Imports section" theModule.Imports
+        AddImportSec theModule.Imports theModule.Types
 
         AddArraySection "Custom section #3"  theModule.Custom3   
-        AddFuncSec theModule.Funcs theModule.Types //AddGenericSection "Funcs section" theModule.Funcs
+        AddFuncSec theModule.Funcs theModule.Types
 
         AddArraySection "Custom section #4"  theModule.Custom4   
-        AddTableSec theModule.Tables  // AddGenericSection "Tables section" theModule.Tables
+        AddTableSec theModule.Tables
 
         AddArraySection "Custom section #5"  theModule.Custom5   
-        AddMemSec theModule.Mems  // AddGenericSection "Mems section" theModule.Mems
+        AddMemSec theModule.Mems
 
         AddArraySection "Custom section #6"  theModule.Custom6   
-        AddGlobalSec theModule.Globals  // AddGenericSection "Globals section" theModule.Globals
+        AddGlobalSec theModule.Globals
 
         AddArraySection "Custom section #7"  theModule.Custom7   
-        AddExportSec theModule.Exports theModule.Funcs theModule.Types theModule.Tables theModule.Mems theModule.Globals  // AddGenericSection "Exports section" theModule.Exports
+        AddExportSec theModule.Exports theModule.Funcs theModule.Types theModule.Tables theModule.Mems theModule.Globals
 
         AddArraySection "Custom section #8"  theModule.Custom8   
-        AddStartSec theModule.Start theModule.Types  // AddGenericSection "Start section" theModule.Start
+        AddStartSec theModule.Start theModule.Types
 
         AddArraySection "Custom section #9"  theModule.Custom9   
-        AddElemSec theModule.Elems  // AddGenericSection "Elems section" theModule.Elems
+        AddElemSec theModule.Elems
 
         AddArraySection "Custom section #10"  theModule.Custom10  
         AddCodeSec theModule.Codes
 
         AddArraySection "Custom section #11"  theModule.Custom11  
-        AddDataSec theModule.Datas  // AddGenericSection "Data section" theModule.Datas
+        AddDataSec theModule.Datas
 
         AddArraySection "Custom section #12"  theModule.Custom12  
 

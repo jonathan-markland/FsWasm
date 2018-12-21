@@ -261,18 +261,18 @@ module Wasm =
     type Code   = { CodeSize:U32; Function:Func }
     type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:InstructionArray; InitImageBytes:byte array }
 
-    type CustomSec = CustomSec of Custom
-    type TypeSec   = TypeSec   of FuncType array
-    type ImportSec = ImportSec of Import array
-    type FuncSec   = FuncSec   of TypeIdx array
-    type TableSec  = TableSec  of Table array
-    type MemSec    = MemSec    of Mem array
-    type GlobalSec = GlobalSec of Global array
-    type ExportSec = ExportSec of Export array
-    type StartSec  = StartSec  of Start
-    type ElemSec   = ElemSec   of Elem array
-    type CodeSec   = CodeSec   of Code array
-    type DataSec   = DataSec   of Data array
+    // type CustomSec = CustomSec of Custom
+    // type TypeSec   = TypeSec   of FuncType array
+    // type ImportSec = ImportSec of Import array
+    // type FuncSec   = FuncSec   of TypeIdx array
+    // type TableSec  = TableSec  of Table array
+    // type MemSec    = MemSec    of Mem array
+    // type GlobalSec = GlobalSec of Global array
+    // type ExportSec = ExportSec of Export array
+    // type StartSec  = StartSec  of Start
+    // type ElemSec   = ElemSec   of Elem array
+    // type CodeSec   = CodeSec   of Code array
+    // type DataSec   = DataSec   of Data array
 
     type Magic   = U32
     type Version = U32
@@ -284,17 +284,17 @@ module Wasm =
         // following allows these to be preserved
         // if the file is saved out:
 
-        Custom1:  CustomSec[]; Types:TypeSec option;
-        Custom2:  CustomSec[]; Imports:ImportSec option;
-        Custom3:  CustomSec[]; Funcs:FuncSec option;
-        Custom4:  CustomSec[]; Tables:TableSec option;
-        Custom5:  CustomSec[]; Mems:MemSec option;
-        Custom6:  CustomSec[]; Globals:GlobalSec option;
-        Custom7:  CustomSec[]; Exports:ExportSec option;
-        Custom8:  CustomSec[]; Start:StartSec option;
-        Custom9:  CustomSec[]; Elems:ElemSec option;
-        Custom10: CustomSec[]; Codes:CodeSec option;
-        Custom11: CustomSec[]; Datas:DataSec option;
-        Custom12: CustomSec[] }
+        Custom1:  Custom[]; Types:FuncType array;
+        Custom2:  Custom[]; Imports:Import array;
+        Custom3:  Custom[]; Funcs:TypeIdx array;
+        Custom4:  Custom[]; Tables:Table array;
+        Custom5:  Custom[]; Mems:Mem array;
+        Custom6:  Custom[]; Globals:Global array;
+        Custom7:  Custom[]; Exports:Export array;
+        Custom8:  Custom[]; Start:Start option;
+        Custom9:  Custom[]; Elems:Elem array;
+        Custom10: Custom[]; Codes:Code array;
+        Custom11: Custom[]; Datas:Data array;
+        Custom12: Custom[] }
 
         

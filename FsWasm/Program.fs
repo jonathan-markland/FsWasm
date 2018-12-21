@@ -459,30 +459,43 @@ let Data r =
 
 // Read Wasm Sections
 
-let CustomSec r = 
+let CustomSec r =
     let s = r |> NameString
     let b = r |> Bytes
-    CustomSec({ Name=s; Data=b })
+    { Name=s; Data=b }
 
-let TypeSec     r = TypeSec(r |> Vector FuncType)
-let ImportSec   r = ImportSec(r |> Vector Import)
-let FunctionSec r = FuncSec(r |> Vector TypeIdx)
-let TableSec    r = TableSec(r |> Vector Table)
-let MemSec      r = MemSec(r |> Vector Mem)
-let GlobalSec   r = GlobalSec(r |> Vector Global)
-let ExportSec   r = ExportSec(r |> Vector Export)
-let CodeSec     r = CodeSec(r |> Vector Code)
+let TypeSec     r = r |> Vector FuncType
+let ImportSec   r = r |> Vector Import
+let FunctionSec r = r |> Vector TypeIdx
+let TableSec    r = r |> Vector Table
+let MemSec      r = r |> Vector Mem
+let GlobalSec   r = r |> Vector Global
+let ExportSec   r = r |> Vector Export
+let CodeSec     r = r |> Vector Code
 
 let StartSec    r = 
     let i = r |> FuncIdx
-    StartSec({ StartFuncIdx=i })
+    { StartFuncIdx=i }
 
-let ElementSec  r = ElemSec(r |> Vector Element)
-let DataSec     r = DataSec(r |> Vector Data)
+let ElementSec  r = r |> Vector Element
+let DataSec     r = r |> Vector Data
 
 // Read section
 
-let TryReadSpecificNumberedSection sectionReader codeOfRequiredSection r =
+let TryReadSpecificNumberedSection (sectionReader:WasmSerialiser.BinaryReader -> 'section[]) codeOfRequiredSection r : 'section[] =
+    match EOF r with
+        | true -> [||]
+        | false ->
+            let backtrackPos = r.ReadOffset
+            let thisHeader = r |> SectionHeader
+            match thisHeader with
+                | (n, _) when n = byte codeOfRequiredSection -> 
+                    r |> sectionReader
+                | _ -> 
+                    r.ReadOffset <- backtrackPos
+                    [||]
+
+let TryReadSpecificNumberedSectionOption sectionReader codeOfRequiredSection r =
     match EOF r with
         | true -> None
         | false ->
@@ -496,7 +509,7 @@ let TryReadSpecificNumberedSection sectionReader codeOfRequiredSection r =
                     None
 
 let OptionalCustomSec r = 
-    r |> TryReadSpecificNumberedSection CustomSec 0
+    r |> TryReadSpecificNumberedSectionOption CustomSec 0
 
 let CustomSecArray r =
     r |> MakeArrayWhileSome OptionalCustomSec
@@ -504,6 +517,11 @@ let CustomSecArray r =
 let CustomSecThenTrySpecificSection sectionReader codeOfRequiredSection r =
     let optionalCustomSecArray = r |> CustomSecArray
     let optionalSection = r |> TryReadSpecificNumberedSection sectionReader codeOfRequiredSection
+    (optionalCustomSecArray, optionalSection)
+
+let CustomSecThenTrySpecificSectionOption sectionReader codeOfRequiredSection r =
+    let optionalCustomSecArray = r |> CustomSecArray
+    let optionalSection = r |> TryReadSpecificNumberedSectionOption sectionReader codeOfRequiredSection
     (optionalCustomSecArray, optionalSection)
 
 // Read module
@@ -533,7 +551,7 @@ let Module r =
     let sec5  = r |> CustomSecThenTrySpecificSection MemSec 5
     let sec6  = r |> CustomSecThenTrySpecificSection GlobalSec 6
     let sec7  = r |> CustomSecThenTrySpecificSection ExportSec 7
-    let sec8  = r |> CustomSecThenTrySpecificSection StartSec 8
+    let sec8  = r |> CustomSecThenTrySpecificSectionOption StartSec 8
     let sec9  = r |> CustomSecThenTrySpecificSection ElementSec 9
     let sec10 = r |> CustomSecThenTrySpecificSection CodeSec 10
     let sec11 = r |> CustomSecThenTrySpecificSection DataSec 11
