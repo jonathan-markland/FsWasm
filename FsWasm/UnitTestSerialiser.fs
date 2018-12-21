@@ -45,6 +45,14 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     // COMMON
 
+    let SingleLineFormatted obj =
+        (sprintf "%A" obj)
+            .Replace("\r", " ")
+            .Replace("\n", " ")
+            .Replace("  ", " ")
+            .Replace("  ", " ")   // TODO: hackish
+            .Replace("  ", " ")
+
     let AddLimits l =
         match l with
             | { LimitMin=U32(m); LimitMax=None }         -> Add (sprintf "[|%d|]" m)
@@ -62,9 +70,10 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         | F32Type -> "F32"
         | F64Type -> "F64"
 
-    let AddByteArray a =
+    let AddByteArray a leftSideString =
         
         a |> Array.iteri (fun i b -> 
+            if (i &&& 15) = 0 then Add leftSideString
             Add (sprintf "%02x " b)
             if (i &&& 15) = 15 then Text "")
 
@@ -82,31 +91,31 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         Add "-> "
         AddValTypes ft.ReturnTypes
 
-    let AddTypeSecEntry i ft =
+    let AddTypeSecEntry i (types:FuncType[]) =
         Add (sprintf "TypeSec[%d] = " i)
-        AddFuncType ft
+        if i >= types.Length then Add "Error: TypeSec index out of range"
+        else AddFuncType types.[i]
 
-    let AddTypeSec ts =
+    let AddTypeSec types =
         Title "Types section"
-        ts |> Array.iteri 
-            (fun i ft ->
-                AddTypeSecEntry i ft
+        types |> Array.iteri 
+            (fun i _ ->
+                AddTypeSecEntry i types
                 NewLine ())
         
     // FUNC SECTION  (which we indirect through the TypeSec to show the signatures)
 
-    let AddFuncSecEntry i ti (ts:FuncType[]) =
+    let AddFuncSecEntry i (funcs:TypeIdx[]) (types:FuncType[]) =
         Add (sprintf "FuncSec[%d] => " i)
-        match ti with
-            | TypeIdx(U32(j))
-                when int j < ts.Length -> 
-                    AddTypeSecEntry (int j) ts.[int j]
-            | _ -> Add "Error: Out of range type index, or missing TypeSec"
+        if i >= funcs.Length then Add "Error: Out of range FuncSec index"
+        else 
+            match funcs.[i] with
+                | TypeIdx(U32(j)) -> AddTypeSecEntry (int j) types
 
-    let AddFuncSec fs ts =
+    let AddFuncSec funcs types =
         Title "Funcs section"
-        fs |> Array.iteri (fun i ti ->
-            AddFuncSecEntry i ti ts
+        funcs |> Array.iteri (fun i _ ->
+            AddFuncSecEntry i funcs types
             NewLine ())
         
 
@@ -153,7 +162,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
             let addInstruction instruction =
                 if isShortForm instruction
-                then addLine (sprintf "%A" instruction)
+                then addLine (SingleLineFormatted instruction)
                 else addLongForm instruction
 
             instructionsArray |> Array.iter addInstruction
@@ -173,13 +182,14 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
             let rec addIndividualLocal repeatCounter t =
                 if repeatCounter >= 1u then
-                    Text (sprintf "Local #%d %A" localIndex t)
+                    Text (sprintf "        Local[%d] %A" localIndex t)
                     localIndex <- localIndex + 1
                     addIndividualLocal (repeatCounter - 1u) t
 
             let addLocals (locals:Locals) =
                 match locals.NumRepeats with
                     | U32(repeatCounter) -> addIndividualLocal repeatCounter locals.LocalsType
+                NewLine ()
 
             localsArray |> Array.iter addLocals
 
@@ -198,16 +208,18 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         Add (sprintf "%A " t.TableElementType)
         AddLimits t.TableLimits
 
-    let AddTableSecEntry i (thisTable:Table) =
+    let AddTableSecEntry i (tables:Table[]) =
         Add (sprintf "TableSec[%d] => " i)
-        match thisTable with
-            | {TableType=t} -> AddTableType t
+        if i >= tables.Length then Add "Error: Tablesec index out of range"
+        else
+            match tables.[i] with
+                | {TableType=t} -> AddTableType t
 
     let AddTableSec tables =
         Title "Tables section"
         tables |> Array.iteri 
-            (fun i ti ->
-                AddTableSecEntry i ti
+            (fun i _ ->
+                AddTableSecEntry i tables
                 NewLine ())
 
     // MEMS SECTION
@@ -216,16 +228,18 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         AddLimits t.MemoryLimits
         Add " x 64KB"
 
-    let AddMemSecEntry i (thisMem:Mem) =
+    let AddMemSecEntry i (mems:Mem[]) =
         Add (sprintf "MemSec[%d] => " i)
-        match thisMem with
-            | {MemType=t} -> AddMemType t
+        if i >= mems.Length then Add "Error: MemSec index out of range"
+        else
+            match mems.[i] with
+                | {MemType=t} -> AddMemType t
 
     let AddMemSec mems =
         Title "Mems section"
         mems |> Array.iteri 
-            (fun i ti ->
-                AddMemSecEntry i ti
+            (fun i _ ->
+                AddMemSecEntry i mems
                 NewLine ())
 
     // GLOBAL SECTION
@@ -242,57 +256,63 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         NewLine ()
         NewLine ()
 
-    let AddGlobalSecEntry i (thisGlobal:Global) =
+    let AddGlobalSecEntry i (globals:Global[]) =
         Add (sprintf "GlobalSec[%d] => " i)
-        match thisGlobal with
-            | {GlobalType=t; InitExpr=e} -> AddGlobalTypeAndInstructions t e
+        if i >= globals.Length then Add "Error: GlobalSec index out of range"
+        else
+            match globals.[i] with
+                | {GlobalType=t; InitExpr=e} -> AddGlobalTypeAndInstructions t e
 
     let AddGlobalSec globals =
         Title "Globals section"
         globals |> Array.iteri 
-            (fun i thisGlobal ->
-                AddGlobalSecEntry i thisGlobal
+            (fun i _ ->
+                AddGlobalSecEntry i globals
                 NewLine ())
 
 
     // IMPORT SECTION
 
-    let AddImportSecEntry i thisImport (types:FuncType[]) =
+    let AddImportSecEntry i (imports:Import[]) (types:FuncType[]) =
         Add (sprintf "ImportSec[%d] => " i)
-        match thisImport with
-            | {ImportModuleName=m; ImportName=n; ImportDesc=d} -> 
-                Add (sprintf "from %s import %s == " m n)
-                match d with
-                    | ImportFunc(TypeIdx(U32(ti))) -> AddTypeSecEntry (int ti) types.[(int ti)]
-                    | ImportTable(tt)  -> AddTableType tt
-                    | ImportMemory(mt) -> AddMemType mt
-                    | ImportGlobal(gt) -> AddGlobalType gt 
+        if i >= imports.Length then Add "Error: ImportSec index out of range."
+        else
+            match imports.[i] with
+                | {ImportModuleName=m; ImportName=n; ImportDesc=d} -> 
+                    Add (sprintf "from '%s' import '%s' == " m n)
+                    match d with
+                        | ImportFunc(TypeIdx(U32(ti))) -> AddTypeSecEntry (int ti) types
+                        | ImportTable(tt)  -> AddTableType tt
+                        | ImportMemory(mt) -> AddMemType mt
+                        | ImportGlobal(gt) -> AddGlobalType gt 
 
     let AddImportSec imports types =
         Title "Imports section"
         imports |> Array.iteri 
-            (fun i thisImport ->
-                AddImportSecEntry i thisImport types
+            (fun i _ ->
+                AddImportSecEntry i imports types
                 NewLine ())
 
     // EXPORT SECTION
 
-    let AddExportSecEntry i ti (functions:TypeIdx[]) (types:FuncType[]) (tables:Table[]) (mems:Mem[]) (globals:Global[]) =
+    let AddExportSecEntry i (exports:Export[]) (functions:TypeIdx[]) (types:FuncType[]) (tables:Table[]) (mems:Mem[]) (globals:Global[]) =
         Add (sprintf "ExportSec[%d] => " i)
-        match ti with
-            | {ExportName=n; ExportDesc=d} -> 
-                Add (sprintf "%s == " n)
-                match d with
-                    | ExportFunc(FuncIdx(U32(fi)))     -> AddFuncSecEntry   (int fi) functions.[(int fi)] types
-                    | ExportTable(TableIdx(U32(ti)))   -> AddTableSecEntry  (int ti) tables.[(int ti)]
-                    | ExportMemory(MemIdx(U32(mi)))    -> AddMemSecEntry    (int mi) mems.[(int mi)]
-                    | ExportGlobal(GlobalIdx(U32(gi))) -> AddGlobalSecEntry (int gi) globals.[(int gi)]
+        if (i >= exports.Length) then Add "Error: ExportSec index out of range"
+        else
+            match exports.[i] with
+                | {ExportName=n; ExportDesc=d} -> 
+                    Add (sprintf "%s == " n)
+                    match d with
+                        | ExportFunc(FuncIdx(U32(fi)))     -> AddFuncSecEntry   (int fi) functions types
+                        | ExportTable(TableIdx(U32(ti)))   -> AddTableSecEntry  (int ti) tables
+                        | ExportMemory(MemIdx(U32(mi)))    -> AddMemSecEntry    (int mi) mems
+                        | ExportGlobal(GlobalIdx(U32(gi))) -> AddGlobalSecEntry (int gi) globals
 
     let AddExportSec exports functions types tables mems globals =
         Title "Exports section"
         exports |> Array.iteri 
-            (fun i ti ->
-                AddExportSecEntry i ti functions types tables mems globals
+            (fun i _ ->
+                AddExportSecEntry i exports functions types tables mems globals
                 NewLine ())
 
     // START
@@ -301,44 +321,49 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         Title "Start section"
         match sto with
             | Some({ StartFuncIdx=FuncIdx(U32(sfi)) }) -> 
-                AddTypeSecEntry (int sfi) types.[(int sfi)]
+                AddTypeSecEntry (int sfi) types
             | None -> ()
 
     // ELEM SECTION
 
-    let AddElemSecEntry i thisElem =
+    let AddElemSecEntry i (elems:Elem[]) =
         Add (sprintf "ElemSec[%d] => " i)
-        match thisElem with
-            | { TableIndex=TableIdx(U32(ti)); OffsetExpr=e; Init=fa } ->
-                Text (sprintf "In table %d, expr =" ti)
-                AddBody e
-                fa |> Array.iteri (fun i fidx -> 
-                    match fidx with 
-                        | FuncIdx(U32(fi)) -> 
-                            Add (sprintf "Table[%d][expr+%d] = FuncSec[%d]" ti i fi))
+        if i >= elems.Length then Add "Error: ElemSec index out of range"
+        else 
+            match elems.[i] with
+                | { TableIndex=TableIdx(U32(ti)); OffsetExpr=e; Init=fa } ->
+                    Text (sprintf "In table %d, expr =" ti)
+                    AddBody e
+                    fa |> Array.iteri (fun i fidx -> 
+                        match fidx with 
+                            | FuncIdx(U32(fi)) -> 
+                                Add (sprintf "Table[%d][expr+%d] = FuncSec[%d]" ti i fi))
 
     let AddElemSec elems =
         Title "Elems section"
         elems |> Array.iteri 
-            (fun i thisElem ->
-                AddElemSecEntry i thisElem
+            (fun i _ ->
+                AddElemSecEntry i elems
                 NewLine ())
 
     // DATA SECTION
 
-    let AddDataSecEntry i thisData =
+    let AddDataSecEntry i (datas:Data[]) =
         Add (sprintf "DataSec[%d] => " i)
-        match thisData with
-            | { DataMemoryIndex=MemIdx(U32(mi)); OffsetExpr=e; InitImageBytes=imageData } ->
-                Text (sprintf "Memory [%d] offset expr =" mi)
-                AddBody e
-                AddByteArray imageData
+        if i >= datas.Length then Add "Error: DataSec index out of range"
+        else
+            match datas.[i] with
+                | { DataMemoryIndex=MemIdx(U32(mi)); OffsetExpr=e; InitImageBytes=imageData } ->
+                    Text (sprintf "Fill memory[%d], where the offset-expr and image-data are as follows:" mi)
+                    AddBody e
+                    AddByteArray imageData "      | "
+                    NewLine ()
 
     let AddDataSec datas =
         Title "Data section"
         datas |> Array.iteri 
-            (fun i thisData ->
-                AddDataSecEntry i thisData
+            (fun i _ ->
+                AddDataSecEntry i datas
                 NewLine ())
 
 
