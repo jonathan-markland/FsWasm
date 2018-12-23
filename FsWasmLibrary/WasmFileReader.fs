@@ -2,11 +2,13 @@
 
 open System
 open Wasm
+open WasmAlgorithms
 open PrivateWasmFileReader
+
 
 // Read module
 
-let Module r =
+let RawModule r =
 
     // Magic stamp:
     
@@ -53,3 +55,13 @@ let Module r =
         Custom12 = finalCustom;
     }
 
+// A more convenient module with concatenated lists
+let Module r =
+
+    let rawModule = r |> RawModule
+    let newLists = rawModule |> GetConvenientLookupTables
+    { rawModule with 
+        Funcs = newLists.MasterFuncs;
+        Tables = newLists.MasterTables; 
+        Mems = newLists.MasterMems; 
+        Globals = newLists.MasterGlobals }

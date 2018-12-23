@@ -1,6 +1,6 @@
 ﻿
 open System.IO
-open WasmAlgorithms
+open WasmSerialiser
 open WasmFileReader
 
 // Main
@@ -10,9 +10,8 @@ let main argv =
 
     let fileName = "program (4).wasm"
     let fileImage = File.ReadAllBytes fileName
-    let r = new WasmSerialiser.BinaryReader(fileImage)
-    let thisModule = r |> WasmFileReader.Module
-    let convenientTables = thisModule |> GetConvenientLookupTables
+    let r = new BinaryReader(fileImage)
+    let thisModule = r |> Module
 
     // Obtain the array that TypeIdx values really index.
 

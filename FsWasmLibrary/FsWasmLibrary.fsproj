@@ -6,9 +6,9 @@
 
   <ItemGroup>
     <Compile Include="Wasm.fs" />
+    <Compile Include="WasmAlgorithms.fs" />
     <Compile Include="PrivateWasmFileReader.fs" />
     <Compile Include="WasmFileReader.fs" />
-    <Compile Include="WasmAlgorithms.fs" />
   </ItemGroup>
 
   <ItemGroup>
