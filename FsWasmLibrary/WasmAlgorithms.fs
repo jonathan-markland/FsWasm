@@ -1,10 +1,12 @@
-﻿namespace FsWasmLibrary
+﻿module WasmAlgorithms
 
 open Wasm
 
-module WasmAlgorithms =
-
-    type ConvenientLookupTables = { MasterFuncs:TypeIdx[]; MasterTables:Table[]; MasterMems:Mem[]; MasterGlobals:Global[] }
+    type ConvenientLookupTables = { 
+        MasterFuncs:TypeIdx[]; 
+        MasterTables:Table[]; 
+        MasterMems:Mem[]; 
+        MasterGlobals:Global[] }
 
     let GetConvenientLookupTables (thisModule:Wasm.Module) =
 

@@ -6,7 +6,13 @@
 
   <ItemGroup>
     <Compile Include="Wasm.fs" />
+    <Compile Include="PrivateWasmFileReader.fs" />
+    <Compile Include="WasmFileReader.fs" />
     <Compile Include="WasmAlgorithms.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WasmSerialiser\WasmSerialiser.csproj" />
   </ItemGroup>
 
 </Project>

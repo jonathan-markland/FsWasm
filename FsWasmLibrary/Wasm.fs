@@ -1,8 +1,6 @@
-﻿namespace FsWasmLibrary
+﻿module Wasm
 
 open System
-
-module Wasm =
 
     type I32 = I32 of int
     type I64 = I64 of int64
