@@ -13,5 +13,7 @@ let main argv =
     let r = new BinaryReader(fileImage)
     let thisModule = r |> Module
 
+    let unitTestSerialisation = thisModule |> UnitTestSerialiser.ModuleToUnitTestString fileName
+
     printfn "Hello World from F#!"
     0 // return an integer exit code

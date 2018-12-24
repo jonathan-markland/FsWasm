@@ -173,6 +173,8 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     let AddCodeSec cso =
 
+        Title "Code section"
+
         // LOCALS
 
         let addLocals localsArray =
@@ -195,7 +197,10 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         // CODE
 
         let addCodeDetail i (c:Code) =
-            Title (sprintf "Code section [%d] of %A bytes" i (c.CodeSize))
+            NewLine ()
+            NewLine ()
+            Text (sprintf "CodeSec[%d]  (%d bytes)" i (match c with { CodeSize=U32(n) } -> n))
+            NewLine ()
             addLocals c.Function.Locals
             AddBody c.Function.Body
 

@@ -2,11 +2,15 @@
 
 open Wasm
 
+
+
 type ConvenientLookupTables = { 
     MasterFuncs:TypeIdx[]; 
     MasterTables:Table[]; 
     MasterMems:Mem[]; 
     MasterGlobals:Global[] }
+
+
 
 let GetConvenientLookupTables (thisModule:Wasm.Module) =
 
@@ -69,3 +73,13 @@ let GetConvenientLookupTables (thisModule:Wasm.Module) =
         MasterTables=tableArray; 
         MasterMems=memoryArray;
         MasterGlobals=globalArray }
+
+
+
+let CodeSecIndexToFuncSecIndex codeSecIndex (thisModule:Wasm.Module) =
+    codeSecIndex + thisModule.Imports.Length
+
+let CodeSecIndexToFuncSec codeSecIndex (thisModule:Wasm.Module) =
+    thisModule.Funcs.[thisModule |> CodeSecIndexToFuncSecIndex codeSecIndex]
+
+ 
