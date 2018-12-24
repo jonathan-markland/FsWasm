@@ -1,13 +1,15 @@
 ﻿module WasmFileReader
 
-open System
 open Wasm
 open WasmAlgorithms
 open PrivateWasmFileReader
 
 
-// Read module
 
+/// <summary>
+/// Read the WASM file from the reader, and return a tree structure
+/// representing the file, verbatim.  See also the Module function.
+/// </summary>
 let RawModule r =
 
     // Magic stamp:
@@ -55,7 +57,15 @@ let RawModule r =
         Custom12 = finalCustom;
     }
 
-// A more convenient module with concatenated lists
+
+
+
+/// <summary>
+/// Read the WASM file from the reader, and return a tree structure
+/// representing the file.  For convenience, the imports are
+/// amalgamated into the Funcs, Tables, Mems and Globals, for 
+/// convenient indexing per the WebAssembly spec.
+/// </summary>
 let Module r =
 
     let rawModule = r |> RawModule

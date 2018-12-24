@@ -370,8 +370,6 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     let AddModule theModule =
 
-        let convenientTables = theModule |> WasmAlgorithms.GetConvenientLookupTables  // TODO: use to fix references
-
         AddArraySection "Custom section #1"  theModule.Custom1   
         AddTypeSec theModule.Types
 

@@ -54,7 +54,8 @@ let rec ForEachRecognised readX actionToDo r =
 
 let MakeArrayWhileSome (recordReaderFunc:'readerType -> 'recordType option) theReader =
     let container = new ResizeArray<'recordType>()
-    ForEachRecognised recordReaderFunc (fun newRecord -> container.Add newRecord) theReader |> ignore
+    ForEachRecognised recordReaderFunc (
+        fun newRecord -> container.Add newRecord) theReader |> ignore
     container.ToArray()
 
 // Read WASM indexes
