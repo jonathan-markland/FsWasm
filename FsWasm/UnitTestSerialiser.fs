@@ -111,7 +111,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             match funcs.[i] with
                 | TypeIdx(U32(j)) -> AddTypeSecEntry (int j) types
 
-    let AddFuncSec funcs types =
+    let AddFuncSec types funcs =
         Title "Funcs section"
         funcs |> Array.iteri (fun i _ ->
             AddFuncSecEntry i funcs types
@@ -290,7 +290,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                         | ImportMemory(mt) -> AddMemType mt
                         | ImportGlobal(gt) -> AddGlobalType gt 
 
-    let AddImportSec imports types =
+    let AddImportSec types imports =
         Title "Imports section"
         imports |> Array.iteri 
             (fun i _ ->
@@ -312,7 +312,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                         | ExportMemory(MemIdx(U32(mi)))    -> AddMemSecEntry    (int mi) mems
                         | ExportGlobal(GlobalIdx(U32(gi))) -> AddGlobalSecEntry (int gi) globals
 
-    let AddExportSec exports functions types tables mems globals =
+    let AddExportSec functions types tables mems globals exports =
         Title "Exports section"
         exports |> Array.iteri 
             (fun i _ ->
@@ -321,9 +321,9 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     // START
 
-    let AddStartSec sto (types:FuncType[]) =
+    let AddStartSec (types:FuncType[]) optionalStartSec =
         Title "Start section"
-        match sto with
+        match optionalStartSec with
             | Some({ StartFuncIdx=FuncIdx(U32(sfi)) }) -> 
                 AddTypeSecEntry (int sfi) types
             | None -> ()
@@ -375,41 +375,41 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     let AddModule theModule =
 
-        AddArraySection "Custom section #1"  theModule.Custom1   
-        AddTypeSec theModule.Types
+        theModule.Custom1 |> AddArraySection "Custom section #1"     
+        theModule.Types |> AddTypeSec 
 
-        AddArraySection "Custom section #2"  theModule.Custom2   
-        AddImportSec theModule.Imports theModule.Types
+        theModule.Custom2 |> AddArraySection "Custom section #2"     
+        theModule.Imports |> AddImportSec theModule.Types
 
-        AddArraySection "Custom section #3"  theModule.Custom3   
-        AddFuncSec theModule.Funcs theModule.Types
+        theModule.Custom3 |> AddArraySection "Custom section #3"     
+        theModule.Funcs |> AddFuncSec theModule.Types
 
-        AddArraySection "Custom section #4"  theModule.Custom4   
-        AddTableSec theModule.Tables
+        theModule.Custom4 |> AddArraySection "Custom section #4"     
+        theModule.Tables |> AddTableSec 
 
-        AddArraySection "Custom section #5"  theModule.Custom5   
-        AddMemSec theModule.Mems
+        theModule.Custom5 |> AddArraySection "Custom section #5"     
+        theModule.Mems |> AddMemSec 
 
-        AddArraySection "Custom section #6"  theModule.Custom6   
-        AddGlobalSec theModule.Globals
+        theModule.Custom6 |> AddArraySection "Custom section #6"     
+        theModule.Globals |> AddGlobalSec 
 
-        AddArraySection "Custom section #7"  theModule.Custom7   
-        AddExportSec theModule.Exports theModule.Funcs theModule.Types theModule.Tables theModule.Mems theModule.Globals
+        theModule.Custom7 |> AddArraySection "Custom section #7"     
+        theModule.Exports |> AddExportSec theModule.Funcs theModule.Types theModule.Tables theModule.Mems theModule.Globals
 
-        AddArraySection "Custom section #8"  theModule.Custom8   
-        AddStartSec theModule.Start theModule.Types
+        theModule.Custom8 |> AddArraySection "Custom section #8"     
+        theModule.Start |> AddStartSec theModule.Types
 
-        AddArraySection "Custom section #9"  theModule.Custom9   
-        AddElemSec theModule.Elems
+        theModule.Custom9 |> AddArraySection "Custom section #9"     
+        theModule.Elems |> AddElemSec
 
-        AddArraySection "Custom section #10"  theModule.Custom10  
-        AddCodeSec theModule.Codes
+        theModule.Custom10 |> AddArraySection "Custom section #10"    
+        theModule.Codes |> AddCodeSec 
 
-        AddArraySection "Custom section #11"  theModule.Custom11  
-        AddDataSec theModule.Datas
+        theModule.Custom11 |> AddArraySection "Custom section #11"    
+        theModule.Datas |> AddDataSec 
 
-        AddArraySection "Custom section #12"  theModule.Custom12  
+        theModule.Custom12 |> AddArraySection "Custom section #12"    
 
     Title ("Unit test serialisation for: " + fileName)
-    AddModule m
+    m |> AddModule 
     sb.ToString ()
