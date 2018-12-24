@@ -259,19 +259,6 @@ open System
     type Code   = { CodeSize:U32; Function:Func }
     type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:InstructionArray; InitImageBytes:byte array }
 
-    // type CustomSec = CustomSec of Custom
-    // type TypeSec   = TypeSec   of FuncType array
-    // type ImportSec = ImportSec of Import array
-    // type FuncSec   = FuncSec   of TypeIdx array
-    // type TableSec  = TableSec  of Table array
-    // type MemSec    = MemSec    of Mem array
-    // type GlobalSec = GlobalSec of Global array
-    // type ExportSec = ExportSec of Export array
-    // type StartSec  = StartSec  of Start
-    // type ElemSec   = ElemSec   of Elem array
-    // type CodeSec   = CodeSec   of Code array
-    // type DataSec   = DataSec   of Data array
-
     type Magic   = U32
     type Version = U32
 
