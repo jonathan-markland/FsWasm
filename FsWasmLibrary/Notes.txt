@@ -1,0 +1,101 @@
+
+FsWasm - notes
+==============
+
+[ ] WasmFileReader.fs -- turn this back to be vanilla "as spec":
+	[ ] Remove function "Module" to another place
+	[ ] Rename "RawModule" as "Module"
+	
+[ ] The "Module" function that calls GetConvenientLookupTables
+    should be located elsewhere, and return a different type
+	rather than re-using the "vanilla" type, since this type
+	would NOT be suitable for directly serialising out again.
+	
+[ ] Issue:  The FuncIdx in the call instruction is not convenient.
+    It indexes into those imports that are of functions, then into
+	the funcsec.  
+		
+[ ] Issue:  All other types referenced by the imports section
+    have the same index issues.
+	
+Convenient representation
+=========================
+
+Need arrays of the following, indexeable by the original indices.
+
+
+Function2
+	| ImportedFunction2
+		{ :Import; :FuncType }
+	| InternalFunction2
+		{ OriginalIndex; CodeSize:U32; :FuncType; :Locals; :Body }
+
+Memory2
+	| ImportedMemory2
+		{ :Import; :MemoryType }
+	| InternalMemory2
+		{ :MemoryType }
+
+Table2
+	| ImportedTable2
+		{ :Import; :TableType }
+	| InternalTable2
+		{ :TableType }
+
+Global2
+	| ImportedGlobal2
+		{ :Import; :GlobalType }
+	| InternalGlobal2
+		{ :GlobalType }
+		
+    type ValType     = I32Type | I64Type | F32Type | F64Type                  // 7F 7E 7D 7C resp.
+    type BlockType   = EmptyBlockType | BlockValType of ValType
+    type FuncType    = { ParameterTypes:ValType[]; ReturnTypes:ValType[] }
+    type MemoryType  = { MemoryLimits:Limits }
+    type ElementType = AnyFuncType
+    type TableType   = { TableElementType:ElementType; TableLimits:Limits }
+    type GlobalType  = { GlobalType:ValType; GlobalMutability:Mutability }
+
+	
+    type Locals = { NumRepeats:U32; LocalsType:ValType }
+
+    type Custom = { Name:Name; Data:byte array }
+    type Import = { ImportModuleName:Name; ImportName:Name; ImportDesc:ImportDesc }
+    type Func   = { Locals:Locals array; Body:InstructionArray }
+    type Table  = { TableType:TableType }
+    type Mem    = { MemType:MemoryType }
+    type Global = { GlobalType:GlobalType; InitExpr:InstructionArray }
+    type Export = { ExportName:Name; ExportDesc:ExportDesc }
+    type Start  = { StartFuncIdx:FuncIdx }
+    type Elem   = { TableIndex:TableIdx; OffsetExpr:InstructionArray; Init:FuncIdx array }
+    type Code   = { CodeSize:U32; Function:Func }
+    type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:InstructionArray; InitImageBytes:byte array }
+
+
+        Custom1:  Custom[]; Types:FuncType array;------- no longer need this array, if we can avoid needing TypeIdx
+        Custom2:  Custom[]; Imports:Import array;------- no longer needed
+        Custom3:  Custom[]; Funcs:TypeIdx array;------- no longer needed
+        Custom4:  Custom[]; Tables:Table array;------- no longer needed
+        Custom5:  Custom[]; Mems:Mem array;------- no longer needed
+        Custom6:  Custom[]; Globals:Global array;------- no longer needed
+        Custom7:  Custom[]; Exports:Export array;
+        Custom8:  Custom[]; Start:Start option;
+        Custom9:  Custom[]; Elems:Elem array;
+        Custom10: Custom[]; Codes:Code array;------- no longer needed
+        Custom11: Custom[]; Datas:Data array;
+        Custom12: Custom[] }
+
+	
+	type ImportDesc = 
+        | ImportFunc   of TypeIdx
+        | ImportTable  of TableType
+        | ImportMemory of MemoryType
+        | ImportGlobal of GlobalType
+
+    type ExportDesc = 
+        | ExportFunc   of FuncIdx
+        | ExportTable  of TableIdx
+        | ExportMemory of MemIdx
+        | ExportGlobal of GlobalIdx
+
+		
