@@ -104,12 +104,14 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         
     // FUNC SECTION  (which we indirect through the TypeSec to show the signatures)
 
+    let AddFuncSecItem types funcSecItem =
+        match funcSecItem with
+            | TypeIdx(U32(j)) -> AddTypeSecEntry (int j) types
+
     let AddFuncSecEntry i (funcs:TypeIdx[]) (types:FuncType[]) =
         Add (sprintf "FuncSec[%d] => " i)
         if i >= funcs.Length then Add "Error: Out of range FuncSec index"
-        else 
-            match funcs.[i] with
-                | TypeIdx(U32(j)) -> AddTypeSecEntry (int j) types
+        else AddFuncSecItem types funcs.[i]
 
     let AddFuncSec types funcs =
         Title "Funcs section"
@@ -120,7 +122,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     // BODY
 
-    let AddBody instructionsArray =
+    let AddBody2 addFuncIdx instructionsArray =
 
         let mutable ip = 0
         let mutable indent = 0
@@ -133,14 +135,6 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
         let rec addInstructions instructionsArray =
 
-            let isShortForm instruction =
-                match instruction with 
-                    | Block(_) -> false
-                    | Loop(_) -> false
-                    | If(_) -> false
-                    | IfElse(_) -> false
-                    | _ -> true
-
             let subList opCode blockType subInstructions =
                 let blockIndex = ip
                 addLine (sprintf "%s %A" opCode blockType)
@@ -148,6 +142,15 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 addInstructions subInstructions
                 // addLine (sprintf "End %s (%d)" opCode blockIndex)
                 indent <- indent - 1
+
+            let isShortForm instruction =
+                match instruction with 
+                    | Block(_) -> false
+                    | Loop(_) -> false
+                    | If(_) -> false
+                    | IfElse(_) -> false
+                    | Call(_) -> false
+                    | _ -> true
 
             let addLongForm instruction =
                 match instruction with 
@@ -157,6 +160,9 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     | IfElse(b,i,e) -> 
                         subList "If..." b i
                         subList "...Else" b e
+                    | Call(funcIdx) -> 
+                        addLine (sprintf "Call %d" (match funcIdx with FuncIdx(U32(i)) -> i))
+                        addFuncIdx funcIdx
                     | _ -> ()
 
             let addInstruction instruction =
@@ -169,9 +175,13 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         addInstructions instructionsArray
 
 
+        // TODO: This is a little messy ?
+    let AddBody instructionsArray =
+        AddBody2 (fun i -> ()) instructionsArray
+
     // CODE SECTION
 
-    let AddCodeSec cso =
+    let AddCodeSec addFuncDetailsString addFuncIdx cso =
 
         Title "Code section"
 
@@ -196,15 +206,19 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
         // CODE
 
-        let addCodeDetail i (c:Code) =
+        let addCodeDetail (addFuncDetailsString:int -> unit) addFuncIdx i (c:Code) =
             NewLine ()
             NewLine ()
-            Text (sprintf "CodeSec[%d]  (%d bytes)" i (match c with { CodeSize=U32(n) } -> n))
+            
+            Add (sprintf "CodeSec[%d]  (%d bytes)  " i (match c with { CodeSize=U32(n) } -> n))
+            addFuncDetailsString i
+            NewLine()
+
             NewLine ()
             addLocals c.Function.Locals
-            AddBody c.Function.Body
+            AddBody2 addFuncIdx c.Function.Body
 
-        cso |> Array.iteri addCodeDetail 
+        cso |> Array.iteri (addCodeDetail addFuncDetailsString addFuncIdx)
 
     // TABLE SECTION
 
@@ -402,8 +416,15 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         theModule.Custom9 |> AddArraySection "Custom section #9"     
         theModule.Elems |> AddElemSec
 
+        let addFuncDetailsString theModule codeSecIndex = // TODO: Not sure about design of passing this in
+            let typeIdx = theModule |> WasmAlgorithms.CodeSecIndexToFuncSec codeSecIndex
+            AddFuncSecItem theModule.Types typeIdx
+
+        let addFuncIdx theModule (funcIdx:FuncIdx) = // TODO: Not sure about design of passing this in
+            AddFuncSecItem theModule.Types (theModule.Funcs.[match funcIdx with FuncIdx(U32(i)) -> (int i)])
+
         theModule.Custom10 |> AddArraySection "Custom section #10"    
-        theModule.Codes |> AddCodeSec 
+        theModule.Codes |> AddCodeSec (addFuncDetailsString theModule) (addFuncIdx theModule)
 
         theModule.Custom11 |> AddArraySection "Custom section #11"    
         theModule.Datas |> AddDataSec 
