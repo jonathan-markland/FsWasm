@@ -1,7 +1,6 @@
 ﻿module WasmFileReader
 
 open Wasm
-open WasmAlgorithms
 open PrivateWasmFileReader
 
 
