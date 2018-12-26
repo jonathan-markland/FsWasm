@@ -2,6 +2,33 @@
 FsWasm - notes
 ==============
 
+
+Technique
+=========
+
+- Loaded the Wasm file into memory using mostly DUs + records + arrays.
+  Very quick to get the structure defined.
+  Very quick to get the file read (re-using custom C# stream reader from 
+  earlier project).  Only bugs were my misunderstanding of spec rather
+  than type-mismatch mistakes.
+  
+- Noticed that the Wasm spec's format isn't easily suitable for use in 
+  translators.  Largely because of use of integer indices into arrays,
+  requiring passing the arrays **AND** the index around.  Also, the
+  indexing scheme per WASM spec was not simple:  CodeSec indices
+  correspond to FuncSec indices, but CALL instruction FuncIdx does
+  not correspond to FuncSec indices because of the wasy the Wasm Imports
+  work!
+
+- Decided to build a different data structure post-load, in order to
+  have an easier format for translator to use directly.
+  
+  
+  
+
+Project
+=======
+
 [ ] WasmFileReader.fs -- turn this back to be vanilla "as spec":
 	[ ] Remove function "Module" to another place
 	[ ] Rename "RawModule" as "Module"
@@ -17,6 +44,10 @@ FsWasm - notes
 		
 [ ] Issue:  All other types referenced by the imports section
     have the same index issues.
+
+[ ] Can we avoid having the types array if we eliminate TypeIdx usages
+
+
 	
 Convenient representation
 =========================
@@ -47,6 +78,7 @@ Global2
 		{ :Import; :GlobalType }
 	| InternalGlobal2
 		{ :GlobalType }
+
 		
     type ValType     = I32Type | I64Type | F32Type | F64Type                  // 7F 7E 7D 7C resp.
     type BlockType   = EmptyBlockType | BlockValType of ValType
@@ -78,11 +110,11 @@ Global2
         Custom4:  Custom[]; Tables:Table array;------- no longer needed
         Custom5:  Custom[]; Mems:Mem array;------- no longer needed
         Custom6:  Custom[]; Globals:Global array;------- no longer needed
-        Custom7:  Custom[]; Exports:Export array;
+        Custom7:  Custom[]; Exports:Export array;------- no longer needed
         Custom8:  Custom[]; Start:Start option;
-        Custom9:  Custom[]; Elems:Elem array;
+        Custom9:  Custom[]; Elems:Elem array; ---- no longer needed, can only be used to initialise a table object, so include there.
         Custom10: Custom[]; Codes:Code array;------- no longer needed
-        Custom11: Custom[]; Datas:Data array;
+        Custom11: Custom[]; Datas:Data array;------- no longer needed, can only be used to initialise a memory object, so include the init there.
         Custom12: Custom[] }
 
 	

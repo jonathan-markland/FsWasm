@@ -10,7 +10,7 @@ open PrivateWasmFileReader
 /// Read the WASM file from the reader, and return a tree structure
 /// representing the file, verbatim.  See also the Module function.
 /// </summary>
-let RawModule r =
+let Module r =
 
     // Magic stamp:
     
@@ -59,7 +59,7 @@ let RawModule r =
 
 
 
-
+(*
 /// <summary>
 /// Read the WASM file from the reader, and return a tree structure
 /// representing the file.  For convenience, the imports are
@@ -75,3 +75,4 @@ let Module r =
         Tables = newLists.MasterTables; 
         Mems = newLists.MasterMems; 
         Globals = newLists.MasterGlobals }
+*)
