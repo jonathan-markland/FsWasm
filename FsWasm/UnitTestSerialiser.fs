@@ -2,6 +2,7 @@
 
 open System.Text
 open Wasm
+open WasmAlgorithms
 
 let ModuleToUnitTestString (fileName:string) (m:Module) =
 
@@ -373,6 +374,22 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     // MODULE        
 
+    /// <summary>
+    /// Read the WASM file from the reader, and return a tree structure
+    /// representing the file.  For convenience, the imports are
+    /// amalgamated into the Funcs, Tables, Mems and Globals, for 
+    /// convenient indexing per the WebAssembly spec.
+    /// </summary>
+    let GetConvenientModule rawModule =
+
+        let newLists = rawModule |> GetConvenientLookupTables
+
+        { rawModule with 
+            Funcs = newLists.MasterFuncs;
+            Tables = newLists.MasterTables; 
+            Mems = newLists.MasterMems; 
+            Globals = newLists.MasterGlobals }
+
     let AddModule theModule =
 
         theModule.Custom1 |> AddArraySection "Custom section #1"     
@@ -411,5 +428,5 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         theModule.Custom12 |> AddArraySection "Custom section #12"    
 
     Title ("Unit test serialisation for: " + fileName)
-    m |> AddModule 
+    m |> GetConvenientModule |> AddModule
     sb.ToString ()

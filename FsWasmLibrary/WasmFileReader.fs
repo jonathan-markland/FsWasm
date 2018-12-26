@@ -55,23 +55,3 @@ let Module r =
         Custom11 = fst sec11; Datas=snd sec11;
         Custom12 = finalCustom;
     }
-
-
-
-(*
-/// <summary>
-/// Read the WASM file from the reader, and return a tree structure
-/// representing the file.  For convenience, the imports are
-/// amalgamated into the Funcs, Tables, Mems and Globals, for 
-/// convenient indexing per the WebAssembly spec.
-/// </summary>
-let Module r =
-
-    let rawModule = r |> RawModule
-    let newLists = rawModule |> GetConvenientLookupTables
-    { rawModule with 
-        Funcs = newLists.MasterFuncs;
-        Tables = newLists.MasterTables; 
-        Mems = newLists.MasterMems; 
-        Globals = newLists.MasterGlobals }
-*)
