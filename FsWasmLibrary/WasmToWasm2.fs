@@ -23,10 +23,6 @@ let FindExport (oldModule:Module) desc : Export2 option =
 
 
 
-let GetFuncTypeFromTypeIdx typeIdx (oldModule:Module) =
-    oldModule.Types.[match typeIdx with TypeIdx(U32(i)) -> (int i)]
-
-
 // -------------------------------------------------------------------------------------------------
 //  Harvest from IMPORTs
 // -------------------------------------------------------------------------------------------------
@@ -81,11 +77,10 @@ let HarvestFunction2sFromImports (oldModule:Module) =
 
     oldModule.Imports |> Array.choose (fun imp ->
         match imp with
-            | {ImportModuleName=m; ImportName=n; ImportDesc=ImportFunc(typeIdx)} 
+            | {ImportModuleName=m; ImportName=n; ImportDesc=ImportFunc(funcType)} 
                 -> let exportOpt = FindExport oldModule (ExportFunc(FuncIdx(U32(exportIndex))))
                    let import2 = { Export2=exportOpt; ImportModuleName=m; ImportName=n }
                    exportIndex <- exportIndex + 1u
-                   let funcType = oldModule |> GetFuncTypeFromTypeIdx typeIdx
                    Some(ImportedFunction2({Import2=import2; FuncType=funcType}))
             | _ -> None)
 
@@ -179,8 +174,7 @@ let HarvestInternalMems (newImportedMems:Memory2[]) (oldModule:Module) =
 
 
 let GetFuncType (oldModule:Module) (codeSecIndex:int) =
-    match oldModule.Funcs.[codeSecIndex] with
-        | TypeIdx(U32(i)) -> oldModule.Types.[int i]
+    oldModule.Funcs.[codeSecIndex]
 
     
 

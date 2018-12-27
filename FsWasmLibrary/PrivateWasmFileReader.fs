@@ -6,18 +6,19 @@ open Wasm
 
 type BinaryReaderAndContext = { Reader:WasmSerialiser.BinaryReader; TypeSec:FuncType[] }
 
-let EOF         (r:WasmSerialiser.BinaryReader) = r.EndOfFile
-let Byte        (r:WasmSerialiser.BinaryReader) = r.ReadByte()
-let PeekByte    (r:WasmSerialiser.BinaryReader) = r.PeekByte()
-let SkipByte    (r:WasmSerialiser.BinaryReader) = r.SkipByte()
-let Leb32       (r:WasmSerialiser.BinaryReader) = r.ReadLebUnsigned32()
-let Leb64       (r:WasmSerialiser.BinaryReader) = r.ReadLebUnsigned64()
-let Float32     (r:WasmSerialiser.BinaryReader) = r.ReadFloat32()
-let Float64     (r:WasmSerialiser.BinaryReader) = r.ReadDouble64()
-let NameString  (r:WasmSerialiser.BinaryReader) = r.ReadString()
-let Bytes       (r:WasmSerialiser.BinaryReader) = r.ReadByteVector()
-let ReadOffset  (r:WasmSerialiser.BinaryReader) = r.ReadOffset
-let SetReadOffset filePos (r:WasmSerialiser.BinaryReader) = r.ReadOffset <- filePos
+let EOF         (r:BinaryReaderAndContext) = r.Reader.EndOfFile
+let Byte        (r:BinaryReaderAndContext) = r.Reader.ReadByte()
+let PeekByte    (r:BinaryReaderAndContext) = r.Reader.PeekByte()
+let SkipByte    (r:BinaryReaderAndContext) = r.Reader.SkipByte()
+let Leb32       (r:BinaryReaderAndContext) = r.Reader.ReadLebUnsigned32()
+let Leb64       (r:BinaryReaderAndContext) = r.Reader.ReadLebUnsigned64()
+let Float32     (r:BinaryReaderAndContext) = r.Reader.ReadFloat32()
+let Float64     (r:BinaryReaderAndContext) = r.Reader.ReadDouble64()
+let NameString  (r:BinaryReaderAndContext) = r.Reader.ReadString()
+let Bytes       (r:BinaryReaderAndContext) = r.Reader.ReadByteVector()
+let ReadOffset  (r:BinaryReaderAndContext) = r.Reader.ReadOffset
+let SetReadOffset filePos (r:BinaryReaderAndContext) = r.Reader.ReadOffset <- filePos
+let Reverse amount (r:BinaryReaderAndContext) = r.Reader.Reverse amount
 
 // Interfacing the BinaryReader with Wasm type wrappers, for convenience:
 
@@ -32,7 +33,7 @@ let F64 r = F64(r |> Float64)
 let ParseFailWith messageText byteThatWasRead r =
     failwith (sprintf "%s (%d) at file offset %d" messageText byteThatWasRead (r |> ReadOffset))
 
-let ReadSequence (f:WasmSerialiser.BinaryReader -> 'a) r =
+let ReadSequence (f:BinaryReaderAndContext -> 'a) r =
     let mutable elementCount = r |> Leb32
     seq { while elementCount > 0u 
     do
@@ -64,7 +65,10 @@ let MakeArrayWhileSome (recordReaderFunc:'readerType -> 'recordType option) theR
 
 // Read WASM indexes
 
-let TypeIdx   r = TypeIdx  (r |> U32)
+let TypeIdx   r = 
+    let typeIndex = r |> U32
+    r.TypeSec.[match typeIndex with U32(x) -> (int x)]  // TODO: bound check with better error.
+
 let FuncIdx   r = FuncIdx  (r |> U32)
 let TableIdx  r = TableIdx (r |> U32)
 let MemIdx    r = MemIdx   (r |> U32)
@@ -411,7 +415,7 @@ and Instruction r =
         | 0xBFuy -> Some(F64ReinterpretI64)
         
         | _ -> 
-            r.Reverse(1u)
+            r |> Reverse 1u
             None
 
 let Expression r =
@@ -487,7 +491,7 @@ let DataSec     r = r |> Vector Data
 
 // Read section
 
-let TryReadSpecificNumberedSection (sectionReader:WasmSerialiser.BinaryReader -> 'section[]) codeOfRequiredSection r : 'section[] =
+let TryReadSpecificNumberedSection (sectionReader:BinaryReaderAndContext -> 'section[]) codeOfRequiredSection r : 'section[] =
     match EOF r with
         | true -> [||]
         | false ->
@@ -504,13 +508,13 @@ let TryReadSpecificNumberedSectionOption sectionReader codeOfRequiredSection r =
     match EOF r with
         | true -> None
         | false ->
-            let backtrackPos = r.ReadOffset
+            let backtrackPos = r |> ReadOffset
             let thisHeader = r |> SectionHeader
             match thisHeader with
                 | (n, _) when n = byte codeOfRequiredSection -> 
                     Some(r |> sectionReader)
                 | _ -> 
-                    r.ReadOffset <- backtrackPos
+                    r |> SetReadOffset backtrackPos
                     None
 
 let OptionalCustomSec r = 

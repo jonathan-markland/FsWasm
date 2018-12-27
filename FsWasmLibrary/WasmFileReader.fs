@@ -9,7 +9,9 @@ open PrivateWasmFileReader
 /// Read the WASM file from the reader, and return a tree structure
 /// representing the file, verbatim.  See also the Module function.
 /// </summary>
-let Module r =
+let Module binaryReader =
+
+    let r = { Reader=binaryReader; TypeSec=[||] }
 
     // Magic stamp:
     
@@ -28,6 +30,14 @@ let Module r =
     // Read sections:
 
     let sec1  = r |> CustomSecThenTrySpecificSection TypeSec 1 
+
+    // Now we've read the TypeSec, install it into the BinaryReaderAndContext
+    // so all the other section-reading can use the TypeSec:
+
+    let r = { Reader=binaryReader; TypeSec=snd sec1; }
+
+    // Read remaining sections:
+
     let sec2  = r |> CustomSecThenTrySpecificSection ImportSec 2
     let sec3  = r |> CustomSecThenTrySpecificSection FunctionSec 3
     let sec4  = r |> CustomSecThenTrySpecificSection TableSec 4

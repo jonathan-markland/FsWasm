@@ -5,7 +5,7 @@ open Wasm
 
 
 type ConvenientLookupTables = { 
-    MasterFuncs:TypeIdx[]; 
+    MasterFuncs:FuncType[]; 
     MasterTables:Table[]; 
     MasterMems:Mem[]; 
     MasterGlobals:Global[] }

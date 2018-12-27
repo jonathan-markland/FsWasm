@@ -105,17 +105,15 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         
     // FUNC SECTION  (which we indirect through the TypeSec to show the signatures)
 
-    let AddFuncSecEntry i (funcs:TypeIdx[]) (types:FuncType[]) =
+    let AddFuncSecEntry (i:int) (funcs:FuncType[]) =
         Add (sprintf "FuncSec[%d] => " i)
         if i >= funcs.Length then Add "Error: Out of range FuncSec index"
-        else 
-            match funcs.[i] with
-                | TypeIdx(U32(j)) -> AddTypeSecEntry (int j) types
+        else AddFuncType funcs.[i] 
 
-    let AddFuncSec types funcs =
+    let AddFuncSec funcs =
         Title "Funcs section"
         funcs |> Array.iteri (fun i _ ->
-            AddFuncSecEntry i funcs types
+            AddFuncSecEntry i funcs
             NewLine ())
         
 
@@ -286,7 +284,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 | {ImportModuleName=m; ImportName=n; ImportDesc=d} -> 
                     Add (sprintf "from '%s' import '%s' == " m n)
                     match d with
-                        | ImportFunc(TypeIdx(U32(ti))) -> AddTypeSecEntry (int ti) types
+                        | ImportFunc(funcType) -> AddFuncType funcType   // TODO: test
                         | ImportTable(tt)  -> AddTableType tt
                         | ImportMemory(mt) -> AddMemType mt
                         | ImportGlobal(gt) -> AddGlobalType gt 
@@ -300,7 +298,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     // EXPORT SECTION
 
-    let AddExportSecEntry i (exports:Export[]) (functions:TypeIdx[]) (types:FuncType[]) (tables:Table[]) (mems:Mem[]) (globals:Global[]) =
+    let AddExportSecEntry i (exports:Export[]) (functions:FuncType[]) (tables:Table[]) (mems:Mem[]) (globals:Global[]) =
         Add (sprintf "ExportSec[%d] => " i)
         if (i >= exports.Length) then Add "Error: ExportSec index out of range"
         else
@@ -308,16 +306,16 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 | {ExportName=n; ExportDesc=d} -> 
                     Add (sprintf "%s == " n)
                     match d with
-                        | ExportFunc(FuncIdx(U32(fi)))     -> AddFuncSecEntry   (int fi) functions types
+                        | ExportFunc(FuncIdx(U32(fi)))     -> AddFuncSecEntry   (int fi) functions
                         | ExportTable(TableIdx(U32(ti)))   -> AddTableSecEntry  (int ti) tables
                         | ExportMemory(MemIdx(U32(mi)))    -> AddMemSecEntry    (int mi) mems
                         | ExportGlobal(GlobalIdx(U32(gi))) -> AddGlobalSecEntry (int gi) globals
 
-    let AddExportSec functions types tables mems globals exports =
+    let AddExportSec functions tables mems globals exports =
         Title "Exports section"
         exports |> Array.iteri 
             (fun i _ ->
-                AddExportSecEntry i exports functions types tables mems globals
+                AddExportSecEntry i exports functions tables mems globals
                 NewLine ())
 
     // START
@@ -399,7 +397,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         theModule.Imports |> AddImportSec theModule.Types
 
         theModule.Custom3 |> AddArraySection "Custom section #3"     
-        theModule.Funcs |> AddFuncSec theModule.Types
+        theModule.Funcs |> AddFuncSec
 
         theModule.Custom4 |> AddArraySection "Custom section #4"     
         theModule.Tables |> AddTableSec 
@@ -411,7 +409,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         theModule.Globals |> AddGlobalSec 
 
         theModule.Custom7 |> AddArraySection "Custom section #7"     
-        theModule.Exports |> AddExportSec theModule.Funcs theModule.Types theModule.Tables theModule.Mems theModule.Globals
+        theModule.Exports |> AddExportSec theModule.Funcs theModule.Tables theModule.Mems theModule.Globals
 
         theModule.Custom8 |> AddArraySection "Custom section #8"     
         theModule.Start |> AddStartSec theModule.Types

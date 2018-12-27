@@ -44,7 +44,7 @@ open System
         | BrTable      of LabelIdx array * LabelIdx  // 0E
         | Return
         | Call         of FuncIdx   // 10
-        | CallIndirect of TypeIdx   // 11 00
+        | CallIndirect of FuncType  // 11 00
 
         // 5.4.2  Parameteric Instructions
 
@@ -234,7 +234,7 @@ open System
     type Name = string
 
     type ImportDesc = 
-        | ImportFunc   of TypeIdx
+        | ImportFunc   of FuncType
         | ImportTable  of TableType
         | ImportMemory of MemoryType
         | ImportGlobal of GlobalType
@@ -271,7 +271,7 @@ open System
 
         Custom1:  Custom[]; Types:FuncType array;
         Custom2:  Custom[]; Imports:Import array;
-        Custom3:  Custom[]; Funcs:TypeIdx array;
+        Custom3:  Custom[]; Funcs:FuncType array;
         Custom4:  Custom[]; Tables:Table array;
         Custom5:  Custom[]; Mems:Mem array;
         Custom6:  Custom[]; Globals:Global array;
