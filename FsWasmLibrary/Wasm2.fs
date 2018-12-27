@@ -206,16 +206,17 @@ type Instr2 =
 // FUNCTIONS
 
 and ImportedFunction2Arg = { Import2:Import2; FuncType:FuncType }
-and InternalFunction2Arg = { Export2:Export2 option; OriginalCodeSecIndex:U32; CodeSize:U32; FuncType:FuncType; Locals:Locals; Body:Instr2[] }
+and InternalFunction2Arg = { Export2:Export2 option; OriginalCodeSecIndex:U32; CodeSize:U32; FuncType:FuncType; Locals:Locals[]; Body:Instr2[] }
 
 and Function2 =
     | ImportedFunction2 of ImportedFunction2Arg
     | InternalFunction2 of InternalFunction2Arg
+    | FunctionNotYetResolved of FuncIdx
 
 // GLOBALS
 
 and ImportedGlobal2Arg = { Import2:Import2; GlobalType:GlobalType }
-and InternalGlobal2Arg = { Export2:Export2 option; GlobalType:GlobalType }
+and InternalGlobal2Arg = { Export2:Export2 option; GlobalType:GlobalType; InitExpr:Instr2[] }
 
 and Global2 =
     | ImportedGlobal2 of ImportedGlobal2Arg
@@ -224,7 +225,7 @@ and Global2 =
 // MEMORY
 
 type ImportedMemory2Arg = { Import2:Import2; MemoryType:MemoryType }
-type InternalMemory2Arg = { Export2:Export2 option; MemoryType:MemoryType; InitOffsetExpr:Instr2[]; InitImageBytes:byte array }
+type InternalMemory2Arg = { Export2:Export2 option; MemoryType:MemoryType; InitData:(Instr2[] * byte array)[]; }
 
 type Memory2 =
     | ImportedMemory2 of ImportedMemory2Arg

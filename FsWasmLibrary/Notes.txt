@@ -130,4 +130,19 @@ Global2
         | ExportMemory of MemIdx
         | ExportGlobal of GlobalIdx
 
+//    type Func   = { Locals:Locals array; Body:InstructionArray }
+//    type Table  = { TableType:TableType }
+//    type Mem    = { MemType:MemoryType }
+//    type Global = { GlobalType:GlobalType; InitExpr:InstructionArray }
+		
+//    type ElementType = AnyFuncType
+//    type FuncType    = { ParameterTypes:ValType[]; ReturnTypes:ValType[] }
+//    type MemoryType  = { MemoryLimits:Limits }
+//    type TableType   = { TableElementType:ElementType; TableLimits:Limits }
+//    type GlobalType  = { GlobalType:ValType; GlobalMutability:Mutability }
+		
+		
+		
+		
+		
 		
