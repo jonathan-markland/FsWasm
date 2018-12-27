@@ -8,6 +8,7 @@
     <Compile Include="Wasm.fs" />
     <Compile Include="Wasm2.fs" />
     <Compile Include="WasmAlgorithms.fs" />
+    <Compile Include="WasmToWasm2.fs" />
     <Compile Include="PrivateWasmFileReader.fs" />
     <Compile Include="WasmFileReader.fs" />
   </ItemGroup>

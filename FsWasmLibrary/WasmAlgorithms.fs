@@ -74,6 +74,3 @@ let GetConvenientLookupTables (thisModule:Wasm.Module) =
         MasterMems=memoryArray;
         MasterGlobals=globalArray }
 
-
-
- 
