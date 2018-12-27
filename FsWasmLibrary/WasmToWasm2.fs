@@ -10,9 +10,9 @@ open WasmAlgorithms
 // -------------------------------------------------------------------------------------------------
 
 
-let FindExport (wasmModule:Module) desc : Export2 option =
+let FindExport (oldModule:Module) desc : Export2 option =
 
-    let oldExportOpt = wasmModule.Exports |> Array.tryFind (fun exp ->
+    let oldExportOpt = oldModule.Exports |> Array.tryFind (fun exp ->
         match exp with
             | { ExportName=n; ExportDesc=d } when desc=d -> true
             | _ -> false)
@@ -23,8 +23,8 @@ let FindExport (wasmModule:Module) desc : Export2 option =
 
 
 
-let GetFuncTypeFromTypeIdx typeIdx (wasmModule:Module) =
-    wasmModule.Types.[match typeIdx with TypeIdx(U32(i)) -> (int i)]
+let GetFuncTypeFromTypeIdx typeIdx (oldModule:Module) =
+    oldModule.Types.[match typeIdx with TypeIdx(U32(i)) -> (int i)]
 
 
 // -------------------------------------------------------------------------------------------------
@@ -33,59 +33,59 @@ let GetFuncTypeFromTypeIdx typeIdx (wasmModule:Module) =
 
 
 
-let HarvestTable2sFromImports (wasmModule:Module) =
+let HarvestTable2sFromImports (oldModule:Module) =
 
     let mutable exportIndex = 0u
 
-    wasmModule.Imports |> Array.choose (fun imp ->
+    oldModule.Imports |> Array.choose (fun imp ->
         match imp with
             | {ImportModuleName=m; ImportName=n; ImportDesc=ImportTable(tableType)} 
-                -> let exportOpt = FindExport wasmModule (ExportTable(TableIdx(U32(exportIndex))))
+                -> let exportOpt = FindExport oldModule (ExportTable(TableIdx(U32(exportIndex))))
                    let import2 = { Export2=exportOpt; ImportModuleName=m; ImportName=n }
                    exportIndex <- exportIndex + 1u
                    Some(ImportedTable2({Import2=import2; TableType=tableType}))
             | _ -> None)
 
 
-let HarvestMemory2sFromImports (wasmModule:Module) =
+let HarvestMemory2sFromImports (oldModule:Module) =
 
     let mutable exportIndex = 0u
 
-    wasmModule.Imports |> Array.choose (fun imp ->
+    oldModule.Imports |> Array.choose (fun imp ->
         match imp with
             | {ImportModuleName=m; ImportName=n; ImportDesc=ImportMemory(memoryType)} 
-                -> let exportOpt = FindExport wasmModule (ExportMemory(MemIdx(U32(exportIndex))))
+                -> let exportOpt = FindExport oldModule (ExportMemory(MemIdx(U32(exportIndex))))
                    let import2 = { Export2=exportOpt; ImportModuleName=m; ImportName=n }
                    exportIndex <- exportIndex + 1u
                    Some(ImportedMemory2({Import2=import2; MemoryType=memoryType}))
             | _ -> None)
 
 
-let HarvestGlobal2sFromImports (wasmModule:Module) =
+let HarvestGlobal2sFromImports (oldModule:Module) =
 
     let mutable exportIndex = 0u
 
-    wasmModule.Imports |> Array.choose (fun imp ->
+    oldModule.Imports |> Array.choose (fun imp ->
         match imp with
             | {ImportModuleName=m; ImportName=n; ImportDesc=ImportGlobal(globalType)} 
-                -> let exportOpt = FindExport wasmModule (ExportGlobal(GlobalIdx(U32(exportIndex))))
+                -> let exportOpt = FindExport oldModule (ExportGlobal(GlobalIdx(U32(exportIndex))))
                    let import2 = { Export2=exportOpt; ImportModuleName=m; ImportName=n }
                    exportIndex <- exportIndex + 1u
                    Some(ImportedGlobal2({Import2=import2; GlobalType=globalType}))
             | _ -> None)
 
 
-let HarvestFunction2sFromImports (wasmModule:Module) =
+let HarvestFunction2sFromImports (oldModule:Module) =
 
     let mutable exportIndex = 0u
 
-    wasmModule.Imports |> Array.choose (fun imp ->
+    oldModule.Imports |> Array.choose (fun imp ->
         match imp with
             | {ImportModuleName=m; ImportName=n; ImportDesc=ImportFunc(typeIdx)} 
-                -> let exportOpt = FindExport wasmModule (ExportFunc(FuncIdx(U32(exportIndex))))
+                -> let exportOpt = FindExport oldModule (ExportFunc(FuncIdx(U32(exportIndex))))
                    let import2 = { Export2=exportOpt; ImportModuleName=m; ImportName=n }
                    exportIndex <- exportIndex + 1u
-                   let funcType = wasmModule |> GetFuncTypeFromTypeIdx typeIdx
+                   let funcType = oldModule |> GetFuncTypeFromTypeIdx typeIdx
                    Some(ImportedFunction2({Import2=import2; FuncType=funcType}))
             | _ -> None)
 
@@ -95,44 +95,35 @@ let HarvestFunction2sFromImports (wasmModule:Module) =
 // -------------------------------------------------------------------------------------------------
 
 
-let GetElemSecForTable (tableIndex:TableIdx) (wasmModule:Module) : Elem option =
-    wasmModule.Elems |> Array.tryFind (fun elem -> elem.TableIndex = tableIndex)
+let GetElemSecForTable (tableIndex:TableIdx) (oldModule:Module) : Elem option =
+    oldModule.Elems |> Array.tryFind (fun elem -> elem.TableIndex = tableIndex)
 
 
-let TranslateFuncIndexUnresolved (wasmModule:Module) (funcIndex:FuncIdx) : Function2 =
-    FunctionNotYetResolved(funcIndex)
-
-
-let TranslateFuncIndexArrayUnresolved wasmModule funcIndexArray =
-    funcIndexArray |> Array.map (TranslateFuncIndexUnresolved wasmModule)
-
-
-let rec TranslateInstr (wasmModule:Module) (ins:Instr) : Instr2 =
+let rec TranslateInstr (oldModule:Module) (ins:Instr) : Instr2 =
     Unreachable // TODO: sort out
 
 
-and TranslateInstrArray wasmModule insArray =
-    insArray |> Array.map (TranslateInstr wasmModule)
+and TranslateInstrArray oldModule insArray =
+    insArray |> Array.map (TranslateInstr oldModule)
 
 
 
 
-let HarvestInternalTables (newImportedTables:Table2[]) (wasmModule:Module) =
+let HarvestInternalTables (newImportedTables:Table2[]) (oldModule:Module) =
 
     // There is only max one Table in the Wasm 1.0 spec, but we allow for more.
 
     let mutable objectIndex = (uint32 newImportedTables.Length)
 
-    wasmModule.Tables |> Array.map (
+    oldModule.Tables |> Array.map (
         fun oldTable -> 
-            let exportOpt = FindExport wasmModule (ExportTable(TableIdx(U32(objectIndex))))
-            let elemOpt = wasmModule |> GetElemSecForTable (TableIdx(U32(objectIndex)))
+            let exportOpt = FindExport oldModule (ExportTable(TableIdx(U32(objectIndex))))
+            let elemOpt = oldModule |> GetElemSecForTable (TableIdx(U32(objectIndex)))
             let newInit = 
                 match elemOpt with
                     | Some({TableIndex=_; OffsetExpr=oldOffsetExpr; Init=oldFuncIdxArray}) ->
-                        let translatedOffsetExpr = oldOffsetExpr |> TranslateInstrArray wasmModule
-                        let translatedFuncArray = oldFuncIdxArray |> TranslateFuncIndexArrayUnresolved wasmModule
-                        (translatedOffsetExpr, translatedFuncArray)
+                        let translatedOffsetExpr = oldOffsetExpr |> TranslateInstrArray oldModule
+                        (translatedOffsetExpr, oldFuncIdxArray)
                     | None -> 
                         ([||], [||])
 
@@ -147,63 +138,63 @@ let HarvestInternalTables (newImportedTables:Table2[]) (wasmModule:Module) =
 
 
 
-let HarvestInternalGlobals (newImportedGlobals:Global2[]) (wasmModule:Module) =
+let HarvestInternalGlobals (newImportedGlobals:Global2[]) (oldModule:Module) =
 
     let mutable objectIndex = (uint32 newImportedGlobals.Length)
 
-    wasmModule.Globals |> Array.map (
+    oldModule.Globals |> Array.map (
         fun oldGlobal -> 
-            let exportOpt = FindExport wasmModule (ExportGlobal(GlobalIdx(U32(objectIndex))))
-            let translatedInitExpr = oldGlobal.InitExpr |> TranslateInstrArray wasmModule
+            let exportOpt = FindExport oldModule (ExportGlobal(GlobalIdx(U32(objectIndex))))
+            let translatedInitExpr = oldGlobal.InitExpr |> TranslateInstrArray oldModule
             objectIndex <- objectIndex + 1u
             InternalGlobal2({ Export2=exportOpt; GlobalType=oldGlobal.GlobalType; InitExpr=translatedInitExpr })
         )
 
 
 
-let GetAllInitialisationsForThisMem wasmModule thisMemIdx =
-    wasmModule.Datas |> Array.choose (fun oldData ->
+let GetAllInitialisationsForThisMem oldModule thisMemIdx =
+    oldModule.Datas |> Array.choose (fun oldData ->
         match oldData with
             | { DataMemoryIndex=i; OffsetExpr=e; InitImageBytes=bs } when i=thisMemIdx ->
-                let translatedOffsetExpr = e |> TranslateInstrArray wasmModule
+                let translatedOffsetExpr = e |> TranslateInstrArray oldModule
                 Some(translatedOffsetExpr, bs)
             | _ -> None
         )
 
 
 
-let HarvestInternalMems (newImportedMems:Memory2[]) (wasmModule:Module) =
+let HarvestInternalMems (newImportedMems:Memory2[]) (oldModule:Module) =
 
     let mutable objectIndex = (uint32 newImportedMems.Length)
 
-    wasmModule.Mems |> Array.map (
+    oldModule.Mems |> Array.map (
         fun oldMem -> 
             let thisMemIdx = MemIdx(U32(objectIndex))
-            let exportOpt = FindExport wasmModule (ExportMemory(thisMemIdx))
-            let translatedInitData = GetAllInitialisationsForThisMem wasmModule thisMemIdx
+            let exportOpt = FindExport oldModule (ExportMemory(thisMemIdx))
+            let translatedInitData = GetAllInitialisationsForThisMem oldModule thisMemIdx
             objectIndex <- objectIndex + 1u
             InternalMemory2({ Export2=exportOpt; MemoryType=oldMem.MemType; InitData=translatedInitData })
         )
 
 
 
-let GetFuncType (wasmModule:Module) (codeSecIndex:int) =
-    match wasmModule.Funcs.[codeSecIndex] with
-        | TypeIdx(U32(i)) -> wasmModule.Types.[int i]
+let GetFuncType (oldModule:Module) (codeSecIndex:int) =
+    match oldModule.Funcs.[codeSecIndex] with
+        | TypeIdx(U32(i)) -> oldModule.Types.[int i]
 
     
 
-let HarvestInternalFuncs (newImportedFuncs:Function2[]) (wasmModule:Module) =
+let HarvestInternalFuncs (newImportedFuncs:Function2[]) (oldModule:Module) =
 
     let mutable objectIndex = (uint32 newImportedFuncs.Length)
     let mutable codeSecIndex = 0
 
-    wasmModule.Codes |> Array.map (fun oldCode -> 
+    oldModule.Codes |> Array.map (fun oldCode -> 
         let thisFuncIdx = FuncIdx(U32(objectIndex))
-        let exportOpt = FindExport wasmModule (ExportFunc(thisFuncIdx))
-        let funcType = GetFuncType wasmModule codeSecIndex
+        let exportOpt = FindExport oldModule (ExportFunc(thisFuncIdx))
+        let funcType = GetFuncType oldModule codeSecIndex
         let translatedBodyWithoutFunctionReferences = 
-            oldCode.Function.Body |> TranslateInstrArray wasmModule
+            oldCode.Function.Body |> TranslateInstrArray oldModule
 
         objectIndex <- objectIndex + 1u
         codeSecIndex <- codeSecIndex + 1
@@ -223,43 +214,30 @@ let HarvestInternalFuncs (newImportedFuncs:Function2[]) (wasmModule:Module) =
 // -------------------------------------------------------------------------------------------------
 
 
-let TranslateWasmToWasm2 (wasmModule:Module) =
+let TranslateWasmToWasm2 (oldModule:Module) =
 
-    let newImportedFuncs = wasmModule |> HarvestFunction2sFromImports 
-    let newImportedMems = wasmModule |> HarvestMemory2sFromImports
-    let newImportedTables = wasmModule |> HarvestTable2sFromImports
-    let newImportedGlobals = wasmModule |> HarvestGlobal2sFromImports
+    let newImportedFuncs = oldModule |> HarvestFunction2sFromImports 
+    let newImportedMems = oldModule |> HarvestMemory2sFromImports
+    let newImportedTables = oldModule |> HarvestTable2sFromImports
+    let newImportedGlobals = oldModule |> HarvestGlobal2sFromImports
 
-    let newImportedFuncs = wasmModule |> HarvestInternalFuncs newImportedFuncs
-    let newInternalMems = wasmModule |> HarvestInternalMems newImportedMems
-    let newInternalTables = wasmModule |> HarvestInternalTables newImportedTables
-    let newInternalGlobals = wasmModule |> HarvestInternalGlobals newImportedGlobals
+    let newInternalFuncs = oldModule |> HarvestInternalFuncs newImportedFuncs
+    let newInternalMems = oldModule |> HarvestInternalMems newImportedMems
+    let newInternalTables = oldModule |> HarvestInternalTables newImportedTables
+    let newInternalGlobals = oldModule |> HarvestInternalGlobals newImportedGlobals
 
-    // [ ] Concatenate the arrays
+    let finalFuncs = Array.append newImportedFuncs newInternalFuncs
+    let finalMems = Array.append newImportedMems newInternalMems
+    let finalTables = Array.append newImportedTables newInternalTables
+    let finalGlobals = Array.append newImportedGlobals newInternalGlobals
 
-    // [ ] 
+    // TODO: Expand out the locals list with the repeats, so that the LocalIdx indices work.
+    // TODO: Translate the instructions.
 
-
-    0
-
-
-    //let lookupTables = wasmModule |> GetConvenientLookupTables
-
-    // [ ] Do not fill in the Body on the first pass of the functions.  Leave empty.  Do later
-    //     and return replacements.
-
-    // [ ] Do Memory and Tables first
-
-    // let newStart = { 
-    //     StartFunction2=
-    //         match wasmModule.Start with
-    //             | None -> None
-    //             | Some({StartFuncIdx=f}) -> look f up in the newFuncs[] }
-
-    // {
-    //     funcs=newFuncs;
-    //     mems=newMems;
-    //     tables=newTables;
-    //     globals=newGlobals;
-    //     start=newStart;
-    // }
+    {
+        funcs   = finalFuncs;
+        mems    = finalMems;
+        tables  = finalTables;
+        globals = finalGlobals;
+        start   = oldModule.Start;
+    }

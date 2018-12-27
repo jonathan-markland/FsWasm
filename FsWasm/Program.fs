@@ -14,11 +14,6 @@ let main argv =
     let thisModule = r |> Module
     let unitTestSerialisation = thisModule |> UnitTestSerialiser.ModuleToUnitTestString fileName
 
-    // ** Convert thisModule to thisModule2 **
-    // let thisModule2 = thisModule |> ConvertToBetterForm
-
-
-
     let translatedToWasm2 = thisModule |> WasmToWasm2.TranslateWasmToWasm2
 
     printfn "Hello World from F#!"

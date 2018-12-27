@@ -19,7 +19,7 @@ type Instr2 =
     | BrIf         of LabelIdx  // 0D
     | BrTable      of LabelIdx array * LabelIdx  // 0E
     | Return
-    | Call         of Function2   // 10
+    | Call         of FuncIdx     // 10
     | CallIndirect of FuncType    // 11 00
 
     // 5.4.2  Parameteric Instructions
@@ -32,8 +32,8 @@ type Instr2 =
     | GetLocal  of LocalIdx    // 20
     | SetLocal  of LocalIdx    // 21
     | TeeLocal  of LocalIdx    // 22
-    | GetGlobal of Global2     // 23
-    | SetGlobal of Global2     // 24
+    | GetGlobal of GlobalIdx   // 23
+    | SetGlobal of GlobalIdx   // 24
 
     // 5.4.4  Memory Instructions
 
@@ -205,20 +205,19 @@ type Instr2 =
 
 // FUNCTIONS
 
-and ImportedFunction2Arg = { Import2:Import2; FuncType:FuncType }
-and InternalFunction2Arg = { Export2:Export2 option; OriginalCodeSecIndex:U32; CodeSize:U32; FuncType:FuncType; Locals:Locals[]; Body:Instr2[] }
+type ImportedFunction2Arg = { Import2:Import2; FuncType:FuncType }
+type InternalFunction2Arg = { Export2:Export2 option; OriginalCodeSecIndex:U32; CodeSize:U32; FuncType:FuncType; Locals:Locals[]; Body:Instr2[] }
 
-and Function2 =
+type Function2 =
     | ImportedFunction2 of ImportedFunction2Arg
     | InternalFunction2 of InternalFunction2Arg
-    | FunctionNotYetResolved of FuncIdx
 
 // GLOBALS
 
-and ImportedGlobal2Arg = { Import2:Import2; GlobalType:GlobalType }
-and InternalGlobal2Arg = { Export2:Export2 option; GlobalType:GlobalType; InitExpr:Instr2[] }
+type ImportedGlobal2Arg = { Import2:Import2; GlobalType:GlobalType }
+type InternalGlobal2Arg = { Export2:Export2 option; GlobalType:GlobalType; InitExpr:Instr2[] }
 
-and Global2 =
+type Global2 =
     | ImportedGlobal2 of ImportedGlobal2Arg
     | InternalGlobal2 of InternalGlobal2Arg
 
@@ -234,15 +233,11 @@ type Memory2 =
 // TABLES
 
 type ImportedTable2Arg  = { Import2:Import2; TableType:TableType }
-type InternalTable2Arg  = { Export2:Export2 option; TableType:TableType; InitOffsetExpr:Instr2[]; InitWith:Function2 array }
+type InternalTable2Arg  = { Export2:Export2 option; TableType:TableType; InitOffsetExpr:Instr2[]; InitWith:FuncIdx array }
 
 type Table2 =
     | ImportedTable2 of ImportedTable2Arg
     | InternalTable2 of InternalTable2Arg
-
-// START
-
-type Start2 = { StartFunction2:Function2 }
 
 // MODULE
 
@@ -252,5 +247,5 @@ type Module2 = {
     mems:Memory2[];
     tables:Table2[];
     globals:Global2[];
-    start:Start2 option; }
+    start:Start option; }
 
