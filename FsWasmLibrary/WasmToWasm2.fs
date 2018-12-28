@@ -2,7 +2,6 @@
 
 open Wasm
 open Wasm2
-open WasmAlgorithms
 
 
 // -------------------------------------------------------------------------------------------------
@@ -212,7 +211,6 @@ let TranslateWasmToWasm2 (oldModule:Module) =
     let finalGlobals = Array.append newImportedGlobals newInternalGlobals
 
     // TODO: Expand out the locals list with the repeats, so that the LocalIdx indices work.
-    // TODO: Translate the instructions.
 
     {
         funcs   = finalFuncs;
