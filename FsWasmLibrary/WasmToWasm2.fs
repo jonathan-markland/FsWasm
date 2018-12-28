@@ -94,15 +94,6 @@ let GetElemSecForTable (tableIndex:TableIdx) (oldModule:Module) : Elem option =
     oldModule.Elems |> Array.tryFind (fun elem -> elem.TableIndex = tableIndex)
 
 
-let rec TranslateInstr (oldModule:Module) (ins:Instr) : Instr2 =
-    Unreachable // TODO: sort out
-
-
-and TranslateInstrArray oldModule insArray =
-    insArray |> Array.map (TranslateInstr oldModule)
-
-
-
 
 let HarvestInternalTables (newImportedTables:Table2[]) (oldModule:Module) =
 
@@ -117,8 +108,7 @@ let HarvestInternalTables (newImportedTables:Table2[]) (oldModule:Module) =
             let newInit = 
                 match elemOpt with
                     | Some({TableIndex=_; OffsetExpr=oldOffsetExpr; Init=oldFuncIdxArray}) ->
-                        let translatedOffsetExpr = oldOffsetExpr |> TranslateInstrArray oldModule
-                        (translatedOffsetExpr, oldFuncIdxArray)
+                        (oldOffsetExpr, oldFuncIdxArray)
                     | None -> 
                         ([||], [||])
 
@@ -140,9 +130,8 @@ let HarvestInternalGlobals (newImportedGlobals:Global2[]) (oldModule:Module) =
     oldModule.Globals |> Array.map (
         fun oldGlobal -> 
             let exportOpt = FindExport oldModule (ExportGlobal(GlobalIdx(U32(objectIndex))))
-            let translatedInitExpr = oldGlobal.InitExpr |> TranslateInstrArray oldModule
             objectIndex <- objectIndex + 1u
-            InternalGlobal2({ Export2=exportOpt; GlobalType=oldGlobal.GlobalType; InitExpr=translatedInitExpr })
+            InternalGlobal2({ Export2=exportOpt; GlobalType=oldGlobal.GlobalType; InitExpr=oldGlobal.InitExpr })
         )
 
 
@@ -151,8 +140,7 @@ let GetAllInitialisationsForThisMem oldModule thisMemIdx =
     oldModule.Datas |> Array.choose (fun oldData ->
         match oldData with
             | { DataMemoryIndex=i; OffsetExpr=e; InitImageBytes=bs } when i=thisMemIdx ->
-                let translatedOffsetExpr = e |> TranslateInstrArray oldModule
-                Some(translatedOffsetExpr, bs)
+                Some(e, bs)
             | _ -> None
         )
 
@@ -187,8 +175,6 @@ let HarvestInternalFuncs (newImportedFuncs:Function2[]) (oldModule:Module) =
         let thisFuncIdx = FuncIdx(U32(objectIndex))
         let exportOpt = FindExport oldModule (ExportFunc(thisFuncIdx))
         let funcType = GetFuncType oldModule codeSecIndex
-        let translatedBodyWithoutFunctionReferences = 
-            oldCode.Function.Body |> TranslateInstrArray oldModule
 
         objectIndex <- objectIndex + 1u
         codeSecIndex <- codeSecIndex + 1
@@ -198,7 +184,7 @@ let HarvestInternalFuncs (newImportedFuncs:Function2[]) (oldModule:Module) =
             CodeSize = oldCode.CodeSize; 
             FuncType = funcType; 
             Locals = oldCode.Function.Locals; 
-            Body = translatedBodyWithoutFunctionReferences })
+            Body = oldCode.Function.Body })
         )
 
 
