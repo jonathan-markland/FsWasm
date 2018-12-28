@@ -163,6 +163,23 @@ let HarvestInternalMems (newImportedMems:Memory2[]) (oldModule:Module) =
 let GetFuncType (oldModule:Module) (codeSecIndex:int) =
     oldModule.Funcs.[codeSecIndex]
 
+
+
+let MakeArrayUsing arrayMaker =
+    let container = new ResizeArray<'recordType>()
+    arrayMaker (container.Add)
+    container.ToArray()
+ 
+
+
+let FlattenLocalsToArray (oldLocals:Locals[]) =
+    
+    let arrayMaker add = oldLocals |> Array.iter (fun item ->
+        let { NumRepeats=U32(numRepeats); LocalsType=theType; } = item
+        for i in 0u..numRepeats do add theType)
+
+    MakeArrayUsing arrayMaker
+
     
 
 let HarvestInternalFuncs (newImportedFuncs:Function2[]) (oldModule:Module) =
@@ -174,6 +191,7 @@ let HarvestInternalFuncs (newImportedFuncs:Function2[]) (oldModule:Module) =
         let thisFuncIdx = FuncIdx(U32(objectIndex))
         let exportOpt = FindExport oldModule (ExportFunc(thisFuncIdx))
         let funcType = GetFuncType oldModule codeSecIndex
+        let newLocals = oldCode.Function.Locals |> FlattenLocalsToArray 
 
         objectIndex <- objectIndex + 1u
         codeSecIndex <- codeSecIndex + 1
@@ -182,7 +200,7 @@ let HarvestInternalFuncs (newImportedFuncs:Function2[]) (oldModule:Module) =
             OriginalCodeSecIndex = U32(uint32 codeSecIndex); 
             CodeSize = oldCode.CodeSize; 
             FuncType = funcType; 
-            Locals = oldCode.Function.Locals; 
+            Locals = newLocals; 
             Body = oldCode.Function.Body })
         )
 

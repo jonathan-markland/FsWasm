@@ -8,7 +8,7 @@ type Import2 = { Export2:Export2 option; ImportModuleName:Name; ImportName:Name 
 // FUNCTIONS
 
 type ImportedFunction2Arg = { Import2:Import2; FuncType:FuncType }
-type InternalFunction2Arg = { Export2:Export2 option; OriginalCodeSecIndex:U32; CodeSize:U32; FuncType:FuncType; Locals:Locals[]; Body:Instr[] }
+type InternalFunction2Arg = { Export2:Export2 option; OriginalCodeSecIndex:U32; CodeSize:U32; FuncType:FuncType; Locals:ValType[]; Body:Instr[] }
 
 type Function2 =
     | ImportedFunction2 of ImportedFunction2Arg
