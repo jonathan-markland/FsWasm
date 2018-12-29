@@ -129,11 +129,11 @@ let HarvestFunction2sFromImports (oldModule:Module) =
 // -------------------------------------------------------------------------------------------------
 
 
-let HarvestInternalTables (newImportedTables:Table2[]) (oldModule:Module) =
+let HarvestInternalTables countOfImportedTables (oldModule:Module) =
 
     // There is only max one Table in the Wasm 1.0 spec, but we allow for more.
 
-    let mutable objectIndex = (uint32 newImportedTables.Length)
+    let mutable objectIndex = (uint32 countOfImportedTables)
 
     oldModule.Tables |> Array.map (
 
@@ -159,9 +159,9 @@ let HarvestInternalTables (newImportedTables:Table2[]) (oldModule:Module) =
 
 
 
-let HarvestInternalGlobals (newImportedGlobals:Global2[]) (oldModule:Module) =
+let HarvestInternalGlobals countOfImportedGlobals (oldModule:Module) =
 
-    let mutable objectIndex = (uint32 newImportedGlobals.Length)
+    let mutable objectIndex = (uint32 countOfImportedGlobals)
 
     oldModule.Globals |> Array.map (fun oldGlobal -> 
 
@@ -173,9 +173,9 @@ let HarvestInternalGlobals (newImportedGlobals:Global2[]) (oldModule:Module) =
 
 
 
-let HarvestInternalMems (newImportedMems:Memory2[]) (oldModule:Module) =
+let HarvestInternalMems countOfImportedMems (oldModule:Module) =
 
-    let mutable objectIndex = (uint32 newImportedMems.Length)
+    let mutable objectIndex = (uint32 countOfImportedMems)
 
     oldModule.Mems |> Array.map (fun oldMem -> 
 
@@ -189,9 +189,9 @@ let HarvestInternalMems (newImportedMems:Memory2[]) (oldModule:Module) =
 
 
 
-let HarvestInternalFuncs (newImportedFuncs:Function2[]) (oldModule:Module) =
+let HarvestInternalFuncs countOfImportedFuncs (oldModule:Module) =
 
-    let mutable objectIndex = (uint32 newImportedFuncs.Length)
+    let mutable objectIndex = (uint32 countOfImportedFuncs)
     let mutable codeSecIndex = 0
 
     oldModule.Codes |> Array.map (fun oldCode -> 

@@ -12,10 +12,10 @@ let TranslateWasmToWasm2 (oldModule:Module) =
     let newImportedTables  = oldModule |> HarvestTable2sFromImports
     let newImportedGlobals = oldModule |> HarvestGlobal2sFromImports
 
-    let newInternalFuncs   = oldModule |> HarvestInternalFuncs   newImportedFuncs
-    let newInternalMems    = oldModule |> HarvestInternalMems    newImportedMems
-    let newInternalTables  = oldModule |> HarvestInternalTables  newImportedTables
-    let newInternalGlobals = oldModule |> HarvestInternalGlobals newImportedGlobals
+    let newInternalFuncs   = oldModule |> HarvestInternalFuncs   newImportedFuncs.Length
+    let newInternalMems    = oldModule |> HarvestInternalMems    newImportedMems.Length
+    let newInternalTables  = oldModule |> HarvestInternalTables  newImportedTables.Length
+    let newInternalGlobals = oldModule |> HarvestInternalGlobals newImportedGlobals.Length
 
     let finalFuncs   = Array.append newImportedFuncs   newInternalFuncs
     let finalMems    = Array.append newImportedMems    newInternalMems
