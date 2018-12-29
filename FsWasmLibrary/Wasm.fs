@@ -229,8 +229,6 @@ open System
 
     // 5.4.6  Expressions
 
-    type InstructionArray = Instr[]
-
     type Name = string
 
     type ImportDesc = 
@@ -249,15 +247,15 @@ open System
 
     type Custom = { Name:Name; Data:byte array }
     type Import = { ImportModuleName:Name; ImportName:Name; ImportDesc:ImportDesc }
-    type Func   = { Locals:Locals array; Body:InstructionArray }
+    type Func   = { Locals:Locals array; Body:Instr[] }
     type Table  = { TableType:TableType }
     type Mem    = { MemType:MemoryType }
-    type Global = { GlobalType:GlobalType; InitExpr:InstructionArray }
+    type Global = { GlobalType:GlobalType; InitExpr:Instr[] }
     type Export = { ExportName:Name; ExportDesc:ExportDesc }
     type Start  = { StartFuncIdx:FuncIdx }
-    type Elem   = { TableIndex:TableIdx; OffsetExpr:InstructionArray; Init:FuncIdx array }
+    type Elem   = { TableIndex:TableIdx; OffsetExpr:Instr[]; Init:FuncIdx[] }
     type Code   = { CodeSize:U32; Function:Func }
-    type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:InstructionArray; InitImageBytes:byte array }
+    type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:Instr[]; InitImageBytes:byte[] }
 
     type Magic   = U32
     type Version = U32

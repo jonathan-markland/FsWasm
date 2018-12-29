@@ -195,7 +195,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
         // CODE
 
-        let addCodeDetail i (c:Code) =
+        let addCodeDetail i c =
             NewLine ()
             NewLine ()
             Text (sprintf "CodeSec[%d]  (%d bytes)" i (match c with { CodeSize=U32(n) } -> n))
@@ -247,15 +247,15 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     // GLOBAL SECTION
 
-    let AddGlobalType (t:GlobalType) =
+    let AddGlobalType t =
         Add (PrettyMutability t.GlobalMutability)
         Add ":"
         Add (PrettyValType t.GlobalType)
 
-    let AddGlobalTypeAndInstructions (t:GlobalType) (e:InstructionArray) =
-        AddGlobalType t
+    let AddGlobalTypeAndInstructions gt ins =
+        AddGlobalType gt
         NewLine ()
-        AddBody e
+        AddBody ins
         NewLine ()
         NewLine ()
 
