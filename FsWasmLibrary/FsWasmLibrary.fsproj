@@ -11,6 +11,7 @@
     <Compile Include="PrivateWasmToWasm2.fs" />
     <Compile Include="WasmToWasm2.fs" />
     <Compile Include="PrivateWasmFileReader.fs" />
+    <Compile Include="PrivateWasm2ToSimpleReg32.fs" />
     <Compile Include="WasmFileReader.fs" />
   </ItemGroup>
 
