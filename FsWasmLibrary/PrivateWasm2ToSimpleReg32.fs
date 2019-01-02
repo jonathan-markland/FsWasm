@@ -28,8 +28,8 @@ type InstrSimpleReg32 =
     | CallFunc    of LABELNAME    // Call to given function label
     | CallTableIndirect           // Reg A contains index into WASM Table[0]
 
-    | BranchA0    of LABELNAME    // Branch if A=0
-    | BranchA1    of LABELNAME    // Branch if A<>0
+    | BranchAZ    of LABELNAME    // Branch to given label when A==0
+    | BranchANZ   of LABELNAME    // Branch to given label when A<>0
     | GotoIndex   of tableLabel:LABELNAME * tableLength:int * defaultLabel:LABELNAME  // Reg A contains index.  Go to defaultLabel if out of range.
 
     | TableOfAddresses of tableLabel:LABELNAME * LABELNAME array
@@ -43,49 +43,49 @@ type InstrSimpleReg32 =
     | LetAB       // Copy reg B value into reg A
     | LetAC       // Copy reg C value into reg A
 
-    | AddAB       // Calculate A+B, result in A
-    | SubAB       // TODO: sort out stack ordering for these non-commutatives
-    | MulAB       // Calculate A*B, result in A
-    | DivsAB
-    | DivuAB
-    | RemsAB
-    | RemuAB
-    | AndAB       // Calculate A AND B, result in A
-    | OrAB        // Calculate A OR B, result in A
-    | XorAB       // Calculate A XOR B, result in A
-    | ShlAB
-    | ShrsAB
-    | ShruAB
-    | RotlAB
-    | RotrAB
+    | AddBA       // Calculate B+A, result in A
+    | SubBA       // Calculate B-A, result in A
+    | MulBA       // Calculate B*A, result in A
+    | DivsBA      // Calculate (signed   B) * (signed   A), result in A
+    | DivuBA      // Calculate (unsigned B) * (unsigned A), result in A
+    | RemsBA      // Calculate (signed   B) % (signed   A), result in A
+    | RemuBA      // Calculate (unsigned B) % (unsigned A), result in A
+    | AndBA       // Calculate B AND A, result in A
+    | OrBA        // Calculate B OR  A, result in A
+    | XorBA       // Calculate B XOR A, result in A
+    | ShlBA       // Calculate (unsigned B) SHL A, result in A
+    | ShrsBA      // Calculate (signed   B) SHR A, result in A
+    | ShruBA      // Calculate (unsigned B) SHR A, result in A
+    | RotlBA      // Calculate B ROL A, result in A
+    | RotrBA      // Calculate B ROR A, result in A
 
-    | CmpEqAB 
-    | CmpNeAB 
-    | CmpLtsAB
-    | CmpLtuAB
-    | CmpGtsAB
-    | CmpGtuAB
-    | CmpLesAB
-    | CmpLeuAB
-    | CmpGesAB
-    | CmpGeuAB
+    | CmpEqBA     // Set A=1 when B == A, else set A=0
+    | CmpNeBA     // Set A=1 when B <> A, else set A=0
+    | CmpLtsBA    // Set A=1 when (signed   B) < (signed   A) , else set A=0
+    | CmpLtuBA    // Set A=1 when (unsigned B) < (unsigned A) , else set A=0
+    | CmpGtsBA    // Set A=1 when (signed   B) > (signed   A) , else set A=0
+    | CmpGtuBA    // Set A=1 when (unsigned B) > (unsigned A) , else set A=0
+    | CmpLesBA    // Set A=1 when (signed   B) <= (signed   A), else set A=0
+    | CmpLeuBA    // Set A=1 when (unsigned B) <= (unsigned A), else set A=0
+    | CmpGesBA    // Set A=1 when (signed   B) >= (signed   A), else set A=0
+    | CmpGeuBA    // Set A=1 when (unsigned B) >= (unsigned A), else set A=0
 
-    | CmpA0                        // Compare A with 0 and set A=1 if so, else set A=0
+    | CmpAZ                        // Set A=1 when A == 0, else set A=0
 
     | FetchLocA     of LocalIdx    // Fetch local variable value into A
     | StoreALoc     of LocalIdx    // Store A to local variable
-    | FetchGloA     of GlobalIdx   // Fetch global variable value into A
-    | StoreAGlo     of GlobalIdx   // Store A to global variable
+    | FetchGloA     of GlobalIdx   // Fetch WASM global variable value into A
+    | StoreAGlo     of GlobalIdx   // Store A to WASM global variable
 
-    | Store8AtoB    of U32         // Store least significant 8 bits of reg A to address given by reg B
-    | Store16AtoB   of U32         // Store least significant 16 bits of reg A to address given by reg B
-    | Store32AtoB   of U32         // Store 32 bits of reg A to address given by reg B
+    | Store8AtoB    of U32         // Store least significant 8 bits of reg A to WASM linear memory, address given by reg B
+    | Store16AtoB   of U32         // Store least significant 16 bits of reg A to WASM linear memory, address given by reg B
+    | Store32AtoB   of U32         // Store 32 bits of reg A to WASM linear memory, address given by reg B
 
-    | Fetch8sFromA  of U32         // Fetch byte from address A, sign-extend with result in A
-    | Fetch8uFromA  of U32         // Fetch byte from address A, zero-extend with result in A
-    | Fetch16sFromA of U32         // Fetch short from address A, sign-extend with result in A
-    | Fetch16uFromA of U32         // Fetch short from address A, zero-extend with result in A
-    | Fetch32FromA  of U32         // Fetch 32-bits from address A, into A
+    | Fetch8sFromA  of U32         // Fetch byte from WASM linear memory, address A, sign-extend with result in A
+    | Fetch8uFromA  of U32         // Fetch byte from WASM linear memory, address A, zero-extend with result in A
+    | Fetch16sFromA of U32         // Fetch short from WASM linear memory, address A, sign-extend with result in A
+    | Fetch16uFromA of U32         // Fetch short from WASM linear memory, address A, zero-extend with result in A
+    | Fetch32FromA  of U32         // Fetch 32-bits from WASM linear memory, address A, into A
 
 
 
@@ -122,7 +122,14 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
 
     and TranslateInstruction (w:Wasm.Instr) : InstrSimpleReg32[] =
 
-        let binaryOp op = [| PopA; PopB; op; PushA; Barrier |]
+        let binaryOp op = 
+            [| 
+                PopA; // RHS operand
+                PopB; // LHS operand
+                op; 
+                PushA; 
+                Barrier 
+            |]
 
         let translateConstruct sourceBody putInOrder =
             let constructLabel = pushNewLabel ()
@@ -146,7 +153,7 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
                     PopA; 
                     PopB; // val2  (desired if A == 0)
                     PopC; // val1  (desired if A <> 0)
-                    BranchA0(l1);
+                    BranchAZ(l1);
                     LetAC;
                     Goto(l2);
                     Label(l1);
@@ -163,7 +170,7 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
                 let skipLabel = pushNewLabel ()
                 let translatedBody = TranslateInstructions body
                 popLabel ()
-                [| PopA; BranchA0(skipLabel); |] +++ translatedBody +++ [| Label(skipLabel); Barrier |]
+                [| PopA; BranchAZ(skipLabel); |] +++ translatedBody +++ [| Label(skipLabel); Barrier |]
                     
             | IfElse(_, ifbody, elsebody) ->
 
@@ -175,7 +182,7 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
                 let translatedElseBody = TranslateInstructions elsebody
                 popLabel ()
 
-                [| PopA; BranchA0(skipIfLabel); |] +++ 
+                [| PopA; BranchAZ(skipIfLabel); |] +++ 
                     translatedIfBody +++ 
                     [| Goto(skipElseLabel); Label(skipIfLabel); |] +++ 
                     translatedElseBody +++ 
@@ -183,7 +190,7 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
 
             | Br(target)   -> [| Goto(labelFor target); Barrier |]
 
-            | BrIf(target) -> [| PopA; BranchA1(labelFor target); Barrier |]
+            | BrIf(target) -> [| PopA; BranchANZ(labelFor target); Barrier |]
 
             | BrTable(labelArray, defaultLabel) -> 
                 let tableLabel = newLabel ()
@@ -223,35 +230,35 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
             | I32Load16u( {Align=U32(A); Offset=_})  -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
             | I32Load(    {Align=U32(A); Offset=_})  -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
 
-            | I32Eqz -> [| PopA; CmpA0; PushA; |] 
+            | I32Eqz -> [| PopA; CmpAZ; PushA; |] 
 
-            | I32Eq  -> binaryOp CmpEqAB 
-            | I32Ne  -> binaryOp CmpNeAB
+            | I32Eq  -> binaryOp CmpEqBA 
+            | I32Ne  -> binaryOp CmpNeBA
 
-            | I32Lts -> binaryOp CmpLtsAB
-            | I32Ltu -> binaryOp CmpLtuAB
-            | I32Gts -> binaryOp CmpGtsAB
-            | I32Gtu -> binaryOp CmpGtuAB
-            | I32Les -> binaryOp CmpLesAB
-            | I32Leu -> binaryOp CmpLeuAB
-            | I32Ges -> binaryOp CmpGesAB
-            | I32Geu -> binaryOp CmpGeuAB
+            | I32Lts -> binaryOp CmpLtsBA
+            | I32Ltu -> binaryOp CmpLtuBA
+            | I32Gts -> binaryOp CmpGtsBA
+            | I32Gtu -> binaryOp CmpGtuBA
+            | I32Les -> binaryOp CmpLesBA
+            | I32Leu -> binaryOp CmpLeuBA
+            | I32Ges -> binaryOp CmpGesBA
+            | I32Geu -> binaryOp CmpGeuBA
 
-            | I32Add  -> binaryOp AddAB
-            | I32Sub  -> binaryOp SubAB
-            | I32Mul  -> binaryOp MulAB
-            | I32Divs -> binaryOp DivsAB
-            | I32Divu -> binaryOp DivuAB
-            | I32Rems -> binaryOp RemsAB
-            | I32Remu -> binaryOp RemuAB
-            | I32And  -> binaryOp AndAB
-            | I32Or   -> binaryOp OrAB
-            | I32Xor  -> binaryOp XorAB
-            | I32Shl  -> binaryOp ShlAB
-            | I32Shrs -> binaryOp ShrsAB
-            | I32Shru -> binaryOp ShruAB
-            | I32Rotl -> binaryOp RotlAB
-            | I32Rotr -> binaryOp RotrAB
+            | I32Add  -> binaryOp AddBA
+            | I32Sub  -> binaryOp SubBA
+            | I32Mul  -> binaryOp MulBA
+            | I32Divs -> binaryOp DivsBA
+            | I32Divu -> binaryOp DivuBA
+            | I32Rems -> binaryOp RemsBA
+            | I32Remu -> binaryOp RemuBA
+            | I32And  -> binaryOp AndBA
+            | I32Or   -> binaryOp OrBA
+            | I32Xor  -> binaryOp XorBA
+            | I32Shl  -> binaryOp ShlBA
+            | I32Shrs -> binaryOp ShrsBA
+            | I32Shru -> binaryOp ShruBA
+            | I32Rotl -> binaryOp RotlBA
+            | I32Rotr -> binaryOp RotrBA
 
             | _ -> failwith "Cannot translate this instruction to simple 32-bit machine."
 
