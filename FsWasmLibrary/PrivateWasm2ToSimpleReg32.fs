@@ -1,91 +1,16 @@
 ﻿module PrivateWasm2ToSimpleReg32
 
 open Wasm
+open SimpleReg32
 
 
 
-type REG32 = Reg32 of int
-type CONST32 = Const32 of int
-type LABELNAME = LabelName of string
+let (+++) a b = Array.append a b
 
 
 
-type InstrSimpleReg32 =
-
-    // A 32-bit register machine with a few registers
-
-    | Barrier     // Marks where all registers are unassigned
-
-    | Breakpoint  // Emit breakpoint instruction
-    | Drop        // Discard top of stack
-
-    | Function    of LABELNAME    // Emit function label
-    | Label       of LABELNAME    // Emit local label
-
-    | ConstA      of CONST32      // Load constant into reg A
-
-    | Goto        of LABELNAME    // Go to given label
-    | CallFunc    of LABELNAME    // Call to given function label
-    | CallTableIndirect           // Reg A contains index into WASM Table[0]
-
-    | BranchAZ    of LABELNAME    // Branch to given label when A==0
-    | BranchANZ   of LABELNAME    // Branch to given label when A<>0
-    | GotoIndex   of tableLabel:LABELNAME * tableLength:int * defaultLabel:LABELNAME  // Reg A contains index.  Go to defaultLabel if out of range.
-
-    | TableOfAddresses of tableLabel:LABELNAME * LABELNAME array
-
-    | PushA       // Push reg A onto stack
-    | PeekA       // Load top-of-stack to A, without any stack adjustment
-    | PopA        // Pop top of stack into reg A
-    | PopB        // Pop top of stack into reg B
-    | PopC        // Pop top of stack into reg C
-
-    | LetAB       // Copy reg B value into reg A
-    | LetAC       // Copy reg C value into reg A
-
-    | AddBA       // Calculate B+A, result in A
-    | SubBA       // Calculate B-A, result in A
-    | MulBA       // Calculate B*A, result in A
-    | DivsBA      // Calculate (signed   B) * (signed   A), result in A
-    | DivuBA      // Calculate (unsigned B) * (unsigned A), result in A
-    | RemsBA      // Calculate (signed   B) % (signed   A), result in A
-    | RemuBA      // Calculate (unsigned B) % (unsigned A), result in A
-    | AndBA       // Calculate B AND A, result in A
-    | OrBA        // Calculate B OR  A, result in A
-    | XorBA       // Calculate B XOR A, result in A
-    | ShlBA       // Calculate (unsigned B) SHL A, result in A
-    | ShrsBA      // Calculate (signed   B) SHR A, result in A
-    | ShruBA      // Calculate (unsigned B) SHR A, result in A
-    | RotlBA      // Calculate B ROL A, result in A
-    | RotrBA      // Calculate B ROR A, result in A
-
-    | CmpEqBA     // Set A=1 when B == A, else set A=0
-    | CmpNeBA     // Set A=1 when B <> A, else set A=0
-    | CmpLtsBA    // Set A=1 when (signed   B) < (signed   A) , else set A=0
-    | CmpLtuBA    // Set A=1 when (unsigned B) < (unsigned A) , else set A=0
-    | CmpGtsBA    // Set A=1 when (signed   B) > (signed   A) , else set A=0
-    | CmpGtuBA    // Set A=1 when (unsigned B) > (unsigned A) , else set A=0
-    | CmpLesBA    // Set A=1 when (signed   B) <= (signed   A), else set A=0
-    | CmpLeuBA    // Set A=1 when (unsigned B) <= (unsigned A), else set A=0
-    | CmpGesBA    // Set A=1 when (signed   B) >= (signed   A), else set A=0
-    | CmpGeuBA    // Set A=1 when (unsigned B) >= (unsigned A), else set A=0
-
-    | CmpAZ                        // Set A=1 when A == 0, else set A=0
-
-    | FetchLocA     of LocalIdx    // Fetch local variable value into A
-    | StoreALoc     of LocalIdx    // Store A to local variable
-    | FetchGloA     of GlobalIdx   // Fetch WASM global variable value into A
-    | StoreAGlo     of GlobalIdx   // Store A to WASM global variable
-
-    | Store8AtoB    of U32         // Store least significant 8 bits of reg A to WASM linear memory, address given by reg B
-    | Store16AtoB   of U32         // Store least significant 16 bits of reg A to WASM linear memory, address given by reg B
-    | Store32AtoB   of U32         // Store 32 bits of reg A to WASM linear memory, address given by reg B
-
-    | Fetch8sFromA  of U32         // Fetch byte from WASM linear memory, address A, sign-extend with result in A
-    | Fetch8uFromA  of U32         // Fetch byte from WASM linear memory, address A, zero-extend with result in A
-    | Fetch16sFromA of U32         // Fetch short from WASM linear memory, address A, sign-extend with result in A
-    | Fetch16uFromA of U32         // Fetch short from WASM linear memory, address A, zero-extend with result in A
-    | Fetch32FromA  of U32         // Fetch 32-bits from WASM linear memory, address A, into A
+let funcLabelFor f =
+    LabelName("Func" + match f with FuncIdx(U32(x)) -> x.ToString()) 
 
 
 
@@ -109,12 +34,10 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
     let labelFor d =
         labelStack.[labelStack.Count - (1 + match d with LabelIdx(U32(i)) -> (int i))]
 
-    let funcLabelFor f =
-        LabelName("Func" + match f with FuncIdx(U32(x)) -> x.ToString()) 
-
     let returnLabel = newLabel ()
 
-    let (+++) a b = Array.append a b
+
+
 
     let rec TranslateInstructions ws =
 
@@ -208,18 +131,18 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
 
             | I32Const(I32(C)) -> [| ConstA(Const32(C)); PushA; Barrier |]
 
-            | GetLocal(L) -> [| FetchLocA(L); PushA; Barrier |]
-            | SetLocal(L) -> [| PopA; StoreALoc(L); Barrier |]
-            | TeeLocal(L) -> [| PeekA; StoreALoc(L); Barrier |]
+            | GetLocal(L)  -> [| FetchLocA(L); PushA; Barrier |]
+            | SetLocal(L)  -> [| PopA; StoreALoc(L); Barrier |]
+            | TeeLocal(L)  -> [| PeekA; StoreALoc(L); Barrier |]
         
             | GetGlobal(G) -> [| FetchGloA(G); PushA; Barrier |]
             | SetGlobal(G) -> [| PopA; StoreAGlo(G); Barrier |]
 
-            | I32Store8( {Align=_; Offset=O})       -> [| PopA; PopB; Store8AtoB(O);  Barrier |]
-            | I32Store16({Align=U32(1u); Offset=O}) -> [| PopA; PopB; Store16AtoB(O); Barrier |]
-            | I32Store(  {Align=U32(2u); Offset=O}) -> [| PopA; PopB; Store32AtoB(O); Barrier |]
-            | I32Store16({Align=U32(A); Offset=_})  -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
-            | I32Store(  {Align=U32(A); Offset=_})  -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
+            | I32Store8(  {Align=_; Offset=O})       -> [| PopA; PopB; Store8AtoB(O);  Barrier |]
+            | I32Store16( {Align=U32(1u); Offset=O}) -> [| PopA; PopB; Store16AtoB(O); Barrier |]
+            | I32Store(   {Align=U32(2u); Offset=O}) -> [| PopA; PopB; Store32AtoB(O); Barrier |]
+            | I32Store16( {Align=U32(A); Offset=_})  -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
+            | I32Store(   {Align=U32(A); Offset=_})  -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
             | I32Load8s(  {Align=_; Offset=O})       -> [| PopA; Fetch8sFromA(O);  Barrier |]
             | I32Load8u(  {Align=_; Offset=O})       -> [| PopA; Fetch8uFromA(O);  Barrier |]
@@ -232,17 +155,17 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
 
             | I32Eqz -> [| PopA; CmpAZ; PushA; |] 
 
-            | I32Eq  -> binaryOp CmpEqBA 
-            | I32Ne  -> binaryOp CmpNeBA
+            | I32Eq   -> binaryOp CmpEqBA 
+            | I32Ne   -> binaryOp CmpNeBA
 
-            | I32Lts -> binaryOp CmpLtsBA
-            | I32Ltu -> binaryOp CmpLtuBA
-            | I32Gts -> binaryOp CmpGtsBA
-            | I32Gtu -> binaryOp CmpGtuBA
-            | I32Les -> binaryOp CmpLesBA
-            | I32Leu -> binaryOp CmpLeuBA
-            | I32Ges -> binaryOp CmpGesBA
-            | I32Geu -> binaryOp CmpGeuBA
+            | I32Lts  -> binaryOp CmpLtsBA
+            | I32Ltu  -> binaryOp CmpLtuBA
+            | I32Gts  -> binaryOp CmpGtsBA
+            | I32Gtu  -> binaryOp CmpGtuBA
+            | I32Les  -> binaryOp CmpLesBA
+            | I32Leu  -> binaryOp CmpLeuBA
+            | I32Ges  -> binaryOp CmpGesBA
+            | I32Geu  -> binaryOp CmpGeuBA
 
             | I32Add  -> binaryOp AddBA
             | I32Sub  -> binaryOp SubBA
