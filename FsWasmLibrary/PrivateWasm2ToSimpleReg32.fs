@@ -116,11 +116,11 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
 
     let (+++) a b = Array.append a b
 
-    let rec TranslateInstructions (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
+    let rec TranslateInstructions ws =
 
         Array.concat (ws |> Array.map TranslateInstruction)
 
-    and TranslateInstruction (w:Wasm.Instr) : InstrSimpleReg32[] =
+    and TranslateInstruction w =
 
         let binaryOp op = 
             [| 
