@@ -144,11 +144,11 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
             | I32Store16( {Align=U32(A); Offset=_})  -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32(A); Offset=_})  -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
-            | I32Load8s(  {Align=_; Offset=O})       -> [| PopA; Fetch8sFromA(O);  Barrier |]
-            | I32Load8u(  {Align=_; Offset=O})       -> [| PopA; Fetch8uFromA(O);  Barrier |]
-            | I32Load16s( {Align=U32(1u); Offset=O}) -> [| PopA; Fetch16sFromA(O); Barrier |]
-            | I32Load16u( {Align=U32(1u); Offset=O}) -> [| PopA; Fetch16uFromA(O); Barrier |]
-            | I32Load(    {Align=U32(2u); Offset=O}) -> [| PopA; Fetch32FromA(O);  Barrier |]
+            | I32Load8s(  {Align=_; Offset=O})       -> [| PopA; Fetch8sFromA(O);  PushA; Barrier |]
+            | I32Load8u(  {Align=_; Offset=O})       -> [| PopA; Fetch8uFromA(O);  PushA; Barrier |]
+            | I32Load16s( {Align=U32(1u); Offset=O}) -> [| PopA; Fetch16sFromA(O); PushA; Barrier |]
+            | I32Load16u( {Align=U32(1u); Offset=O}) -> [| PopA; Fetch16uFromA(O); PushA; Barrier |]
+            | I32Load(    {Align=U32(2u); Offset=O}) -> [| PopA; Fetch32FromA(O);  PushA; Barrier |]
             | I32Load16s( {Align=U32(A); Offset=_})  -> failwith "Cannot translate 16-bit sign-extended load unless alignemtn is 2 bytes"
             | I32Load16u( {Align=U32(A); Offset=_})  -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
             | I32Load(    {Align=U32(A); Offset=_})  -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
@@ -189,3 +189,54 @@ let TranslateInstructionsMaster (ws:Wasm.Instr[]) : InstrSimpleReg32[] =
     // and append the return label before we're done:
 
     (TranslateInstructions ws) +++ [| Label(returnLabel) |]
+
+
+
+let ReplaceAll patternLength patternMatcher (replaceWith:InstrSimpleReg32[]) (a:InstrSimpleReg32[]) =
+
+    let al = a.Length
+
+    if patternLength >= al 
+    then 
+        a  // Trivially can't be any matches
+    else
+        let result = new ResizeArray<InstrSimpleReg32> ()
+        let mutable i = 0
+
+        while i < (al - patternLength) do
+            if patternMatcher i a
+            then 
+                i <- i + patternLength
+                result.AddRange(replaceWith)
+            else
+                result.Add(a.[i])
+                i <- i + 1
+
+        while i < al do
+            result.Add(a.[i])
+            i <- i + 1
+
+        result.ToArray ()
+
+
+
+
+let IsPushA   i = match i with | PushA   -> true | _ -> false
+let IsPeekA   i = match i with | PeekA   -> true | _ -> false
+let IsPopA    i = match i with | PopA    -> true | _ -> false
+let IsBarrier i = match i with | Barrier -> true | _ -> false
+
+
+
+
+let Optimise (originalArray:InstrSimpleReg32[]) =
+
+    let WherePushPop  i (a:InstrSimpleReg32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPopA a.[i+2]
+    let WherePushPeek i (a:InstrSimpleReg32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPeekA a.[i+2]
+    let WhereBarrier  i (a:InstrSimpleReg32[]) = IsBarrier a.[i]
+
+    originalArray
+        |> ReplaceAll 3 WherePushPop  [||]
+        |> ReplaceAll 3 WherePushPeek [| PushA |]
+        |> ReplaceAll 1 WhereBarrier  [||]   // <- Must only ever be final
+
