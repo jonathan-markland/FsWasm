@@ -26,9 +26,6 @@ type InstrSimpleReg32 =
     /// Discard top of stack
     | Drop        
 
-    /// Emit function label
-    | Function    of LABELNAME    
-
     /// Emit local label
     | Label       of LABELNAME    
 
