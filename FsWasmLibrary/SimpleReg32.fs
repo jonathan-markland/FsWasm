@@ -75,6 +75,8 @@ type InstrSimpleReg32 =
     /// Copy reg C value into reg A
     | LetAC       
 
+    /// Copy reg A value into reg C
+    | LetCA
 
     /// Calculate B+A, result in A
     | AddBA       
@@ -106,20 +108,20 @@ type InstrSimpleReg32 =
     /// Calculate B XOR A, result in A
     | XorBA       
     
-    /// Calculate (unsigned B) SHL A, result in A
-    | ShlBA       
+    /// Calculate (unsigned B) SHL C, result in B
+    | ShlBC
     
-    /// Calculate (signed   B) SHR A, result in A
-    | ShrsBA      
+    /// Calculate (signed   B) SHR C, result in B
+    | ShrsBC
     
-    /// Calculate (unsigned B) SHR A, result in A
-    | ShruBA      
+    /// Calculate (unsigned B) SHR C, result in B
+    | ShruBC
     
-    /// Calculate B ROL A, result in A
-    | RotlBA      
+    /// Calculate B ROL C, result in B
+    | RotlBC
     
-    /// Calculate B ROR A, result in A
-    | RotrBA      
+    /// Calculate B ROR C, result in B
+    | RotrBC
 
 
     /// Set A=1 when B == A, else set A=0

@@ -83,6 +83,17 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr[]) : Ins
                 Barrier 
             |]
 
+        let shiftOp op = 
+            [| 
+                PopA;  // RHS operand
+                PopB;  // LHS operand
+                LetCA;
+                op;    // Result in B
+                LetAB;
+                PushA; 
+                Barrier 
+            |]
+
         let translateConstruct sourceBody putInOrder =
             let constructLabel = pushNewLabel ()
             let translatedBody = TranslateInstrArray sourceBody
@@ -210,11 +221,11 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr[]) : Ins
             | I32And  -> binaryCommutativeOp AndBA
             | I32Or   -> binaryCommutativeOp OrBA
             | I32Xor  -> binaryCommutativeOp XorBA
-            | I32Shl  -> binaryNonCommutativeOp ShlBA
-            | I32Shrs -> binaryNonCommutativeOp ShrsBA
-            | I32Shru -> binaryNonCommutativeOp ShruBA
-            | I32Rotl -> binaryNonCommutativeOp RotlBA
-            | I32Rotr -> binaryNonCommutativeOp RotrBA
+            | I32Shl  -> shiftOp ShlBC
+            | I32Shrs -> shiftOp ShrsBC
+            | I32Shru -> shiftOp ShruBC
+            | I32Rotl -> shiftOp RotlBC
+            | I32Rotr -> shiftOp RotrBC
 
             | _ -> failwith "Cannot translate this instruction to simple 32-bit machine."
 
@@ -387,6 +398,7 @@ let InstructionsToText writeOut instrs =
             | PopC   -> writeIns "pop C"
             | LetAB  -> writeIns "let A=B"
             | LetAC  -> writeIns "let A=C"
+            | LetCA  -> writeIns "let C=A"
             | AddBA  -> writeIns "add A,B"  // commutative
             | SubBA  -> writeIns "sub B,A"
             | MulBA  -> writeIns "mul A,B"  // commutative
@@ -394,10 +406,10 @@ let InstructionsToText writeOut instrs =
             | AndBA  -> writeIns "and A,B"  // commutative
             | OrBA   -> writeIns "or A,B"    // commutative
             | XorBA  -> writeIns "xor A,B"  // commutative
-            | ShlBA  -> writeIns "let C=A:shl B,C"
-            | ShrsBA -> writeIns "let C=A:sar B,C"
-            | ShruBA -> writeIns "let C=A:shr B,C"
-            | RotlBA | RotrBA -> failwith "Assembler does not have a rotate instruction"
+            | ShlBC  -> writeIns "shl B,C"
+            | ShrsBC -> writeIns "sar B,C"
+            | ShruBC -> writeIns "shr B,C"
+            | RotlBC | RotrBC -> failwith "Assembler does not have a rotate instruction"
             | CmpEqBA          -> writeIns "cmp B,A:set z A"
             | CmpNeBA          -> writeIns "cmp B,A:set nz A"
             | CmpLtsBA         -> writeIns "cmp B,A:set < A"
@@ -429,8 +441,10 @@ let InstructionsToText writeOut instrs =
 
 
 let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record) =   // TODO: module only needed to query function metadata in TranslateInstructions
+    
     writeOut (sprintf "procedure wasm_func%d%s" funcIndex (AsmSignatureOf f.FuncType))
     TranslateLocals writeOut f.FuncType f.Locals
+
     let funcInstructions = f.Body |> (TranslateInstructions m.Funcs) 
     let optimisedInstructions = funcInstructions |> Optimise
     let withoutBarriers = optimisedInstructions |> RemoveBarriers
