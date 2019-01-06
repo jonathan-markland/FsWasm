@@ -211,16 +211,16 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr[]) : Ins
             | I32Ges  -> compareOp CmpGesBA
             | I32Geu  -> compareOp CmpGeuBA
 
-            | I32Add  -> binaryCommutativeOp AddBA
+            | I32Add  -> binaryCommutativeOp AddAB
             | I32Sub  -> binaryNonCommutativeOp SubBA
-            | I32Mul  -> binaryCommutativeOp MulBA
+            | I32Mul  -> binaryCommutativeOp MulAB
             | I32Divs -> binaryNonCommutativeOp DivsBA
             | I32Divu -> binaryNonCommutativeOp DivuBA
             | I32Rems -> binaryNonCommutativeOp RemsBA
             | I32Remu -> binaryNonCommutativeOp RemuBA
-            | I32And  -> binaryCommutativeOp AndBA
-            | I32Or   -> binaryCommutativeOp OrBA
-            | I32Xor  -> binaryCommutativeOp XorBA
+            | I32And  -> binaryCommutativeOp AndAB
+            | I32Or   -> binaryCommutativeOp OrAB
+            | I32Xor  -> binaryCommutativeOp XorAB
             | I32Shl  -> shiftOp ShlBC
             | I32Shrs -> shiftOp ShrsBC
             | I32Shru -> shiftOp ShruBC
@@ -363,6 +363,8 @@ let ReturnCommandFor (ft:FuncType) =
 let LabelTextOf l = match l with LabelName(n) -> n
 let FuncNameOf  l = match l with LabelName(n) -> n   // TODO: type usage isn't right: no distinction
 
+let GlobalIdxAsUint32 i = match i with GlobalIdx(U32(i)) -> i
+let LocalIdxAsUint32  i = match i with LocalIdx(U32(i)) -> i
 
 let InstructionsToText writeOut instrs =
 
@@ -372,12 +374,12 @@ let InstructionsToText writeOut instrs =
                                                             | U32(0u) -> ""   // indexed addressing not needed
                                                             | U32(n)  -> "+" + n.ToString()) s2)   // indexed addressing
 
-    let writeLoc s1 i s2 = writeIns (sprintf "%s%d%s" s1 (match i with LocalIdx(U32(i)) -> i) s2)
+    let writeLoc s1 i s2 = writeIns (sprintf "%s%d%s" s1 (LocalIdxAsUint32 i) s2)
 
     let rec instructionsToText instrs =
         instrs |> Array.iter instructionToText
 
-    and instructionToText (ins:InstrSimpleReg32) =
+    and instructionToText ins =
         match ins with
             | Barrier               -> writeIns "// ~~~ register barrier ~~~"
             | Breakpoint            -> writeIns "break"
@@ -391,48 +393,48 @@ let InstructionsToText writeOut instrs =
             | BranchANZ(l)          -> writeIns ("cmp A,0:if nz goto " + LabelTextOf(l))
             | GotoIndex(_,_,_)      -> writeIns "goto index not yet implemented -- TODO" // TODO
             | TableOfAddresses(_,_) -> writeIns "table of addresses not yet implemented -- TODO" // TODO
-            | PushA  -> writeIns "push A"
-            | PeekA  -> writeIns "let A=int [SP]"
-            | PopA   -> writeIns "pop A"
-            | PopB   -> writeIns "pop B"
-            | PopC   -> writeIns "pop C"
-            | LetAB  -> writeIns "let A=B"
-            | LetAC  -> writeIns "let A=C"
-            | LetCA  -> writeIns "let C=A"
-            | AddBA  -> writeIns "add A,B"  // commutative
-            | SubBA  -> writeIns "sub B,A"
-            | MulBA  -> writeIns "mul A,B"  // commutative
+            | PushA                 -> writeIns "push A"
+            | PeekA                 -> writeIns "let A=int [SP]"
+            | PopA                  -> writeIns "pop A"
+            | PopB                  -> writeIns "pop B"
+            | PopC                  -> writeIns "pop C"
+            | LetAB                 -> writeIns "let A=B"
+            | LetAC                 -> writeIns "let A=C"
+            | LetCA                 -> writeIns "let C=A"
+            | AddAB                 -> writeIns "add A,B"  // commutative
+            | SubBA                 -> writeIns "sub B,A"
+            | MulAB                 -> writeIns "mul A,B"  // commutative
             | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have a division instruction"
-            | AndBA  -> writeIns "and A,B"  // commutative
-            | OrBA   -> writeIns "or A,B"    // commutative
-            | XorBA  -> writeIns "xor A,B"  // commutative
-            | ShlBC  -> writeIns "shl B,C"
-            | ShrsBC -> writeIns "sar B,C"
-            | ShruBC -> writeIns "shr B,C"
-            | RotlBC | RotrBC -> failwith "Assembler does not have a rotate instruction"
-            | CmpEqBA          -> writeIns "cmp B,A:set z A"
-            | CmpNeBA          -> writeIns "cmp B,A:set nz A"
-            | CmpLtsBA         -> writeIns "cmp B,A:set < A"
-            | CmpLtuBA         -> writeIns "cmp B,A:set << A"
-            | CmpGtsBA         -> writeIns "cmp B,A:set > A"
-            | CmpGtuBA         -> writeIns "cmp B,A:set >> A"
-            | CmpLesBA         -> writeIns "cmp B,A:set <= A"
-            | CmpLeuBA         -> writeIns "cmp B,A:set <<= A"
-            | CmpGesBA         -> writeIns "cmp B,A:set >= A"
-            | CmpGeuBA         -> writeIns "cmp B,A:set >>= A"
-            | CmpAZ            -> writeIns "cmp B,A:set z A"
-            | FetchLocA(i)     -> writeLoc "let A=int[@local" i "]"  // TODO: the text "local" should be defined once
-            | StoreALoc(i)     -> writeLoc "let int[@local" i "]=A"
-            | FetchGloA(i)     -> writeIns "fetch global todo" // TODO
-            | StoreAGlo(i)     -> writeIns "store global todo" // TODO
-            | Store8AtoB(i)    -> writeU32 "let byte[B" i "]=A"
-            | Store16AtoB(i)   -> writeU32 "let ushort[B" i "]=A"
-            | Store32AtoB(i)   -> writeU32 "let uint[B" i "]=A"  // TODO:  Won't work for gcc using address 4 as stack pointer
-            | Fetch8sFromA(i)  -> writeU32 "let A=sbyte[A" i "]"
-            | Fetch8uFromA(i)  -> writeU32 "let A=byte[A" i "]"
-            | Fetch16sFromA(i) -> writeU32 "let A=short[A" i "]"
-            | Fetch16uFromA(i) -> writeU32 "let A=ushort[A" i "]"
-            | Fetch32FromA(i)  -> writeU32 "let A=uint[A" i "]"  // TODO:  Won't work for gcc using address 4 as stack pointer
+            | AndAB                 -> writeIns "and A,B"  // commutative
+            | OrAB                  -> writeIns "or A,B"   // commutative
+            | XorAB                 -> writeIns "xor A,B"  // commutative
+            | ShlBC                 -> writeIns "shl B,C"
+            | ShrsBC                -> writeIns "sar B,C"
+            | ShruBC                -> writeIns "shr B,C"
+            | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
+            | CmpEqBA               -> writeIns "cmp B,A:set z A"
+            | CmpNeBA               -> writeIns "cmp B,A:set nz A"
+            | CmpLtsBA              -> writeIns "cmp B,A:set < A"
+            | CmpLtuBA              -> writeIns "cmp B,A:set << A"
+            | CmpGtsBA              -> writeIns "cmp B,A:set > A"
+            | CmpGtuBA              -> writeIns "cmp B,A:set >> A"
+            | CmpLesBA              -> writeIns "cmp B,A:set <= A"
+            | CmpLeuBA              -> writeIns "cmp B,A:set <<= A"
+            | CmpGesBA              -> writeIns "cmp B,A:set >= A"
+            | CmpGeuBA              -> writeIns "cmp B,A:set >>= A"
+            | CmpAZ                 -> writeIns "cmp B,A:set z A"
+            | FetchLocA(i)          -> writeLoc "let A=int[@local" i "]"  // TODO: the text "local" should be defined once
+            | StoreALoc(i)          -> writeLoc "let int[@local" i "]=A"
+            | FetchGloA(i)          -> writeIns (sprintf "let A=int[wasm_global%d]" (GlobalIdxAsUint32 i))  // TODO: Eventually use the type
+            | StoreAGlo(i)          -> writeIns (sprintf "let int[wasm_global%d]=A" (GlobalIdxAsUint32 i))  // TODO: Eventually use the type
+            | Store8AtoB(i)         -> writeU32 "let byte[B" i "]=A"
+            | Store16AtoB(i)        -> writeU32 "let ushort[B" i "]=A"
+            | Store32AtoB(i)        -> writeU32 "let uint[B" i "]=A"  // TODO:  Won't work for gcc using address 4 as stack pointer
+            | Fetch8sFromA(i)       -> writeU32 "let A=sbyte[A" i "]"
+            | Fetch8uFromA(i)       -> writeU32 "let A=byte[A" i "]"
+            | Fetch16sFromA(i)      -> writeU32 "let A=short[A" i "]"
+            | Fetch16uFromA(i)      -> writeU32 "let A=ushort[A" i "]"
+            | Fetch32FromA(i)       -> writeU32 "let A=uint[A" i "]"  // TODO:  Won't work for gcc using address 4 as stack pointer
 
     // Kick off the whole thing here:
 
@@ -460,6 +462,7 @@ let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record)
 
     writeOut (ReturnCommandFor f.FuncType)
     writeOut ""
+
 
 
 let TranslateStart writeOut (s:Start option) =

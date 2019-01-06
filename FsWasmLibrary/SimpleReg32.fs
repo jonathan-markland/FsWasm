@@ -53,6 +53,7 @@ type InstrSimpleReg32 =
     /// Insert a table of label addresses into the output
     | TableOfAddresses of tableLabel:LABELNAME * LABELNAME array
 
+
     /// Push reg A onto stack
     | PushA       
     
@@ -78,14 +79,15 @@ type InstrSimpleReg32 =
     /// Copy reg A value into reg C
     | LetCA
 
-    /// Calculate B+A, result in A
-    | AddBA       
+
+    /// Calculate A+B, result in A
+    | AddAB
     
     /// Calculate B-A, result in A
     | SubBA       
     
-    /// Calculate B*A, result in A
-    | MulBA       
+    /// Calculate A*B, result in A
+    | MulAB       
     
     /// Calculate (signed   B) * (signed   A), result in A
     | DivsBA      
@@ -99,14 +101,14 @@ type InstrSimpleReg32 =
     /// Calculate (unsigned B) % (unsigned A), result in A
     | RemuBA      
     
-    /// Calculate B AND A, result in A
-    | AndBA       
+    /// Calculate A AND B, result in A
+    | AndAB
     
-    /// Calculate B OR  A, result in A
-    | OrBA        
+    /// Calculate A OR  B, result in A
+    | OrAB
     
-    /// Calculate B XOR A, result in A
-    | XorBA       
+    /// Calculate A XOR B, result in A
+    | XorAB
     
     /// Calculate (unsigned B) SHL C, result in B
     | ShlBC
