@@ -127,7 +127,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr[]) : Ins
                 |]
    
             | Block(_, body) -> translateConstruct body (Array.append)
-            | Loop(bt, body) -> translateConstruct body (fun a b -> Array.append b a)
+            | Loop(_, body)  -> translateConstruct body (fun a b -> Array.append b a)
 
             | If(_, body) -> 
                 let skipLabel = pushNewLabel ()
@@ -157,9 +157,10 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr[]) : Ins
 
             | BrTable(labelArray, defaultLabel) -> 
                 let tableLabel = newLabel ()
-                [| PopA; 
-                   GotoIndex(tableLabel, labelArray.Length, labelFor defaultLabel);
-                   TableOfAddresses(tableLabel, labelArray |> Array.map labelFor)
+                [|
+                    PopA; 
+                    GotoIndex(tableLabel, labelArray.Length, labelFor defaultLabel);
+                    TableOfAddresses(tableLabel, Array.map labelFor labelArray)
                 |]
 
             | Return -> [| Goto(returnLabel) |]
@@ -176,26 +177,26 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr[]) : Ins
             | I32Const(I32(C)) -> [| ConstA(Const32(C)); PushA; Barrier |]
 
             | GetLocal(L)  -> [| FetchLocA(L); PushA; Barrier |]
-            | SetLocal(L)  -> [| PopA; StoreALoc(L); Barrier |]
+            | SetLocal(L)  -> [| PopA;  StoreALoc(L); Barrier |]
             | TeeLocal(L)  -> [| PeekA; StoreALoc(L); Barrier |]
         
             | GetGlobal(G) -> [| FetchGloA(G); PushA; Barrier |]
-            | SetGlobal(G) -> [| PopA; StoreAGlo(G); Barrier |]
+            | SetGlobal(G) -> [| PopA; StoreAGlo(G);  Barrier |]
 
-            | I32Store8(  {Align=_; Offset=O})       -> [| PopA; PopB; Store8AtoB(O);  Barrier |]
+            | I32Store8(  {Align=_;       Offset=O}) -> [| PopA; PopB; Store8AtoB(O);  Barrier |]
             | I32Store16( {Align=U32(1u); Offset=O}) -> [| PopA; PopB; Store16AtoB(O); Barrier |]
             | I32Store(   {Align=U32(2u); Offset=O}) -> [| PopA; PopB; Store32AtoB(O); Barrier |]
-            | I32Store16( {Align=U32(A); Offset=_})  -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
-            | I32Store(   {Align=U32(A); Offset=_})  -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
+            | I32Store16( {Align=U32(A);  Offset=_}) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
+            | I32Store(   {Align=U32(A);  Offset=_}) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
-            | I32Load8s(  {Align=_; Offset=O})       -> [| PopA; Fetch8sFromA(O);  PushA; Barrier |]
-            | I32Load8u(  {Align=_; Offset=O})       -> [| PopA; Fetch8uFromA(O);  PushA; Barrier |]
+            | I32Load8s(  {Align=_;       Offset=O}) -> [| PopA; Fetch8sFromA(O);  PushA; Barrier |]
+            | I32Load8u(  {Align=_;       Offset=O}) -> [| PopA; Fetch8uFromA(O);  PushA; Barrier |]
             | I32Load16s( {Align=U32(1u); Offset=O}) -> [| PopA; Fetch16sFromA(O); PushA; Barrier |]
             | I32Load16u( {Align=U32(1u); Offset=O}) -> [| PopA; Fetch16uFromA(O); PushA; Barrier |]
             | I32Load(    {Align=U32(2u); Offset=O}) -> [| PopA; Fetch32FromA(O);  PushA; Barrier |]
-            | I32Load16s( {Align=U32(A); Offset=_})  -> failwith "Cannot translate 16-bit sign-extended load unless alignemtn is 2 bytes"
-            | I32Load16u( {Align=U32(A); Offset=_})  -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
-            | I32Load(    {Align=U32(A); Offset=_})  -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
+            | I32Load16s( {Align=U32(A);  Offset=_}) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
+            | I32Load16u( {Align=U32(A);  Offset=_}) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
+            | I32Load(    {Align=U32(A);  Offset=_}) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
 
             | I32Eqz -> [| PopA; CmpAZ; PushA; |] 
 
@@ -236,28 +237,28 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr[]) : Ins
 
 
 
-let ReplaceAll patternLength patternMatcher (replaceWith:InstrSimpleReg32[]) (a:InstrSimpleReg32[]) =
+let ReplaceAll patternLength patternMatcher replaceWith (sourceArray:InstrSimpleReg32[]) =
 
-    let al = a.Length
+    let sourceLength = sourceArray.Length
 
-    if patternLength >= al 
+    if patternLength >= sourceLength 
     then 
-        a  // Trivially can't be any matches
+        sourceArray  // Trivially can't be any matches
     else
         let result = new ResizeArray<InstrSimpleReg32> ()
         let mutable i = 0
 
-        while i < (al - patternLength) do
-            if patternMatcher i a
+        while i < (sourceLength - patternLength) do
+            if patternMatcher i sourceArray
             then 
                 i <- i + patternLength
                 result.AddRange(replaceWith)
             else
-                result.Add(a.[i])
+                result.Add(sourceArray.[i])
                 i <- i + 1
 
-        while i < al do
-            result.Add(a.[i])
+        while i < sourceLength do
+            result.Add(sourceArray.[i])
             i <- i + 1
 
         result.ToArray ()
@@ -384,13 +385,13 @@ let InstructionsToText writeOut instrs =
             | Barrier               -> writeIns "// ~~~ register barrier ~~~"
             | Breakpoint            -> writeIns "break"
             | Drop                  -> writeIns "add SP,4"
-            | Label(l)              -> writeOut ("=> " + LabelTextOf(l))   // TODO: sort out ASM local label references
+            | Label(l)              -> writeOut ("=> " + LabelTextOf l)   // TODO: sort out ASM local label references
             | ConstA(Const32(n))    -> writeIns ("let A=" + n.ToString())
-            | Goto(l)               -> writeIns ("goto " + LabelTextOf(l))
-            | CallFunc(l)           -> writeIns ("call " + FuncNameOf(l))
+            | Goto(l)               -> writeIns ("goto " + LabelTextOf l)
+            | CallFunc(l)           -> writeIns ("call " + FuncNameOf l)
             | CallTableIndirect     -> writeIns "call table indirect -- TODO" // TODO
-            | BranchAZ(l)           -> writeIns ("cmp A,0:if z goto " + LabelTextOf(l))
-            | BranchANZ(l)          -> writeIns ("cmp A,0:if nz goto " + LabelTextOf(l))
+            | BranchAZ(l)           -> writeIns ("cmp A,0:if z goto " + LabelTextOf l)
+            | BranchANZ(l)          -> writeIns ("cmp A,0:if nz goto " + LabelTextOf l)
             | GotoIndex(_,_,_)      -> writeIns "goto index not yet implemented -- TODO" // TODO
             | TableOfAddresses(_,_) -> writeIns "table of addresses not yet implemented -- TODO" // TODO
             | PushA                 -> writeIns "push A"
