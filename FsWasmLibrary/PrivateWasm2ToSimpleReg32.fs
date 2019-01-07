@@ -299,6 +299,10 @@ let RemoveBarriers (originalArray:InstrSimpleReg32[]) =  // <- Must only ever be
 
 
 
+let AsmGlobalNamePrefix = "wasm_global"
+let AsmLocalNamePrefix = "loc"
+let AsmEntryPointLabel = "wasm_entry"
+let AsmTableNamePrefix = "wasm_table"  // There is only one, for the TableSec
 
 let ValTypeTranslationOf =
     function
@@ -337,7 +341,7 @@ let TextSignatureOf (funcType:FuncType) =
 
 
 let AtParamDecls (ps:ValType[]) =
-    String.concat ", " (ps |> Array.mapi (fun i t -> (sprintf "@local%d" i)))
+    String.concat ", " (ps |> Array.mapi (fun i t -> (sprintf "@%s%d" AsmLocalNamePrefix i)))
    
 
 let AsmSignatureOf (funcType:FuncType) =
@@ -352,7 +356,7 @@ let TranslateLocals writeOut (funcType:FuncType) valTypes =
     valTypes |> Array.iteri (fun arrayIndex v ->
         let indexOfVariable = localBaseIndex + arrayIndex
         let prefixStr = if arrayIndex = 0 then "var " else "  , "
-        writeOut (sprintf "%s@local%d:%s" prefixStr indexOfVariable (ValTypeTranslationOf v)))
+        writeOut (sprintf "%s@%s%d:%s" prefixStr AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v)))
 
 
 let ReturnCommandFor (ft:FuncType) =
@@ -367,6 +371,35 @@ let FuncNameOf  l = match l with LabelName(n) -> n   // TODO: type usage isn't r
 let GlobalIdxAsUint32 i = match i with GlobalIdx(U32(i)) -> i
 let LocalIdxAsUint32  i = match i with LocalIdx(U32(i)) -> i
 
+
+
+//let TranslateTable writeOut i (m:Module2) (t:InternalTable2Record) =
+//
+//    let writeIns s = writeOut ("    " + s)
+//
+//    t.
+        
+
+
+
+
+let TablesOfAddressesToDataSectionText writeOut (m:Module2) (f:InternalFunction2Record) =
+
+    let funcInstructions = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in func outputting too!
+
+    let writeIns s = writeOut ("    " + s)
+
+    funcInstructions |> Array.iter (fun ins ->
+        match ins with
+            | TableOfAddresses(tableLabel,codePointLabels) ->
+                writeOut (sprintf "data %s" (LabelTextOf tableLabel))
+                codePointLabels |> Array.iter (fun lbl -> writeIns (sprintf "int %s" (LabelTextOf lbl)))
+                writeOut ""
+            | _ -> ()
+        )
+
+
+
 let InstructionsToText writeOut instrs =
 
     let writeIns s = writeOut ("    " + s)
@@ -377,10 +410,8 @@ let InstructionsToText writeOut instrs =
 
     let writeLoc s1 i s2 = writeIns (sprintf "%s%d%s" s1 (LocalIdxAsUint32 i) s2)
 
-    let rec instructionsToText instrs =
-        instrs |> Array.iter instructionToText
+    let instructionToText ins =  // These translations can assume a 32-bit target for now.
 
-    and instructionToText ins =
         match ins with
             | Barrier               -> writeIns "// ~~~ register barrier ~~~"
             | Breakpoint            -> writeIns "break"
@@ -393,7 +424,7 @@ let InstructionsToText writeOut instrs =
             | BranchAZ(l)           -> writeIns ("cmp A,0:if z goto " + LabelTextOf l)
             | BranchANZ(l)          -> writeIns ("cmp A,0:if nz goto " + LabelTextOf l)
             | GotoIndex(_,_,_)      -> writeIns "goto index not yet implemented -- TODO" // TODO
-            | TableOfAddresses(_,_) -> writeIns "table of addresses not yet implemented -- TODO" // TODO
+            | TableOfAddresses(_,_) -> ()   // ignore in the code section (separately output these tables)
             | PushA                 -> writeIns "push A"
             | PeekA                 -> writeIns "let A=int [SP]"
             | PopA                  -> writeIns "pop A"
@@ -424,10 +455,10 @@ let InstructionsToText writeOut instrs =
             | CmpGesBA              -> writeIns "cmp B,A:set >= A"
             | CmpGeuBA              -> writeIns "cmp B,A:set >>= A"
             | CmpAZ                 -> writeIns "cmp B,A:set z A"
-            | FetchLocA(i)          -> writeLoc "let A=int[@local" i "]"  // TODO: the text "local" should be defined once
-            | StoreALoc(i)          -> writeLoc "let int[@local" i "]=A"
-            | FetchGloA(i)          -> writeIns (sprintf "let A=int[wasm_global%d]" (GlobalIdxAsUint32 i))  // TODO: Eventually use the type
-            | StoreAGlo(i)          -> writeIns (sprintf "let int[wasm_global%d]=A" (GlobalIdxAsUint32 i))  // TODO: Eventually use the type
+            | FetchLocA(i)          -> writeLoc ("let A=int[@" + AsmLocalNamePrefix) i "]"
+            | StoreALoc(i)          -> writeLoc ("let int[@" + AsmLocalNamePrefix) i "]=A"
+            | FetchGloA(i)          -> writeIns (sprintf "let A=int[%s%d]" AsmGlobalNamePrefix (GlobalIdxAsUint32 i))  // TODO: Eventually use the type rather than "int"
+            | StoreAGlo(i)          -> writeIns (sprintf "let int[%s%d]=A" AsmGlobalNamePrefix (GlobalIdxAsUint32 i))  // TODO: Eventually use the type rather than "int"
             | Store8AtoB(i)         -> writeU32 "let byte[B" i "]=A"
             | Store16AtoB(i)        -> writeU32 "let ushort[B" i "]=A"
             | Store32AtoB(i)        -> writeU32 "let uint[B" i "]=A"  // TODO:  Won't work for gcc using address 4 as stack pointer
@@ -439,7 +470,7 @@ let InstructionsToText writeOut instrs =
 
     // Kick off the whole thing here:
 
-    instructionsToText instrs
+    instrs |> Array.iter instructionToText
     
 
 
@@ -448,7 +479,7 @@ let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record)
     writeOut (sprintf "procedure wasm_func%d%s" funcIndex (AsmSignatureOf f.FuncType))
     TranslateLocals writeOut f.FuncType f.Locals
 
-    let funcInstructions = f.Body |> (TranslateInstructions m.Funcs) 
+    let funcInstructions = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in table outputting
     let optimisedInstructions = funcInstructions |> Optimise
     let withoutBarriers = optimisedInstructions |> RemoveBarriers
 
@@ -467,10 +498,13 @@ let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record)
 
 
 let TranslateStart writeOut (s:Start option) =
+
     match s with 
+
         | None -> writeOut "// No entry point in this translation"
+
         | Some(st) -> 
-            writeOut "procedure wasm_start"
+            writeOut ("procedure " + AsmEntryPointLabel)
             let labelName = FuncLabelFor st.StartFuncIdx
             writeOut (sprintf "goto %s" (match labelName with LabelName(str) -> str))
 
