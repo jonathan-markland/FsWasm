@@ -298,7 +298,7 @@ let RemoveBarriers (originalArray:InstrSimpleReg32[]) =  // <- Must only ever be
 
 
 
-
+let AsmFuncNamePrefix = "wasm_func"
 let AsmGlobalNamePrefix = "wasm_global"
 let AsmLocalNamePrefix = "loc"
 let AsmEntryPointLabel = "wasm_entry"
@@ -367,18 +367,39 @@ let ReturnCommandFor (ft:FuncType) =
 
 let LabelTextOf l = match l with LabelName(n) -> n
 let FuncNameOf  l = match l with LabelName(n) -> n   // TODO: type usage isn't right: no distinction
+let AsmFunctionNameOf funcidx = sprintf "%s%d" AsmFuncNamePrefix (match funcidx with FuncIdx(U32(i)) -> i)
 
 let GlobalIdxAsUint32 i = match i with GlobalIdx(U32(i)) -> i
 let LocalIdxAsUint32  i = match i with LocalIdx(U32(i)) -> i
 
 
 
-//let TranslateTable writeOut i (m:Module2) (t:InternalTable2Record) =
-//
-//    let writeIns s = writeOut ("    " + s)
-//
-//    t.
-        
+let StaticEvaluate (instrs:Instr[]) : int =
+
+    match instrs.Length with
+        | 1 -> ()
+        | _ -> failwith "Cannot statically evaluate instruction sequence"  // TODO: clarify
+
+    match instrs.[0] with
+        | I32Const(I32(n)) -> n
+        | _ -> failwith "Cannot statically evaluate instruction sequence -- unsupported single instruction"  // TODO: clarify
+
+
+
+let TranslateTable writeOut i (m:Module2) (t:InternalTable2Record) =
+
+    let writeIns s = writeOut ("    " + s)
+
+    writeOut (sprintf "data %s%d" AsmTableNamePrefix i)
+
+    if t.InitData.Length > 1 then failwith "Cannot translate module with more than one Elem in a TableSec table"
+
+    t.InitData |> Array.iter (fun elem ->
+            let ofsExpr, funcIdxList = elem
+            let ofsValue = StaticEvaluate ofsExpr
+            if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
+            funcIdxList |> Array.iter (fun fidx -> writeIns (AsmFunctionNameOf fidx))
+        )
 
 
 
@@ -476,7 +497,7 @@ let InstructionsToText writeOut instrs =
 
 let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record) =   // TODO: module only needed to query function metadata in TranslateInstructions
     
-    writeOut (sprintf "procedure wasm_func%d%s" funcIndex (AsmSignatureOf f.FuncType))
+    writeOut (sprintf "procedure %s%d%s" AsmFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType))
     TranslateLocals writeOut f.FuncType f.Locals
 
     let funcInstructions = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in table outputting

@@ -18,7 +18,7 @@ type ImportedMemory2Record = { Import:Import2; MemoryType:MemoryType }
 type InternalMemory2Record = { Export:Export2 option; MemoryType:MemoryType; InitData:(Instr[] * byte array)[]; }
 
 type ImportedTable2Record  = { Import:Import2; TableType:TableType }
-type InternalTable2Record  = { Export:Export2 option; TableType:TableType; InitOffsetExpr:Instr[]; InitWith:FuncIdx array }
+type InternalTable2Record  = { Export:Export2 option; TableType:TableType; InitData:(Instr array * FuncIdx array) array }
 
 
 

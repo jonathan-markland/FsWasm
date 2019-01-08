@@ -1,5 +1,7 @@
 ﻿module Wasm
 
+// TODO: I forgot F# arrays are mutable!
+
 open System
 
     type I32 = I32 of int

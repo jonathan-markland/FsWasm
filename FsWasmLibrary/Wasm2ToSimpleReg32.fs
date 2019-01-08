@@ -17,15 +17,15 @@ let TranslateWasm2ToSimpleReg32 (m:Module2) =   // TODO: rename because write ou
 
     m.Funcs |> Array.iteri (fun i f ->
         match f with 
-            | InternalFunction2(g) -> TablesOfAddressesToDataSectionText writeOut m g
-            | ImportedFunction2(g) -> ()
+            | InternalFunction2(g) -> TablesOfAddressesToDataSectionText writeOut m g    // ie: used by WASM "switch"
+            | ImportedFunction2(g) -> () // TODO: Error?  Can't support importing, expect self-contained module.
         )
 
-//    m.Tables |> Array.iteri (fun i t ->
-//        match t with
-//            | InternalTable2(tbl) -> TranslateTable writeOut i m tbl
-//            | ImportedTable2(tbl) -> () // TODO: Error?  Can't support importing, expect self-contained module.
-//        )
+    m.Tables |> Array.iteri (fun i t ->
+        match t with
+            | InternalTable2(tbl) -> TranslateTable writeOut i m tbl
+            | ImportedTable2(tbl) -> () // TODO: Error?  Can't support importing, expect self-contained module.
+        )
 
     // ASM CODE section
 

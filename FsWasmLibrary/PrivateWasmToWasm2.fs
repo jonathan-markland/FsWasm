@@ -33,8 +33,10 @@ let FindExport (oldModule:Module) desc : Export2 option =
 
 
 
-let GetElemSecForTable (tableIndex:TableIdx) (oldModule:Module) : Elem option =
-    oldModule.Elems |> Array.tryFind (fun elem -> elem.TableIndex = tableIndex)
+let GetAllElemsForTableIdx (tableIndex:TableIdx) (oldModule:Module) =
+    oldModule.Elems 
+        |> Array.where (fun elem -> elem.TableIndex = tableIndex)
+        |> Array.map (fun e -> (e.OffsetExpr, e.Init))
 
 
 
@@ -140,20 +142,13 @@ let HarvestInternalTables countOfImportedTables (oldModule:Module) =
         fun oldTable -> 
             
             let exportOpt = FindExport oldModule (ExportTable(TableIdx(U32(objectIndex))))
-            let elemOpt = oldModule |> GetElemSecForTable (TableIdx(U32(objectIndex)))
-            let newInit = 
-                match elemOpt with
-                    | Some({TableIndex=_; OffsetExpr=oldOffsetExpr; Init=oldFuncIdxArray}) ->
-                        (oldOffsetExpr, oldFuncIdxArray)
-                    | None -> 
-                        ([||], [||])
+            let elemsForThisTable = oldModule |> GetAllElemsForTableIdx (TableIdx(U32(objectIndex)))
 
             objectIndex <- objectIndex + 1u
 
             InternalTable2({ Export=exportOpt; 
                 TableType=oldTable.TableType; 
-                InitOffsetExpr=fst newInit; 
-                InitWith=snd newInit})
+                InitData = elemsForThisTable })
         )
 
 
