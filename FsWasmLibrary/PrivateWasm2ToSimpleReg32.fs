@@ -303,6 +303,8 @@ let AsmGlobalNamePrefix = "wasm_global"
 let AsmLocalNamePrefix = "loc"
 let AsmEntryPointLabel = "wasm_entry"
 let AsmTableNamePrefix = "wasm_table"  // There is only one, for the TableSec
+let AsmMemoryNamePrefix = "wasm_mem_init_data"
+
 
 let ValTypeTranslationOf =
     function
@@ -404,6 +406,36 @@ let TranslateTable writeOut i (m:Module2) (t:InternalTable2Record) =
 
 
 
+let TranslateMemory writeOut i (t:InternalMemory2Record) =
+
+    let writeIns s = writeOut ("    " + s)
+
+    writeOut (sprintf "data %s%d" AsmMemoryNamePrefix i)
+
+    t.InitData |> Array.iter (fun elem ->
+            let ofsExpr, byteArray = elem
+            // TODO: let ofsValue = StaticEvaluate ofsExpr
+            byteArray |> Array.iter (fun byteVal -> writeIns (sprintf "byte %d" byteVal))   // TODO: hex, and rows of 16
+        )
+
+
+let GlobalIdxNameString g = 
+    sprintf "%s%d" AsmGlobalNamePrefix (GlobalIdxAsUint32 g)
+
+
+
+let TranslateGlobal writeOut i (m:Module2) (g:InternalGlobal2Record) =
+
+    // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
+
+    let initValue = StaticEvaluate g.InitExpr
+    let globalIdx = GlobalIdx(U32(uint32 i))   // TODO: not ideal construction of temporary
+
+    writeOut (sprintf "data %s int %d" (GlobalIdxNameString globalIdx) initValue)
+
+
+
+
 let TablesOfAddressesToDataSectionText writeOut (m:Module2) (f:InternalFunction2Record) =
 
     let funcInstructions = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in func outputting too!
@@ -478,8 +510,8 @@ let InstructionsToText writeOut instrs =
             | CmpAZ                 -> writeIns "cmp B,A:set z A"
             | FetchLocA(i)          -> writeLoc ("let A=int[@" + AsmLocalNamePrefix) i "]"
             | StoreALoc(i)          -> writeLoc ("let int[@" + AsmLocalNamePrefix) i "]=A"
-            | FetchGloA(i)          -> writeIns (sprintf "let A=int[%s%d]" AsmGlobalNamePrefix (GlobalIdxAsUint32 i))  // TODO: Eventually use the type rather than "int"
-            | StoreAGlo(i)          -> writeIns (sprintf "let int[%s%d]=A" AsmGlobalNamePrefix (GlobalIdxAsUint32 i))  // TODO: Eventually use the type rather than "int"
+            | FetchGloA(i)          -> writeIns (sprintf "let A=int[%s]" (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
+            | StoreAGlo(i)          -> writeIns (sprintf "let int[%s]=A" (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
             | Store8AtoB(i)         -> writeU32 "let byte[B" i "]=A"
             | Store16AtoB(i)        -> writeU32 "let ushort[B" i "]=A"
             | Store32AtoB(i)        -> writeU32 "let uint[B" i "]=A"  // TODO:  Won't work for gcc using address 4 as stack pointer

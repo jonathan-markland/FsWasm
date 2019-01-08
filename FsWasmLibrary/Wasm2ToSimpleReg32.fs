@@ -1,6 +1,5 @@
 ﻿module Wasm2ToSimpleReg32
 
-open Wasm
 open Wasm2
 open PrivateWasm2ToSimpleReg32
 
@@ -25,6 +24,18 @@ let TranslateWasm2ToSimpleReg32 (m:Module2) =   // TODO: rename because write ou
         match t with
             | InternalTable2(tbl) -> TranslateTable writeOut i m tbl
             | ImportedTable2(tbl) -> () // TODO: Error?  Can't support importing, expect self-contained module.
+        )
+
+    m.Globals |> Array.iteri (fun i g ->
+        match g with
+            | InternalGlobal2(glo) -> TranslateGlobal writeOut i m glo
+            | ImportedGlobal2(glo) -> () // TODO: Error?  Can't support importing, expect self-contained module.
+        )
+
+    m.Mems |> Array.iteri (fun i me ->
+        match me with
+            | InternalMemory2(mem) -> TranslateMemory writeOut i mem
+            | ImportedMemory2(mem) -> () // TODO: Error?  Can't support importing, expect self-contained module.
         )
 
     // ASM CODE section
