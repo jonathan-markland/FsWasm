@@ -3,6 +3,7 @@
 open Wasm
 open Wasm2
 open SimpleReg32
+open SimpleReg32Constants
 
 
 
@@ -11,7 +12,7 @@ let (+++) a b = Array.append a b
 
 
 let FuncLabelFor fidx =
-    LabelName("wasm_func" + match fidx with FuncIdx(U32(i)) -> i.ToString()) 
+    LabelName(AsmFuncNamePrefix + match fidx with FuncIdx(U32(i)) -> i.ToString()) 
 
 
 
@@ -183,17 +184,17 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr[]) : Ins
             | GetGlobal(G) -> [| FetchGloA(G); PushA; Barrier |]
             | SetGlobal(G) -> [| PopA; StoreAGlo(G);  Barrier |]
 
-            | I32Store8(  {Align=_;       Offset=O}) -> [| PopA; PopB; Store8AtoB(O);  Barrier |]
-            | I32Store16( {Align=U32(1u); Offset=O}) -> [| PopA; PopB; Store16AtoB(O); Barrier |]
-            | I32Store(   {Align=U32(2u); Offset=O}) -> [| PopA; PopB; Store32AtoB(O); Barrier |]
+            | I32Store8(  {Align=_;       Offset=O}) -> [| PopA; PopB; AddBY; Store8AtoB(O);  Barrier |]
+            | I32Store16( {Align=U32(1u); Offset=O}) -> [| PopA; PopB; AddBY; Store16AtoB(O); Barrier |]
+            | I32Store(   {Align=U32(2u); Offset=O}) -> [| PopA; PopB; AddBY; Store32AtoB(O); Barrier |]
             | I32Store16( {Align=U32(A);  Offset=_}) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32(A);  Offset=_}) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
-            | I32Load8s(  {Align=_;       Offset=O}) -> [| PopA; Fetch8sFromA(O);  PushA; Barrier |]
-            | I32Load8u(  {Align=_;       Offset=O}) -> [| PopA; Fetch8uFromA(O);  PushA; Barrier |]
-            | I32Load16s( {Align=U32(1u); Offset=O}) -> [| PopA; Fetch16sFromA(O); PushA; Barrier |]
-            | I32Load16u( {Align=U32(1u); Offset=O}) -> [| PopA; Fetch16uFromA(O); PushA; Barrier |]
-            | I32Load(    {Align=U32(2u); Offset=O}) -> [| PopA; Fetch32FromA(O);  PushA; Barrier |]
+            | I32Load8s(  {Align=_;       Offset=O}) -> [| PopA; AddAY; Fetch8sFromA(O);  PushA; Barrier |]
+            | I32Load8u(  {Align=_;       Offset=O}) -> [| PopA; AddAY; Fetch8uFromA(O);  PushA; Barrier |]
+            | I32Load16s( {Align=U32(1u); Offset=O}) -> [| PopA; AddAY; Fetch16sFromA(O); PushA; Barrier |]
+            | I32Load16u( {Align=U32(1u); Offset=O}) -> [| PopA; AddAY; Fetch16uFromA(O); PushA; Barrier |]
+            | I32Load(    {Align=U32(2u); Offset=O}) -> [| PopA; AddAY; Fetch32FromA(O);  PushA; Barrier |]
             | I32Load16s( {Align=U32(A);  Offset=_}) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
             | I32Load16u( {Align=U32(A);  Offset=_}) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
             | I32Load(    {Align=U32(A);  Offset=_}) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
@@ -298,12 +299,6 @@ let RemoveBarriers (originalArray:InstrSimpleReg32[]) =  // <- Must only ever be
 
 
 
-let AsmFuncNamePrefix = "wasm_func"
-let AsmGlobalNamePrefix = "wasm_global"
-let AsmLocalNamePrefix = "loc"
-let AsmEntryPointLabel = "wasm_entry"
-let AsmTableNamePrefix = "wasm_table"  // There is only one, for the TableSec
-let AsmMemoryNamePrefix = "wasm_mem_init_data"
 
 
 let ValTypeTranslationOf =
@@ -486,6 +481,8 @@ let InstructionsToText writeOut instrs =
             | LetAB                 -> writeIns "let A=B"
             | LetAC                 -> writeIns "let A=C"
             | LetCA                 -> writeIns "let C=A"
+            | AddAY                 -> writeIns "add A,Y"  // used for address space relocation
+            | AddBY                 -> writeIns "add B,Y"  // used for address space relocation
             | AddAB                 -> writeIns "add A,B"  // commutative
             | SubBA                 -> writeIns "sub B,A"
             | MulAB                 -> writeIns "mul A,B"  // commutative

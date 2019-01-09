@@ -1,0 +1,53 @@
+
+FsWasm -- Notes
+===============
+
+
+DESIGN ISSUES - decide how to do.
+=============
+
+[ ] call table indirect -- TODO
+
+[ ] goto index not yet implemented -- TODO
+
+[ ] Decide new name for "Wasm2" - something proprietary.
+
+
+
+
+CODE
+====
+
+[ ] Need label numbers to be unique across all functions in case of br_table.
+
+[ ] Generate a VAR section for the WASM Linear Memory.
+
+[ ] Need to generate code to copy the init data into the Linear Memory.
+
+[ ] Is "data label24" correct in the switch lookup?  Rename as "wasm_brtable_24" ?
+
+[ ] Optimise to use 386OS ASM push-constant:
+    let A=20
+    push A
+	
+[ ] Optimise:   cmp B,A:if > goto label2
+    cmp B,A:set > A
+    cmp A,0:if nz goto label2
+	
+[ ] 386OS ASM may need more "traditional" labels scheme, to support 
+    pointers into a function body (bt_table).
+
+[ ] Separate the F# listing files a bit.
+
+[ ] Wasm2:  Merge TableOfAddresses into GotoIndex??
+
+[X] Need fetch/store to be dynamically relocated to target the Linear Memory.
+
+		Idea 1:
+		
+		Use Y register to point to base of memory.
+		We could do:
+			pop B:store   replace with ->   pop B:add B,Y:store
+			pop A:fetch   replace with ->   pop A:add A,Y:fetch
+
+

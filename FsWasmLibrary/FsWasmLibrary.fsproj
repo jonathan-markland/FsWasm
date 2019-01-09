@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="SimpleReg32Constants.fs" />
     <Compile Include="Wasm.fs" />
     <Compile Include="SimpleReg32.fs" />
     <Compile Include="Wasm2.fs" />

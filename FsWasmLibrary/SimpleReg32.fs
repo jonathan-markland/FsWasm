@@ -80,6 +80,13 @@ type InstrSimpleReg32 =
     | LetCA
 
 
+    /// Calculate A+Y, result in A.  Used for relocation of the Linear address space.
+    | AddAY
+    
+    /// Calculate B+Y, result in B.  Used for relocation of the Linear address space.
+    | AddBY
+
+
     /// Calculate A+B, result in A
     | AddAB
     
