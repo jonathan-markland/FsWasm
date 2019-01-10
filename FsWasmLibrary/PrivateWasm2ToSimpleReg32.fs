@@ -4,6 +4,7 @@ open Wasm
 open Wasm2
 open SimpleReg32
 open SimpleReg32Constants
+open OptimiseSimpleReg32
 
 
 
@@ -238,64 +239,54 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr[]) : Ins
 
 
 
-let ReplaceAll patternLength patternMatcher replaceWith (sourceArray:InstrSimpleReg32[]) =
-
-    let sourceLength = sourceArray.Length
-
-    if patternLength >= sourceLength 
-    then 
-        sourceArray  // Trivially can't be any matches
-    else
-        let result = new ResizeArray<InstrSimpleReg32> ()
-        let mutable i = 0
-
-        while i < (sourceLength - patternLength) do
-            if patternMatcher i sourceArray
-            then 
-                i <- i + patternLength
-                result.AddRange(replaceWith)
-            else
-                result.Add(sourceArray.[i])
-                i <- i + 1
-
-        while i < sourceLength do
-            result.Add(sourceArray.[i])
-            i <- i + 1
-
-        result.ToArray ()
-
-
-
-
-let IsPushA   i = match i with | PushA   -> true | _ -> false
-let IsPeekA   i = match i with | PeekA   -> true | _ -> false
-let IsPopA    i = match i with | PopA    -> true | _ -> false
-let IsBarrier i = match i with | Barrier -> true | _ -> false
-let IsDrop    i = match i with | Drop    -> true | _ -> false
-
-
-let WherePushBarrierPop  i (a:InstrSimpleReg32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPopA a.[i+2]
-let WherePushBarrierDrop i (a:InstrSimpleReg32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsDrop a.[i+2]
-let WherePushBarrierPeek i (a:InstrSimpleReg32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPeekA a.[i+2]
-let WhereBarrier         i (a:InstrSimpleReg32[]) = IsBarrier a.[i]
-
-
-let Optimise (originalArray:InstrSimpleReg32[]) =
-
-    originalArray
-        |> ReplaceAll 3 WherePushBarrierPop  [||]
-        |> ReplaceAll 3 WherePushBarrierDrop [||]
-        |> ReplaceAll 3 WherePushBarrierPeek [| PushA |]
-
-let RemoveBarriers (originalArray:InstrSimpleReg32[]) =  // <- Must only ever be final
-
-    originalArray
-        |> ReplaceAll 1 WhereBarrier  [||]   
 
 
 
 
 
+
+
+let StaticEvaluate (instrs:Instr[]) : int =
+
+    match instrs.Length with
+        | 1 -> ()
+        | _ -> failwith "Cannot statically evaluate instruction sequence"  // TODO: clarify
+
+    match instrs.[0] with
+        | I32Const(I32(n)) -> n
+        | _ -> failwith "Cannot statically evaluate instruction sequence -- unsupported single instruction"  // TODO: clarify
+
+
+
+
+
+
+
+let Surrounded (before:string) (after:string) (content:string) =
+    match content.Length with
+        | 0 -> ""
+        | _ -> before + content + after
+
+
+let Bracketed s =           s |> Surrounded "(" ")"
+let Prefixed thePrefix s =  s |> Surrounded thePrefix ""
+let ColonPrefixed s =       s |> Prefixed ": "
+
+
+
+
+let GlobalIdxAsUint32 i = match i with GlobalIdx(U32(i)) -> i
+let LocalIdxAsUint32  i = match i with LocalIdx(U32(i)) -> i
+let FuncIdxAsUint32   i = match i with FuncIdx(U32(i)) -> i
+
+let LabelTextOf l = match l with LabelName(n) -> n
+let FuncNameOf  l = match l with LabelName(n) -> n   // TODO: type usage isn't right: no distinction
+
+let GlobalIdxNameString globalIdx = 
+    sprintf "%s%d" AsmGlobalNamePrefix (GlobalIdxAsUint32 globalIdx)
+
+let FuncIdxNameString funcIdx = 
+    sprintf "%s%d" AsmFuncNamePrefix (FuncIdxAsUint32 funcIdx)
 
 
 
@@ -313,37 +304,23 @@ let ParamListOf (ps:ValType[]) =
     String.concat ", " (ps |> Array.map ValTypeTranslationOf)
 
 
-let Surrounded (before:string) (after:string) (s:string) =
-    match s.Length with
-        | 0 -> ""
-        | _ -> before + s + after
-
-
-let Bracketed s =
-    Surrounded "(" ")" s
-
-
-let Prefixed thePrefix s =
-    Surrounded thePrefix "" s
-
-
-let ColonPrefixed s = 
-    Prefixed ": " s
-
-
 let TextSignatureOf (funcType:FuncType) =
     let translatedParameters = ParamListOf funcType.ParameterTypes
-    let translatedReturns = ParamListOf funcType.ReturnTypes
+    let translatedReturns    = ParamListOf funcType.ReturnTypes
     (Bracketed translatedParameters) + (ColonPrefixed translatedReturns)
 
 
-let AtParamDecls (ps:ValType[]) =
-    String.concat ", " (ps |> Array.mapi (fun i t -> (sprintf "@%s%d" AsmLocalNamePrefix i)))
-   
-
 let AsmSignatureOf (funcType:FuncType) =
-    let atParamsString = AtParamDecls funcType.ParameterTypes
+
+    let atParamDecls (ps:ValType[]) =
+        String.concat ", " (ps |> Array.mapi (fun i t -> (sprintf "@%s%d" AsmLocalNamePrefix i)))
+
+    let atParamsString = 
+        atParamDecls funcType.ParameterTypes
+
     (Bracketed atParamsString) + "  // " + (TextSignatureOf funcType)
+
+
 
 
 let TranslateLocals writeOut (funcType:FuncType) valTypes =
@@ -362,24 +339,7 @@ let ReturnCommandFor (ft:FuncType) =
         | _ -> "endproc"    // TODO: Not sure if this can't just be endproc everywhere now in the ASM ?
 
 
-let LabelTextOf l = match l with LabelName(n) -> n
-let FuncNameOf  l = match l with LabelName(n) -> n   // TODO: type usage isn't right: no distinction
-let AsmFunctionNameOf funcidx = sprintf "%s%d" AsmFuncNamePrefix (match funcidx with FuncIdx(U32(i)) -> i)
 
-let GlobalIdxAsUint32 i = match i with GlobalIdx(U32(i)) -> i
-let LocalIdxAsUint32  i = match i with LocalIdx(U32(i)) -> i
-
-
-
-let StaticEvaluate (instrs:Instr[]) : int =
-
-    match instrs.Length with
-        | 1 -> ()
-        | _ -> failwith "Cannot statically evaluate instruction sequence"  // TODO: clarify
-
-    match instrs.[0] with
-        | I32Const(I32(n)) -> n
-        | _ -> failwith "Cannot statically evaluate instruction sequence -- unsupported single instruction"  // TODO: clarify
 
 
 
@@ -395,7 +355,7 @@ let TranslateTable writeOut i (m:Module2) (t:InternalTable2Record) =
             let ofsExpr, funcIdxList = elem
             let ofsValue = StaticEvaluate ofsExpr
             if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
-            funcIdxList |> Array.iter (fun fidx -> writeIns (AsmFunctionNameOf fidx))
+            funcIdxList |> Array.iter (fun funcIdx -> writeIns (FuncIdxNameString funcIdx))
         )
 
 
@@ -413,9 +373,6 @@ let TranslateMemory writeOut i (t:InternalMemory2Record) =
             byteArray |> Array.iter (fun byteVal -> writeIns (sprintf "byte %d" byteVal))   // TODO: hex, and rows of 16
         )
 
-
-let GlobalIdxNameString g = 
-    sprintf "%s%d" AsmGlobalNamePrefix (GlobalIdxAsUint32 g)
 
 
 
@@ -529,17 +486,17 @@ let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record)
     writeOut (sprintf "procedure %s%d%s" AsmFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType))
     TranslateLocals writeOut f.FuncType f.Locals
 
-    let funcInstructions = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in table outputting
+    let funcInstructions      = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in table outputting
     let optimisedInstructions = funcInstructions |> Optimise
-    let withoutBarriers = optimisedInstructions |> RemoveBarriers
+    let withoutBarriers       = optimisedInstructions |> RemoveBarriers
 
-    writeOut "// NON-OPTIMISED:"
-    InstructionsToText writeOut funcInstructions    // TODO: Don't want both of these outputs
+    //writeOut "// NON-OPTIMISED:"
+    //InstructionsToText writeOut funcInstructions    // TODO: Don't want both of these outputs
 
-    writeOut "// OPTIMISED:"
-    InstructionsToText writeOut optimisedInstructions
+    //writeOut "// OPTIMISED:"
+    //InstructionsToText writeOut optimisedInstructions
 
-    writeOut "// OPTIMISED WITHOUT BARRIERS:"
+    //writeOut "// OPTIMISED WITHOUT BARRIERS:"
     InstructionsToText writeOut withoutBarriers
 
     writeOut (ReturnCommandFor f.FuncType)

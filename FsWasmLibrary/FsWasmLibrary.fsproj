@@ -14,6 +14,8 @@
     <Compile Include="WasmToWasm2.fs" />
     <Compile Include="PrivateWasmFileReader.fs" />
     <Compile Include="WasmFileReader.fs" />
+    <Compile Include="PrivateOptimiseSimpleReg32.fs" />
+    <Compile Include="OptimiseSimpleReg32.fs" />
     <Compile Include="PrivateWasm2ToSimpleReg32.fs" />
     <Compile Include="Wasm2ToSimpleReg32.fs" />
   </ItemGroup>
