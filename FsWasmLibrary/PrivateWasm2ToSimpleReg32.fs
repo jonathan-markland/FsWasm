@@ -47,7 +47,9 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr[]) : Ins
                     | InternalFunction2(f) -> f.FuncType
 
     let funcReturnsSomething (fidx:FuncIdx) =
-        (getFuncType fidx).ReturnTypes.Length > 0   // will actually only be 0 or 1 in MVP   TODO: validation
+        let numReturns = (getFuncType fidx).ReturnTypes.Length
+        if numReturns > 1 then failwith "Cannot translate functions which return more than 1 result"
+        numReturns > 0
 
 
 
