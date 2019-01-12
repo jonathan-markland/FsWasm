@@ -159,9 +159,9 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
                     translatedElseBody +++ 
                     [ Label(skipElseLabel); Barrier ]
 
-            | Br(target)   -> [ Goto(labelFor target); Barrier ]
+            | Br(target) -> [ Goto(labelFor target); Barrier ]
 
-            | BrIf(target) -> [ PopA; BranchANZ(labelFor target); Barrier ]
+            | BrIf(cond,target) -> TranslateInstr(cond) +++ [ PopA; BranchANZ(labelFor target); Barrier ]
 
             | BrTable(indexExpression, labelArray, defaultLabel) -> 
                 let tableLabel = newLabel ()

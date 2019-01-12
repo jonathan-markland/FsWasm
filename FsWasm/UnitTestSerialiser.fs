@@ -369,7 +369,10 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                         addInstructions il2)
 
                 | Br   (LabelIdx(U32(i))) -> addIndex "Br" i
-                | BrIf (LabelIdx(U32(i))) -> addIndex "BrIf" i
+                
+                | BrIf (cond, LabelIdx(U32(i))) -> 
+                    addIndex "BrIf" i
+                    withIndent (fun () -> addInstruction cond)
 
                 | BrTable (ins, idxs, idx) ->
                     addLine "BrTable  ** todo: show table"  // TODO

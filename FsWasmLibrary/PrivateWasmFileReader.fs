@@ -256,7 +256,7 @@ and Instruction recent r =
                     ParseFailWith "END or ELSE expected after IF instructions, unexpected byte" endOrElse r
 
         | 0x0Cuy -> Some(Br (r |> LabelIdx)::recent)
-        | 0x0Duy -> Some(BrIf (r |> LabelIdx)::recent)
+        | 0x0Duy -> Some(BrIf (first(), r |> LabelIdx)::tail1())
 
         | 0x0Euy -> 
             let indexExpression = first()

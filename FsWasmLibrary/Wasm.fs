@@ -42,7 +42,7 @@ open System
         | If           of BlockType * Instr list  // 04 0B
         | IfElse       of BlockType * If:Instr list * Else:Instr list  // 04 05 0B
         | Br           of LabelIdx  // 0C
-        | BrIf         of LabelIdx  // 0D
+        | BrIf         of Instr * LabelIdx  // 0D
         | BrTable      of Instr * LabelIdx array * LabelIdx  // 0E
         | Return
         | Call         of FuncIdx * Instr list  // 10
