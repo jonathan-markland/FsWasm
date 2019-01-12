@@ -17,7 +17,7 @@ DESIGN ISSUES - decide how to do.
 [ ] Want to do constant-hoisting, so we don't waste time pushing constants onto the stack
     if they are just going to be operands for ADD etc...  Maybe can use "add A,1".
 
-[ ] Sort out Optimise (which got commented out when doing the trees).
+[X] Sort out Optimise (which got commented out when doing the trees).
 	
 	
 

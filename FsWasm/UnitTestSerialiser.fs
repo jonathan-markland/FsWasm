@@ -340,7 +340,8 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     fa |> Array.iteri (fun i fidx -> 
                         match fidx with 
                             | FuncIdx(U32(fi)) -> 
-                                Add (sprintf "Table[%d][expr+%d] = FuncSec[%d]" ti i fi))
+                                Add (sprintf "Table[%d][expr+%d] = FuncSec[%d]" ti i fi)
+                                NewLine())
 
     let AddElemSec elems =
         Title "Elems section"
