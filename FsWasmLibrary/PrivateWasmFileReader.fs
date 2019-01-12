@@ -4,7 +4,7 @@ open Wasm
 
 // Interfacing the BinaryReader:
 
-type BinaryReaderAndContext = { Reader:WasmSerialiser.BinaryReader; TypeSec:FuncType[] }
+type BinaryReaderAndContext = { Reader:WasmSerialiser.BinaryReader; TypeSec:FuncType[]; ConvenientFuncTypeArray:FuncType[] }
 
 let EOF         (r:BinaryReaderAndContext) = r.Reader.EndOfFile
 let Byte        (r:BinaryReaderAndContext) = r.Reader.ReadByte()
@@ -179,10 +179,38 @@ let ExpectEnd r =
 
 // Instructions
 
-let rec InstructionList r =
-    r |> MakeArrayWhileSome Instruction
+let rec InstructionList (r:BinaryReaderAndContext) =
 
-and Instruction r =
+    // Returns a list of instructions (effectively as list of 
+    // trees like a WAT file), in program order.
+
+    List.rev (r |> ReversedInstructionList)
+
+and ReversedInstructionList (r:BinaryReaderAndContext) =
+
+    // When building an F# list from a file, it naturally reversed
+    // the order when you traverse the list later.  This means the
+    // most recent instructions are at the head of such a list.
+    // It's useful to have the most recent instructions at the head
+    // because we can easily pull them out as parameters when tree-
+    // building.  Once built, a sub-tree immediately becomes the
+    // new head of this list.
+
+    r |> ReversedInstructionList2 []
+
+and ReversedInstructionList2 previousInstructions r =
+
+    match r |> Instruction previousInstructions with
+        | Some(newInstructions) -> r |> ReversedInstructionList2 newInstructions
+        | None -> previousInstructions
+
+and Instruction recent r =
+
+    let numParametersOfFuncType (ft:FuncType) =
+        (ft.ParameterTypes.Length)
+
+    let numParametersOfFunction (f:FuncIdx) =
+        numParametersOfFuncType r.ConvenientFuncTypeArray.[match f with FuncIdx(U32(i)) -> int i]
 
     let then00 (code, r) =
         r |> ExpectByte 0x00uy
@@ -190,229 +218,248 @@ and Instruction r =
 
     let opcodeByte = r |> Byte
 
+    let first  () = List.head recent
+    let second () = List.head (List.tail recent)
+    let tail1  () = List.tail recent
+    let tail2  () = List.tail (List.tail recent)
+
     match opcodeByte with
 
-        | 0x00uy -> Some(Unreachable)
+        | 0x00uy -> Some(Unreachable::recent)
 
-        | 0x01uy -> Some(Nop)
+        | 0x01uy -> Some(Nop::recent)
 
-        | 0x02uy -> 
+        | 0x02uy ->
             let t = r |> BlockType
             let l = r |> InstructionList
             r |> ExpectEnd
-            Some(Block(t, l))
+            Some(Block(t, l)::recent)
 
         | 0x03uy -> 
             let t = r |> BlockType
             let l = r |> InstructionList
             r |> ExpectEnd
-            Some(Loop(t, l))
+            Some(Loop(t, l)::recent)
 
         | 0x04uy -> 
-            let blockType = r |> BlockType
+            let blockType      = r |> BlockType
             let ifInstructions = r |> InstructionList
-            let endOrElse = r |> Byte   // 0x05 or 0x0B
+            let endOrElse      = r |> Byte   // 0x05 or 0x0B
             match endOrElse with
                 | 0x05uy ->
                     let elseInstructions = r |> InstructionList
                     r |> ExpectEnd
-                    Some(IfElse(blockType, ifInstructions, elseInstructions))
+                    Some(IfElse(blockType, ifInstructions, elseInstructions)::recent)
                 | 0x0Buy ->
-                    Some(If(blockType, ifInstructions))
+                    Some(If(blockType, ifInstructions)::recent)
                 | _ ->
                     ParseFailWith "END or ELSE expected after IF instructions, unexpected byte" endOrElse r
 
-        | 0x0Cuy -> Some(Br (r |> LabelIdx))
-        | 0x0Duy -> Some(BrIf (r |> LabelIdx))
+        | 0x0Cuy -> Some(Br (r |> LabelIdx)::recent)
+        | 0x0Duy -> Some(BrIf (r |> LabelIdx)::recent)
 
         | 0x0Euy -> 
-            let v = r |> Vector LabelIdx
-            let i = r |> LabelIdx
-            Some(BrTable(v, i))
+            let indexExpression = first()
+            let vectorOfIndices = r |> Vector LabelIdx
+            let defaultIndex = r |> LabelIdx
+            Some(BrTable(indexExpression, vectorOfIndices, defaultIndex)::tail1())
 
-        | 0x0Fuy -> Some(Return)
-        | 0x10uy -> Some(Call(r |> FuncIdx))
-        | 0x11uy -> Some(CallIndirect(r |> TypeIdx))
+        | 0x0Fuy -> Some(Return::recent)
+
+        | 0x10uy -> 
+            let f = r |> FuncIdx
+            let numParameters = numParametersOfFunction f
+            let instrsAfterParameters = recent |> List.skip numParameters
+            let paramsForCall = List.rev (recent |> List.take numParameters)
+            Some(Call(f,paramsForCall)::instrsAfterParameters)
+
+        | 0x11uy -> 
+            let t = r |> TypeIdx // TODO: has bad name!
+            let numParameters = numParametersOfFuncType t
+            let instrsAfterParameters = recent |> List.skip numParameters
+            let paramsForCall = List.rev (recent |> List.take numParameters)  // TODO: ideally not need list reversing
+            Some(CallIndirect(t,paramsForCall)::instrsAfterParameters)
 
         // 5.4.2  Parameteric Instructions
 
-        | 0x1Auy -> Some(Drop)
-        | 0x1Buy -> Some(Select)
+        | 0x1Auy -> Some(Drop::recent)
+        | 0x1Buy -> Some(Select::recent)
 
         // 5.4.3  Variable Instructions
 
-        | 0x20uy -> Some(GetLocal(r |> LocalIdx))
-        | 0x21uy -> Some(SetLocal(r |> LocalIdx))
-        | 0x22uy -> Some(TeeLocal(r |> LocalIdx))
-        | 0x23uy -> Some(GetGlobal(r |> GlobalIdx))
-        | 0x24uy -> Some(SetGlobal(r |> GlobalIdx))
+        | 0x20uy -> Some(GetLocal(r |> LocalIdx)::recent)
+        | 0x21uy -> Some(SetLocal(r |> LocalIdx)::recent)
+        | 0x22uy -> Some(TeeLocal(r |> LocalIdx)::recent)
+        | 0x23uy -> Some(GetGlobal(r |> GlobalIdx)::recent)
+        | 0x24uy -> Some(SetGlobal(r |> GlobalIdx)::recent)
 
         // 5.4.4  Memory Instructions
 
-        | 0x28uy -> Some(I32Load(r |> MemArg))
-        | 0x29uy -> Some(I64Load(r |> MemArg))
-        | 0x2Auy -> Some(F32Load(r |> MemArg))
-        | 0x2Buy -> Some(F64Load(r |> MemArg))
-        | 0x2Cuy -> Some(I32Load8s(r |> MemArg))
-        | 0x2Duy -> Some(I32Load8u(r |> MemArg))
-        | 0x2Euy -> Some(I32Load16s(r |> MemArg))
-        | 0x2Fuy -> Some(I32Load16u(r |> MemArg))
-        | 0x30uy -> Some(I64Load8s(r |> MemArg))
-        | 0x31uy -> Some(I64Load8u(r |> MemArg))
-        | 0x32uy -> Some(I64Load16s(r |> MemArg))
-        | 0x33uy -> Some(I64Load16u(r |> MemArg))
-        | 0x34uy -> Some(I64Load32s(r |> MemArg))
-        | 0x35uy -> Some(I64Load32u(r |> MemArg))
-        | 0x36uy -> Some(I32Store(r |> MemArg))
-        | 0x37uy -> Some(I64Store(r |> MemArg))
-        | 0x38uy -> Some(F32Store(r |> MemArg))
-        | 0x39uy -> Some(F64Store(r |> MemArg))
-        | 0x3Auy -> Some(I32Store8(r |> MemArg))
-        | 0x3Buy -> Some(I32Store16(r |> MemArg))
-        | 0x3Cuy -> Some(I64Store8(r |> MemArg))
-        | 0x3Duy -> Some(I64Store16(r |> MemArg))
-        | 0x3Euy -> Some(I64Store32(r |> MemArg))
+        | 0x28uy -> Some(I32Load(r |> MemArg, first())::tail1())
+        | 0x29uy -> Some(I64Load(r |> MemArg, first())::tail1())
+        | 0x2Auy -> Some(F32Load(r |> MemArg, first())::tail1())
+        | 0x2Buy -> Some(F64Load(r |> MemArg, first())::tail1())
+        | 0x2Cuy -> Some(I32Load8s(r |> MemArg, first())::tail1())
+        | 0x2Duy -> Some(I32Load8u(r |> MemArg, first())::tail1())
+        | 0x2Euy -> Some(I32Load16s(r |> MemArg, first())::tail1())
+        | 0x2Fuy -> Some(I32Load16u(r |> MemArg, first())::tail1())
+        | 0x30uy -> Some(I64Load8s(r |> MemArg, first())::tail1())
+        | 0x31uy -> Some(I64Load8u(r |> MemArg, first())::tail1())
+        | 0x32uy -> Some(I64Load16s(r |> MemArg, first())::tail1())
+        | 0x33uy -> Some(I64Load16u(r |> MemArg, first())::tail1())
+        | 0x34uy -> Some(I64Load32s(r |> MemArg, first())::tail1())
+        | 0x35uy -> Some(I64Load32u(r |> MemArg, first())::tail1())
 
-        | 0x3Fuy -> (Some(MemorySize), r) |> then00
-        | 0x40uy -> (Some(GrowMemory), r) |> then00
+        | 0x36uy -> Some(I32Store(r |> MemArg, second(), first())::tail2())
+        | 0x37uy -> Some(I64Store(r |> MemArg, second(), first())::tail2())
+        | 0x38uy -> Some(F32Store(r |> MemArg, second(), first())::tail2())
+        | 0x39uy -> Some(F64Store(r |> MemArg, second(), first())::tail2())
+        | 0x3Auy -> Some(I32Store8(r |> MemArg, second(), first())::tail2())
+        | 0x3Buy -> Some(I32Store16(r |> MemArg, second(), first())::tail2())
+        | 0x3Cuy -> Some(I64Store8(r |> MemArg, second(), first())::tail2())
+        | 0x3Duy -> Some(I64Store16(r |> MemArg, second(), first())::tail2())
+        | 0x3Euy -> Some(I64Store32(r |> MemArg, second(), first())::tail2())
+
+        | 0x3Fuy -> Some(((MemorySize, r) |> then00)::recent)
+        | 0x40uy -> Some(((GrowMemory, r) |> then00)::recent)
 
         // 5.4.5  Numeric Instructions
 
-        | 0x41uy -> Some(I32Const(r |> I32))
-        | 0x42uy -> Some(I64Const(r |> I64))
-        | 0x43uy -> Some(F32Const(r |> F32))
-        | 0x44uy -> Some(F64Const(r |> F64))
+        | 0x41uy -> Some(I32Const(r |> I32)::recent)
+        | 0x42uy -> Some(I64Const(r |> I64)::recent)
+        | 0x43uy -> Some(F32Const(r |> F32)::recent)
+        | 0x44uy -> Some(F64Const(r |> F64)::recent)
 
-        | 0x45uy -> Some(I32Eqz)
-        | 0x46uy -> Some(I32Eq)
-        | 0x47uy -> Some(I32Ne)
-        | 0x48uy -> Some(I32Lts)
-        | 0x49uy -> Some(I32Ltu)
-        | 0x4Auy -> Some(I32Gts)
-        | 0x4Buy -> Some(I32Gtu)
-        | 0x4Cuy -> Some(I32Les)
-        | 0x4Duy -> Some(I32Leu)
-        | 0x4Euy -> Some(I32Ges)
-        | 0x4Fuy -> Some(I32Geu)
+        | 0x45uy -> Some(I32Eqz(first())::tail1())
+        | 0x46uy -> Some(I32Eq(second(), first())::tail2())
+        | 0x47uy -> Some(I32Ne(second(), first())::tail2())
+        | 0x48uy -> Some(I32Lts(second(), first())::tail2())
+        | 0x49uy -> Some(I32Ltu(second(), first())::tail2())
+        | 0x4Auy -> Some(I32Gts(second(), first())::tail2())
+        | 0x4Buy -> Some(I32Gtu(second(), first())::tail2())
+        | 0x4Cuy -> Some(I32Les(second(), first())::tail2())
+        | 0x4Duy -> Some(I32Leu(second(), first())::tail2())
+        | 0x4Euy -> Some(I32Ges(second(), first())::tail2())
+        | 0x4Fuy -> Some(I32Geu(second(), first())::tail2())
 
-        | 0x50uy -> Some(I64Eqz)
-        | 0x51uy -> Some(I64Eq)
-        | 0x52uy -> Some(I64Ne)
-        | 0x53uy -> Some(I64Lts)
-        | 0x54uy -> Some(I64Ltu)
-        | 0x55uy -> Some(I64Gts)
-        | 0x56uy -> Some(I64Gtu)
-        | 0x57uy -> Some(I64Les)
-        | 0x58uy -> Some(I64Leu)
-        | 0x59uy -> Some(I64Ges)
-        | 0x5Auy -> Some(I64Geu)
-        | 0x5Buy -> Some(F32Eq)
-        | 0x5Cuy -> Some(F32Ne)
-        | 0x5Duy -> Some(F32Lt)
-        | 0x5Euy -> Some(F32Gt)
-        | 0x5Fuy -> Some(F32Le)
+        | 0x50uy -> Some(I64Eqz(first())::tail1())
+        | 0x51uy -> Some(I64Eq(second(), first())::tail2())
+        | 0x52uy -> Some(I64Ne(second(), first())::tail2())
+        | 0x53uy -> Some(I64Lts(second(), first())::tail2())
+        | 0x54uy -> Some(I64Ltu(second(), first())::tail2())
+        | 0x55uy -> Some(I64Gts(second(), first())::tail2())
+        | 0x56uy -> Some(I64Gtu(second(), first())::tail2())
+        | 0x57uy -> Some(I64Les(second(), first())::tail2())
+        | 0x58uy -> Some(I64Leu(second(), first())::tail2())
+        | 0x59uy -> Some(I64Ges(second(), first())::tail2())
+        | 0x5Auy -> Some(I64Geu(second(), first())::tail2())
+        | 0x5Buy -> Some(F32Eq(second(), first())::tail2())
+        | 0x5Cuy -> Some(F32Ne(second(), first())::tail2())
+        | 0x5Duy -> Some(F32Lt(second(), first())::tail2())
+        | 0x5Euy -> Some(F32Gt(second(), first())::tail2())
+        | 0x5Fuy -> Some(F32Le(second(), first())::tail2())
 
-        | 0x60uy -> Some(F32Ge)
-        | 0x61uy -> Some(F64Eq)
-        | 0x62uy -> Some(F64Ne)
-        | 0x63uy -> Some(F64Lt)
-        | 0x64uy -> Some(F64Gt)
-        | 0x65uy -> Some(F64Le)
-        | 0x66uy -> Some(F64Ge)
-        | 0x67uy -> Some(I32Clz)
-        | 0x68uy -> Some(I32Ctz)
-        | 0x69uy -> Some(I32PopCnt)
-        | 0x6Auy -> Some(I32Add)
-        | 0x6Buy -> Some(I32Sub)
-        | 0x6Cuy -> Some(I32Mul)
-        | 0x6Duy -> Some(I32Divs)
-        | 0x6Euy -> Some(I32Divu)
-        | 0x6Fuy -> Some(I32Rems)
+        | 0x60uy -> Some(F32Ge(second(), first())::tail2())
+        | 0x61uy -> Some(F64Eq(second(), first())::tail2())
+        | 0x62uy -> Some(F64Ne(second(), first())::tail2())
+        | 0x63uy -> Some(F64Lt(second(), first())::tail2())
+        | 0x64uy -> Some(F64Gt(second(), first())::tail2())
+        | 0x65uy -> Some(F64Le(second(), first())::tail2())
+        | 0x66uy -> Some(F64Ge(second(), first())::tail2())
+        | 0x67uy -> Some(I32Clz(first())::tail1())
+        | 0x68uy -> Some(I32Ctz(first())::tail1())
+        | 0x69uy -> Some(I32PopCnt(first())::tail1())
+        | 0x6Auy -> Some(I32Add(second(), first())::tail2())
+        | 0x6Buy -> Some(I32Sub(second(), first())::tail2())
+        | 0x6Cuy -> Some(I32Mul(second(), first())::tail2())
+        | 0x6Duy -> Some(I32Divs(second(), first())::tail2())
+        | 0x6Euy -> Some(I32Divu(second(), first())::tail2())
+        | 0x6Fuy -> Some(I32Rems(second(), first())::tail2())
 
-        | 0x70uy -> Some(I32Remu)
-        | 0x71uy -> Some(I32And)
-        | 0x72uy -> Some(I32Or)
-        | 0x73uy -> Some(I32Xor)
-        | 0x74uy -> Some(I32Shl)
-        | 0x75uy -> Some(I32Shrs)
-        | 0x76uy -> Some(I32Shru)
-        | 0x77uy -> Some(I32Rotl)
-        | 0x78uy -> Some(I32Rotr)
-        | 0x79uy -> Some(I64Clz)
-        | 0x7Auy -> Some(I64Ctz)
-        | 0x7Buy -> Some(I64PopCnt)
-        | 0x7Cuy -> Some(I64Add)
-        | 0x7Duy -> Some(I64Sub)
-        | 0x7Euy -> Some(I64Mul)
-        | 0x7Fuy -> Some(I64Divs)
+        | 0x70uy -> Some(I32Remu(second(), first())::tail2())
+        | 0x71uy -> Some(I32And(second(), first())::tail2())
+        | 0x72uy -> Some(I32Or(second(), first())::tail2())
+        | 0x73uy -> Some(I32Xor(second(), first())::tail2())
+        | 0x74uy -> Some(I32Shl(second(), first())::tail2())
+        | 0x75uy -> Some(I32Shrs(second(), first())::tail2())
+        | 0x76uy -> Some(I32Shru(second(), first())::tail2())
+        | 0x77uy -> Some(I32Rotl(second(), first())::tail2())
+        | 0x78uy -> Some(I32Rotr(second(), first())::tail2())
+        | 0x79uy -> Some(I64Clz(first())::tail1())
+        | 0x7Auy -> Some(I64Ctz(first())::tail1())
+        | 0x7Buy -> Some(I64PopCnt(first())::tail1())
+        | 0x7Cuy -> Some(I64Add(second(), first())::tail2())
+        | 0x7Duy -> Some(I64Sub(second(), first())::tail2())
+        | 0x7Euy -> Some(I64Mul(second(), first())::tail2())
+        | 0x7Fuy -> Some(I64Divs(second(), first())::tail2())
 
-        | 0x80uy -> Some(I64Divu)
-        | 0x81uy -> Some(I64Rems)
-        | 0x82uy -> Some(I64Remu)
-        | 0x83uy -> Some(I64And)
-        | 0x84uy -> Some(I64Or)
-        | 0x85uy -> Some(I64Xor)
-        | 0x86uy -> Some(I64Shl)
-        | 0x87uy -> Some(I64Shrs)
-        | 0x88uy -> Some(I64Shru)
-        | 0x89uy -> Some(I64Rotl)
-        | 0x8Auy -> Some(I64Rotr)
-        | 0x8Buy -> Some(F32Abs)
-        | 0x8Cuy -> Some(F32Neg)
-        | 0x8Duy -> Some(F32Ceil)
-        | 0x8Euy -> Some(F32Floor)
-        | 0x8Fuy -> Some(F32Trunc)
+        | 0x80uy -> Some(I64Divu(second(), first())::tail2())
+        | 0x81uy -> Some(I64Rems(second(), first())::tail2())
+        | 0x82uy -> Some(I64Remu(second(), first())::tail2())
+        | 0x83uy -> Some(I64And(second(), first())::tail2())
+        | 0x84uy -> Some(I64Or(second(), first())::tail2())
+        | 0x85uy -> Some(I64Xor(second(), first())::tail2())
+        | 0x86uy -> Some(I64Shl(second(), first())::tail2())
+        | 0x87uy -> Some(I64Shrs(second(), first())::tail2())
+        | 0x88uy -> Some(I64Shru(second(), first())::tail2())
+        | 0x89uy -> Some(I64Rotl(second(), first())::tail2())
+        | 0x8Auy -> Some(I64Rotr(second(), first())::tail2())
+        | 0x8Buy -> Some(F32Abs(first())::tail1())
+        | 0x8Cuy -> Some(F32Neg(first())::tail1())
+        | 0x8Duy -> Some(F32Ceil(first())::tail1())
+        | 0x8Euy -> Some(F32Floor(first())::tail1())
+        | 0x8Fuy -> Some(F32Trunc(first())::tail1())
 
-        | 0x90uy -> Some(F32Nearest)
-        | 0x91uy -> Some(F32Sqrt)
-        | 0x92uy -> Some(F32Add)
-        | 0x93uy -> Some(F32Sub)
-        | 0x94uy -> Some(F32Mul)
-        | 0x95uy -> Some(F32Div)
-        | 0x96uy -> Some(F32Min)
-        | 0x97uy -> Some(F32Max)
-        | 0x98uy -> Some(F32CopySign)
-        | 0x99uy -> Some(F64Abs)
-        | 0x9Auy -> Some(F64Neg)
-        | 0x9Buy -> Some(F64Ceil)
-        | 0x9Cuy -> Some(F64Floor)
-        | 0x9Duy -> Some(F64Trunc)
-        | 0x9Euy -> Some(F64Nearest)
-        | 0x9Fuy -> Some(F64Sqrt)
+        | 0x90uy -> Some(F32Nearest(first())::tail1())
+        | 0x91uy -> Some(F32Sqrt(first())::tail1())
+        | 0x92uy -> Some(F32Add(second(), first())::tail2())
+        | 0x93uy -> Some(F32Sub(second(), first())::tail2())
+        | 0x94uy -> Some(F32Mul(second(), first())::tail2())
+        | 0x95uy -> Some(F32Div(second(), first())::tail2())
+        | 0x96uy -> Some(F32Min(second(), first())::tail2())
+        | 0x97uy -> Some(F32Max(second(), first())::tail2())
+        | 0x98uy -> Some(F32CopySign(second(), first())::tail2())
+        | 0x99uy -> Some(F64Abs(first())::tail1())
+        | 0x9Auy -> Some(F64Neg(first())::tail1())
+        | 0x9Buy -> Some(F64Ceil(first())::tail1())
+        | 0x9Cuy -> Some(F64Floor(first())::tail1())
+        | 0x9Duy -> Some(F64Trunc(first())::tail1())
+        | 0x9Euy -> Some(F64Nearest(first())::tail1())
+        | 0x9Fuy -> Some(F64Sqrt(first())::tail1())
 
-        | 0xA0uy -> Some(F64Add)
-        | 0xA1uy -> Some(F64Sub)
-        | 0xA2uy -> Some(F64Mul)
-        | 0xA3uy -> Some(F64Div)
-        | 0xA4uy -> Some(F64Min)
-        | 0xA5uy -> Some(F64Max)
-        | 0xA6uy -> Some(F64CopySign)
-        | 0xA7uy -> Some(I32WrapI64)
-        | 0xA8uy -> Some(I32TruncsF32)
-        | 0xA9uy -> Some(I32TruncuF32)
-        | 0xAAuy -> Some(I32TruncsF64)
-        | 0xABuy -> Some(I32TruncuF64)
-        | 0xACuy -> Some(I64ExtendsI32)
-        | 0xADuy -> Some(I64ExtenduI32)
-        | 0xAEuy -> Some(I64TruncsF32)
-        | 0xAFuy -> Some(I64TruncuF32)
+        | 0xA0uy -> Some(F64Add(second(), first())::tail2())
+        | 0xA1uy -> Some(F64Sub(second(), first())::tail2())
+        | 0xA2uy -> Some(F64Mul(second(), first())::tail2())
+        | 0xA3uy -> Some(F64Div(second(), first())::tail2())
+        | 0xA4uy -> Some(F64Min(second(), first())::tail2())
+        | 0xA5uy -> Some(F64Max(second(), first())::tail2())
+        | 0xA6uy -> Some(F64CopySign(second(), first())::tail2())
+        | 0xA7uy -> Some(I32WrapI64(first())::tail1())
+        | 0xA8uy -> Some(I32TruncsF32(first())::tail1())
+        | 0xA9uy -> Some(I32TruncuF32(first())::tail1())
+        | 0xAAuy -> Some(I32TruncsF64(first())::tail1())
+        | 0xABuy -> Some(I32TruncuF64(first())::tail1())
+        | 0xACuy -> Some(I64ExtendsI32(first())::tail1())
+        | 0xADuy -> Some(I64ExtenduI32(first())::tail1())
+        | 0xAEuy -> Some(I64TruncsF32(first())::tail1())
+        | 0xAFuy -> Some(I64TruncuF32(first())::tail1())
 
-        | 0xB0uy -> Some(I64TruncsF64)
-        | 0xB1uy -> Some(I64TruncuF64)
-        | 0xB2uy -> Some(F32ConvertsI32)
-        | 0xB3uy -> Some(F32ConvertuI32)
-        | 0xB4uy -> Some(F32ConvertsI64)
-        | 0xB5uy -> Some(F32ConvertuI64)
-        | 0xB6uy -> Some(F32DemoteF64)
-        | 0xB7uy -> Some(F64ConvertsI32)
-        | 0xB8uy -> Some(F64ConvertuI32)
-        | 0xB9uy -> Some(F64ConvertsI64)
-        | 0xBAuy -> Some(F64ConvertuI64)
-        | 0xBBuy -> Some(F64PromoteF32)
-        | 0xBCuy -> Some(I32ReinterpretF32)
-        | 0xBDuy -> Some(I64ReinterpretF64)
-        | 0xBEuy -> Some(F32ReinterpretI32)
-        | 0xBFuy -> Some(F64ReinterpretI64)
+        | 0xB0uy -> Some(I64TruncsF64(first())::tail1())
+        | 0xB1uy -> Some(I64TruncuF64(first())::tail1())
+        | 0xB2uy -> Some(F32ConvertsI32(first())::tail1())
+        | 0xB3uy -> Some(F32ConvertuI32(first())::tail1())
+        | 0xB4uy -> Some(F32ConvertsI64(first())::tail1())
+        | 0xB5uy -> Some(F32ConvertuI64(first())::tail1())
+        | 0xB6uy -> Some(F32DemoteF64(first())::tail1())
+        | 0xB7uy -> Some(F64ConvertsI32(first())::tail1())
+        | 0xB8uy -> Some(F64ConvertuI32(first())::tail1())
+        | 0xB9uy -> Some(F64ConvertsI64(first())::tail1())
+        | 0xBAuy -> Some(F64ConvertuI64(first())::tail1())
+        | 0xBBuy -> Some(F64PromoteF32(first())::tail1())
+        | 0xBCuy -> Some(I32ReinterpretF32(first())::tail1())
+        | 0xBDuy -> Some(I64ReinterpretF64(first())::tail1())
+        | 0xBEuy -> Some(F32ReinterpretI32(first())::tail1())
+        | 0xBFuy -> Some(F64ReinterpretI64(first())::tail1())
         
         | _ -> 
             r |> Reverse 1u

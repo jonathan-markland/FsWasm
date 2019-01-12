@@ -11,7 +11,7 @@ open PrivateWasmFileReader
 /// </summary>
 let Module binaryReader =
 
-    let r = { Reader=binaryReader; TypeSec=[||] }
+    let r = { Reader=binaryReader; TypeSec=[||]; ConvenientFuncTypeArray=null }  // TODO: prefer not to expose the null and empty TypeSec
 
     // Magic stamp:
     
@@ -34,12 +34,22 @@ let Module binaryReader =
     // Now we've read the TypeSec, install it into the BinaryReaderAndContext
     // so all the other section-reading can use the TypeSec:
 
-    let r = { Reader=binaryReader; TypeSec=snd sec1; }
+    let r = { Reader=binaryReader; TypeSec=snd sec1; ConvenientFuncTypeArray=null }  // TODO: prefer not to expose the null
 
     // Read remaining sections:
 
     let sec2  = r |> CustomSecThenTrySpecificSection ImportSec 2
     let sec3  = r |> CustomSecThenTrySpecificSection FunctionSec 3
+
+    // Now we've read the ImportSec and FunctionSec we can make a more
+    // convenient indexable function-signatures array:
+
+    let convenientFuncTypesArray = WasmAlgorithms.GetConvenientTypeIdxArray (snd sec2) (snd sec3)
+
+    let r = { Reader=binaryReader; TypeSec=snd sec1; ConvenientFuncTypeArray=convenientFuncTypesArray }
+
+    // Read remaining sections:
+
     let sec4  = r |> CustomSecThenTrySpecificSection TableSec 4
     let sec5  = r |> CustomSecThenTrySpecificSection MemSec 5
     let sec6  = r |> CustomSecThenTrySpecificSection GlobalSec 6

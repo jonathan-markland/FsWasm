@@ -12,11 +12,19 @@ DESIGN ISSUES - decide how to do.
 
 [ ] Decide new name for "Wasm2" - something proprietary.
 
+[ ] Review naming since moving WASM to trees, where the instructions that have operands *bind* them as child sub-tree fields.
+
+[ ] Want to do constant-hoisting, so we don't waste time pushing constants onto the stack
+    if they are just going to be operands for ADD etc...  Maybe can use "add A,1".
 
 
 
 CODE
 ====
+
+[ ] The "--- Elems section ---" is messy in the unitTestSerialisation text.
+
+[ ] Now that we've moved to subtrees representation, the code in the unitTestSerialisation is messy.
 
 [ ] Need label numbers to be unique across all functions in case of br_table.
 

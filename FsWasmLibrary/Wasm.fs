@@ -43,10 +43,10 @@ open System
         | IfElse       of BlockType * If:Instr list * Else:Instr list  // 04 05 0B
         | Br           of LabelIdx  // 0C
         | BrIf         of LabelIdx  // 0D
-        | BrTable      of LabelIdx array * LabelIdx  // 0E
+        | BrTable      of Instr * LabelIdx array * LabelIdx  // 0E
         | Return
-        | Call         of FuncIdx   // 10
-        | CallIndirect of FuncType  // 11 00
+        | Call         of FuncIdx * Instr list  // 10
+        | CallIndirect of FuncType * Instr list // 11 00
 
         // 5.4.2  Parameteric Instructions
 
@@ -63,30 +63,30 @@ open System
 
         // 5.4.4  Memory Instructions
 
-        | I32Load     of MemArg     // 28
-        | I64Load     of MemArg
-        | F32Load     of MemArg
-        | F64Load     of MemArg
-        | I32Load8s   of MemArg   // 2C
-        | I32Load8u   of MemArg
-        | I32Load16s  of MemArg
-        | I32Load16u  of MemArg
+        | I32Load     of MemArg * Instr     // 28
+        | I64Load     of MemArg * Instr
+        | F32Load     of MemArg * Instr
+        | F64Load     of MemArg * Instr
+        | I32Load8s   of MemArg * Instr   // 2C
+        | I32Load8u   of MemArg * Instr
+        | I32Load16s  of MemArg * Instr
+        | I32Load16u  of MemArg * Instr
 
-        | I64Load8s   of MemArg   // 30
-        | I64Load8u   of MemArg
-        | I64Load16s  of MemArg
-        | I64Load16u  of MemArg
-        | I64Load32s  of MemArg  // 34
-        | I64Load32u  of MemArg
-        | I32Store    of MemArg
-        | I64Store    of MemArg
-        | F32Store    of MemArg    // 38
-        | F64Store    of MemArg
-        | I32Store8   of MemArg
-        | I32Store16  of MemArg
-        | I64Store8   of MemArg   // 3C
-        | I64Store16  of MemArg
-        | I64Store32  of MemArg
+        | I64Load8s   of MemArg * Instr   // 30
+        | I64Load8u   of MemArg * Instr
+        | I64Load16s  of MemArg * Instr
+        | I64Load16u  of MemArg * Instr
+        | I64Load32s  of MemArg * Instr  // 34
+        | I64Load32u  of MemArg * Instr
+        | I32Store    of MemArg * Instr * Instr
+        | I64Store    of MemArg * Instr * Instr
+        | F32Store    of MemArg * Instr * Instr    // 38
+        | F64Store    of MemArg * Instr * Instr
+        | I32Store8   of MemArg * Instr * Instr
+        | I32Store16  of MemArg * Instr * Instr
+        | I64Store8   of MemArg * Instr * Instr   // 3C
+        | I64Store16  of MemArg * Instr * Instr
+        | I64Store32  of MemArg * Instr * Instr
 
         | MemorySize    // 3F 00
         | GrowMemory    // 40 00
