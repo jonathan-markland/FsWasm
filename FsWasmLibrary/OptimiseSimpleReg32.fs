@@ -5,17 +5,23 @@ open PrivateOptimiseSimpleReg32
 
 
 
-let Optimise (originalArray:InstrSimpleReg32[]) =
+let Optimise (originalList:InstrSimpleReg32 list) =
+
+    let originalArray = List.toArray originalList   // TODO: re-write ReplaceAll (etc) for F# lists
 
     originalArray
         |> ReplaceAll 3 WherePushBarrierPop  [||]
         |> ReplaceAll 3 WherePushBarrierDrop [||]
         |> ReplaceAll 3 WherePushBarrierPeek [| PushA |]
+        |> Array.toList
 
 
 
-let RemoveBarriers (originalArray:InstrSimpleReg32[]) =  // <- Must only ever be final
+let RemoveBarriers (originalList:InstrSimpleReg32 list) =
+
+    let originalArray = List.toArray originalList   // TODO: re-write ReplaceAll (etc) for F# lists
 
     originalArray
         |> ReplaceAll 1 WhereBarrier  [||]   
+        |> Array.toList
 

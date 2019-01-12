@@ -497,8 +497,8 @@ let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record)
     TranslateLocals writeOut f.FuncType f.Locals
 
     let funcInstructions      = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in table outputting
-    let optimisedInstructions = funcInstructions // TODO: sort out |> Optimise
-    let withoutBarriers       = optimisedInstructions // TODO: sort out |> RemoveBarriers
+    let optimisedInstructions = funcInstructions |> Optimise
+    let withoutBarriers       = optimisedInstructions |> RemoveBarriers
 
     //writeOut "// NON-OPTIMISED:"
     //InstructionsToText writeOut funcInstructions    // TODO: Don't want both of these outputs
