@@ -12,6 +12,22 @@ type ConvenientLookupTables = {
 
 
 
+let GetConvenientTypeIdxArray thisModuleImports thisModuleFuncs =
+
+    let importedFuncs = 
+        thisModuleImports |> Array.choose (fun thisImport -> 
+            match thisImport with
+                | {ImportDesc=ImportFunc(x)} -> Some(x)
+                | _ -> None)
+
+    Array.append importedFuncs thisModuleFuncs
+
+
+
+
+
+
+
 let GetConvenientLookupTables (thisModule:Wasm.Module) =
 
     // 2.5.1  "The index space for functions, tables, memories and 
@@ -22,14 +38,7 @@ let GetConvenientLookupTables (thisModule:Wasm.Module) =
     // TypeIdxs  (function signatures)
 
     let typeIdxArray = 
-
-        let importedFuncs = 
-            thisModule.Imports |> Array.choose (fun thisImport -> 
-                match thisImport with
-                    | {ImportDesc=ImportFunc(x)} -> Some(x)
-                    | _ -> None)
-
-        Array.append importedFuncs thisModule.Funcs
+        GetConvenientTypeIdxArray thisModule.Imports thisModule.Funcs
 
     // Tables
 
@@ -62,7 +71,7 @@ let GetConvenientLookupTables (thisModule:Wasm.Module) =
         let importedGlobals = 
             thisModule.Imports |> Array.choose (fun thisImport -> 
                 match thisImport with
-                    | {ImportDesc=ImportGlobal(x)} -> Some({GlobalType=x; InitExpr=[||]}) // TODO: didn't want this final re-wrapping
+                    | {ImportDesc=ImportGlobal(x)} -> Some({GlobalType=x; InitExpr=[]}) // TODO: didn't want this final re-wrapping
                     | _ -> None)
 
         Array.append importedGlobals thisModule.Globals

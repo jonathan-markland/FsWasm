@@ -163,7 +163,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 then addLine (SingleLineFormatted instruction)
                 else addLongForm instruction
 
-            instructionsArray |> Array.iter addInstruction
+            instructionsArray |> List.iter addInstruction
 
         addInstructions instructionsArray
 

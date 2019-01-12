@@ -37,16 +37,16 @@ open System
 
         | Unreachable  // 00
         | Nop          // 01
-        | Block        of BlockType * Instr array  // 02 0B
-        | Loop         of BlockType * Instr array  // 03 0B
-        | If           of BlockType * Instr array  // 04 0B
-        | IfElse       of BlockType * If:Instr array * Else:Instr array  // 04 05 0B
+        | Block        of BlockType * Instr list  // 02 0B
+        | Loop         of BlockType * Instr list  // 03 0B
+        | If           of BlockType * Instr list  // 04 0B
+        | IfElse       of BlockType * If:Instr list * Else:Instr list  // 04 05 0B
         | Br           of LabelIdx  // 0C
         | BrIf         of LabelIdx  // 0D
-        | BrTable      of LabelIdx array * LabelIdx  // 0E
+        | BrTable      of Instr * LabelIdx array * LabelIdx  // 0E
         | Return
-        | Call         of FuncIdx   // 10
-        | CallIndirect of FuncType  // 11 00
+        | Call         of FuncIdx * Instr list  // 10
+        | CallIndirect of FuncType * Instr list // 11 00
 
         // 5.4.2  Parameteric Instructions
 
@@ -55,179 +55,179 @@ open System
 
         // 5.4.3  Variable Instructions
 
-        | GetLocal  of LocalIdx    // 20
-        | SetLocal  of LocalIdx    // 21
-        | TeeLocal  of LocalIdx    // 22
-        | GetGlobal of GlobalIdx   // 23
-        | SetGlobal of GlobalIdx   // 24
+        | GetLocal    of LocalIdx    // 20
+        | SetLocal    of LocalIdx    // 21
+        | TeeLocal    of LocalIdx    // 22
+        | GetGlobal   of GlobalIdx   // 23
+        | SetGlobal   of GlobalIdx   // 24
 
         // 5.4.4  Memory Instructions
 
-        | I32Load of MemArg     // 28
-        | I64Load of MemArg
-        | F32Load of MemArg
-        | F64Load of MemArg
-        | I32Load8s of MemArg   // 2C
-        | I32Load8u of MemArg
-        | I32Load16s of MemArg
-        | I32Load16u of MemArg
+        | I32Load     of MemArg * Instr     // 28
+        | I64Load     of MemArg * Instr
+        | F32Load     of MemArg * Instr
+        | F64Load     of MemArg * Instr
+        | I32Load8s   of MemArg * Instr   // 2C
+        | I32Load8u   of MemArg * Instr
+        | I32Load16s  of MemArg * Instr
+        | I32Load16u  of MemArg * Instr
 
-        | I64Load8s of MemArg   // 30
-        | I64Load8u of MemArg
-        | I64Load16s of MemArg
-        | I64Load16u of MemArg
-        | I64Load32s of MemArg  // 34
-        | I64Load32u of MemArg
-        | I32Store of MemArg
-        | I64Store of MemArg
-        | F32Store of MemArg    // 38
-        | F64Store of MemArg
-        | I32Store8 of MemArg
-        | I32Store16 of MemArg
-        | I64Store8 of MemArg   // 3C
-        | I64Store16 of MemArg
-        | I64Store32 of MemArg
+        | I64Load8s   of MemArg * Instr   // 30
+        | I64Load8u   of MemArg * Instr
+        | I64Load16s  of MemArg * Instr
+        | I64Load16u  of MemArg * Instr
+        | I64Load32s  of MemArg * Instr  // 34
+        | I64Load32u  of MemArg * Instr
+        | I32Store    of MemArg * Instr * Instr
+        | I64Store    of MemArg * Instr * Instr
+        | F32Store    of MemArg * Instr * Instr    // 38
+        | F64Store    of MemArg * Instr * Instr
+        | I32Store8   of MemArg * Instr * Instr
+        | I32Store16  of MemArg * Instr * Instr
+        | I64Store8   of MemArg * Instr * Instr   // 3C
+        | I64Store16  of MemArg * Instr * Instr
+        | I64Store32  of MemArg * Instr * Instr
 
         | MemorySize    // 3F 00
         | GrowMemory    // 40 00
 
         // 5.4.5  Numeric Instructions
 
-        | I32Const of I32  // 41
-        | I64Const of I64  // 42
-        | F32Const of F32  // 43
-        | F64Const of F64  // 44
+        | I32Const    of I32  // 41
+        | I64Const    of I64  // 42
+        | F32Const    of F32  // 43
+        | F64Const    of F64  // 44
 
-        | I32Eqz 
-        | I32Eq 
-        | I32Ne 
-        | I32Lts 
-        | I32Ltu 
-        | I32Gts 
-        | I32Gtu 
-        | I32Les 
-        | I32Leu 
-        | I32Ges 
-        | I32Geu 
+        | I32Eqz      of Instr 
+        | I32Eq       of Instr * Instr
+        | I32Ne       of Instr * Instr
+        | I32Lts      of Instr * Instr
+        | I32Ltu      of Instr * Instr
+        | I32Gts      of Instr * Instr
+        | I32Gtu      of Instr * Instr
+        | I32Les      of Instr * Instr
+        | I32Leu      of Instr * Instr
+        | I32Ges      of Instr * Instr
+        | I32Geu      of Instr * Instr
 
-        | I64Eqz   // 50
-        | I64Eq 
-        | I64Ne 
-        | I64Lts 
-        | I64Ltu 
-        | I64Gts 
-        | I64Gtu 
-        | I64Les 
-        | I64Leu 
-        | I64Ges 
-        | I64Geu 
-        | F32Eq 
-        | F32Ne 
-        | F32Lt 
-        | F32Gt 
-        | F32Le
+        | I64Eqz      of Instr  // 50
+        | I64Eq       of Instr * Instr
+        | I64Ne       of Instr * Instr
+        | I64Lts      of Instr * Instr 
+        | I64Ltu      of Instr * Instr 
+        | I64Gts      of Instr * Instr 
+        | I64Gtu      of Instr * Instr 
+        | I64Les      of Instr * Instr 
+        | I64Leu      of Instr * Instr 
+        | I64Ges      of Instr * Instr 
+        | I64Geu      of Instr * Instr 
+        | F32Eq       of Instr * Instr
+        | F32Ne       of Instr * Instr
+        | F32Lt       of Instr * Instr
+        | F32Gt       of Instr * Instr
+        | F32Le       of Instr * Instr
         
-        | F32Ge   // 60
-        | F64Eq 
-        | F64Ne 
-        | F64Lt 
-        | F64Gt
-        | F64Le 
-        | F64Ge 
-        | I32Clz 
-        | I32Ctz 
-        | I32PopCnt 
-        | I32Add 
-        | I32Sub 
-        | I32Mul 
-        | I32Divs 
-        | I32Divu 
-        | I32Rems 
+        | F32Ge       of Instr * Instr // 60
+        | F64Eq       of Instr * Instr
+        | F64Ne       of Instr * Instr
+        | F64Lt       of Instr * Instr
+        | F64Gt       of Instr * Instr
+        | F64Le       of Instr * Instr
+        | F64Ge       of Instr * Instr
+        | I32Clz      of Instr
+        | I32Ctz      of Instr
+        | I32PopCnt   of Instr
+        | I32Add      of Instr * Instr
+        | I32Sub      of Instr * Instr
+        | I32Mul      of Instr * Instr
+        | I32Divs     of Instr * Instr
+        | I32Divu     of Instr * Instr
+        | I32Rems     of Instr * Instr
 
-        | I32Remu    // 70
-        | I32And 
-        | I32Or 
-        | I32Xor 
-        | I32Shl
-        | I32Shrs
-        | I32Shru
-        | I32Rotl
-        | I32Rotr
-        | I64Clz
-        | I64Ctz
-        | I64PopCnt
-        | I64Add
-        | I64Sub
-        | I64Mul
-        | I64Divs
+        | I32Remu     of Instr * Instr   // 70
+        | I32And      of Instr * Instr
+        | I32Or       of Instr * Instr
+        | I32Xor      of Instr * Instr
+        | I32Shl      of Instr * Instr
+        | I32Shrs     of Instr * Instr
+        | I32Shru     of Instr * Instr
+        | I32Rotl     of Instr * Instr
+        | I32Rotr     of Instr * Instr
+        | I64Clz      of Instr
+        | I64Ctz      of Instr
+        | I64PopCnt   of Instr
+        | I64Add      of Instr * Instr
+        | I64Sub      of Instr * Instr
+        | I64Mul      of Instr * Instr
+        | I64Divs     of Instr * Instr
 
-        | I64Divu   // 80
-        | I64Rems
-        | I64Remu
-        | I64And
-        | I64Or
-        | I64Xor
-        | I64Shl
-        | I64Shrs
-        | I64Shru
-        | I64Rotl
-        | I64Rotr
-        | F32Abs
-        | F32Neg
-        | F32Ceil
-        | F32Floor
-        | F32Trunc
+        | I64Divu     of Instr * Instr  // 80
+        | I64Rems     of Instr * Instr
+        | I64Remu     of Instr * Instr
+        | I64And      of Instr * Instr
+        | I64Or       of Instr * Instr
+        | I64Xor      of Instr * Instr
+        | I64Shl      of Instr * Instr
+        | I64Shrs     of Instr * Instr
+        | I64Shru     of Instr * Instr
+        | I64Rotl     of Instr * Instr
+        | I64Rotr     of Instr * Instr
+        | F32Abs      of Instr
+        | F32Neg      of Instr
+        | F32Ceil     of Instr
+        | F32Floor    of Instr
+        | F32Trunc    of Instr
 
-        | F32Nearest   // 90
-        | F32Sqrt
-        | F32Add
-        | F32Sub
-        | F32Mul
-        | F32Div
-        | F32Min
-        | F32Max
-        | F32CopySign
-        | F64Abs
-        | F64Neg
-        | F64Ceil
-        | F64Floor
-        | F64Trunc
-        | F64Nearest
-        | F64Sqrt
+        | F32Nearest  of Instr  // 90
+        | F32Sqrt     of Instr
+        | F32Add      of Instr * Instr
+        | F32Sub      of Instr * Instr
+        | F32Mul      of Instr * Instr
+        | F32Div      of Instr * Instr
+        | F32Min      of Instr * Instr
+        | F32Max      of Instr * Instr
+        | F32CopySign of Instr * Instr
+        | F64Abs      of Instr
+        | F64Neg      of Instr
+        | F64Ceil     of Instr
+        | F64Floor    of Instr
+        | F64Trunc    of Instr
+        | F64Nearest  of Instr
+        | F64Sqrt     of Instr
 
-        | F64Add   // A0
-        | F64Sub
-        | F64Mul
-        | F64Div
-        | F64Min
-        | F64Max
-        | F64CopySign
-        | I32WrapI64 
-        | I32TruncsF32 
-        | I32TruncuF32 
-        | I32TruncsF64 
-        | I32TruncuF64 
-        | I64ExtendsI32 
-        | I64ExtenduI32 
-        | I64TruncsF32 
-        | I64TruncuF32 
+        | F64Add        of Instr * Instr  // A0
+        | F64Sub        of Instr * Instr
+        | F64Mul        of Instr * Instr
+        | F64Div        of Instr * Instr
+        | F64Min        of Instr * Instr
+        | F64Max        of Instr * Instr
+        | F64CopySign   of Instr * Instr
+        | I32WrapI64    of Instr
+        | I32TruncsF32  of Instr
+        | I32TruncuF32  of Instr
+        | I32TruncsF64  of Instr
+        | I32TruncuF64  of Instr
+        | I64ExtendsI32 of Instr
+        | I64ExtenduI32 of Instr
+        | I64TruncsF32  of Instr
+        | I64TruncuF32  of Instr
 
-        | I64TruncsF64   // B0
-        | I64TruncuF64 
-        | F32ConvertsI32 
-        | F32ConvertuI32 
-        | F32ConvertsI64 
-        | F32ConvertuI64 
-        | F32DemoteF64 
-        | F64ConvertsI32 
-        | F64ConvertuI32 
-        | F64ConvertsI64 
-        | F64ConvertuI64 
-        | F64PromoteF32 
-        | I32ReinterpretF32  
-        | I64ReinterpretF64  
-        | F32ReinterpretI32  
-        | F64ReinterpretI64 
+        | I64TruncsF64      of Instr // B0
+        | I64TruncuF64      of Instr
+        | F32ConvertsI32    of Instr
+        | F32ConvertuI32    of Instr
+        | F32ConvertsI64    of Instr
+        | F32ConvertuI64    of Instr
+        | F32DemoteF64      of Instr
+        | F64ConvertsI32    of Instr
+        | F64ConvertuI32    of Instr
+        | F64ConvertsI64    of Instr
+        | F64ConvertuI64    of Instr
+        | F64PromoteF32     of Instr
+        | I32ReinterpretF32 of Instr 
+        | I64ReinterpretF64 of Instr 
+        | F32ReinterpretI32 of Instr 
+        | F64ReinterpretI64 of Instr
 
     // 5.4.6  Expressions
 
@@ -249,15 +249,15 @@ open System
 
     type Custom = { Name:Name; Data:byte array }
     type Import = { ImportModuleName:Name; ImportName:Name; ImportDesc:ImportDesc }
-    type Func   = { Locals:Locals array; Body:Instr[] }
+    type Func   = { Locals:Locals array; Body:Instr list }
     type Table  = { TableType:TableType }
     type Mem    = { MemType:MemoryType }
-    type Global = { GlobalType:GlobalType; InitExpr:Instr[] }
+    type Global = { GlobalType:GlobalType; InitExpr:Instr list }
     type Export = { ExportName:Name; ExportDesc:ExportDesc }
     type Start  = { StartFuncIdx:FuncIdx }
-    type Elem   = { TableIndex:TableIdx; OffsetExpr:Instr[]; Init:FuncIdx[] }
+    type Elem   = { TableIndex:TableIdx; OffsetExpr:Instr list; Init:FuncIdx[] }
     type Code   = { CodeSize:U32; Function:Func }
-    type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:Instr[]; InitImageBytes:byte[] }
+    type Data   = { DataMemoryIndex:MemIdx; OffsetExpr:Instr list; InitImageBytes:byte[] }
 
     type Magic   = U32
     type Version = U32
