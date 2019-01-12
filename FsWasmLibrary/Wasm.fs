@@ -55,11 +55,11 @@ open System
 
         // 5.4.3  Variable Instructions
 
-        | GetLocal    of LocalIdx    // 20
-        | SetLocal    of LocalIdx    // 21
-        | TeeLocal    of LocalIdx    // 22
-        | GetGlobal   of GlobalIdx   // 23
-        | SetGlobal   of GlobalIdx   // 24
+        | GetLocal    of LocalIdx            // 20
+        | SetLocal    of LocalIdx * Instr    // 21
+        | TeeLocal    of LocalIdx * Instr    // 22
+        | GetGlobal   of GlobalIdx           // 23
+        | SetGlobal   of GlobalIdx * Instr   // 24
 
         // 5.4.4  Memory Instructions
 

@@ -188,12 +188,12 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
 
             | I32Const(I32(C)) -> [ ConstA(Const32(C)); PushA; Barrier ]
 
-            | GetLocal(L)  -> [ FetchLocA(L); PushA; Barrier ]
-            | SetLocal(L)  -> [ PopA;  StoreALoc(L); Barrier ]
-            | TeeLocal(L)  -> [ PeekA; StoreALoc(L); Barrier ]
+            | GetLocal(L)   -> [ FetchLocA(L); PushA; Barrier ]
+            | SetLocal(L,V) -> (TranslateInstr V) +++ [ PopA;  StoreALoc(L); Barrier ]
+            | TeeLocal(L,V) -> (TranslateInstr V) +++ [ PeekA; StoreALoc(L); Barrier ]
         
-            | GetGlobal(G) -> [ FetchGloA(G); PushA; Barrier ]
-            | SetGlobal(G) -> [ PopA; StoreAGlo(G);  Barrier ]
+            | GetGlobal(G)   -> [ FetchGloA(G); PushA; Barrier ]
+            | SetGlobal(G,V) -> (TranslateInstr V) +++ [ PopA; StoreAGlo(G);  Barrier ]
 
             | I32Store8(  {Align=_;       Offset=O}, lhs, rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store8AtoB(O);  Barrier ]
             | I32Store16( {Align=U32(1u); Offset=O}, lhs, rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store16AtoB(O); Barrier ]

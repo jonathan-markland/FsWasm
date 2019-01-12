@@ -288,10 +288,10 @@ and Instruction recent r =
         // 5.4.3  Variable Instructions
 
         | 0x20uy -> Some(GetLocal(r |> LocalIdx)::recent)
-        | 0x21uy -> Some(SetLocal(r |> LocalIdx)::recent)
-        | 0x22uy -> Some(TeeLocal(r |> LocalIdx)::recent)
+        | 0x21uy -> Some(SetLocal(r |> LocalIdx, first())::tail1())
+        | 0x22uy -> Some(TeeLocal(r |> LocalIdx, first())::tail1())
         | 0x23uy -> Some(GetGlobal(r |> GlobalIdx)::recent)
-        | 0x24uy -> Some(SetGlobal(r |> GlobalIdx)::recent)
+        | 0x24uy -> Some(SetGlobal(r |> GlobalIdx, first())::tail1())
 
         // 5.4.4  Memory Instructions
 

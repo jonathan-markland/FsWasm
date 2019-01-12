@@ -156,6 +156,11 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 addInstruction ins1
                 addInstruction ins2)
 
+        and addSet s i instr = 
+            addLine (sprintf "%s [%d]" s i)
+            withIndent (fun () -> 
+                addInstruction instr)
+
         and addConst c =
             addLine (sprintf "const %A" c)
 
@@ -197,11 +202,11 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 | F32Const(c) -> addConst c
                 | F64Const(c) -> addConst c
 
-                | GetLocal  (LocalIdx(U32(idx)))  -> addIndex "Get Local"  idx 
-                | SetLocal  (LocalIdx(U32(idx)))  -> addIndex "Set Local"  idx 
-                | TeeLocal  (LocalIdx(U32(idx)))  -> addIndex "Tee Local"  idx 
-                | GetGlobal (GlobalIdx(U32(idx))) -> addIndex "Get Global" idx 
-                | SetGlobal (GlobalIdx(U32(idx))) -> addIndex "Set Global" idx 
+                | GetLocal  (LocalIdx(U32(idx)))         -> addIndex "Get Local"  idx 
+                | GetGlobal (GlobalIdx(U32(idx)))        -> addIndex "Get Global" idx 
+                | SetLocal  (LocalIdx(U32(idx)), instr)  -> addSet "Set Local"  idx instr
+                | TeeLocal  (LocalIdx(U32(idx)), instr)  -> addSet "Tee Local"  idx instr
+                | SetGlobal (GlobalIdx(U32(idx)), instr) -> addSet "Set Global" idx instr
 
                 | I32Load    (memArg, instr) -> addLoad "I32Load"    memArg instr
                 | I64Load    (memArg, instr) -> addLoad "I64Load"    memArg instr
