@@ -119,7 +119,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     // BODY
 
-    let AddBody instructionsArray =
+    let AddBody instructionsList =
 
         let mutable ip = 0
         let mutable indent = 0
@@ -130,7 +130,270 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             sb.AppendLine s |> ignore
             ip <- ip + 1
 
-        let rec addInstructions instructionsArray =
+        let addIndex s i = 
+            addLine (sprintf "%s [%d]" s i)
+
+        let rec addInstructions instructionsList =
+            match instructionsList with
+                | head::tail -> 
+                    addInstruction head
+                    addInstructions tail
+                | [] -> ()
+
+        and withIndent f =
+            indent <- indent + 1
+            f ()
+            indent <- indent - 1
+
+        and addLoad s memArg instr = 
+            addLine (sprintf "%s %s" s (SingleLineFormatted memArg))
+            withIndent (fun () -> 
+                addInstruction instr)
+
+        and addStore s memArg ins1 ins2 = 
+            addLine (sprintf "%s %s" s (SingleLineFormatted memArg))
+            withIndent (fun () ->
+                addInstruction ins1
+                addInstruction ins2)
+
+        and addConst c =
+            addLine (sprintf "const %A" c)
+
+        and addUnary s ins =
+            addLine s
+            withIndent (fun () -> 
+                addInstruction ins)
+
+        and addBinary s ins1 ins2 =
+            addLine s
+            withIndent (fun () ->
+                addInstruction ins1
+                addInstruction ins2)
+
+        and addBlock s bt il =
+            let blockIndicator = 
+                match bt with 
+                    | EmptyBlockType -> ""
+                    | BlockValType(bvt) -> PrettyValType bvt
+            addLine (sprintf "%s %s" s blockIndicator)
+            withIndent (fun () -> 
+                addInstructions il)
+
+        and addInstruction instr =
+
+            match instr with
+
+                | Unreachable 
+                | Nop 
+                | Return
+                | Drop
+                | Select
+                | MemorySize
+                | GrowMemory
+                    -> addLine (instr.ToString())
+
+                | I32Const(c) -> addConst c
+                | I64Const(c) -> addConst c
+                | F32Const(c) -> addConst c
+                | F64Const(c) -> addConst c
+
+                | GetLocal  (LocalIdx(U32(idx)))  -> addIndex "Get Local"  idx 
+                | SetLocal  (LocalIdx(U32(idx)))  -> addIndex "Set Local"  idx 
+                | TeeLocal  (LocalIdx(U32(idx)))  -> addIndex "Tee Local"  idx 
+                | GetGlobal (GlobalIdx(U32(idx))) -> addIndex "Get Global" idx 
+                | SetGlobal (GlobalIdx(U32(idx))) -> addIndex "Set Global" idx 
+
+                | I32Load    (memArg, instr) -> addLoad "I32Load"    memArg instr
+                | I64Load    (memArg, instr) -> addLoad "I64Load"    memArg instr
+                | F32Load    (memArg, instr) -> addLoad "F32Load"    memArg instr
+                | F64Load    (memArg, instr) -> addLoad "F64Load"    memArg instr
+                | I32Load8s  (memArg, instr) -> addLoad "I32Load8s"  memArg instr
+                | I32Load8u  (memArg, instr) -> addLoad "I32Load8u"  memArg instr
+                | I32Load16s (memArg, instr) -> addLoad "I32Load16s" memArg instr
+                | I32Load16u (memArg, instr) -> addLoad "I32Load16u" memArg instr
+                | I64Load8s  (memArg, instr) -> addLoad "I64Load8s"  memArg instr
+                | I64Load8u  (memArg, instr) -> addLoad "I64Load8u"  memArg instr
+                | I64Load16s (memArg, instr) -> addLoad "I64Load16s" memArg instr
+                | I64Load16u (memArg, instr) -> addLoad "I64Load16u" memArg instr
+                | I64Load32s (memArg, instr) -> addLoad "I64Load32s" memArg instr
+                | I64Load32u (memArg, instr) -> addLoad "I64Load32u" memArg instr
+
+                | I32Store   (memArg, ins1, ins2) -> addStore "I32Store"   memArg ins1 ins2
+                | I64Store   (memArg, ins1, ins2) -> addStore "I64Store"   memArg ins1 ins2
+                | F32Store   (memArg, ins1, ins2) -> addStore "F32Store"   memArg ins1 ins2
+                | F64Store   (memArg, ins1, ins2) -> addStore "F64Store"   memArg ins1 ins2
+                | I32Store8  (memArg, ins1, ins2) -> addStore "I32Store8"  memArg ins1 ins2
+                | I32Store16 (memArg, ins1, ins2) -> addStore "I32Store16" memArg ins1 ins2
+                | I64Store8  (memArg, ins1, ins2) -> addStore "I64Store8"  memArg ins1 ins2
+                | I64Store16 (memArg, ins1, ins2) -> addStore "I64Store16" memArg ins1 ins2
+                | I64Store32 (memArg, ins1, ins2) -> addStore "I64Store32" memArg ins1 ins2
+
+                | I32Eqz            (i) -> addUnary "I32Eqz" i
+                | I64Eqz            (i) -> addUnary "I64Eqz" i
+                | I32Clz            (i) -> addUnary "I32Clz" i
+                | I32Ctz            (i) -> addUnary "I32Ctz" i
+                | I32PopCnt         (i) -> addUnary "I32PopCnt" i
+                | I64Clz            (i) -> addUnary "I64Clz" i
+                | I64Ctz            (i) -> addUnary "I64Ctz" i
+                | I64PopCnt         (i) -> addUnary "I64PopCnt" i
+                | F32Abs            (i) -> addUnary "F32Abs" i
+                | F32Neg            (i) -> addUnary "F32Neg" i
+                | F32Ceil           (i) -> addUnary "F32Ceil" i
+                | F32Floor          (i) -> addUnary "F32Floor" i
+                | F32Trunc          (i) -> addUnary "F32Trunc" i
+                | F32Nearest        (i) -> addUnary "F32Nearest" i
+                | F32Sqrt           (i) -> addUnary "F32Sqrt" i
+                | F64Abs            (i) -> addUnary "F64Abs" i
+                | F64Neg            (i) -> addUnary "F64Neg" i
+                | F64Ceil           (i) -> addUnary "F64Ceil" i
+                | F64Floor          (i) -> addUnary "F64Floor" i
+                | F64Trunc          (i) -> addUnary "F64Trunc" i
+                | F64Nearest        (i) -> addUnary "F64Nearest" i
+                | F64Sqrt           (i) -> addUnary "F64Sqrt" i
+                | I32WrapI64        (i) -> addUnary "I32WrapI64" i
+                | I32TruncsF32      (i) -> addUnary "I32TruncsF32" i
+                | I32TruncuF32      (i) -> addUnary "I32TruncuF32" i
+                | I32TruncsF64      (i) -> addUnary "I32TruncsF64" i
+                | I32TruncuF64      (i) -> addUnary "I32TruncuF64" i
+                | I64ExtendsI32     (i) -> addUnary "I64ExtendsI32" i
+                | I64ExtenduI32     (i) -> addUnary "I64ExtenduI32" i
+                | I64TruncsF32      (i) -> addUnary "I64TruncsF32" i
+                | I64TruncuF32      (i) -> addUnary "I64TruncuF32" i
+                | I64TruncsF64      (i) -> addUnary "I64TruncsF64" i
+                | I64TruncuF64      (i) -> addUnary "I64TruncuF64" i
+                | F32ConvertsI32    (i) -> addUnary "F32ConvertsI32" i
+                | F32ConvertuI32    (i) -> addUnary "F32ConvertuI32" i
+                | F32ConvertsI64    (i) -> addUnary "F32ConvertsI64" i
+                | F32ConvertuI64    (i) -> addUnary "F32ConvertuI64" i
+                | F32DemoteF64      (i) -> addUnary "F32DemoteF64" i
+                | F64ConvertsI32    (i) -> addUnary "F64ConvertsI32" i
+                | F64ConvertuI32    (i) -> addUnary "F64ConvertuI32" i
+                | F64ConvertsI64    (i) -> addUnary "F64ConvertsI64" i
+                | F64ConvertuI64    (i) -> addUnary "F64ConvertuI64" i
+                | F64PromoteF32     (i) -> addUnary "F64PromoteF32" i
+                | I32ReinterpretF32 (i) -> addUnary "I32ReinterpretF32" i
+                | I64ReinterpretF64 (i) -> addUnary "I64ReinterpretF64" i
+                | F32ReinterpretI32 (i) -> addUnary "F32ReinterpretI32" i
+                | F64ReinterpretI64 (i) -> addUnary "F64ReinterpretI64" i
+
+                | I32Eq       (a,b) -> addBinary "I32Eq" a b
+                | I32Ne       (a,b) -> addBinary "I32Ne" a b
+                | I32Lts      (a,b) -> addBinary "I32Lts" a b
+                | I32Ltu      (a,b) -> addBinary "I32Ltu" a b
+                | I32Gts      (a,b) -> addBinary "I32Gts" a b
+                | I32Gtu      (a,b) -> addBinary "I32Gtu" a b
+                | I32Les      (a,b) -> addBinary "I32Les" a b
+                | I32Leu      (a,b) -> addBinary "I32Leu" a b
+                | I32Ges      (a,b) -> addBinary "I32Ges" a b
+                | I32Geu      (a,b) -> addBinary "I32Geu" a b
+                | I64Eq       (a,b) -> addBinary "I64Eq" a b
+                | I64Ne       (a,b) -> addBinary "I64Ne" a b
+                | I64Lts      (a,b) -> addBinary "I64Lts" a b
+                | I64Ltu      (a,b) -> addBinary "I64Ltu" a b
+                | I64Gts      (a,b) -> addBinary "I64Gts" a b
+                | I64Gtu      (a,b) -> addBinary "I64Gtu" a b
+                | I64Les      (a,b) -> addBinary "I64Les" a b
+                | I64Leu      (a,b) -> addBinary "I64Leu" a b
+                | I64Ges      (a,b) -> addBinary "I64Ges" a b
+                | I64Geu      (a,b) -> addBinary "I64Geu" a b
+                | F32Eq       (a,b) -> addBinary "F32Eq" a b
+                | F32Ne       (a,b) -> addBinary "F32Ne" a b
+                | F32Lt       (a,b) -> addBinary "F32Lt" a b
+                | F32Gt       (a,b) -> addBinary "F32Gt" a b
+                | F32Le       (a,b) -> addBinary "F32Le" a b
+                | F32Ge       (a,b) -> addBinary "F32Ge" a b
+                | F64Eq       (a,b) -> addBinary "F64Eq" a b
+                | F64Ne       (a,b) -> addBinary "F64Ne" a b
+                | F64Lt       (a,b) -> addBinary "F64Lt" a b
+                | F64Gt       (a,b) -> addBinary "F64Gt" a b
+                | F64Le       (a,b) -> addBinary "F64Le" a b
+                | F64Ge       (a,b) -> addBinary "F64Ge" a b
+                | I32Add      (a,b) -> addBinary "I32Add" a b
+                | I32Sub      (a,b) -> addBinary "I32Sub" a b
+                | I32Mul      (a,b) -> addBinary "I32Mul" a b
+                | I32Divs     (a,b) -> addBinary "I32Divs" a b
+                | I32Divu     (a,b) -> addBinary "I32Divu" a b
+                | I32Rems     (a,b) -> addBinary "I32Rems" a b
+                | I32Remu     (a,b) -> addBinary "I32Remu" a b
+                | I32And      (a,b) -> addBinary "I32And" a b
+                | I32Or       (a,b) -> addBinary "I32Or" a b
+                | I32Xor      (a,b) -> addBinary "I32Xor" a b
+                | I32Shl      (a,b) -> addBinary "I32Shl" a b
+                | I32Shrs     (a,b) -> addBinary "I32Shrs" a b
+                | I32Shru     (a,b) -> addBinary "I32Shru" a b
+                | I32Rotl     (a,b) -> addBinary "I32Rotl" a b
+                | I32Rotr     (a,b) -> addBinary "I32Rotr" a b
+                | I64Add      (a,b) -> addBinary "I64Add" a b
+                | I64Sub      (a,b) -> addBinary "I64Sub" a b
+                | I64Mul      (a,b) -> addBinary "I64Mul" a b
+                | I64Divs     (a,b) -> addBinary "I64Divs" a b
+                | I64Divu     (a,b) -> addBinary "I64Divu" a b
+                | I64Rems     (a,b) -> addBinary "I64Rems" a b
+                | I64Remu     (a,b) -> addBinary "I64Remu" a b
+                | I64And      (a,b) -> addBinary "I64And" a b
+                | I64Or       (a,b) -> addBinary "I64Or" a b
+                | I64Xor      (a,b) -> addBinary "I64Xor" a b
+                | I64Shl      (a,b) -> addBinary "I64Shl" a b
+                | I64Shrs     (a,b) -> addBinary "I64Shrs" a b
+                | I64Shru     (a,b) -> addBinary "I64Shru" a b
+                | I64Rotl     (a,b) -> addBinary "I64Rotl" a b
+                | I64Rotr     (a,b) -> addBinary "I64Rotr" a b
+                | F32Add      (a,b) -> addBinary "F32Add" a b
+                | F32Sub      (a,b) -> addBinary "F32Sub" a b
+                | F32Mul      (a,b) -> addBinary "F32Mul" a b
+                | F32Div      (a,b) -> addBinary "F32Div" a b
+                | F32Min      (a,b) -> addBinary "F32Min" a b
+                | F32Max      (a,b) -> addBinary "F32Max" a b
+                | F32CopySign (a,b) -> addBinary "F32CopySign" a b
+                | F64Add      (a,b) -> addBinary "F64Add" a b
+                | F64Sub      (a,b) -> addBinary "F64Sub" a b
+                | F64Mul      (a,b) -> addBinary "F64Mul" a b
+                | F64Div      (a,b) -> addBinary "F64Div" a b
+                | F64Min      (a,b) -> addBinary "F64Min" a b
+                | F64Max      (a,b) -> addBinary "F64Max" a b
+                | F64CopySign (a,b) -> addBinary "F64CopySign" a b
+
+                | Block (bt,il) -> addBlock "Block" bt il
+                | Loop  (bt,il) -> addBlock "Loop" bt il
+                | If    (bt,il) -> addBlock "If" bt il
+
+                | IfElse (bt,il1,il2) -> 
+                    addLine (sprintf "IfElse %A" bt)
+                    withIndent (fun () -> 
+                        addInstructions il1
+                        addInstructions il2)
+
+                | Br   (LabelIdx(U32(i))) -> addIndex "Br" i
+                | BrIf (LabelIdx(U32(i))) -> addIndex "BrIf" i
+
+                | BrTable (ins, idxs, idx) ->
+                    addLine "BrTable  ** todo: show table"  // TODO
+                    withIndent (fun () -> addInstruction ins)
+
+                | Call (FuncIdx(U32(fidx)), paramList) ->
+                    addLine (sprintf "Call FuncIdx[%d]" fidx)  // TODO: show names?
+                    withIndent (fun () -> addInstructions paramList)
+
+                | CallIndirect (ft, paramList) ->  // TODO
+                    addLine "CallIndirect ** TODO: functype **"
+                    withIndent (fun () -> addInstructions paramList)
+
+
+            
+
+
+(*
+            let withIndentationDo opCode blockType f =
+                addLine (sprintf "%s %A" opCode blockType)
+                indent <- indent + 1
+                f
+                indent <- indent - 1
+
+            let indentedList opCode blockType subInstructions =
+                withIndentationDo opCode blockType (addInstructions subInstructions)
+
+            let indentedInstr opCode blockType instr =
+                withIndentationDo opCode blockType (addInstruction instr)
 
             let isShortForm instruction =
                 match instruction with 
@@ -140,22 +403,14 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     | IfElse(_) -> false
                     | _ -> true
 
-            let subList opCode blockType subInstructions =
-                let blockIndex = ip
-                addLine (sprintf "%s %A" opCode blockType)
-                indent <- indent + 1
-                addInstructions subInstructions
-                // addLine (sprintf "End %s (%d)" opCode blockIndex)
-                indent <- indent - 1
-
             let addLongForm instruction =
                 match instruction with 
-                    | Block(b,a)    -> subList "Block" b a
-                    | Loop(b,a)     -> subList "Loop" b a
-                    | If(b,a)       -> subList "If" b a
+                    | Block(b,a)    -> indentedList "Block" b a
+                    | Loop(b,a)     -> indentedList "Loop" b a
+                    | If(b,a)       -> indentedList "If" b a
                     | IfElse(b,i,e) -> 
-                        subList "If..." b i
-                        subList "...Else" b e
+                        indentedList "If..." b i
+                        indentedList "...Else" b e
                     | _ -> ()
 
             let addInstruction instruction =
@@ -163,9 +418,10 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 then addLine (SingleLineFormatted instruction)
                 else addLongForm instruction
 
-            instructionsArray |> List.iter addInstruction
+            instructionsList |> List.iter addInstruction
+            *)
 
-        addInstructions instructionsArray
+        addInstructions instructionsList
 
 
     // CODE SECTION

@@ -19,6 +19,8 @@ DESIGN ISSUES - decide how to do.
 
 [X] Sort out Optimise (which got commented out when doing the trees).
 	
+[ ] Do we have issues with the table labels and code labels (br_table) ?
+	
 	
 
 CODE
