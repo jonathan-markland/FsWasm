@@ -1,7 +1,5 @@
 ﻿module Wasm
 
-// TODO: I forgot F# arrays are mutable!
-
 open System
 
     type I32 = I32 of int
@@ -10,12 +8,12 @@ open System
     type F32 = F32 of float32
     type F64 = F64 of float
 
-    type Mutability  = Constant | Variable      // 00 01 resp.
+    type Mutability  = Constant | Variable   // 00 01 resp.
     type Limits      = { LimitMin:U32; LimitMax:U32 option }
 
-    type ValType     = I32Type | I64Type | F32Type | F64Type                  // 7F 7E 7D 7C resp.
+    type ValType     = I32Type | I64Type | F32Type | F64Type   // 7F 7E 7D 7C resp.
     type BlockType   = EmptyBlockType | BlockValType of ValType
-    type FuncType    = { ParameterTypes:ValType[]; ReturnTypes:ValType[] }
+    type FuncType    = { ParameterTypes:ValType[]; ReturnTypes:ValType[] }  // TODO: use list?
     type MemoryType  = { MemoryLimits:Limits }
     type ElementType = AnyFuncType
     type TableType   = { TableElementType:ElementType; TableLimits:Limits }
@@ -50,8 +48,8 @@ open System
 
         // 5.4.2  Parameteric Instructions
 
-        | Drop    // 1A
-        | Select  // 1B
+        | Drop        of Instr                   // 1A
+        | Select      of Instr * Instr * Instr   // 1B
 
         // 5.4.3  Variable Instructions
 
@@ -63,7 +61,7 @@ open System
 
         // 5.4.4  Memory Instructions
 
-        | I32Load     of MemArg * Instr     // 28
+        | I32Load     of MemArg * Instr   // 28
         | I64Load     of MemArg * Instr
         | F32Load     of MemArg * Instr
         | F64Load     of MemArg * Instr
@@ -76,7 +74,7 @@ open System
         | I64Load8u   of MemArg * Instr
         | I64Load16s  of MemArg * Instr
         | I64Load16u  of MemArg * Instr
-        | I64Load32s  of MemArg * Instr  // 34
+        | I64Load32s  of MemArg * Instr   // 34
         | I64Load32u  of MemArg * Instr
         | I32Store    of MemArg * Instr * Instr
         | I64Store    of MemArg * Instr * Instr
@@ -84,7 +82,7 @@ open System
         | F64Store    of MemArg * Instr * Instr
         | I32Store8   of MemArg * Instr * Instr
         | I32Store16  of MemArg * Instr * Instr
-        | I64Store8   of MemArg * Instr * Instr   // 3C
+        | I64Store8   of MemArg * Instr * Instr    // 3C
         | I64Store16  of MemArg * Instr * Instr
         | I64Store32  of MemArg * Instr * Instr
 

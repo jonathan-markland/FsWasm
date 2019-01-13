@@ -26,6 +26,8 @@ DESIGN ISSUES - decide how to do.
 CODE
 ====
 
+[ ] No longer need +++ because can use @
+
 [ ] The "--- Elems section ---" is messy in the unitTestSerialisation text.
 
 [ ] Now that we've moved to subtrees representation, the code in the unitTestSerialisation is messy.

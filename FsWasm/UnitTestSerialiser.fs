@@ -124,14 +124,23 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         let mutable ip = 0
         let mutable indent = 0
 
-        let addLine s =
+        let addLineStart () = 
             sb.Append (sprintf "  %3d | " ip) |> ignore
-            sb.Append (new string(' ', (indent * 2))) |> ignore
-            sb.AppendLine s |> ignore
             ip <- ip + 1
+            sb.Append (new string(' ', (indent * 2))) |> ignore
+
+        let addPart (s:string) =
+            sb.Append (s) |> ignore
+
+        let addNewLine () =
+            sb.AppendLine "" |> ignore
+
+        let addLine s =
+            addLineStart ()
+            sb.AppendLine s |> ignore
 
         let addIndex s i = 
-            addLine (sprintf "%s [%d]" s i)
+            addLine (sprintf "%s[%d]" s i)
 
         let rec addInstructions instructionsList =
             match instructionsList with
@@ -157,7 +166,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 addInstruction ins2)
 
         and addSet s i instr = 
-            addLine (sprintf "%s [%d]" s i)
+            addLine (sprintf "%s[%d]" s i)
             withIndent (fun () -> 
                 addInstruction instr)
 
@@ -191,11 +200,19 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 | Unreachable 
                 | Nop 
                 | Return
-                | Drop
-                | Select
                 | MemorySize
                 | GrowMemory
                     -> addLine (instr.ToString())
+
+                | Drop(ins) -> 
+                    addInstruction ins
+                    addLine "Drop"
+
+                | Select(a,b,c) ->
+                    addInstruction a
+                    addInstruction b
+                    addInstruction c
+                    addLine "Select"
 
                 | I32Const(c) -> addConst c
                 | I64Const(c) -> addConst c
@@ -383,7 +400,10 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     withIndent (fun () -> addInstructions paramList)
 
                 | CallIndirect (ft, paramList) ->  // TODO
-                    addLine "CallIndirect ** TODO: functype **"
+                    addLineStart ()
+                    addPart "CallIndirect "
+                    AddFuncType ft
+                    addNewLine ()
                     withIndent (fun () -> addInstructions paramList)
 
 

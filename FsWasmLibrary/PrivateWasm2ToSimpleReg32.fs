@@ -115,11 +115,14 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
 
             // The following translations must all end with Barrier
 
-            | Instr.Drop -> [ Drop; Barrier ]
+            | Instr.Drop(ins) -> TranslateInstr(ins) +++ [ Drop; Barrier ]
         
-            | Select -> 
+            | Select(a,b,c) -> 
                 let l1 = newLabel ()
                 let l2 = newLabel ()
+                TranslateInstr(a) +++
+                TranslateInstr(b) +++
+                TranslateInstr(c) +++
                 [
                     PopA; 
                     PopB; // val2  (desired if A == 0)
@@ -169,7 +172,8 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
                 [
                     PopA; 
                     GotoIndex(tableLabel, labelArray.Length, labelFor defaultLabel);
-                    TableOfAddresses(tableLabel, Array.map labelFor labelArray)
+                    TableOfAddresses(tableLabel, Array.map labelFor labelArray);
+                    Barrier
                 ]
 
             | Return -> [ Goto(returnLabel) ]
@@ -184,7 +188,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
             | CallIndirect(funcType,paramList) ->
                 // TODO: runtime validation of funcType
                 let translatedParams = TranslateInstrArray paramList
-                translatedParams +++ [ PopA; CallTableIndirect ]
+                translatedParams +++ [ PopA; CallTableIndirect; Barrier ]
 
             | I32Const(I32(C)) -> [ ConstA(Const32(C)); PushA; Barrier ]
 
@@ -425,6 +429,19 @@ let InstructionsToText writeOut instrs =
 
     let writeLoc s1 i s2 = writeIns (sprintf "%s%d%s" s1 (LocalIdxAsUint32 i) s2)
 
+    let writeGotoIndex tableLabel numMax defaultLabel =
+        writeIns "pop A"   // The index to branch to
+        writeIns (sprintf "cmp A,%d:if >>= goto %s" numMax (LabelTextOf defaultLabel))
+        writeIns "shl A,2"
+        writeIns (sprintf "goto [A+%s]" (LabelTextOf tableLabel))
+
+    let writeCallTableIndirect () =
+        // TODO: We really need to emit some code to validate the signatures.
+        writeIns "pop A"   // The index to call
+        // TODO: We need to validate index A lies within wasm table [0]
+        writeIns "shl A,2"
+        writeIns (sprintf "goto [A+%s0]" AsmTableNamePrefix)  // WASM 1.0 always looks in table #0
+
     let instructionToText ins =  // These translations can assume a 32-bit target for now.
 
         match ins with
@@ -435,11 +452,11 @@ let InstructionsToText writeOut instrs =
             | ConstA(Const32(n))    -> writeIns ("let A=" + n.ToString())
             | Goto(l)               -> writeIns ("goto " + LabelTextOf l)
             | CallFunc(l)           -> writeIns ("call " + FuncNameOf l)
-            | CallTableIndirect     -> writeIns "call table indirect -- TODO" // TODO
+            | CallTableIndirect     -> writeCallTableIndirect ()
             | BranchAZ(l)           -> writeIns ("cmp A,0:if z goto " + LabelTextOf l)
             | BranchANZ(l)          -> writeIns ("cmp A,0:if nz goto " + LabelTextOf l)
-            | GotoIndex(_,_,_)      -> writeIns "goto index not yet implemented -- TODO" // TODO
-            | TableOfAddresses(_,_) -> ()   // ignore in the code section (separately output these tables)
+            | GotoIndex(t,n,d)      -> writeGotoIndex t n d
+            | TableOfAddresses(_,_) -> ()   // Ignored in the code section because we separately output these tables.
             | PushA                 -> writeIns "push A"
             | PeekA                 -> writeIns "let A=int [SP]"
             | PopA                  -> writeIns "pop A"

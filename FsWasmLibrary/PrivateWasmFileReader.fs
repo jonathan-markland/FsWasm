@@ -220,6 +220,7 @@ and Instruction recent r =
 
     let first  () = List.head recent
     let second () = List.head (List.tail recent)
+    let third  () = List.head (List.tail recent)
     let tail1  () = List.tail recent
     let tail2  () = List.tail (List.tail recent)
 
@@ -261,7 +262,7 @@ and Instruction recent r =
         | 0x0Euy -> 
             let indexExpression = first()
             let vectorOfIndices = r |> Vector LabelIdx
-            let defaultIndex = r |> LabelIdx
+            let defaultIndex    = r |> LabelIdx
             Some(BrTable(indexExpression, vectorOfIndices, defaultIndex)::tail1())
 
         | 0x0Fuy -> Some(Return::recent)
@@ -275,15 +276,19 @@ and Instruction recent r =
 
         | 0x11uy -> 
             let t = r |> TypeIdx // TODO: has bad name!
-            let numParameters = numParametersOfFuncType t
+            let numParameters         = numParametersOfFuncType t
             let instrsAfterParameters = recent |> List.skip numParameters
-            let paramsForCall = List.rev (recent |> List.take numParameters)  // TODO: ideally not need list reversing
+            let paramsForCall         = List.rev (recent |> List.take numParameters)  // TODO: ideally not need list reversing
             Some(CallIndirect(t,paramsForCall)::instrsAfterParameters)
 
         // 5.4.2  Parameteric Instructions
 
-        | 0x1Auy -> Some(Drop::recent)
-        | 0x1Buy -> Some(Select::recent)
+        | 0x1Auy -> Some(Drop(first())::tail1())
+
+        | 0x1Buy -> 
+            match recent with
+                | cond::b::a::tail -> Some(Select(a,b,cond)::tail)
+                | _ -> failwith "Cannot translate WASM select instruction because of insufficient operand expressions"
 
         // 5.4.3  Variable Instructions
 
