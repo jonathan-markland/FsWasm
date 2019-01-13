@@ -3,6 +3,7 @@
 open System.Text
 open Wasm
 open WasmAlgorithms
+open PrivateWasm2ToSimpleReg32
 
 let ModuleToUnitTestString (fileName:string) (m:Module) =
 
@@ -43,6 +44,9 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         Title (sprintf "%s" sectionTitle)
         AddOptionalObject genericSection
 
+    let LabelIdxOf l =
+        match l with LabelIdx(U32(i)) -> i.ToString()
+
     // COMMON
 
     let SingleLineFormatted obj =
@@ -57,6 +61,15 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         match l with
             | { LimitMin=U32(m); LimitMax=None }         -> Add (sprintf "[|%d|]" m)
             | { LimitMin=U32(a); LimitMax=Some(U32(b)) } -> Add (sprintf "[|%d..%d|]" a b)
+
+    let AlignTextOf a logBase2Size =
+        if a = 0u || a = logBase2Size then "" else (sprintf "align %d bytes" (1 <<< int a))
+
+    let OffsetTextOf o =
+        if o = 0u then "" else (sprintf "+%d" o)
+
+    let FormattedMemArg memArg logBase2Size =
+        match memArg with {Align=U32(a);Offset=U32(o)} -> (sprintf "%s %s" (OffsetTextOf o) (AlignTextOf a logBase2Size))
 
     let PrettyMutability =
         function 
@@ -154,13 +167,13 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             f ()
             indent <- indent - 1
 
-        and addLoad s memArg instr = 
-            addLine (sprintf "%s %s" s (SingleLineFormatted memArg))
+        and addLoad s memArg instr logBase2Size = 
+            addLine (sprintf "%s %s" s (FormattedMemArg memArg (uint32 logBase2Size)))
             withIndent (fun () -> 
                 addInstruction instr)
 
-        and addStore s memArg ins1 ins2 = 
-            addLine (sprintf "%s %s" s (SingleLineFormatted memArg))
+        and addStore s memArg ins1 ins2 logBase2Size = 
+            addLine (sprintf "%s %s" s (FormattedMemArg memArg (uint32 logBase2Size)))
             withIndent (fun () ->
                 addInstruction ins1
                 addInstruction ins2)
@@ -171,7 +184,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 addInstruction instr)
 
         and addConst c =
-            addLine (sprintf "const %A" c)
+            addLine (sprintf "Const %A" c)
 
         and addUnary s ins =
             addLine s
@@ -225,30 +238,30 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 | TeeLocal  (LocalIdx(U32(idx)), instr)  -> addSet "Tee Local"  idx instr
                 | SetGlobal (GlobalIdx(U32(idx)), instr) -> addSet "Set Global" idx instr
 
-                | I32Load    (memArg, instr) -> addLoad "I32Load"    memArg instr
-                | I64Load    (memArg, instr) -> addLoad "I64Load"    memArg instr
-                | F32Load    (memArg, instr) -> addLoad "F32Load"    memArg instr
-                | F64Load    (memArg, instr) -> addLoad "F64Load"    memArg instr
-                | I32Load8s  (memArg, instr) -> addLoad "I32Load8s"  memArg instr
-                | I32Load8u  (memArg, instr) -> addLoad "I32Load8u"  memArg instr
-                | I32Load16s (memArg, instr) -> addLoad "I32Load16s" memArg instr
-                | I32Load16u (memArg, instr) -> addLoad "I32Load16u" memArg instr
-                | I64Load8s  (memArg, instr) -> addLoad "I64Load8s"  memArg instr
-                | I64Load8u  (memArg, instr) -> addLoad "I64Load8u"  memArg instr
-                | I64Load16s (memArg, instr) -> addLoad "I64Load16s" memArg instr
-                | I64Load16u (memArg, instr) -> addLoad "I64Load16u" memArg instr
-                | I64Load32s (memArg, instr) -> addLoad "I64Load32s" memArg instr
-                | I64Load32u (memArg, instr) -> addLoad "I64Load32u" memArg instr
+                | I32Load    (memArg, instr) -> addLoad "I32Load"    memArg instr 2
+                | I64Load    (memArg, instr) -> addLoad "I64Load"    memArg instr 3
+                | F32Load    (memArg, instr) -> addLoad "F32Load"    memArg instr 2
+                | F64Load    (memArg, instr) -> addLoad "F64Load"    memArg instr 3
+                | I32Load8s  (memArg, instr) -> addLoad "I32Load8s"  memArg instr 0
+                | I32Load8u  (memArg, instr) -> addLoad "I32Load8u"  memArg instr 0
+                | I32Load16s (memArg, instr) -> addLoad "I32Load16s" memArg instr 1
+                | I32Load16u (memArg, instr) -> addLoad "I32Load16u" memArg instr 1
+                | I64Load8s  (memArg, instr) -> addLoad "I64Load8s"  memArg instr 0
+                | I64Load8u  (memArg, instr) -> addLoad "I64Load8u"  memArg instr 0
+                | I64Load16s (memArg, instr) -> addLoad "I64Load16s" memArg instr 1
+                | I64Load16u (memArg, instr) -> addLoad "I64Load16u" memArg instr 1
+                | I64Load32s (memArg, instr) -> addLoad "I64Load32s" memArg instr 2
+                | I64Load32u (memArg, instr) -> addLoad "I64Load32u" memArg instr 2
 
-                | I32Store   (memArg, ins1, ins2) -> addStore "I32Store"   memArg ins1 ins2
-                | I64Store   (memArg, ins1, ins2) -> addStore "I64Store"   memArg ins1 ins2
-                | F32Store   (memArg, ins1, ins2) -> addStore "F32Store"   memArg ins1 ins2
-                | F64Store   (memArg, ins1, ins2) -> addStore "F64Store"   memArg ins1 ins2
-                | I32Store8  (memArg, ins1, ins2) -> addStore "I32Store8"  memArg ins1 ins2
-                | I32Store16 (memArg, ins1, ins2) -> addStore "I32Store16" memArg ins1 ins2
-                | I64Store8  (memArg, ins1, ins2) -> addStore "I64Store8"  memArg ins1 ins2
-                | I64Store16 (memArg, ins1, ins2) -> addStore "I64Store16" memArg ins1 ins2
-                | I64Store32 (memArg, ins1, ins2) -> addStore "I64Store32" memArg ins1 ins2
+                | I32Store   (memArg, ins1, ins2) -> addStore "I32Store"   memArg ins1 ins2 2
+                | I64Store   (memArg, ins1, ins2) -> addStore "I64Store"   memArg ins1 ins2 3
+                | F32Store   (memArg, ins1, ins2) -> addStore "F32Store"   memArg ins1 ins2 2
+                | F64Store   (memArg, ins1, ins2) -> addStore "F64Store"   memArg ins1 ins2 3
+                | I32Store8  (memArg, ins1, ins2) -> addStore "I32Store8"  memArg ins1 ins2 0
+                | I32Store16 (memArg, ins1, ins2) -> addStore "I32Store16" memArg ins1 ins2 1
+                | I64Store8  (memArg, ins1, ins2) -> addStore "I64Store8"  memArg ins1 ins2 0
+                | I64Store16 (memArg, ins1, ins2) -> addStore "I64Store16" memArg ins1 ins2 1
+                | I64Store32 (memArg, ins1, ins2) -> addStore "I64Store32" memArg ins1 ins2 2
 
                 | I32Eqz            (i) -> addUnary "I32Eqz" i
                 | I64Eqz            (i) -> addUnary "I64Eqz" i
@@ -385,18 +398,28 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                         addInstructions il1
                         addInstructions il2)
 
-                | Br   (LabelIdx(U32(i))) -> addIndex "Br" i
+                | Br   (LabelIdx(U32(i))) -> 
+                    addIndex "Br" i
                 
                 | BrIf (cond, LabelIdx(U32(i))) -> 
                     addIndex "BrIf" i
                     withIndent (fun () -> addInstruction cond)
 
                 | BrTable (ins, idxs, idx) ->
-                    addLine "BrTable  ** todo: show table"  // TODO
+                    addLineStart ()
+                    addPart "BrTable ["
+                    idxs |> Array.iter (fun l -> addPart (LabelIdxOf l); addPart " ")
+                    addPart "default "
+                    addPart (LabelIdxOf idx)
+                    addPart "]"
+                    addNewLine ()
                     withIndent (fun () -> addInstruction ins)
 
                 | Call (FuncIdx(U32(fidx)), paramList) ->
-                    addLine (sprintf "Call FuncIdx[%d]" fidx)  // TODO: show names?
+                    addLineStart ()
+                    addPart (sprintf "Call FuncIdx[%d] " fidx)  // TODO: show names?
+                    AddFuncType m.Funcs.[int fidx]
+                    addNewLine ()
                     withIndent (fun () -> addInstructions paramList)
 
                 | CallIndirect (ft, paramList) ->  // TODO
@@ -405,49 +428,6 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     AddFuncType ft
                     addNewLine ()
                     withIndent (fun () -> addInstructions paramList)
-
-
-            
-
-
-(*
-            let withIndentationDo opCode blockType f =
-                addLine (sprintf "%s %A" opCode blockType)
-                indent <- indent + 1
-                f
-                indent <- indent - 1
-
-            let indentedList opCode blockType subInstructions =
-                withIndentationDo opCode blockType (addInstructions subInstructions)
-
-            let indentedInstr opCode blockType instr =
-                withIndentationDo opCode blockType (addInstruction instr)
-
-            let isShortForm instruction =
-                match instruction with 
-                    | Block(_) -> false
-                    | Loop(_) -> false
-                    | If(_) -> false
-                    | IfElse(_) -> false
-                    | _ -> true
-
-            let addLongForm instruction =
-                match instruction with 
-                    | Block(b,a)    -> indentedList "Block" b a
-                    | Loop(b,a)     -> indentedList "Loop" b a
-                    | If(b,a)       -> indentedList "If" b a
-                    | IfElse(b,i,e) -> 
-                        indentedList "If..." b i
-                        indentedList "...Else" b e
-                    | _ -> ()
-
-            let addInstruction instruction =
-                if isShortForm instruction
-                then addLine (SingleLineFormatted instruction)
-                else addLongForm instruction
-
-            instructionsList |> List.iter addInstruction
-            *)
 
         addInstructions instructionsList
 
@@ -663,14 +643,14 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
     /// amalgamated into the Funcs, Tables, Mems and Globals, for 
     /// convenient indexing per the WebAssembly spec.
     /// </summary>
-    let GetConvenientModule rawModule =
+    let WithConvenientLookupTables rawModule =
 
         let newLists = rawModule |> GetConvenientLookupTables
 
         { rawModule with 
-            Funcs = newLists.MasterFuncs;
-            Tables = newLists.MasterTables; 
-            Mems = newLists.MasterMems; 
+            Funcs   = newLists.MasterFuncs;
+            Tables  = newLists.MasterTables; 
+            Mems    = newLists.MasterMems; 
             Globals = newLists.MasterGlobals }
 
     let AddModule theModule =
@@ -711,5 +691,5 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         theModule.Custom12 |> AddArraySection "Custom section #12"    
 
     Title ("Unit test serialisation for: " + fileName)
-    m |> GetConvenientModule |> AddModule
+    m |> WithConvenientLookupTables |> AddModule
     sb.ToString ()
