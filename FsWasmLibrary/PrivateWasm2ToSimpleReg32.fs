@@ -171,8 +171,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
                 (TranslateInstr indexExpression) +++
                 [
                     PopA; 
-                    GotoIndex(tableLabel, labelArray.Length, labelFor defaultLabel);
-                    TableOfAddresses(tableLabel, Array.map labelFor labelArray);
+                    GotoIndex(tableLabel, labelArray.Length, labelFor defaultLabel, Array.map labelFor labelArray);
                     Barrier
                 ]
 
@@ -410,7 +409,7 @@ let TablesOfAddressesToDataSectionText writeOut (m:Module2) (f:InternalFunction2
 
     funcInstructions |> List.iter (fun ins ->
         match ins with
-            | TableOfAddresses(tableLabel,codePointLabels) ->
+            | GotoIndex(tableLabel,_,_,codePointLabels) ->
                 writeOut (sprintf "data %s" (LabelTextOf tableLabel))
                 codePointLabels |> Array.iter (fun lbl -> writeIns (sprintf "int %s" (LabelTextOf lbl)))
                 writeOut ""
@@ -455,8 +454,7 @@ let InstructionsToText writeOut instrs =
             | CallTableIndirect     -> writeCallTableIndirect ()
             | BranchAZ(l)           -> writeIns ("cmp A,0:if z goto " + LabelTextOf l)
             | BranchANZ(l)          -> writeIns ("cmp A,0:if nz goto " + LabelTextOf l)
-            | GotoIndex(t,n,d)      -> writeGotoIndex t n d
-            | TableOfAddresses(_,_) -> ()   // Ignored in the code section because we separately output these tables.
+            | GotoIndex(t,n,d,_)    -> writeGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
             | PushA                 -> writeIns "push A"
             | PeekA                 -> writeIns "let A=int [SP]"
             | PopA                  -> writeIns "pop A"
@@ -514,8 +512,8 @@ let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record)
     TranslateLocals writeOut f.FuncType f.Locals
 
     let funcInstructions      = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in table outputting
-    let optimisedInstructions = funcInstructions |> Optimise
-    let withoutBarriers       = optimisedInstructions |> RemoveBarriers
+    let optimisedInstructions = funcInstructions // |> Optimise
+    let withoutBarriers       = optimisedInstructions // |> RemoveBarriers
 
     //writeOut "// NON-OPTIMISED:"
     //InstructionsToText writeOut funcInstructions    // TODO: Don't want both of these outputs

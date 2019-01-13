@@ -48,10 +48,8 @@ type InstrSimpleReg32 =
     | BranchANZ   of LABELNAME    
 
     /// Reg A contains index.  Go to defaultLabel if out of range.
-    | GotoIndex   of tableLabel:LABELNAME * tableLength:int * defaultLabel:LABELNAME  
-
-    /// Insert a table of label addresses into the output
-    | TableOfAddresses of tableLabel:LABELNAME * LABELNAME array
+    /// The lookup table would be separately stored in the generated data section.
+    | GotoIndex   of tableLabel:LABELNAME * tableLength:int * defaultLabel:LABELNAME * lookupTable:LABELNAME array
 
 
     /// Push reg A onto stack

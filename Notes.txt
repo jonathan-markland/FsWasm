@@ -6,43 +6,47 @@ FsWasm -- Notes
 DESIGN ISSUES - decide how to do.
 =============
 
-[ ] call table indirect -- TODO
+[X] call table indirect -- TODO
 
-[ ] goto index not yet implemented -- TODO
+[X] goto index not yet implemented -- TODO
 
 [ ] Decide new name for "Wasm2" - something proprietary.
 
-[ ] Review naming since moving WASM to trees, where the instructions that have operands *bind* them as child sub-tree fields.
-
-[ ] Want to do constant-hoisting, so we don't waste time pushing constants onto the stack
-    if they are just going to be operands for ADD etc...  Maybe can use "add A,1".
+[ ] Review naming since moving WASM to trees, where the instructions
+    that have operands *bind* them as child sub-tree fields.
 
 [X] Sort out Optimise (which got commented out when doing the trees).
 	
-[ ] Do we have issues with the table labels and code labels (br_table) ?
 	
 	
 
 CODE
 ====
 
+[ ] We have a bug in the code output, in that long stretches get REVERSED
+
 [ ] No longer need +++ because can use @
 
-[ ] The "--- Elems section ---" is messy in the unitTestSerialisation text.
+[X] The "--- Elems section ---" is messy in the unitTestSerialisation text.
 
-[ ] Now that we've moved to subtrees representation, the code in the unitTestSerialisation is messy.
+[X] Now that we've moved to subtrees representation, the code in the unitTestSerialisation is messy.
 
-[ ] Need label numbers to be unique across all functions in case of br_table.
+[ ] Need local-label numbering to be unique across all functions in case of br_table.
 
 [ ] Generate a VAR section for the WASM Linear Memory.
 
 [ ] Need to generate code to copy the init data into the Linear Memory.
 
-[ ] Is "data label24" correct in the switch lookup?  Rename as "wasm_brtable_24" ?
+[X] Is "data label24" correct in the switch lookup?  YES
+[ ] Rename "data label24" as "data wasm_brtable_24" ?
+
+[ ] Optimise:  Eliminate push-constant by hoisting.  Very easy now we have tree representation.
+    So we don't waste time pushing constants onto the stack
+    if they are just going to be operands for ADD etc...  Maybe can use "add A,1".
 
 [ ] Optimise to use 386OS ASM push-constant:
     let A=20
-    push A
+    push A                ->    push 20
 	
 [ ] Optimise:   cmp B,A:if > goto label2
     cmp B,A:set > A
@@ -51,7 +55,8 @@ CODE
 [ ] 386OS ASM may need more "traditional" labels scheme, to support 
     pointers into a function body (bt_table).
 
-[ ] Separate the F# listing files a bit.
+[ ] Separate the F# listing files a bit.  The following file is troubling:
+    C:\Users\Jonathan\Documents\Work\FsWasm\FsWasmLibrary\PrivateWasm2ToSimpleReg32.fs
 
 [ ] Wasm2:  Merge TableOfAddresses into GotoIndex??
 
