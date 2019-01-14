@@ -19,6 +19,10 @@ DESIGN ISSUES - decide how to do.
 
 [ ] Output -- annotate code with commentary eg:  // Prepare wasm_func1 / Param1:
 	
+[ ] Look at whether to insert extra line-gaps in the output ASM
+	
+	
+	
 	
 
 CODE
