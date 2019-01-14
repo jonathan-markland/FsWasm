@@ -8,10 +8,6 @@ open OptimiseSimpleReg32
 
 
 
-let (+++) a b = List.append a b
-
-
-
 let (-+-) a b =
     U32(match a with U32(a2) -> match b with I32(b2) -> a2 + uint32 b2)
 
@@ -65,7 +61,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
     and TranslateInstr w =
 
         let binaryCommutativeOp lhs rhs op = 
-            (TranslateInstr lhs) +++ (TranslateInstr rhs) +++
+            (TranslateInstr lhs) @ (TranslateInstr rhs)  @ 
             [
                 PopA; // RHS operand
                 PopB; // LHS operand
@@ -75,7 +71,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
             ]
 
         let binaryOpWithConst lhs constant getOp =
-            (TranslateInstr lhs) +++
+            (TranslateInstr lhs)  @ 
             [
                 PopA; // LHS operand
                 getOp ();   // Result in A
@@ -84,7 +80,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
             ]
 
         let compareOp lhs rhs op = 
-            (TranslateInstr lhs) +++ (TranslateInstr rhs) +++
+            (TranslateInstr lhs) @ (TranslateInstr rhs)  @ 
             [
                 PopA; // RHS operand
                 PopB; // LHS operand
@@ -94,7 +90,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
             ]
 
         let binaryNonCommutativeOp lhs rhs op = 
-            (TranslateInstr lhs) +++ (TranslateInstr rhs) +++
+            (TranslateInstr lhs) @ (TranslateInstr rhs)  @ 
             [
                 PopA; // RHS operand
                 PopB; // LHS operand
@@ -105,7 +101,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
             ]
 
         let shiftOp lhs rhs op = 
-            (TranslateInstr lhs) +++ (TranslateInstr rhs) +++
+            (TranslateInstr lhs) @ (TranslateInstr rhs)  @ 
             [
                 PopA;  // RHS operand
                 PopB;  // LHS operand
@@ -120,7 +116,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
             let constructLabel = pushNewLabel ()
             let translatedBody = TranslateInstrArray sourceBody
             popLabel ()
-            (putInOrder translatedBody [ Label(constructLabel) ]) +++ [ Barrier ]
+            (putInOrder translatedBody [ Label(constructLabel) ]) @ [ Barrier ]
 
         match w with
 
@@ -129,14 +125,14 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
 
             // The following translations must all end with Barrier
 
-            | Instr.Drop(ins) -> TranslateInstr(ins) +++ [ Drop; Barrier ]
+            | Instr.Drop(ins) -> TranslateInstr(ins) @ [ Drop; Barrier ]
         
             | Select(a,b,c) -> 
                 let l1 = newLabel ()
                 let l2 = newLabel ()
-                TranslateInstr(a) +++
-                TranslateInstr(b) +++
-                TranslateInstr(c) +++
+                TranslateInstr(a)  @ 
+                TranslateInstr(b)  @ 
+                TranslateInstr(c)  @ 
                 [
                     PopA; 
                     PopB; // val2  (desired if A == 0)
@@ -158,7 +154,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
                 let skipLabel = pushNewLabel ()
                 let translatedBody = TranslateInstrArray body
                 popLabel ()
-                [ PopA; BranchAZ(skipLabel); ] +++ translatedBody +++ [ Label(skipLabel); Barrier ]
+                [ PopA; BranchAZ(skipLabel); ] @ translatedBody @ [ Label(skipLabel); Barrier ]
                     
             | IfElse(_, ifbody, elsebody) ->
 
@@ -170,19 +166,19 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
                 let translatedElseBody = TranslateInstrArray elsebody
                 popLabel ()
 
-                [ PopA; BranchAZ(skipIfLabel); ] +++ 
-                    translatedIfBody +++ 
-                    [ Goto(skipElseLabel); Label(skipIfLabel); Barrier; ] +++ 
-                    translatedElseBody +++ 
+                [ PopA; BranchAZ(skipIfLabel); ] @ 
+                    translatedIfBody @ 
+                    [ Goto(skipElseLabel); Label(skipIfLabel); Barrier; ] @ 
+                    translatedElseBody @ 
                     [ Label(skipElseLabel); Barrier ]
 
             | Br(target) -> [ Goto(labelFor target); Barrier ]
 
-            | BrIf(cond,target) -> TranslateInstr(cond) +++ [ PopA; BranchANZ(labelFor target); Barrier ]
+            | BrIf(cond,target) -> TranslateInstr(cond) @ [ PopA; BranchANZ(labelFor target); Barrier ]
 
             | BrTable(indexExpression, labelArray, defaultLabel) -> 
                 let tableLabel = newLabel ()
-                (TranslateInstr indexExpression) +++
+                (TranslateInstr indexExpression)  @ 
                 [
                     PopA; 
                     GotoIndex(tableLabel, labelArray.Length, labelFor defaultLabel, Array.map labelFor labelArray);
@@ -195,60 +191,60 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
                 let translatedParams = TranslateInstrArray paramList
                 let fl = FuncLabelFor funcIdx
                 if funcIdx |> funcReturnsSomething 
-                then translatedParams +++ [ CallFunc(fl); PushA; Barrier ]
-                else translatedParams +++ [ CallFunc(fl); Barrier ]
+                then translatedParams @ [ CallFunc(fl); PushA; Barrier ]
+                else translatedParams @ [ CallFunc(fl); Barrier ]
 
             | CallIndirect(funcType,paramList,indexExpr) ->
                 // TODO: runtime validation of funcType
                 let translatedParams = TranslateInstrArray paramList
                 let translatedIndex  = TranslateInstr indexExpr
-                translatedParams +++ translatedIndex +++ [ PopA; CallTableIndirect; Barrier ]
+                translatedParams @ translatedIndex @ [ PopA; CallTableIndirect; Barrier ]
 
             | I32Const(I32(C)) -> [ ConstA(Const32(C)); PushA; Barrier ]
 
             | GetLocal(L)   -> [ FetchLocA(L); PushA; Barrier ]
-            | SetLocal(L,V) -> (TranslateInstr V) +++ [ PopA;  StoreALoc(L); Barrier ]
-            | TeeLocal(L,V) -> (TranslateInstr V) +++ [ PeekA; StoreALoc(L); Barrier ]
+            | SetLocal(L,V) -> (TranslateInstr V) @ [ PopA;  StoreALoc(L); Barrier ]
+            | TeeLocal(L,V) -> (TranslateInstr V) @ [ PeekA; StoreALoc(L); Barrier ]
         
             | GetGlobal(G)   -> [ FetchGloA(G); PushA; Barrier ]
-            | SetGlobal(G,V) -> (TranslateInstr V) +++ [ PopA; StoreAGlo(G);  Barrier ]
+            | SetGlobal(G,V) -> (TranslateInstr V) @ [ PopA; StoreAGlo(G);  Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst8toY(O -+- O2,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst8toY( O -+- O2,v); Barrier ]   // TODO: separate routines!!
             | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst16toY(O -+- O2,v); Barrier ]
             | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst32toY(O -+- O2,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs)+++[ PopA; AddAY; StoreConst8toA(O,v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs)+++[ PopA; AddAY; StoreConst16toA(O,v); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs)+++[ PopA; AddAY; StoreConst32toA(O,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ PopA; AddAY; StoreConst8toA(O,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ PopA; AddAY; StoreConst16toA(O,v); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ PopA; AddAY; StoreConst32toA(O,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs)+++[ PopA; Store8AtoY( O -+- O2); Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs)+++[ PopA; Store16AtoY(O -+- O2); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs)+++[ PopA; Store32AtoY(O -+- O2); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ PopA; Store8AtoY( O -+- O2); Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ PopA; Store16AtoY(O -+- O2); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ PopA; Store32AtoY(O -+- O2); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},          lhs,         rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store8AtoB(O);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store16AtoB(O); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store32AtoB(O); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ PopA; PopB; AddBY; Store8AtoB(O);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ PopA; PopB; AddBY; Store16AtoB(O); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ PopA; PopB; AddBY; Store32AtoB(O); Barrier ]
 
             | I32Store16( {Align=U32(_);  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32(_);  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
-            | I32Load8s(  {Align=_;       Offset=U32(O)}, I32Const(I32(O2))) -> [ Fetch8sFromY(U32(O + uint32 O2));  PushA; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=U32(O)}, I32Const(I32(O2))) -> [ Fetch8uFromY(U32(O + uint32 O2));  PushA; Barrier ]
-            | I32Load16s( {Align=U32(1u); Offset=U32(O)}, I32Const(I32(O2))) -> [ Fetch16sFromY(U32(O + uint32 O2)); PushA; Barrier ]
-            | I32Load16u( {Align=U32(1u); Offset=U32(O)}, I32Const(I32(O2))) -> [ Fetch16uFromY(U32(O + uint32 O2)); PushA; Barrier ]
-            | I32Load(    {Align=U32(2u); Offset=U32(O)}, I32Const(I32(O2))) -> [ Fetch32FromY(U32(O + uint32 O2));  PushA; Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8sFromY( O -+- O2); PushA; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8uFromY( O -+- O2); PushA; Barrier ]
+            | I32Load16s( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16sFromY(O -+- O2); PushA; Barrier ]
+            | I32Load16u( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16uFromY(O -+- O2); PushA; Barrier ]
+            | I32Load(    {Align=U32(2u); Offset=O}, I32Const(O2)) -> [ Fetch32FromY( O -+- O2); PushA; Barrier ]
 
-            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand)+++[ PopA; AddAY; Fetch8sFromA(O);  PushA; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand)+++[ PopA; AddAY; Fetch8uFromA(O);  PushA; Barrier ]
-            | I32Load16s( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand)+++[ PopA; AddAY; Fetch16sFromA(O); PushA; Barrier ]
-            | I32Load16u( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand)+++[ PopA; AddAY; Fetch16uFromA(O); PushA; Barrier ]
-            | I32Load(    {Align=U32(2u); Offset=O}, operand) -> (TranslateInstr operand)+++[ PopA; AddAY; Fetch32FromA(O);  PushA; Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch8sFromA(O);  PushA; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch8uFromA(O);  PushA; Barrier ]
+            | I32Load16s( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch16sFromA(O); PushA; Barrier ]
+            | I32Load16u( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch16uFromA(O); PushA; Barrier ]
+            | I32Load(    {Align=U32(2u); Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch32FromA(O);  PushA; Barrier ]
             
             | I32Load16s( {Align=U32(A);  Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
             | I32Load16u( {Align=U32(A);  Offset=_}, _) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
             | I32Load(    {Align=U32(A);  Offset=_}, _) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
 
-            | I32Eqz(operand) -> (TranslateInstr operand)+++[ PopA; CmpAZ; PushA; ] 
+            | I32Eqz(operand) -> (TranslateInstr operand) @ [ PopA; CmpAZ; PushA; ] 
 
             | I32Eq(a,b)   -> compareOp a b CmpEqBA 
             | I32Ne(a,b)   -> compareOp a b CmpNeBA
@@ -289,7 +285,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
     // Do the translation using the nested functions,
     // and append the return label before we're done:
 
-    (TranslateInstrArray ws) +++ [ Label(returnLabel) ]
+    (TranslateInstrArray ws) @ [ Label(returnLabel) ]
 
 
 
