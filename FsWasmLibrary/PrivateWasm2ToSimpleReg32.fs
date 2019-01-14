@@ -12,6 +12,11 @@ let (+++) a b = List.append a b
 
 
 
+let (-+-) a b =
+    U32(match a with U32(a2) -> match b with I32(b2) -> a2 + uint32 b2)
+
+
+
 let FuncLabelFor fidx =
     LabelName(AsmFuncNamePrefix + match fidx with FuncIdx(U32(i)) -> i.ToString()) 
 
@@ -208,21 +213,21 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
             | GetGlobal(G)   -> [ FetchGloA(G); PushA; Barrier ]
             | SetGlobal(G,V) -> (TranslateInstr V) +++ [ PopA; StoreAGlo(G);  Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=U32(O)}, I32Const(I32(O2)), I32Const(v)) -> [ StoreConst8toY(U32(O + uint32 O2),v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=U32(O)}, I32Const(I32(O2)), I32Const(v)) -> [ StoreConst16toY(U32(O + uint32 O2),v); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=U32(O)}, I32Const(I32(O2)), I32Const(v)) -> [ StoreConst32toY(U32(O + uint32 O2),v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst8toY(O -+- O2,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst16toY(O -+- O2,v); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst32toY(O -+- O2,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O}, lhs, I32Const(v)) -> (TranslateInstr lhs)+++[ PopA; AddAY; StoreConst8toA(O,v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O}, lhs, I32Const(v)) -> (TranslateInstr lhs)+++[ PopA; AddAY; StoreConst16toA(O,v); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O}, lhs, I32Const(v)) -> (TranslateInstr lhs)+++[ PopA; AddAY; StoreConst32toA(O,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs)+++[ PopA; AddAY; StoreConst8toA(O,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs)+++[ PopA; AddAY; StoreConst16toA(O,v); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs)+++[ PopA; AddAY; StoreConst32toA(O,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=U32(O)}, I32Const(I32(O2)), rhs) -> (TranslateInstr rhs)+++[ PopA; Store8AtoY(U32(O + uint32 O2));  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=U32(O)}, I32Const(I32(O2)), rhs) -> (TranslateInstr rhs)+++[ PopA; Store16AtoY(U32(O + uint32 O2)); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=U32(O)}, I32Const(I32(O2)), rhs) -> (TranslateInstr rhs)+++[ PopA; Store32AtoY(U32(O + uint32 O2)); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs)+++[ PopA; Store8AtoY( O -+- O2); Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs)+++[ PopA; Store16AtoY(O -+- O2); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs)+++[ PopA; Store32AtoY(O -+- O2); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O}, lhs, rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store8AtoB(O);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O}, lhs, rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store16AtoB(O); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O}, lhs, rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store32AtoB(O); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},          lhs,         rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store8AtoB(O);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store16AtoB(O); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs)+++(TranslateInstr rhs)+++[ PopA; PopB; AddBY; Store32AtoB(O); Barrier ]
 
             | I32Store16( {Align=U32(_);  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32(_);  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
