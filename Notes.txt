@@ -17,7 +17,7 @@ DESIGN ISSUES - decide how to do.
 
 [X] Sort out Optimise (which got commented out when doing the trees).
 
-[ ] Output -- annotate code with commentary eg:  // Prepare wasm_func1 / Param1:
+[ ] Idea: Output -- annotate code with commentary eg:  // Prepare wasm_func1 / Param1:
 	
 [ ] Look at whether to insert extra line-gaps in the output ASM
 	
@@ -57,6 +57,8 @@ ret
 [ ] Generate a VAR section for the WASM Linear Memory.
 
 [ ] Need to generate code to copy the init data into the Linear Memory.
+
+[ ] Need to load the Y register to point to the linear memory.
 
 [X] Is "data label24" correct in the switch lookup?  YES
 [ ] Rename "data label24" as "data wasm_brtable_24" ?

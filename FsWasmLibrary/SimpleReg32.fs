@@ -88,8 +88,14 @@ type InstrSimpleReg32 =
     /// Calculate A+B, result in A
     | AddAB
     
+    /// Calculate A+n, result in A
+    | AddAN of I32
+    
     /// Calculate B-A, result in A
     | SubBA       
+
+    /// Calculate A-n, result in A
+    | SubAN of I32
     
     /// Calculate A*B, result in A
     | MulAB       
@@ -114,6 +120,15 @@ type InstrSimpleReg32 =
     
     /// Calculate A XOR B, result in A
     | XorAB
+    
+    /// Calculate A AND B, result in A
+    | AndAN of I32
+    
+    /// Calculate A OR  N, result in A
+    | OrAN of I32
+    
+    /// Calculate A XOR N, result in A
+    | XorAN of I32
     
     /// Calculate (unsigned B) SHL C, result in B
     | ShlBC
@@ -179,14 +194,41 @@ type InstrSimpleReg32 =
     /// Store A to WASM global variable
     | StoreAGlo     of GlobalIdx   
 
-    /// Store least significant 8 bits of reg A to WASM linear memory, address given by reg B
+    /// Store 8-bit constant I32 to WASM linear memory, address given by reg A+U32
+    | StoreConst8toA    of U32 * I32   
+
+    /// Store 16-bit constant I32 to WASM linear memory, address given by reg A+U32
+    | StoreConst16toA   of U32 * I32         
+
+    /// Store 32-bit constant I32 to WASM linear memory, address given by reg A+U32
+    | StoreConst32toA   of U32 * I32
+
+    /// Store 8-bit constant I32 to WASM linear memory, address given by reg Y+U32
+    | StoreConst8toY    of U32 * I32   
+
+    /// Store 16-bit constant I32 to WASM linear memory, address given by reg Y+U32
+    | StoreConst16toY   of U32 * I32         
+
+    /// Store 32-bit constant I32 to WASM linear memory, address given by reg Y+U32
+    | StoreConst32toY   of U32 * I32
+
+    /// Store least significant 8 bits of reg A to WASM linear memory, address given by reg B+U32
     | Store8AtoB    of U32         
 
-    /// Store least significant 16 bits of reg A to WASM linear memory, address given by reg B
+    /// Store least significant 16 bits of reg A to WASM linear memory, address given by reg B+U32
     | Store16AtoB   of U32         
 
-    /// Store 32 bits of reg A to WASM linear memory, address given by reg B
+    /// Store 32 bits of reg A to WASM linear memory, address given by reg B+U32
     | Store32AtoB   of U32         
+
+    /// Store least significant 8 bits of reg A to WASM linear memory, address given by reg Y+U32
+    | Store8AtoY    of U32         
+
+    /// Store least significant 16 bits of reg A to WASM linear memory, address given by reg Y+U32
+    | Store16AtoY   of U32         
+
+    /// Store 32 bits of reg A to WASM linear memory, address given by reg Y+U32
+    | Store32AtoY   of U32         
 
 
     /// Fetch byte from WASM linear memory, address A, sign-extend with result in A
@@ -204,5 +246,20 @@ type InstrSimpleReg32 =
     /// Fetch 32-bits from WASM linear memory, address A, into A
     | Fetch32FromA  of U32         
 
+
+    /// Fetch byte from WASM linear memory, address Y+int, sign-extend with result in A
+    | Fetch8sFromY  of U32
+
+    /// Fetch byte from WASM linear memory, address Y+int, zero-extend with result in A
+    | Fetch8uFromY  of U32
+
+    /// Fetch short from WASM linear memory, address Y+int, sign-extend with result in A
+    | Fetch16sFromY of U32
+
+    /// Fetch short from WASM linear memory, address Y+int, zero-extend with result in A
+    | Fetch16uFromY of U32
+
+    /// Fetch 32-bits from WASM linear memory, address Y+int, into A
+    | Fetch32FromY  of U32
 
 
