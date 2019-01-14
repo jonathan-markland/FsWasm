@@ -6,16 +6,10 @@ FsWasm -- Notes
 DESIGN ISSUES - decide how to do.
 =============
 
-[X] call table indirect -- TODO
-
-[X] goto index not yet implemented -- TODO
-
 [ ] Decide new name for "Wasm2" - something proprietary.
 
 [ ] Review naming since moving WASM to trees, where the instructions
     that have operands *bind* them as child sub-tree fields.
-
-[X] Sort out Optimise (which got commented out when doing the trees).
 
 [ ] Idea: Output -- annotate code with commentary eg:  // Prepare wasm_func1 / Param1:
 	
@@ -28,31 +22,7 @@ DESIGN ISSUES - decide how to do.
 CODE
 ====
 
-[ ] We are missing register barriers after some labels (after => label3):
-
-    // ~~~ register barrier ~~~
-=> label3
-    let A=int[@loc1]
-    push A
-
-[ ] Need to generate "pop A" at end of a function that returns a single value.
-
-    let A=0
-    push A
-    // ~~~ register barrier ~~~
-=> label1
-ret
-
-
-[X] We have a bug in the code output, in that long stretches get REVERSED
-
-[ ] No longer need +++ because can use @
-
-[X] The "--- Elems section ---" is messy in the unitTestSerialisation text.
-
-[X] Now that we've moved to subtrees representation, the code in the unitTestSerialisation is messy.
-
-[ ] Need local-label numbering to be unique across all functions in case of br_table.
+[ ] Need local-label numbering to be unique across all functions to support br_table.
 
 [ ] Generate a VAR section for the WASM Linear Memory.
 
@@ -60,12 +30,7 @@ ret
 
 [ ] Need to load the Y register to point to the linear memory.
 
-[X] Is "data label24" correct in the switch lookup?  YES
 [ ] Rename "data label24" as "data wasm_brtable_24" ?
-
-[ ] Optimise:  Eliminate push-constant by hoisting.  Very easy now we have tree representation.
-    So we don't waste time pushing constants onto the stack
-    if they are just going to be operands for ADD etc...  Maybe can use "add A,1".
 
 [ ] Optimise to use 386OS ASM push-constant:
     let A=20
@@ -75,13 +40,57 @@ ret
     cmp B,A:set > A
     cmp A,0:if nz goto label2
 	
+[ ] Optimise: Compare-With-Constant	
+	
 [ ] 386OS ASM may need more "traditional" labels scheme, to support 
     pointers into a function body (bt_table).
 
 [ ] Separate the F# listing files a bit.  The following file is troubling:
     C:\Users\Jonathan\Documents\Work\FsWasm\FsWasmLibrary\PrivateWasm2ToSimpleReg32.fs
 
-[ ] Wasm2:  Merge TableOfAddresses into GotoIndex??
+	
+	
+	
+	
+	
+	
+	
+	
+COMPLETE
+========	
+
+
+[X] We are missing register barriers after some labels (after => label3):
+
+    // ~~~ register barrier ~~~
+=> label3
+    let A=int[@loc1]
+    push A
+
+[X] Need to generate "pop A" at end of a function that returns a single value.
+
+    let A=0
+    push A
+    // ~~~ register barrier ~~~
+=> label1
+ret
+
+[X] We have a bug in the code output, in that long stretches get REVERSED
+
+[X] No longer need +++ because can use @
+
+[X] The "--- Elems section ---" is messy in the unitTestSerialisation text.
+
+[X] Now that we've moved to subtrees representation, the code in the unitTestSerialisation is messy.
+
+[X] Is "data label24" correct in the switch lookup?  YES
+
+[X] Optimise:  Eliminate push-constant by hoisting.  Very easy now we have tree representation.
+    So we don't waste time pushing constants onto the stack
+    if they are just going to be operands for ADD etc...  Maybe can use "add A,1".
+
+
+[X] Wasm2:  Merge TableOfAddresses into GotoIndex??
 
 [X] Need fetch/store to be dynamically relocated to target the Linear Memory.
 
@@ -92,4 +101,10 @@ ret
 			pop B:store   replace with ->   pop B:add B,Y:store
 			pop A:fetch   replace with ->   pop A:add A,Y:fetch
 
+
+[X] call table indirect -- TODO
+
+[X] goto index not yet implemented -- TODO
+
+[X] Sort out Optimise (which got commented out when doing the trees).
 
