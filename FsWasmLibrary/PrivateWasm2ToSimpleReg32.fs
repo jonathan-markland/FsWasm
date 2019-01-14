@@ -106,11 +106,11 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
             let constructLabel = pushNewLabel ()
             let translatedBody = TranslateInstrArray sourceBody
             popLabel ()
-            List.rev ((putInOrder translatedBody [ Label(constructLabel) ]) +++ [ Barrier ])
+            (putInOrder translatedBody [ Label(constructLabel) ]) +++ [ Barrier ]
 
         match w with
 
-            | Unreachable -> [ Breakpoint ]
+            | Unreachable -> [ Breakpoint; Barrier ]
             | Nop -> []
 
             // The following translations must all end with Barrier
@@ -184,10 +184,11 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
                 then translatedParams +++ [ CallFunc(fl); PushA; Barrier ]
                 else translatedParams +++ [ CallFunc(fl); Barrier ]
 
-            | CallIndirect(funcType,paramList) ->
+            | CallIndirect(funcType,paramList,indexExpr) ->
                 // TODO: runtime validation of funcType
                 let translatedParams = TranslateInstrArray paramList
-                translatedParams +++ [ PopA; CallTableIndirect; Barrier ]
+                let translatedIndex  = TranslateInstr indexExpr
+                translatedParams +++ translatedIndex +++ [ PopA; CallTableIndirect; Barrier ]
 
             | I32Const(I32(C)) -> [ ConstA(Const32(C)); PushA; Barrier ]
 
@@ -429,14 +430,14 @@ let InstructionsToText writeOut instrs =
     let writeLoc s1 i s2 = writeIns (sprintf "%s%d%s" s1 (LocalIdxAsUint32 i) s2)
 
     let writeGotoIndex tableLabel numMax defaultLabel =
-        writeIns "pop A"   // The index to branch to
+        // A is already the index to branch to
         writeIns (sprintf "cmp A,%d:if >>= goto %s" numMax (LabelTextOf defaultLabel))
         writeIns "shl A,2"
         writeIns (sprintf "goto [A+%s]" (LabelTextOf tableLabel))
 
     let writeCallTableIndirect () =
         // TODO: We really need to emit some code to validate the signatures.
-        writeIns "pop A"   // The index to call
+        // A is already the index to call.
         // TODO: We need to validate index A lies within wasm table [0]
         writeIns "shl A,2"
         writeIns (sprintf "goto [A+%s0]" AsmTableNamePrefix)  // WASM 1.0 always looks in table #0
@@ -512,8 +513,8 @@ let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record)
     TranslateLocals writeOut f.FuncType f.Locals
 
     let funcInstructions      = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in table outputting
-    let optimisedInstructions = funcInstructions // |> Optimise
-    let withoutBarriers       = optimisedInstructions // |> RemoveBarriers
+    let optimisedInstructions = funcInstructions // |> Optimise  TODO: reinstate
+    let withoutBarriers       = optimisedInstructions // |> RemoveBarriers  TODO: reinstate
 
     //writeOut "// NON-OPTIMISED:"
     //InstructionsToText writeOut funcInstructions    // TODO: Don't want both of these outputs

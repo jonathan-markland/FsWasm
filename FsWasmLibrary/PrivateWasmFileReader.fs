@@ -276,10 +276,12 @@ and Instruction recent r =
 
         | 0x11uy -> 
             let t = r |> TypeIdx // TODO: has bad name!
-            let numParameters         = numParametersOfFuncType t
-            let instrsAfterParameters = recent |> List.skip numParameters
-            let paramsForCall         = List.rev (recent |> List.take numParameters)  // TODO: ideally not need list reversing
-            Some(CallIndirect(t,paramsForCall)::instrsAfterParameters)
+            r |> ExpectByte 0x00uy
+            let numParameters   = numParametersOfFuncType t
+            let instrsAfterCall = recent |> List.skip (numParameters + 1)
+            let indexExpr       = recent |> List.head
+            let paramsForCall   = List.rev (recent |> List.skip 1 |> List.take numParameters)  // TODO: ideally not need list reversing
+            Some(CallIndirect(t,paramsForCall,indexExpr)::instrsAfterCall)
 
         // 5.4.2  Parameteric Instructions
 

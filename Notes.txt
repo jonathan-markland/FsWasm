@@ -16,14 +16,31 @@ DESIGN ISSUES - decide how to do.
     that have operands *bind* them as child sub-tree fields.
 
 [X] Sort out Optimise (which got commented out when doing the trees).
-	
+
+[ ] Output -- annotate code with commentary eg:  // Prepare wasm_func1 / Param1:
 	
 	
 
 CODE
 ====
 
-[ ] We have a bug in the code output, in that long stretches get REVERSED
+[ ] We are missing register barriers after some labels (after => label3):
+
+    // ~~~ register barrier ~~~
+=> label3
+    let A=int[@loc1]
+    push A
+
+[ ] Need to generate "pop A" at end of a function that returns a single value.
+
+    let A=0
+    push A
+    // ~~~ register barrier ~~~
+=> label1
+ret
+
+
+[X] We have a bug in the code output, in that long stretches get REVERSED
 
 [ ] No longer need +++ because can use @
 

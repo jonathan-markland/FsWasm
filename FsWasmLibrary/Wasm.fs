@@ -44,7 +44,7 @@ open System
         | BrTable      of Instr * LabelIdx array * LabelIdx  // 0E
         | Return
         | Call         of FuncIdx * Instr list  // 10
-        | CallIndirect of FuncType * Instr list // 11 00
+        | CallIndirect of FuncType * Instr list * indexExpr:Instr // 11 00
 
         // 5.4.2  Parameteric Instructions
 

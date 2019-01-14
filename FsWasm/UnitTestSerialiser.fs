@@ -3,7 +3,6 @@
 open System.Text
 open Wasm
 open WasmAlgorithms
-open PrivateWasm2ToSimpleReg32
 
 let ModuleToUnitTestString (fileName:string) (m:Module) =
 
@@ -422,12 +421,15 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     addNewLine ()
                     withIndent (fun () -> addInstructions paramList)
 
-                | CallIndirect (ft, paramList) ->  // TODO
+                | CallIndirect (ft, paramList, indexExpr) ->
                     addLineStart ()
                     addPart "CallIndirect "
                     AddFuncType ft
                     addNewLine ()
-                    withIndent (fun () -> addInstructions paramList)
+                    withIndent (fun () -> 
+                        addInstructions paramList
+                        addInstruction indexExpr)
+
 
         addInstructions instructionsList
 
