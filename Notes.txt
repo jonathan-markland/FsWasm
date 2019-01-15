@@ -22,8 +22,6 @@ DESIGN ISSUES - decide how to do.
 CODE
 ====
 
-[ ] Need local-label numbering to be unique across all functions to support br_table.
-
 [ ] Generate a VAR section for the WASM Linear Memory.
 
 [ ] Need to generate code to copy the init data into the Linear Memory.
@@ -107,4 +105,6 @@ ret
 [X] goto index not yet implemented -- TODO
 
 [X] Sort out Optimise (which got commented out when doing the trees).
+
+[X] Need local-label numbering to be unique across all functions to support br_table.
 

@@ -2,6 +2,7 @@
 
 open Wasm
 open Wasm2
+open Wasm2ToSimpleReg32ConfigTypes
 open SimpleReg32
 open SimpleReg32Constants
 open OptimiseSimpleReg32
@@ -379,7 +380,7 @@ let AsmSignatureOf (funcType:FuncType) =
 
 
 
-let TranslateLocals writeOut (funcType:FuncType) valTypes =
+let WriteOutFunctionLocals writeOut (funcType:FuncType) valTypes =
 
     let localBaseIndex = funcType.ParameterTypes.Length
 
@@ -408,7 +409,7 @@ let ReturnCommandFor (ft:FuncType) =
 
 
 
-let TranslateTable writeOut i (m:Module2) (t:InternalTable2Record) =
+let WriteOutWasmTable writeOut i (m:Module2) (t:InternalTable2Record) =
 
     let writeIns s = writeOut ("    " + s)  // TODO: repetition throughout routines!
 
@@ -426,7 +427,7 @@ let TranslateTable writeOut i (m:Module2) (t:InternalTable2Record) =
 
 
 
-let TranslateMemory writeOut i (t:InternalMemory2Record) =
+let WriteOutWasmMem writeOut i (t:InternalMemory2Record) =
 
     let writeIns s = writeOut ("    " + s)
 
@@ -441,7 +442,7 @@ let TranslateMemory writeOut i (t:InternalMemory2Record) =
 
 
 
-let TranslateGlobal writeOut i (m:Module2) (g:InternalGlobal2Record) =
+let WriteOutWasmGlobal writeOut i (m:Module2) (g:InternalGlobal2Record) =
 
     // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
 
@@ -453,7 +454,7 @@ let TranslateGlobal writeOut i (m:Module2) (g:InternalGlobal2Record) =
 
 
 
-let InstructionsToText writeOut instrs thisFuncType =
+let WriteOutInstructionsToText writeOut instrs thisFuncType =
 
     let writeIns    s         = writeOut ("    " + s)
 
@@ -568,7 +569,7 @@ let InstructionsToText writeOut instrs thisFuncType =
     
 
 
-let TranslateBranchTables writeOut funcInstructions =
+let WriteOutBranchTables writeOut funcInstructions =
 
     let writeIns s = writeOut ("    " + s)
 
@@ -583,49 +584,49 @@ let TranslateBranchTables writeOut funcInstructions =
 
 
 
-let TranslateFunction writeOut f funcInstructions  =   // TODO:  Can we reduce f to inner components ?
+let WriteOutFunction writeOut thisFuncType funcInstructions config =   // TODO:  Can we reduce f to inner components ?
 
-    let thisFuncType          = f.FuncType
-    let optimisedInstructions = funcInstructions |> Optimise
-    let withoutBarriers       = optimisedInstructions |> RemoveBarriers
+    let phase1 = 
+        match config with
+            | WriteOutFunctionConfig(_,FullyOptimised) -> funcInstructions |> Optimise
+            | WriteOutFunctionConfig(_,NoOptimisation) -> funcInstructions
+    
+    let phase2 =
+        match config with
+            | WriteOutFunctionConfig(WithBarriers,_)    -> phase1
+            | WriteOutFunctionConfig(WithoutBarriers,_) -> phase1 |> RemoveBarriers
 
-    //writeOut "// NON-OPTIMISED:"
-    //InstructionsToText writeOut funcInstructions    // TODO: Don't want both of these outputs
+    let desiredInstructions = phase2
 
-    //writeOut "// OPTIMISED:"
-    //InstructionsToText writeOut optimisedInstructions
-
-    //writeOut "// OPTIMISED WITHOUT BARRIERS:"
-    InstructionsToText writeOut withoutBarriers thisFuncType
-
+    WriteOutInstructionsToText writeOut desiredInstructions thisFuncType
     writeOut (ReturnCommandFor thisFuncType)
     writeOut ""
 
 
 
-let TranslateFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2) translationState (f:InternalFunction2Record) =   // TODO: module only needed to query function metadata in TranslateInstructions
+let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2) translationState config (f:InternalFunction2Record) =   // TODO: module only needed to query function metadata in TranslateInstructions
     
     let funcInstructions, updatedTranslationState = 
         f.Body |> TranslateInstructions m.Funcs translationState
 
     writeOut (sprintf "procedure %s%d%s" AsmFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType))
-    TranslateLocals writeOut f.FuncType f.Locals
-    TranslateFunction writeOut f funcInstructions
-    TranslateBranchTables writeOutTables funcInstructions
+    WriteOutFunctionLocals writeOut f.FuncType f.Locals
+    WriteOutFunction writeOut f.FuncType funcInstructions config
+    WriteOutBranchTables writeOutTables funcInstructions
 
     updatedTranslationState
 
 
 
-let TranslateStart writeOut (s:Start option) =
+let WriteOutBranchToEntryLabel writeOut startFuncIdx =
+    writeOut ("procedure " + AsmEntryPointLabel)
+    writeOut (sprintf "goto %s" (match FuncLabelFor startFuncIdx with LabelName(s) -> s))
 
-    match s with 
 
+
+let WriteOutWasmStart writeOut startOption =
+    match startOption with 
+        | Some({StartFuncIdx=startFuncIdx}) -> WriteOutBranchToEntryLabel writeOut startFuncIdx
         | None -> writeOut "// No entry point in this translation"
-
-        | Some(st) -> 
-            writeOut ("procedure " + AsmEntryPointLabel)
-            let labelName = FuncLabelFor st.StartFuncIdx
-            writeOut (sprintf "goto %s" (match labelName with LabelName(str) -> str))
 
 

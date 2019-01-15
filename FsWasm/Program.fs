@@ -3,6 +3,7 @@ open System.IO
 open WasmSerialiser
 open WasmFileReader
 open Wasm2ToSimpleReg32
+open Wasm2ToSimpleReg32ConfigTypes
 
 // Main
 
@@ -17,7 +18,10 @@ let main argv =
     let unitTestSerialisation = thisModule |> UnitTestSerialiser.ModuleToUnitTestString fileName
 
     let translatedToWasm2 = thisModule |> WasmToWasm2.TranslateWasmToWasm2
-    let translatedToSimpleReg32 = translatedToWasm2 |> TranslateWasm2ToSimpleReg32
+
+    let config = WriteOutFunctionConfig(WithBarriers, FullyOptimised)
+
+    let translatedToSimpleReg32 = translatedToWasm2 |> WriteOutWasm2AsJonathansAssemblerText config
     
 
     printfn "Hello World from F#!"

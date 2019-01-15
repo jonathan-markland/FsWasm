@@ -5,11 +5,11 @@ open PrivateWasm2ToSimpleReg32
 
 
 
-let TranslateWasm2ToSimpleReg32 (m:Module2) =   // TODO: rename because write out to text???
+let WriteOutWasm2AsJonathansAssemblerText config (m:Module2) =   // TODO: rename because write out to text???
 
-    // Set up conceptual output streams
+    // Set up conceptual output streams     // TODO: This is temporary while developing.  Want caller to pass these in???
 
-    let writeOutData s = printfn "DATA> %s" s   // TODO: This is temporary while developing.  Want caller to pass this in???
+    let writeOutData s = printfn "DATA> %s" s
     let writeOutCode s = printfn "CODE> %s" s
 
     // Start outputting ASM language text:
@@ -19,19 +19,19 @@ let TranslateWasm2ToSimpleReg32 (m:Module2) =   // TODO: rename because write ou
 
     m.Tables |> Array.iteri (fun i t ->
         match t with
-            | InternalTable2(tbl) -> tbl |> TranslateTable writeOutData i m 
+            | InternalTable2(tbl) -> tbl |> WriteOutWasmTable writeOutData i m 
             | ImportedTable2(tbl) -> () // TODO: Error?  Can't support importing, expect self-contained module.
         )
 
     m.Globals |> Array.iteri (fun i g ->
         match g with
-            | InternalGlobal2(glo) -> glo |> TranslateGlobal writeOutData i m 
+            | InternalGlobal2(glo) -> glo |> WriteOutWasmGlobal writeOutData i m 
             | ImportedGlobal2(glo) -> () // TODO: Error?  Can't support importing, expect self-contained module.
         )
 
     m.Mems |> Array.iteri (fun i me ->
         match me with
-            | InternalMemory2(mem) -> mem |> TranslateMemory writeOutData i 
+            | InternalMemory2(mem) -> mem |> WriteOutWasmMem writeOutData i 
             | ImportedMemory2(mem) -> () // TODO: Error?  Can't support importing, expect self-contained module.
         )
 
@@ -41,8 +41,8 @@ let TranslateWasm2ToSimpleReg32 (m:Module2) =   // TODO: rename because write ou
         match g with 
             | InternalFunction2(g) -> 
                 moduleTranslationState <- g |> 
-                    TranslateFunctionAndBranchTables writeOutCode writeOutData i m moduleTranslationState
+                    WriteOutFunctionAndBranchTables writeOutCode writeOutData i m moduleTranslationState config
             | ImportedFunction2(g) -> () // TODO:  Error?  Can't support importing, expect self-contained module.
         )
 
-    TranslateStart writeOutData m.Start
+    WriteOutWasmStart writeOutCode m.Start
