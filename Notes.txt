@@ -30,6 +30,14 @@ CODE
 
 [ ] Rename "data label24" as "data wasm_brtable_24" ?
 
+[ ] 386OS ASM may need more "traditional" labels scheme, to support 
+    pointers into a function body (bt_table).
+
+[ ] Separate the F# listing files a bit.  The following file is troubling:
+    C:\Users\Jonathan\Documents\Work\FsWasm\FsWasmLibrary\PrivateWasm2ToSimpleReg32.fs
+
+^^^ MUST RELEASE ^^^
+	
 [ ] Optimise to use 386OS ASM push-constant:
     let A=20
     push A                ->    push 20
@@ -40,12 +48,6 @@ CODE
 	
 [ ] Optimise: Compare-With-Constant	
 	
-[ ] 386OS ASM may need more "traditional" labels scheme, to support 
-    pointers into a function body (bt_table).
-
-[ ] Separate the F# listing files a bit.  The following file is troubling:
-    C:\Users\Jonathan\Documents\Work\FsWasm\FsWasmLibrary\PrivateWasm2ToSimpleReg32.fs
-
 	
 	
 	
