@@ -18,9 +18,14 @@ let FuncLabelFor fidx =
 
 
 
-let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : InstrSimpleReg32 list =
+type ModuleTranslationState =
+    | ModuleTranslationState of labelCount:int
 
-    let mutable labelCount = 0
+
+
+let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wasm.Instr list) =
+
+    let mutable labelCount = match translationState with ModuleTranslationState(count) -> count
     let mutable labelStack = new ResizeArray<LABELNAME>()
 
     let newLabel () =
@@ -285,7 +290,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) (ws:Wasm.Instr list) : 
     // Do the translation using the nested functions,
     // and append the return label before we're done:
 
-    (TranslateInstrArray ws) @ [ Label(returnLabel) ]
+    ((TranslateInstrArray ws) @ [ Label(returnLabel) ], ModuleTranslationState(labelCount))
 
 
 
@@ -448,36 +453,18 @@ let TranslateGlobal writeOut i (m:Module2) (g:InternalGlobal2Record) =
 
 
 
-let TablesOfAddressesToDataSectionText writeOut (m:Module2) (f:InternalFunction2Record) =
+let InstructionsToText writeOut instrs thisFuncType =
 
-    let funcInstructions = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in func outputting too!
-
-    let writeIns s = writeOut ("    " + s)
-
-    funcInstructions |> List.iter (fun ins ->
-        match ins with
-            | GotoIndex(tableLabel,_,_,codePointLabels) ->
-                writeOut (sprintf "data %s" (LabelTextOf tableLabel))
-                codePointLabels |> Array.iter (fun lbl -> writeIns (sprintf "int %s" (LabelTextOf lbl)))
-                writeOut ""
-            | _ -> ()
-        )
-
-
-
-let InstructionsToText writeOut instrs =
-
-    let writeIns s = writeOut ("    " + s)
+    let writeIns    s         = writeOut ("    " + s)
 
     let writeOfs u = 
         match u with
             | U32(0u) -> ""   // indexed addressing not needed
             | U32(n)  -> ("+" + n.ToString())   // indexed addressing
 
-    let writeU32    s1 u s2   = writeIns (sprintf "%s%s%s" s1 (writeOfs u) s2)
+    let writeU32    s1 u s2   = writeIns (sprintf "%s%s%s"   s1 (writeOfs u) s2)
     let writeU32I32 s1 u s2 n = writeIns (sprintf "%s%s%s%d" s1 (writeOfs u) s2 n)
-
-    let writeLoc s1 i s2 = writeIns (sprintf "%s%d%s" s1 (LocalIdxAsUint32 i) s2)
+    let writeLoc    s1 i s2   = writeIns (sprintf "%s%d%s"   s1 (LocalIdxAsUint32 i) s2)
 
     let writeGotoIndex tableLabel numMax defaultLabel =
         // A is already the index to branch to
@@ -573,15 +560,32 @@ let InstructionsToText writeOut instrs =
     // Kick off the whole thing here:
 
     instrs |> List.iter instructionToText
+
+    // Handle the function's return (may need pop into A):
+
+    writeIns (ReturnValueLoadFor thisFuncType)
+
     
 
 
-let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record) =   // TODO: module only needed to query function metadata in TranslateInstructions
-    
-    writeOut (sprintf "procedure %s%d%s" AsmFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType))
-    TranslateLocals writeOut f.FuncType f.Locals
+let TranslateBranchTables writeOut funcInstructions =
 
-    let funcInstructions      = f.Body |> TranslateInstructions m.Funcs   // TODO: bad we do this in table outputting
+    let writeIns s = writeOut ("    " + s)
+
+    funcInstructions |> List.iter (fun ins ->
+        match ins with
+            | GotoIndex(tableLabel,_,_,codePointLabels) ->
+                writeOut (sprintf "data %s" (LabelTextOf tableLabel))
+                codePointLabels |> Array.iter (fun lbl -> writeIns (sprintf "int %s" (LabelTextOf lbl)))
+                writeOut ""
+            | _ -> ()
+        )
+
+
+
+let TranslateFunction writeOut f funcInstructions  =   // TODO:  Can we reduce f to inner components ?
+
+    let thisFuncType          = f.FuncType
     let optimisedInstructions = funcInstructions |> Optimise
     let withoutBarriers       = optimisedInstructions |> RemoveBarriers
 
@@ -592,11 +596,24 @@ let TranslateFunction writeOut funcIndex (m:Module2) (f:InternalFunction2Record)
     //InstructionsToText writeOut optimisedInstructions
 
     //writeOut "// OPTIMISED WITHOUT BARRIERS:"
-    InstructionsToText writeOut withoutBarriers
+    InstructionsToText writeOut withoutBarriers thisFuncType
 
-    writeOut ("    " + (ReturnValueLoadFor f.FuncType))  // TODO: repetition of spacing.
-    writeOut (ReturnCommandFor f.FuncType)
+    writeOut (ReturnCommandFor thisFuncType)
     writeOut ""
+
+
+
+let TranslateFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2) translationState (f:InternalFunction2Record) =   // TODO: module only needed to query function metadata in TranslateInstructions
+    
+    let funcInstructions, updatedTranslationState = 
+        f.Body |> TranslateInstructions m.Funcs translationState
+
+    writeOut (sprintf "procedure %s%d%s" AsmFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType))
+    TranslateLocals writeOut f.FuncType f.Locals
+    TranslateFunction writeOut f funcInstructions
+    TranslateBranchTables writeOutTables funcInstructions
+
+    updatedTranslationState
 
 
 

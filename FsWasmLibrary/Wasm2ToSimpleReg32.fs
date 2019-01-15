@@ -7,44 +7,42 @@ open PrivateWasm2ToSimpleReg32
 
 let TranslateWasm2ToSimpleReg32 (m:Module2) =   // TODO: rename because write out to text???
 
-    let writeOut s = printfn "%s" s   // TODO: This is temporary while developing.  Want caller to pass this in???
+    // Set up conceptual output streams
 
-    writeOut "// Translation of WASM module"
-    writeOut ""
+    let writeOutData s = printfn "DATA> %s" s   // TODO: This is temporary while developing.  Want caller to pass this in???
+    let writeOutCode s = printfn "CODE> %s" s
 
-    // ASM DATA section
+    // Start outputting ASM language text:
 
-    m.Funcs |> Array.iteri (fun i f ->
-        match f with 
-            | InternalFunction2(g) -> TablesOfAddressesToDataSectionText writeOut m g    // ie: used by WASM "switch"
-            | ImportedFunction2(g) -> () // TODO: Error?  Can't support importing, expect self-contained module.
-        )
+    writeOutData "// Translation of WASM module"
+    writeOutData ""
 
     m.Tables |> Array.iteri (fun i t ->
         match t with
-            | InternalTable2(tbl) -> TranslateTable writeOut i m tbl
+            | InternalTable2(tbl) -> tbl |> TranslateTable writeOutData i m 
             | ImportedTable2(tbl) -> () // TODO: Error?  Can't support importing, expect self-contained module.
         )
 
     m.Globals |> Array.iteri (fun i g ->
         match g with
-            | InternalGlobal2(glo) -> TranslateGlobal writeOut i m glo
+            | InternalGlobal2(glo) -> glo |> TranslateGlobal writeOutData i m 
             | ImportedGlobal2(glo) -> () // TODO: Error?  Can't support importing, expect self-contained module.
         )
 
     m.Mems |> Array.iteri (fun i me ->
         match me with
-            | InternalMemory2(mem) -> TranslateMemory writeOut i mem
+            | InternalMemory2(mem) -> mem |> TranslateMemory writeOutData i 
             | ImportedMemory2(mem) -> () // TODO: Error?  Can't support importing, expect self-contained module.
         )
 
-    // ASM CODE section
+    let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
 
     m.Funcs |> Array.iteri (fun i g ->
         match g with 
-            | InternalFunction2(g) -> TranslateFunction writeOut i m g
+            | InternalFunction2(g) -> 
+                moduleTranslationState <- g |> 
+                    TranslateFunctionAndBranchTables writeOutCode writeOutData i m moduleTranslationState
             | ImportedFunction2(g) -> () // TODO:  Error?  Can't support importing, expect self-contained module.
         )
 
-    TranslateStart writeOut m.Start
-
+    TranslateStart writeOutData m.Start
