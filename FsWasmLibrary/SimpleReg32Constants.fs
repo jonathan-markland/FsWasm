@@ -6,3 +6,4 @@ let AsmLocalNamePrefix  = "loc"
 let AsmEntryPointLabel  = "wasm_entry"
 let AsmTableNamePrefix  = "wasm_table"  // There is only one, for the TableSec
 let AsmMemoryNamePrefix = "wasm_mem_init_data"
+let AsmMemPrefix = "wasm_mem"

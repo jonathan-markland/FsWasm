@@ -426,16 +426,49 @@ let WriteOutWasmTable writeOut i (m:Module2) (t:InternalTable2Record) =
 
 
 
+let WasmMemoryBlockMultiplier = 65536u
 
-let WriteOutWasmMem writeOut i (t:InternalMemory2Record) =
 
-    let writeIns s = writeOut ("    " + s)
 
-    writeOut (sprintf "data %s%d" AsmMemoryNamePrefix i)
+let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory2[]) =
 
-    t.InitData |> Array.iter (fun elem ->
+    writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
+
+    let writeOutDataCopyCommand i (thisMem:InternalMemory2Record) =
+        thisMem.InitData |> Array.iteri (fun j elem ->
+                let ofsExpr, byteArray = elem
+                let ofsValue = StaticEvaluate ofsExpr
+                writeOutCode (sprintf "    do copy_block(%s%d+%d,%s%d_%d,%d)" AsmMemPrefix i ofsValue AsmMemoryNamePrefix i j byteArray.Length)
+            )
+
+    mems |> Array.iteri (fun i me ->
+        match me with
+            | InternalMemory2(mem) -> mem |> writeOutDataCopyCommand i 
+            | ImportedMemory2(mem) -> () // TODO: Error?  Can't support importing, expect self-contained module.
+        )
+
+    writeOutCode "ret"
+
+
+
+let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemory2Record) =
+
+    let linearMemorySize = 
+        match thisMem with 
+            | { MemoryType={ MemoryLimits=lims } } -> 
+            match lims with 
+                | { LimitMin=U32(memSize); LimitMax=None; } -> memSize * WasmMemoryBlockMultiplier
+                | { LimitMin=_; LimitMax=Some(_); } -> failwith "Cannot translate module with Mem that has max size limit"
+
+    writeOutVar (sprintf "var %s%d: %d" AsmMemPrefix i linearMemorySize)
+
+    let writeIns s = writeOutData ("    " + s)
+
+    writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix i)
+
+    thisMem.InitData |> Array.iteri (fun j elem ->
             let ofsExpr, byteArray = elem
-            // TODO: let ofsValue = StaticEvaluate ofsExpr
+            writeOutData (sprintf "%s%d_%d" AsmMemoryNamePrefix i j)
             byteArray |> Array.iter (fun byteVal -> writeIns (sprintf "byte %d" byteVal))   // TODO: hex, and rows of 16
         )
 

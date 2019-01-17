@@ -11,6 +11,7 @@ let WriteOutWasm2AsJonathansAssemblerText config (m:Module2) =   // TODO: rename
 
     let writeOutData s = printfn "DATA> %s" s
     let writeOutCode s = printfn "CODE> %s" s
+    let writeOutVar  s = printfn "VAR>  %s" s
 
     // Start outputting ASM language text:
 
@@ -31,9 +32,11 @@ let WriteOutWasm2AsJonathansAssemblerText config (m:Module2) =   // TODO: rename
 
     m.Mems |> Array.iteri (fun i me ->
         match me with
-            | InternalMemory2(mem) -> mem |> WriteOutWasmMem writeOutData i 
+            | InternalMemory2(mem) -> mem |> WriteOutWasmMem writeOutData writeOutVar i 
             | ImportedMemory2(mem) -> () // TODO: Error?  Can't support importing, expect self-contained module.
         )
+
+    m.Mems |> WriteOutAllDataInitialisationFunction writeOutCode
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
 
@@ -46,3 +49,5 @@ let WriteOutWasm2AsJonathansAssemblerText config (m:Module2) =   // TODO: rename
         )
 
     WriteOutWasmStart writeOutCode m.Start
+
+
