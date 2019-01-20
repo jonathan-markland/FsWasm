@@ -23,7 +23,5 @@ let main argv =
 
     let translatedToSimpleReg32 = translatedToWasm2 |> WriteOutWasm2AsJonathansAssemblerText config
     
-
-    printfn "Hello World from F#!"
     0 // return an integer exit code
  

@@ -4,8 +4,24 @@ open Wasm
 open Wasm2
 open PrivateWasmToWasm2
 
-
 let TranslateWasmToWasm2 (oldModule:Module) =
+
+    let raiseErrorIfExists (customArray:Custom[]) =
+        if customArray.Length > 0
+        then failwith "Cannot translate a module that has a Custom section.  The custom section is not understood by this translator."
+
+    oldModule.Custom1  |> raiseErrorIfExists
+    oldModule.Custom2  |> raiseErrorIfExists
+    oldModule.Custom3  |> raiseErrorIfExists
+    oldModule.Custom4  |> raiseErrorIfExists
+    oldModule.Custom5  |> raiseErrorIfExists
+    oldModule.Custom6  |> raiseErrorIfExists
+    oldModule.Custom7  |> raiseErrorIfExists
+    oldModule.Custom8  |> raiseErrorIfExists
+    oldModule.Custom9  |> raiseErrorIfExists
+    oldModule.Custom10 |> raiseErrorIfExists
+    oldModule.Custom11 |> raiseErrorIfExists
+    oldModule.Custom12 |> raiseErrorIfExists
 
     let newImportedFuncs   = oldModule |> HarvestFunction2sFromImports 
     let newImportedMems    = oldModule |> HarvestMemory2sFromImports
