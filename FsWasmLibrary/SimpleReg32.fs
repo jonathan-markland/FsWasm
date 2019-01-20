@@ -17,6 +17,9 @@ type LABELNAME = LabelName of string
 /// A 32-bit register machine instruction
 type InstrSimpleReg32 =
 
+    /// Thunk In.  (Loads Y register to point to linear memory in this implementation).
+    | ThunkIn
+
     /// Marks where all registers are unassigned.  Used to make peephole optimisation reliable.
     | Barrier     
 

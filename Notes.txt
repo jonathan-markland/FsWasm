@@ -3,15 +3,27 @@ FsWasm -- Notes
 ===============
 
 
+INVESTIGATION
+=============
+
+[ ] Need a GCC -> WASM toolchain setting up on the Linux box.
+
+
+
+
 DESIGN ISSUES - decide how to do.
 =============
+
+[ ] We do not allow the hosting assembler program to use multiple WASM modules, as this
+    translator would generate name-clashes.  (Only allowing one WASM
+	module per host).
 
 [ ] Decide new name for "Wasm2" - something proprietary.
 
 [ ] Review naming since moving WASM to trees, where the instructions
     that have operands *bind* them as child sub-tree fields.
 
-[ ] Idea: Output -- annotate code with commentary eg:  // Prepare wasm_func1 / Param1:
+[ ] Idea: Output -- annotate code with commentary eg:  // Prepare wasm_fn1 / Param1:
 	
 [ ] Look at whether to insert extra line-gaps in the output ASM
 	
@@ -22,22 +34,21 @@ DESIGN ISSUES - decide how to do.
 CODE
 ====
 
-[ ] Generate a VAR section for the WASM Linear Memory.
+[ ] Raise error on Custom sections being present.
 
-[ ] Need to generate code to copy the init data into the Linear Memory.
+[ ] Need the output to be in the correct order!  Currently we mix three streams.
+    Separate program to re-order the output?
 
-[ ] Need to load the Y register to point to the linear memory.
+^^^ MUST RELEASE ^^^
 
-[ ] Rename "data label24" as "data wasm_brtable_24" ?
-
-[ ] 386OS ASM may need more "traditional" labels scheme, to support 
-    pointers into a function body (bt_table).
-
+[ ] Could we word-align the data sections, and copy them in word-at-a-time rather 
+    than byte-at-a-time?
+	
 [ ] Separate the F# listing files a bit.  The following file is troubling:
     C:\Users\Jonathan\Documents\Work\FsWasm\FsWasmLibrary\PrivateWasm2ToSimpleReg32.fs
 
-^^^ MUST RELEASE ^^^
-	
+[ ] Sort out the writeIns:  We have multiple instances where we specify four spaces.
+
 [ ] Optimise to use 386OS ASM push-constant:
     let A=20
     push A                ->    push 20
@@ -109,4 +120,18 @@ ret
 [X] Sort out Optimise (which got commented out when doing the trees).
 
 [X] Need local-label numbering to be unique across all functions to support br_table.
+
+[X] Generate a VAR section for the WASM Linear Memory.
+
+[X] Need to generate code to copy the init data into the Linear Memory.
+
+[X] Need to load the Y register to point to the linear memory.
+[X] Reload the Y register to point to the linear memory on return from a call to an import.
+
+[X] Need to load the stack pointer at linear memory offset 4.
+
+[X] Rename "data label24" as "data wasm_brtable_24" ?
+
+[X] 386OS ASM may need more "traditional" labels scheme, to support 
+    pointers into a function body (bt_table).
 

@@ -10,7 +10,7 @@ open Wasm2ToSimpleReg32ConfigTypes
 [<EntryPoint>]
 let main argv =
 
-    let fileName = "program (5).wasm"
+    let fileName = "program (5).wasm"  // TODO: pass on command line
     let fileImage = File.ReadAllBytes fileName
     let r = new BinaryReader(fileImage)
 

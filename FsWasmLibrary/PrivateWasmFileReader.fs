@@ -216,13 +216,12 @@ and Instruction recent r =
         r |> ExpectByte 0x00uy
         code
 
-    let opcodeByte = r |> Byte
-
     let first  () = List.head recent
     let second () = List.head (List.tail recent)
-    let third  () = List.head (List.tail recent)
     let tail1  () = List.tail recent
     let tail2  () = List.tail (List.tail recent)
+
+    let opcodeByte = r |> Byte
 
     match opcodeByte with
 
@@ -327,8 +326,8 @@ and Instruction recent r =
         | 0x3Duy -> Some(I64Store16(r |> MemArg, second(), first())::tail2())
         | 0x3Euy -> Some(I64Store32(r |> MemArg, second(), first())::tail2())
 
-        | 0x3Fuy -> Some(((MemorySize, r) |> then00)::recent)
-        | 0x40uy -> Some(((GrowMemory, r) |> then00)::recent)
+        | 0x3Fuy -> Some( ((MemorySize, r) |> then00)::recent )
+        | 0x40uy -> Some( ((GrowMemory, r) |> then00)::recent )
 
         // 5.4.5  Numeric Instructions
 

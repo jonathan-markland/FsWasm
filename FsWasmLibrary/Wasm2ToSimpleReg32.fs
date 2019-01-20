@@ -21,19 +21,19 @@ let WriteOutWasm2AsJonathansAssemblerText config (m:Module2) =   // TODO: rename
     m.Tables |> Array.iteri (fun i t ->
         match t with
             | InternalTable2(tbl) -> tbl |> WriteOutWasmTable writeOutData i m 
-            | ImportedTable2(tbl) -> () // TODO: Error?  Can't support importing, expect self-contained module.
+            | ImportedTable2(tbl) -> failwith "Error:  Cannot support importing a 'table'.  WASM module must be self-contained."
         )
 
     m.Globals |> Array.iteri (fun i g ->
         match g with
             | InternalGlobal2(glo) -> glo |> WriteOutWasmGlobal writeOutData i m 
-            | ImportedGlobal2(glo) -> () // TODO: Error?  Can't support importing, expect self-contained module.
+            | ImportedGlobal2(glo) -> failwith "Error:  Cannot support importing a 'global'.  WASM module must be self-contained."
         )
 
     m.Mems |> Array.iteri (fun i me ->
         match me with
             | InternalMemory2(mem) -> mem |> WriteOutWasmMem writeOutData writeOutVar i 
-            | ImportedMemory2(mem) -> () // TODO: Error?  Can't support importing, expect self-contained module.
+            | ImportedMemory2(mem) -> failwith "Error:  Cannot support importing a 'memory'.  WASM module must be self-contained."
         )
 
     m.Mems |> WriteOutAllDataInitialisationFunction writeOutCode
@@ -45,9 +45,10 @@ let WriteOutWasm2AsJonathansAssemblerText config (m:Module2) =   // TODO: rename
             | InternalFunction2(g) -> 
                 moduleTranslationState <- g |> 
                     WriteOutFunctionAndBranchTables writeOutCode writeOutData i m moduleTranslationState config
-            | ImportedFunction2(g) -> () // TODO:  Error?  Can't support importing, expect self-contained module.
+            | ImportedFunction2({Import={ImportModuleName=m; ImportName=n}}) ->
+                writeOutCode (sprintf "// WASM Import: %s.%s" m n)
         )
 
-    WriteOutWasmStart writeOutCode m.Start
+    WriteOutWasmStart writeOutCode m.Start m.Funcs
 
 

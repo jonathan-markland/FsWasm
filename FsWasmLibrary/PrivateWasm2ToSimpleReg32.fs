@@ -6,6 +6,7 @@ open Wasm2ToSimpleReg32ConfigTypes
 open SimpleReg32
 open SimpleReg32Constants
 open OptimiseSimpleReg32
+open System.Text
 
 
 
@@ -14,8 +15,14 @@ let (-+-) a b =
 
 
 
-let FuncLabelFor fidx =
-    LabelName(AsmFuncNamePrefix + match fidx with FuncIdx(U32(i)) -> i.ToString()) 
+let FuncLabelFor fidx (moduleFuncsArray:Function2[]) =
+    match fidx with
+        | FuncIdx(U32(i)) -> 
+            match moduleFuncsArray.[int i] with
+                | ImportedFunction2({Import={ImportModuleName=m; ImportName=n}}) -> 
+                    LabelName(AsmInternalFuncNamePrefix + m + "_" + n)
+                | InternalFunction2(f) ->
+                    LabelName(AsmInternalFuncNamePrefix + i.ToString()) 
 
 
 
@@ -31,7 +38,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
 
     let newLabel () =
         labelCount <- labelCount + 1
-        LabelName(sprintf "label%d" labelCount)
+        LabelName(sprintf "%s%d" AsmCodeLabelPrefix labelCount)
 
     let pushNewLabel () =
         let l = newLabel ()
@@ -53,14 +60,21 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
                     | ImportedFunction2(f) -> f.FuncType
                     | InternalFunction2(f) -> f.FuncType
 
-    let funcReturnsSomething (fidx:FuncIdx) =
-        let numReturns = (getFuncType fidx).ReturnTypes.Length
-        if numReturns > 1 then failwith "Cannot translate functions which return more than 1 result"
-        numReturns > 0
+    let thunkInIfNeeded fidx = 
+        match fidx with
+            | FuncIdx(U32(i)) -> 
+                match moduleFuncsArray.[int i] with
+                    | ImportedFunction2(_) -> [ ThunkIn ]   // Since we called an imported function, we reload Y on return.
+                    | InternalFunction2(_) -> []
+ 
+    let pushAnyReturn fidx =
+        let ft = (getFuncType fidx)
+        match ft.ReturnTypes.Length with
+            | 0 -> []
+            | 1 -> [ PushA ]
+            | _ -> failwith "Cannot translate functions which return more than 1 result"
 
-
-
-    let rec TranslateInstrArray ws =
+    let rec TranslateInstrList ws =
 
         List.concat (ws |> List.map TranslateInstr)
 
@@ -120,7 +134,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
 
         let translateConstruct sourceBody putInOrder =
             let constructLabel = pushNewLabel ()
-            let translatedBody = TranslateInstrArray sourceBody
+            let translatedBody = TranslateInstrList sourceBody
             popLabel ()
             (putInOrder translatedBody [ Label(constructLabel) ]) @ [ Barrier ]
 
@@ -158,25 +172,27 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
 
             | If(_, body) -> 
                 let skipLabel = pushNewLabel ()
-                let translatedBody = TranslateInstrArray body
+                let translatedBody = TranslateInstrList body
                 popLabel ()
-                [ PopA; BranchAZ(skipLabel); ] @ translatedBody @ [ Label(skipLabel); Barrier ]
+                [ PopA; BranchAZ(skipLabel); ] 
+                    @ translatedBody 
+                    @ [ Label(skipLabel); Barrier ]
                     
             | IfElse(_, ifbody, elsebody) ->
 
                 let skipIfLabel = pushNewLabel ()
-                let translatedIfBody = TranslateInstrArray ifbody
+                let translatedIfBody = TranslateInstrList ifbody
                 popLabel ()
 
                 let skipElseLabel = pushNewLabel ()
-                let translatedElseBody = TranslateInstrArray elsebody
+                let translatedElseBody = TranslateInstrList elsebody
                 popLabel ()
 
-                [ PopA; BranchAZ(skipIfLabel); ] @ 
-                    translatedIfBody @ 
-                    [ Goto(skipElseLabel); Label(skipIfLabel); Barrier; ] @ 
-                    translatedElseBody @ 
-                    [ Label(skipElseLabel); Barrier ]
+                [ PopA; BranchAZ(skipIfLabel); ] 
+                    @ translatedIfBody 
+                    @ [ Goto(skipElseLabel); Label(skipIfLabel); Barrier; ] 
+                    @ translatedElseBody 
+                    @ [ Label(skipElseLabel); Barrier ]
 
             | Br(target) -> [ Goto(labelFor target); Barrier ]
 
@@ -193,18 +209,21 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
 
             | Return -> [ Goto(returnLabel); Barrier ]
             
-            | Call(funcIdx,paramList) -> 
-                let translatedParams = TranslateInstrArray paramList
-                let fl = FuncLabelFor funcIdx
-                if funcIdx |> funcReturnsSomething 
-                then translatedParams @ [ CallFunc(fl); PushA; Barrier ]
-                else translatedParams @ [ CallFunc(fl); Barrier ]
+            | Call(funcIdx, argsList) -> 
+                let codeToPushArguments = argsList |> TranslateInstrList
+                codeToPushArguments
+                    @ [ CallFunc(FuncLabelFor funcIdx moduleFuncsArray) ]
+                    @ (thunkInIfNeeded funcIdx) 
+                    @ (pushAnyReturn funcIdx) 
+                    @ [ Barrier ]
 
-            | CallIndirect(funcType,paramList,indexExpr) ->
+            | CallIndirect(funcType, argsList, indexExpr) ->
                 // TODO: runtime validation of funcType
-                let translatedParams = TranslateInstrArray paramList
-                let translatedIndex  = TranslateInstr indexExpr
-                translatedParams @ translatedIndex @ [ PopA; CallTableIndirect; Barrier ]
+                let codeToPushArguments = argsList |> TranslateInstrList
+                let translatedIndex     = indexExpr |> TranslateInstr   // TODO: We could see if this would statically evaluate, and reduce this to a regular call, although the compiler would probably optimise that.
+                codeToPushArguments 
+                    @ translatedIndex 
+                    @ [ PopA; CallTableIndirect; Barrier ]
 
             | I32Const(I32(C)) -> [ ConstA(Const32(C)); PushA; Barrier ]
 
@@ -289,9 +308,11 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             | _ -> failwith "Cannot translate this instruction to simple 32-bit machine."
 
     // Do the translation using the nested functions,
-    // and append the return label before we're done:
+    // and append the return label before we're done.
+    // We return an updated "ModuleTranslationState"
+    // with new new label counter:
 
-    ((TranslateInstrArray ws) @ [ Label(returnLabel) ], ModuleTranslationState(labelCount))
+    (TranslateInstrList ws) @ [ Label(returnLabel) ] , ModuleTranslationState(labelCount)
 
 
 
@@ -343,7 +364,7 @@ let GlobalIdxNameString globalIdx =
     sprintf "%s%d" AsmGlobalNamePrefix (GlobalIdxAsUint32 globalIdx)
 
 let FuncIdxNameString funcIdx = 
-    sprintf "%s%d" AsmFuncNamePrefix (FuncIdxAsUint32 funcIdx)
+    sprintf "%s%d" AsmInternalFuncNamePrefix (FuncIdxAsUint32 funcIdx)
 
 
 
@@ -430,24 +451,66 @@ let WasmMemoryBlockMultiplier = 65536u
 
 
 
+let WriteOutLoadLinearMemoryRegister writeOutCode =
+    // The translated code requires the Y register to
+    // point to the base of the linear memory region.
+    // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
+    writeOutCode (sprintf "let Y=%s%d" AsmMemPrefix 0)
+    
+
+
+
 let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory2[]) =
 
     writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
+    writeOutCode (sprintf "    // Caller must pass stack pointer (relative to %s%d) in A" AsmMemPrefix 0)
+    writeOutCode (sprintf "    let uint [%s%d+4]=A // Initialise WasmFiddle stack pointer at address offset 4" AsmMemPrefix 0)
 
     let writeOutDataCopyCommand i (thisMem:InternalMemory2Record) =
+        if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
         thisMem.InitData |> Array.iteri (fun j elem ->
                 let ofsExpr, byteArray = elem
                 let ofsValue = StaticEvaluate ofsExpr
-                writeOutCode (sprintf "    do copy_block(%s%d+%d,%s%d_%d,%d)" AsmMemPrefix i ofsValue AsmMemoryNamePrefix i j byteArray.Length)
+                writeOutCode (sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue)
+                writeOutCode (sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j)
+                writeOutCode (sprintf "    let C=%d" byteArray.Length)
+                writeOutCode          "    cld rep movsb"
             )
 
     mems |> Array.iteri (fun i me ->
         match me with
             | InternalMemory2(mem) -> mem |> writeOutDataCopyCommand i 
-            | ImportedMemory2(mem) -> () // TODO: Error?  Can't support importing, expect self-contained module.
+            | ImportedMemory2(mem) -> failwith "Error:  Cannot support importing a 'memory' region.  WASM module must be expect self-contained."
         )
 
+    WriteOutLoadLinearMemoryRegister writeOutCode
     writeOutCode "ret"
+
+
+
+let WriteOutHexDump writeLine byteArray =
+    
+    let sb = new StringBuilder()
+    
+    byteArray |> Array.iteri (fun i byteVal -> 
+
+        let c = i &&& 15
+        
+        sb.Append (
+            match c with
+                | 0 -> sprintf "byte 0x%02X" byteVal
+                | _ -> sprintf ",0x%02X" byteVal
+            )
+            |> ignore
+
+        match c with
+            | 15 -> 
+                writeLine (sb.ToString())
+                sb.Clear() |> ignore
+            | _ -> ()
+    )
+
+    if sb.Length > 0 then writeLine (sb.ToString())
 
 
 
@@ -457,8 +520,9 @@ let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemory2Record) =
         match thisMem with 
             | { MemoryType={ MemoryLimits=lims } } -> 
             match lims with 
+                | { LimitMin=U32(0u); LimitMax=None; }      -> failwith "Cannot translate module with Mem that is size 0"   // At least we expect to initalise GCC's stack pointer.
                 | { LimitMin=U32(memSize); LimitMax=None; } -> memSize * WasmMemoryBlockMultiplier
-                | { LimitMin=_; LimitMax=Some(_); } -> failwith "Cannot translate module with Mem that has max size limit"
+                | { LimitMin=_; LimitMax=Some(_); }         -> failwith "Cannot translate module with Mem that has max size limit"
 
     writeOutVar (sprintf "var %s%d: %d" AsmMemPrefix i linearMemorySize)
 
@@ -467,9 +531,9 @@ let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemory2Record) =
     writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix i)
 
     thisMem.InitData |> Array.iteri (fun j elem ->
-            let ofsExpr, byteArray = elem
-            writeOutData (sprintf "%s%d_%d" AsmMemoryNamePrefix i j)
-            byteArray |> Array.iter (fun byteVal -> writeIns (sprintf "byte %d" byteVal))   // TODO: hex, and rows of 16
+            let _, byteArray = elem
+            writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix i j)
+            WriteOutHexDump writeIns byteArray
         )
 
 
@@ -489,7 +553,7 @@ let WriteOutWasmGlobal writeOut i (m:Module2) (g:InternalGlobal2Record) =
 
 let WriteOutInstructionsToText writeOut instrs thisFuncType =
 
-    let writeIns    s         = writeOut ("    " + s)
+    let writeIns s = writeOut ("    " + s)
 
     let writeOfs u = 
         match u with
@@ -503,14 +567,14 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
     let writeGotoIndex tableLabel numMax defaultLabel =
         // A is already the index to branch to
         writeIns (sprintf "cmp A,%d:if >>= goto %s" numMax (LabelTextOf defaultLabel))
-        writeIns "shl A,2"
+        writeIns "shl A,2"  // TODO: assumes 32-bit target
         writeIns (sprintf "goto [A+%s]" (LabelTextOf tableLabel))
 
     let writeCallTableIndirect () =
         // TODO: We really need to emit some code to validate the signatures.
         // A is already the index to call.
         // TODO: We need to validate index A lies within wasm table [0]
-        writeIns "shl A,2"
+        writeIns "shl A,2"  // TODO: assumes 32-bit target
         writeIns (sprintf "goto [A+%s0]" AsmTableNamePrefix)  // WASM 1.0 always looks in table #0
 
     let instructionToText ins =  // These translations can assume a 32-bit target for now.
@@ -519,7 +583,7 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
             | Barrier               -> writeIns "// ~~~ register barrier ~~~"
             | Breakpoint            -> writeIns "break"
             | Drop                  -> writeIns "add SP,4"
-            | Label(l)              -> writeOut ("=> " + LabelTextOf l)   // TODO: sort out ASM local label references
+            | Label(l)              -> writeOut ("label " + LabelTextOf l)   // TODO: sort out ASM local label references
             | ConstA(Const32(n))    -> writeIns ("let A=" + n.ToString())
             | Goto(l)               -> writeIns ("goto " + LabelTextOf l)
             | CallFunc(l)           -> writeIns ("call " + FuncNameOf l)
@@ -590,6 +654,7 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
             | Fetch16sFromY(ofs)      -> writeU32 "let A=short[Y" ofs "]"
             | Fetch16uFromY(ofs)      -> writeU32 "let A=ushort[Y" ofs "]"
             | Fetch32FromY(ofs)       -> writeU32 "let A=uint[Y" ofs "]"
+            | ThunkIn                 -> WriteOutLoadLinearMemoryRegister writeIns
 
     // Kick off the whole thing here:
 
@@ -642,7 +707,7 @@ let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2
     let funcInstructions, updatedTranslationState = 
         f.Body |> TranslateInstructions m.Funcs translationState
 
-    writeOut (sprintf "procedure %s%d%s" AsmFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType))
+    writeOut (sprintf "procedure %s%d%s" AsmInternalFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType))
     WriteOutFunctionLocals writeOut f.FuncType f.Locals
     WriteOutFunction writeOut f.FuncType funcInstructions config
     WriteOutBranchTables writeOutTables funcInstructions
@@ -651,15 +716,16 @@ let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2
 
 
 
-let WriteOutBranchToEntryLabel writeOut startFuncIdx =
+let WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray =
     writeOut ("procedure " + AsmEntryPointLabel)
-    writeOut (sprintf "goto %s" (match FuncLabelFor startFuncIdx with LabelName(s) -> s))
+    writeOut (sprintf "goto %s" (match (FuncLabelFor startFuncIdx moduleFuncsArray) with LabelName(s) -> s))
 
 
 
-let WriteOutWasmStart writeOut startOption =
+let WriteOutWasmStart writeOut startOption moduleFuncsArray =
     match startOption with 
-        | Some({StartFuncIdx=startFuncIdx}) -> WriteOutBranchToEntryLabel writeOut startFuncIdx
+        | Some({StartFuncIdx=startFuncIdx}) -> 
+            WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray
         | None -> writeOut "// No entry point in this translation"
 
 
