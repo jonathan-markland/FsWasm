@@ -5,13 +5,7 @@ open PrivateWasm2ToSimpleReg32
 
 
 
-let WriteOutWasm2AsJonathansAssemblerText config headingText (m:Module2) =   // TODO: rename because write out to text???
-
-    // Set up conceptual output streams     // TODO: This is temporary while developing.  Want caller to pass these in???
-
-    let writeOutData s = printfn "DATA> %s" s
-    let writeOutCode s = printfn "CODE> %s" s
-    let writeOutVar  s = printfn "VAR>  %s" s
+let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module2) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
 

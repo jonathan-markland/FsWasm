@@ -4,6 +4,7 @@ open WasmSerialiser
 open WasmFileReader
 open Wasm2ToSimpleReg32
 open Wasm2ToSimpleReg32ConfigTypes
+open CompilationOutputting
 
 // Main
 
@@ -25,12 +26,17 @@ let main argv =
 
         let translatedToWasm2 = thisModule |> WasmToWasm2.TranslateWasmToWasm2
 
-        let config = WriteOutFunctionConfig(WithBarriers, FullyOptimised)
+        let config = WriteOutFunctionConfig(WithBarriers, FullyOptimised, FinalOutputOrder)  // TODO: Hard-code config!!
 
         let headingText = (sprintf "%s (%d bytes) %s" fileName (fileImage.Length) fileDate)
 
-        translatedToWasm2
-            |> WriteOutWasm2AsJonathansAssemblerText config headingText
+        let theProcess writeOutData writeOutCode writeOutVar =
+            translatedToWasm2
+                |> WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar
+
+        match config with
+            | WriteOutFunctionConfig(_,_,DebugOutputOrder) -> theProcess |> OutputForDebug
+            | WriteOutFunctionConfig(_,_,FinalOutputOrder) -> theProcess |> OutputInFinalOrder
 
     with
 

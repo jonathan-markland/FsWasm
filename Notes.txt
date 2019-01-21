@@ -30,14 +30,12 @@ DESIGN ISSUES - decide how to do.
 
 [ ] A test framework (integration level) is needed.	
 
+[ ] Design a command line parameter format, as we have hard-coded config.
 	
 	
 
 CODE
 ====
-
-[ ] Need the output to be in the correct order!  Currently we mix three streams.
-    Separate program to re-order the output?
 
 ^^^ MUST RELEASE ^^^
 
@@ -70,6 +68,8 @@ CODE
 COMPLETE
 ========	
 
+[X] Need the output to be in the correct order!  Currently we mix three streams.
+    Separate program to re-order the output?
 
 [X] We are missing register barriers after some labels (after => label3):
 

@@ -440,7 +440,9 @@ let WriteOutWasmTable writeOut i (m:Module2) (t:InternalTable2Record) =
 
     let writeIns s = writeOut ("    " + s)  // TODO: repetition throughout routines!
 
-    writeOut (sprintf "data %s%d" AsmTableNamePrefix i)
+    // TODO: assumed 32-bit target:
+    writeOut "align int"
+    writeOut (sprintf "data int %s%d" AsmTableNamePrefix i)
 
     if t.InitData.Length > 1 then failwith "Cannot translate module with more than one Elem in a TableSec table"
 
@@ -492,7 +494,9 @@ let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory2[]) =
             | ImportedMemory2(mem) -> failwith "Error:  Cannot support importing a 'memory' region.  WASM module must be expect self-contained."
         )
 
-    WriteOutLoadLinearMemoryRegister writeOutCode
+    let writeOutIns s = writeOutCode ("    " + s)
+
+    WriteOutLoadLinearMemoryRegister writeOutIns
     writeOutCode "ret"
 
 
@@ -533,7 +537,9 @@ let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemory2Record) =
                 | { LimitMin=U32(memSize); LimitMax=None; } -> memSize * WasmMemoryBlockMultiplier
                 | { LimitMin=_; LimitMax=Some(_); }         -> failwith "Cannot translate module with Mem that has max size limit"
 
-    writeOutVar (sprintf "var %s%d: %d" AsmMemPrefix i linearMemorySize)
+    writeOutVar "global"
+    writeOutVar "    align ptr"
+    writeOutVar (sprintf "    %s%d: %d" AsmMemPrefix i linearMemorySize)
 
     let writeIns s = writeOutData ("    " + s)
 
@@ -685,9 +691,9 @@ let WriteOutBranchTables writeOut funcInstructions =
     funcInstructions |> List.iter (fun ins ->
         match ins with
             | GotoIndex(tableLabel,_,_,codePointLabels) ->
+                writeOut "align int"
                 writeOut (sprintf "data %s" (LabelTextOf tableLabel))
                 codePointLabels |> Array.iter (fun lbl -> writeIns (sprintf "int %s" (LabelTextOf lbl)))
-                writeOut ""
             | _ -> ()
         )
 
@@ -697,13 +703,13 @@ let WriteOutFunction writeOut thisFuncType funcInstructions config =   // TODO: 
 
     let phase1 = 
         match config with
-            | WriteOutFunctionConfig(_,FullyOptimised) -> funcInstructions |> Optimise
-            | WriteOutFunctionConfig(_,NoOptimisation) -> funcInstructions
+            | WriteOutFunctionConfig(_,FullyOptimised,_) -> funcInstructions |> Optimise
+            | WriteOutFunctionConfig(_,NoOptimisation,_) -> funcInstructions
     
     let phase2 =
         match config with
-            | WriteOutFunctionConfig(WithBarriers,_)    -> phase1
-            | WriteOutFunctionConfig(WithoutBarriers,_) -> phase1 |> RemoveBarriers
+            | WriteOutFunctionConfig(WithBarriers,_,_)    -> phase1
+            | WriteOutFunctionConfig(WithoutBarriers,_,_) -> phase1 |> RemoveBarriers
 
     let desiredInstructions = phase2
 

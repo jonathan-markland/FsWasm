@@ -2,4 +2,6 @@
 
 type BarrierConfig = WithBarriers | WithoutBarriers
 type OptimisationConfig = FullyOptimised | NoOptimisation
-type WriteOutFunctionConfig = WriteOutFunctionConfig of BarrierConfig * OptimisationConfig
+type OutputOrderConfig = DebugOutputOrder | FinalOutputOrder
+type WriteOutFunctionConfig = WriteOutFunctionConfig of BarrierConfig * OptimisationConfig * OutputOrderConfig
+
