@@ -138,7 +138,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             let constructLabel = pushNewLabel ()
             let translatedBody = TranslateInstrList sourceBody
             popLabel ()
-            (putInOrder translatedBody [ Label(constructLabel) ]) @ [ Barrier ]
+            (putInOrder translatedBody [ Label(constructLabel) ])
 
         match w with
 
@@ -169,8 +169,8 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
                     Barrier;
                 ]
    
-            | Block(_, body) -> translateConstruct body (List.append)
-            | Loop(_, body)  -> translateConstruct body (fun a b -> List.append b a)
+            | Block(_, body) -> translateConstruct body (List.append) @ [Barrier]
+            | Loop(_, body)  -> translateConstruct body (fun a b -> List.append (b @ [Barrier]) a)
 
             | If(_, body) -> 
                 let skipLabel = pushNewLabel ()

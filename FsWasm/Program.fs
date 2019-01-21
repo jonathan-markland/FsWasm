@@ -11,7 +11,7 @@ open CompilationOutputting
 [<EntryPoint>]
 let main argv =
 
-    let paramFileName = "program (5).wasm"  // TODO: pass on command line
+    let paramFileName = "program (8).wasm"  // TODO: pass on command line
 
     try
 
