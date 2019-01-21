@@ -713,13 +713,13 @@ let WriteOutFunction writeOut thisFuncType funcInstructions config =   // TODO: 
 
     let phase1 = 
         match config with
-            | WriteOutFunctionConfig(_,FullyOptimised,_) -> funcInstructions |> Optimise
-            | WriteOutFunctionConfig(_,NoOptimisation,_) -> funcInstructions
+            | TranslationConfiguration(_,FullyOptimised,_) -> funcInstructions |> Optimise
+            | TranslationConfiguration(_,NoOptimisation,_) -> funcInstructions
     
     let phase2 =
         match config with
-            | WriteOutFunctionConfig(WithBarriers,_,_)    -> phase1
-            | WriteOutFunctionConfig(WithoutBarriers,_,_) -> phase1 |> RemoveBarriers
+            | TranslationConfiguration(WithBarriers,_,_)    -> phase1
+            | TranslationConfiguration(WithoutBarriers,_,_) -> phase1 |> RemoveBarriers
 
     let desiredInstructions = phase2
 

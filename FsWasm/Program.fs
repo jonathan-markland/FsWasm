@@ -26,7 +26,7 @@ let main argv =
 
         let translatedToWasm2 = thisModule |> WasmToWasm2.TranslateWasmToWasm2
 
-        let config = WriteOutFunctionConfig(WithBarriers, FullyOptimised, FinalOutputOrder)  // TODO: Hard-code config!!
+        let config = TranslationConfiguration(WithBarriers, FullyOptimised, FinalOutputOrder)  // TODO: Hard-code config!!
 
         let headingText = (sprintf "%s (%d bytes) %s" fileName (fileImage.Length) fileDate)
 
@@ -35,8 +35,8 @@ let main argv =
                 |> WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar
 
         match config with
-            | WriteOutFunctionConfig(_,_,DebugOutputOrder) -> theProcess |> OutputForDebug
-            | WriteOutFunctionConfig(_,_,FinalOutputOrder) -> theProcess |> OutputInFinalOrder
+            | TranslationConfiguration(_,_,DebugOutputOrder) -> theProcess |> OutputForDebug
+            | TranslationConfiguration(_,_,FinalOutputOrder) -> theProcess |> OutputInFinalOrder
 
     with
 
