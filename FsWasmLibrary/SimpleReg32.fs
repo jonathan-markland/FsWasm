@@ -234,19 +234,19 @@ type InstrSimpleReg32 =
     | Store32AtoY   of U32         
 
 
-    /// Fetch byte from WASM linear memory, address A, sign-extend with result in A
+    /// Fetch byte from WASM linear memory, address A+int, sign-extend with result in A
     | Fetch8sFromA  of U32         
 
-    /// Fetch byte from WASM linear memory, address A, zero-extend with result in A
+    /// Fetch byte from WASM linear memory, address A+int, zero-extend with result in A
     | Fetch8uFromA  of U32         
 
-    /// Fetch short from WASM linear memory, address A, sign-extend with result in A
+    /// Fetch short from WASM linear memory, address A+int, sign-extend with result in A
     | Fetch16sFromA of U32         
 
-    /// Fetch short from WASM linear memory, address A, zero-extend with result in A
+    /// Fetch short from WASM linear memory, address A+int, zero-extend with result in A
     | Fetch16uFromA of U32         
 
-    /// Fetch 32-bits from WASM linear memory, address A, into A
+    /// Fetch 32-bits from WASM linear memory, address A+int, into A
     | Fetch32FromA  of U32         
 
 

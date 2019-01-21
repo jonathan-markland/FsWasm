@@ -112,7 +112,8 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             ]
 
         let binaryNonCommutativeOp lhs rhs op = 
-            (TranslateInstr lhs) @ (TranslateInstr rhs)  @ 
+            (TranslateInstr lhs) @ 
+            (TranslateInstr rhs) @ 
             [
                 PopA; // RHS operand
                 PopB; // LHS operand
@@ -123,7 +124,8 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             ]
 
         let shiftOp lhs rhs op = 
-            (TranslateInstr lhs) @ (TranslateInstr rhs)  @ 
+            (TranslateInstr lhs) @ 
+            (TranslateInstr rhs) @ 
             [
                 PopA;  // RHS operand
                 PopB;  // LHS operand
@@ -275,11 +277,10 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             | I32Load16u( {Align=U32(A);  Offset=_}, _) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
             | I32Load(    {Align=U32(A);  Offset=_}, _) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
 
-            | I32Eqz(operand) -> (TranslateInstr operand) @ [ PopA; CmpAZ; PushA; ] 
+            | I32Eqz(operand) -> (TranslateInstr operand) @ [ PopA; CmpAZ; PushA; Barrier ]
 
             | I32Eq(a,b)   -> compareOp a b CmpEqBA 
             | I32Ne(a,b)   -> compareOp a b CmpNeBA
-
             | I32Lts(a,b)  -> compareOp a b CmpLtsBA
             | I32Ltu(a,b)  -> compareOp a b CmpLtuBA
             | I32Gts(a,b)  -> compareOp a b CmpGtsBA
@@ -642,7 +643,7 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
             | CmpLeuBA              -> writeIns "cmp B,A:set <<= A"
             | CmpGesBA              -> writeIns "cmp B,A:set >= A"
             | CmpGeuBA              -> writeIns "cmp B,A:set >>= A"
-            | CmpAZ                 -> writeIns "cmp B,A:set z A"
+            | CmpAZ                 -> writeIns "cmp A,0:set z A"
             | FetchLocA(i)          -> writeLoc ("let A=int[@" + AsmLocalNamePrefix) i "]"  // TODO: Assumes 32-bit target
             | StoreALoc(i)          -> writeLoc ("let int[@" + AsmLocalNamePrefix) i "]=A"  // TODO: Assumes 32-bit target
             | FetchGloA(i)          -> writeIns (sprintf "let A=int[%s]" (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
