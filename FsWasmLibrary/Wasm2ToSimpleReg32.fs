@@ -5,7 +5,7 @@ open PrivateWasm2ToSimpleReg32
 
 
 
-let WriteOutWasm2AsJonathansAssemblerText config (m:Module2) =   // TODO: rename because write out to text???
+let WriteOutWasm2AsJonathansAssemblerText config headingText (m:Module2) =   // TODO: rename because write out to text???
 
     // Set up conceptual output streams     // TODO: This is temporary while developing.  Want caller to pass these in???
 
@@ -15,7 +15,7 @@ let WriteOutWasm2AsJonathansAssemblerText config (m:Module2) =   // TODO: rename
 
     // Start outputting ASM language text:
 
-    writeOutData "// Translation of WASM module"
+    writeOutData ("// Translation of WASM module: " + headingText)
     writeOutData ""
 
     m.Tables |> Array.iteri (fun i t ->

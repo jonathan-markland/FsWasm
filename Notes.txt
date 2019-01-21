@@ -34,8 +34,6 @@ DESIGN ISSUES - decide how to do.
 CODE
 ====
 
-[ ] Raise error on Custom sections being present.
-
 [ ] Need the output to be in the correct order!  Currently we mix three streams.
     Separate program to re-order the output?
 
@@ -134,4 +132,8 @@ ret
 
 [X] 386OS ASM may need more "traditional" labels scheme, to support 
     pointers into a function body (bt_table).
+
+[X] Raise error on Custom sections being present.
+
+[X] Catch exceptions at base, and report the file that was being interpreted at the time.
 

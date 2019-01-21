@@ -10,18 +10,31 @@ open Wasm2ToSimpleReg32ConfigTypes
 [<EntryPoint>]
 let main argv =
 
-    let fileName = "program (5).wasm"  // TODO: pass on command line
-    let fileImage = File.ReadAllBytes fileName
-    let r = new BinaryReader(fileImage)
+    let paramFileName = "program (5).wasm"  // TODO: pass on command line
 
-    let thisModule = r |> Module
-    let unitTestSerialisation = thisModule |> UnitTestSerialiser.ModuleToUnitTestString fileName
+    try
 
-    let translatedToWasm2 = thisModule |> WasmToWasm2.TranslateWasmToWasm2
+        let fileName  = Path.GetFullPath(paramFileName)
+        let fileImage = File.ReadAllBytes fileName
+        let fileDate  = File.GetLastWriteTime(fileName).ToString()
 
-    let config = WriteOutFunctionConfig(WithBarriers, FullyOptimised)
+        let r = new BinaryReader(fileImage)
 
-    let translatedToSimpleReg32 = translatedToWasm2 |> WriteOutWasm2AsJonathansAssemblerText config
+        let thisModule = r |> Module
+        // TODO:  Should this be an optional output?  let unitTestSerialisation = thisModule |> UnitTestSerialiser.ModuleToUnitTestString fileName
+
+        let translatedToWasm2 = thisModule |> WasmToWasm2.TranslateWasmToWasm2
+
+        let config = WriteOutFunctionConfig(WithBarriers, FullyOptimised)
+
+        let headingText = (sprintf "%s (%d bytes) %s" fileName (fileImage.Length) fileDate)
+
+        translatedToWasm2
+            |> WriteOutWasm2AsJonathansAssemblerText config headingText
+
+    with
+
+        | _ as ex -> printf "%s: %s" paramFileName (ex.ToString())
     
     0 // return an integer exit code
  

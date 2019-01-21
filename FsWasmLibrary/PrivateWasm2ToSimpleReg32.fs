@@ -81,7 +81,8 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
     and TranslateInstr w =
 
         let binaryCommutativeOp lhs rhs op = 
-            (TranslateInstr lhs) @ (TranslateInstr rhs)  @ 
+            (TranslateInstr lhs) @ 
+            (TranslateInstr rhs) @ 
             [
                 PopA; // RHS operand
                 PopB; // LHS operand
@@ -90,17 +91,18 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
                 Barrier 
             ]
 
-        let binaryOpWithConst lhs constant getOp =
-            (TranslateInstr lhs)  @ 
+        let binaryOpWithConst lhs getOp =
+            (TranslateInstr lhs) @ 
             [
-                PopA; // LHS operand
+                PopA;       // LHS operand
                 getOp ();   // Result in A
                 PushA; 
                 Barrier 
             ]
 
         let compareOp lhs rhs op = 
-            (TranslateInstr lhs) @ (TranslateInstr rhs)  @ 
+            (TranslateInstr lhs) @ 
+            (TranslateInstr rhs) @ 
             [
                 PopA; // RHS operand
                 PopB; // LHS operand
@@ -218,7 +220,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
                     @ [ Barrier ]
 
             | CallIndirect(funcType, argsList, indexExpr) ->
-                // TODO: runtime validation of funcType
+                // TODO: runtime validation of funcType, in order to be safe per-spec
                 let codeToPushArguments = argsList |> TranslateInstrList
                 let translatedIndex     = indexExpr |> TranslateInstr   // TODO: We could see if this would statically evaluate, and reduce this to a regular call, although the compiler would probably optimise that.
                 codeToPushArguments 
@@ -233,6 +235,10 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
         
             | GetGlobal(G)   -> [ FetchGloA(G); PushA; Barrier ]
             | SetGlobal(G,V) -> (TranslateInstr V) @ [ PopA; StoreAGlo(G);  Barrier ]
+
+                    // TODO: runtime restriction of addressing to the Linear Memory extent.
+                    // (Wouldn't fit my application anyway, since it will not be possible
+                    // to guarantee contiguous extension of the Linear Memory).
 
             | I32Store8(  {Align=_;       Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst8toY( O -+- O2,v); Barrier ]   // TODO: separate routines!!
             | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst16toY(O -+- O2,v); Barrier ]
@@ -283,11 +289,11 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             | I32Ges(a,b)  -> compareOp a b CmpGesBA
             | I32Geu(a,b)  -> compareOp a b CmpGeuBA
 
-            | I32Add (a,I32Const(n)) -> binaryOpWithConst a n (fun () -> AddAN(n))
-            | I32Sub (a,I32Const(n)) -> binaryOpWithConst a n (fun () -> SubAN(n))
-            | I32And (a,I32Const(n)) -> binaryOpWithConst a n (fun () -> AndAN(n))
-            | I32Or  (a,I32Const(n)) -> binaryOpWithConst a n (fun () -> OrAN (n))
-            | I32Xor (a,I32Const(n)) -> binaryOpWithConst a n (fun () -> XorAN(n))
+            | I32Add (a,I32Const(n)) -> binaryOpWithConst a (fun () -> AddAN(n))
+            | I32Sub (a,I32Const(n)) -> binaryOpWithConst a (fun () -> SubAN(n))
+            | I32And (a,I32Const(n)) -> binaryOpWithConst a (fun () -> AndAN(n))
+            | I32Or  (a,I32Const(n)) -> binaryOpWithConst a (fun () -> OrAN (n))
+            | I32Xor (a,I32Const(n)) -> binaryOpWithConst a (fun () -> XorAN(n))
 
             | I32Add (a,b) -> binaryCommutativeOp     a b AddAB
             | I32Sub (a,b) -> binaryNonCommutativeOp  a b SubBA
@@ -307,12 +313,12 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
 
             | _ -> failwith "Cannot translate this instruction to simple 32-bit machine."
 
-    // Do the translation using the nested functions,
-    // and append the return label before we're done.
-    // We return an updated "ModuleTranslationState"
-    // with new new label counter:
+    // Do the translation with the above nested functions:
 
-    (TranslateInstrList ws) @ [ Label(returnLabel) ] , ModuleTranslationState(labelCount)
+    let finalTranslation = (TranslateInstrList ws) @ [ Label(returnLabel) ] 
+    let updatedTranslationState = ModuleTranslationState(labelCount)
+
+    (finalTranslation, updatedTranslationState)
 
 
 
@@ -412,10 +418,10 @@ let WriteOutFunctionLocals writeOut (funcType:FuncType) valTypes =
 
 
 
-let ReturnValueLoadFor (ft:FuncType) =
+let ReturnsSingleValue (ft:FuncType) =
     match ft.ReturnTypes.Length with
-        | 0 -> ""
-        | 1 -> "pop A"
+        | 0 -> false
+        | 1 -> true
         | _ -> failwith "Cannot translate function that returns more than one value"
 
 
@@ -582,9 +588,9 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
         match ins with
             | Barrier               -> writeIns "// ~~~ register barrier ~~~"
             | Breakpoint            -> writeIns "break"
-            | Drop                  -> writeIns "add SP,4"
+            | Drop                  -> writeIns "add SP,4"  // TODO: Assumes 32-bit target
             | Label(l)              -> writeOut ("label " + LabelTextOf l)   // TODO: sort out ASM local label references
-            | ConstA(Const32(n))    -> writeIns ("let A=" + n.ToString())
+            | ConstA(Const32(n))    -> writeIns (sprintf "let A=%d" n)
             | Goto(l)               -> writeIns ("goto " + LabelTextOf l)
             | CallFunc(l)           -> writeIns ("call " + FuncNameOf l)
             | CallTableIndirect     -> writeCallTableIndirect ()
@@ -592,7 +598,7 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
             | BranchANZ(l)          -> writeIns ("cmp A,0:if nz goto " + LabelTextOf l)
             | GotoIndex(t,n,d,_)    -> writeGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
             | PushA                 -> writeIns "push A"
-            | PeekA                 -> writeIns "let A=int [SP]"
+            | PeekA                 -> writeIns "let A=int [SP]"  // TODO: Assumes 32-bit target
             | PopA                  -> writeIns "pop A"
             | PopB                  -> writeIns "pop B"
             | PopC                  -> writeIns "pop C"
@@ -628,8 +634,8 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
             | CmpGesBA              -> writeIns "cmp B,A:set >= A"
             | CmpGeuBA              -> writeIns "cmp B,A:set >>= A"
             | CmpAZ                 -> writeIns "cmp B,A:set z A"
-            | FetchLocA(i)          -> writeLoc ("let A=int[@" + AsmLocalNamePrefix) i "]"
-            | StoreALoc(i)          -> writeLoc ("let int[@" + AsmLocalNamePrefix) i "]=A"
+            | FetchLocA(i)          -> writeLoc ("let A=int[@" + AsmLocalNamePrefix) i "]"  // TODO: Assumes 32-bit target
+            | StoreALoc(i)          -> writeLoc ("let int[@" + AsmLocalNamePrefix) i "]=A"  // TODO: Assumes 32-bit target
             | FetchGloA(i)          -> writeIns (sprintf "let A=int[%s]" (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
             | StoreAGlo(i)          -> writeIns (sprintf "let int[%s]=A" (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
             | StoreConst8toA(ofs,I32(v))   -> writeU32I32 "let byte[A" ofs "]=" v  
@@ -662,7 +668,9 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
 
     // Handle the function's return (may need pop into A):
 
-    writeIns (ReturnValueLoadFor thisFuncType)
+    match thisFuncType |> ReturnsSingleValue with
+        | true  -> writeIns "pop A"
+        | false -> ()
 
     
 
@@ -698,7 +706,6 @@ let WriteOutFunction writeOut thisFuncType funcInstructions config =   // TODO: 
 
     WriteOutInstructionsToText writeOut desiredInstructions thisFuncType
     writeOut (ReturnCommandFor thisFuncType)
-    writeOut ""
 
 
 
@@ -707,10 +714,15 @@ let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2
     let funcInstructions, updatedTranslationState = 
         f.Body |> TranslateInstructions m.Funcs translationState
 
-    writeOut (sprintf "procedure %s%d%s" AsmInternalFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType))
-    WriteOutFunctionLocals writeOut f.FuncType f.Locals
-    WriteOutFunction writeOut f.FuncType funcInstructions config
-    WriteOutBranchTables writeOutTables funcInstructions
+    let procedureCommand = (sprintf "procedure %s%d%s" AsmInternalFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType))
+
+    try
+        writeOut procedureCommand
+        WriteOutFunctionLocals writeOut f.FuncType f.Locals
+        WriteOutFunction writeOut f.FuncType funcInstructions config
+        WriteOutBranchTables writeOutTables funcInstructions
+    with
+        | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
 
     updatedTranslationState
 
