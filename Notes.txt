@@ -7,6 +7,7 @@ INVESTIGATION
 =============
 
 [ ] Need a GCC -> WASM toolchain setting up on the Linux box.
+    Test this system.
 
 
 
@@ -26,8 +27,9 @@ DESIGN ISSUES - decide how to do.
 [ ] Idea: Output -- annotate code with commentary eg:  // Prepare wasm_fn1 / Param1:
 	
 [ ] Look at whether to insert extra line-gaps in the output ASM
-	
-	
+
+[ ] A test framework (integration level) is needed.	
+
 	
 	
 
@@ -126,7 +128,7 @@ ret
 [X] Need to load the Y register to point to the linear memory.
 [X] Reload the Y register to point to the linear memory on return from a call to an import.
 
-[X] Need to load the stack pointer at linear memory offset 4.
+[X] REVERTED THIS -->  Need to load the stack pointer at linear memory offset 4.
 
 [X] Rename "data label24" as "data wasm_brtable_24" ?
 

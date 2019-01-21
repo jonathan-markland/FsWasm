@@ -469,8 +469,11 @@ let WriteOutLoadLinearMemoryRegister writeOutCode =
 let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory2[]) =
 
     writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
-    writeOutCode (sprintf "    // Caller must pass stack pointer (relative to %s%d) in A" AsmMemPrefix 0)
-    writeOutCode (sprintf "    let uint [%s%d+4]=A // Initialise WasmFiddle stack pointer at address offset 4" AsmMemPrefix 0)
+    
+    // NO!!  The following is absolutely wrong, as this translator
+    //       should not pretend to know who its input generator is:
+    // writeOutCode (sprintf "    // Caller must pass stack pointer (relative to %s%d) in A" AsmMemPrefix 0)
+    // writeOutCode (sprintf "    let uint [%s%d+4]=A // Initialise WasmFiddle stack pointer at address offset 4" AsmMemPrefix 0)
 
     let writeOutDataCopyCommand i (thisMem:InternalMemory2Record) =
         if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
