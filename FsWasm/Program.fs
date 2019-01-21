@@ -26,7 +26,7 @@ let main argv =
 
         let translatedToWasm2 = thisModule |> WasmToWasm2.TranslateWasmToWasm2
 
-        let config = TranslationConfiguration(WithBarriers, FullyOptimised, FinalOutputOrder)  // TODO: Hard-code config!!
+        let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, FinalOutputOrder)  // TODO: Hard-code config!!
 
         let headingText = (sprintf "%s (%d bytes) %s" fileName (fileImage.Length) fileDate)
 

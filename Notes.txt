@@ -37,6 +37,10 @@ DESIGN ISSUES - decide how to do.
 CODE
 ====
 
+[ ] A procedure with local variables must end with "endproc".
+[ ] wasm_table0 : must omit if empty
+[ ] wasm_table0 : bad syntax with "int" positioning!!
+
 ^^^ MUST RELEASE ^^^
 
 [ ] Could we word-align the data sections, and copy them in word-at-a-time rather 
