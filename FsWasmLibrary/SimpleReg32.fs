@@ -12,6 +12,9 @@ type CONST32 = Const32 of int
 /// A code label
 type LABELNAME = LabelName of string
 
+/// One of the general registers
+type REG = A | B | Y
+
 
 
 /// A 32-bit register machine instruction
@@ -32,8 +35,8 @@ type InstrSimpleReg32 =
     /// Emit local label
     | Label       of LABELNAME    
 
-    /// Load constant into reg A
-    | ConstA      of CONST32      
+    /// Load constant into given register
+    | Const       of REG * CONST32      
 
     /// Go to given label
     | Goto        of LABELNAME    
@@ -185,17 +188,17 @@ type InstrSimpleReg32 =
     | CmpAZ                        
 
 
-    /// Fetch local variable value into A
-    | FetchLocA     of LocalIdx    
+    /// Fetch local variable value into given register
+    | FetchLoc      of REG * LocalIdx    
     
-    /// Store A to local variable
-    | StoreALoc     of LocalIdx    
+    /// Store given register to local variable
+    | StoreLoc      of REG * LocalIdx    
     
-    /// Fetch WASM global variable value into A
-    | FetchGloA     of GlobalIdx   
+    /// Fetch WASM global variable value into given regiser
+    | FetchGlo      of REG * GlobalIdx   
 
-    /// Store A to WASM global variable
-    | StoreAGlo     of GlobalIdx   
+    /// Store given regiser to WASM global variable
+    | StoreGlo      of REG * GlobalIdx   
 
     /// Store 8-bit constant I32 to WASM linear memory, address given by reg A+U32
     | StoreConst8toA    of U32 * I32   

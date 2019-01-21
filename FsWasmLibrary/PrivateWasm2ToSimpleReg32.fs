@@ -9,6 +9,12 @@ open OptimiseSimpleReg32
 open System.Text
 
 
+let RegNameOf = function
+        | A -> "A"
+        | B -> "B"
+        | Y -> "Y"
+
+
 
 let (-+-) a b =
     U32(match a with U32(a2) -> match b with I32(b2) -> a2 + uint32 b2)
@@ -229,14 +235,14 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
                     @ translatedIndex 
                     @ [ PopA; CallTableIndirect; Barrier ]
 
-            | I32Const(I32(C)) -> [ ConstA(Const32(C)); PushA; Barrier ]
+            | I32Const(I32(C)) -> [ Const(A, Const32(C)); PushA; Barrier ]
 
-            | GetLocal(L)   -> [ FetchLocA(L); PushA; Barrier ]
-            | SetLocal(L,V) -> (TranslateInstr V) @ [ PopA;  StoreALoc(L); Barrier ]
-            | TeeLocal(L,V) -> (TranslateInstr V) @ [ PeekA; StoreALoc(L); Barrier ]
+            | GetLocal(L)   -> [ FetchLoc(A,L); PushA; Barrier ]
+            | SetLocal(L,V) -> (TranslateInstr V) @ [ PopA;  StoreLoc(A,L); Barrier ]
+            | TeeLocal(L,V) -> (TranslateInstr V) @ [ PeekA; StoreLoc(A,L); Barrier ]
         
-            | GetGlobal(G)   -> [ FetchGloA(G); PushA; Barrier ]
-            | SetGlobal(G,V) -> (TranslateInstr V) @ [ PopA; StoreAGlo(G);  Barrier ]
+            | GetGlobal(G)   -> [ FetchGlo(A,G); PushA; Barrier ]
+            | SetGlobal(G,V) -> (TranslateInstr V) @ [ PopA; StoreGlo(A,G);  Barrier ]
 
                     // TODO: runtime restriction of addressing to the Linear Memory extent.
                     // (Wouldn't fit my application anyway, since it will not be possible
@@ -273,9 +279,9 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             | I32Load16u( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch16uFromA(O); PushA; Barrier ]
             | I32Load(    {Align=U32(2u); Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch32FromA(O);  PushA; Barrier ]
             
-            | I32Load16s( {Align=U32(A);  Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
-            | I32Load16u( {Align=U32(A);  Offset=_}, _) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
-            | I32Load(    {Align=U32(A);  Offset=_}, _) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
+            | I32Load16s( {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
+            | I32Load16u( {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
+            | I32Load(    {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
 
             | I32Eqz(operand) -> (TranslateInstr operand) @ [ PopA; CmpAZ; PushA; Barrier ]
 
@@ -366,6 +372,9 @@ let FuncIdxAsUint32   i = match i with FuncIdx(U32(i)) -> i
 
 let LabelTextOf l = match l with LabelName(n) -> n
 let FuncNameOf  l = match l with LabelName(n) -> n   // TODO: type usage isn't right: no distinction
+
+let LocalIdxNameString localIdx = 
+    sprintf "%s%d" AsmLocalNamePrefix (LocalIdxAsUint32 localIdx)
 
 let GlobalIdxNameString globalIdx = 
     sprintf "%s%d" AsmGlobalNamePrefix (GlobalIdxAsUint32 globalIdx)
@@ -600,7 +609,7 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
             | Breakpoint            -> writeIns "break"
             | Drop                  -> writeIns "add SP,4"  // TODO: Assumes 32-bit target
             | Label(l)              -> writeOut ("label " + LabelTextOf l)   // TODO: sort out ASM local label references
-            | ConstA(Const32(n))    -> writeIns (sprintf "let A=%d" n)
+            | Const(r,Const32(n))   -> writeIns (sprintf "let %s=%d" (RegNameOf r) n)
             | Goto(l)               -> writeIns ("goto " + LabelTextOf l)
             | CallFunc(l)           -> writeIns ("call " + FuncNameOf l)
             | CallTableIndirect     -> writeCallTableIndirect ()
@@ -644,10 +653,10 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
             | CmpGesBA              -> writeIns "cmp B,A:set >= A"
             | CmpGeuBA              -> writeIns "cmp B,A:set >>= A"
             | CmpAZ                 -> writeIns "cmp A,0:set z A"
-            | FetchLocA(i)          -> writeLoc ("let A=int[@" + AsmLocalNamePrefix) i "]"  // TODO: Assumes 32-bit target
-            | StoreALoc(i)          -> writeLoc ("let int[@" + AsmLocalNamePrefix) i "]=A"  // TODO: Assumes 32-bit target
-            | FetchGloA(i)          -> writeIns (sprintf "let A=int[%s]" (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
-            | StoreAGlo(i)          -> writeIns (sprintf "let int[%s]=A" (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
+            | FetchLoc(r,i)         -> writeIns (sprintf "let %s=int[@%s]" (RegNameOf r) (LocalIdxNameString i))  // TODO: Assumes 32-bit target
+            | StoreLoc(r,i)         -> writeIns (sprintf "let int[@%s]=%s" (LocalIdxNameString i) (RegNameOf r))  // TODO: Assumes 32-bit target
+            | FetchGlo(r,i)         -> writeIns (sprintf "let %s=int[%s]" (RegNameOf r) (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
+            | StoreGlo(r,i)         -> writeIns (sprintf "let int[%s]=%s" (GlobalIdxNameString i) (RegNameOf r))  // TODO: Eventually use the type rather than "int"
             | StoreConst8toA(ofs,I32(v))   -> writeU32I32 "let byte[A" ofs "]=" v  
             | StoreConst16toA(ofs,I32(v))  -> writeU32I32 "let ushort[A" ofs "]=" v
             | StoreConst32toA(ofs,I32(v))  -> writeU32I32 "let uint[A" ofs "]=" v  

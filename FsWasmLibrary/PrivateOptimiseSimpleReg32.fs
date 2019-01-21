@@ -36,28 +36,38 @@ let ReplaceAll patternLength patternMatcher getReplacementRegarding (sourceArray
 let IsPushA   i = match i with | PushA   -> true | _ -> false
 let IsPeekA   i = match i with | PeekA   -> true | _ -> false
 let IsPopA    i = match i with | PopA    -> true | _ -> false
+let IsPopB    i = match i with | PopB    -> true | _ -> false
 let IsBarrier i = match i with | Barrier -> true | _ -> false
 let IsDrop    i = match i with | Drop    -> true | _ -> false
 
-let IsRegisterPreserving i = 
-    match i with 
-        | StoreALoc(_)
-        | Store16AtoB(_)
-        | StoreAGlo(_)
-        | StoreConst8toA(_)
-        | StoreConst16toA(_)
-        | StoreConst32toA(_)
-        | StoreConst8toY(_)
-        | StoreConst16toY(_)
-        | StoreConst32toY(_)
-        | Store8AtoB  (_)
-        | Store16AtoB (_)
-        | Store32AtoB (_)
-        | Store8AtoY  (_)
-        | Store16AtoY (_)
-        | Store32AtoY (_)
-            -> true
-        | _ -> false
+
+let IsRegisterPreserving = function
+    | StoreLoc(_)
+    | Store16AtoB(_)
+    | StoreGlo(_)
+    | StoreConst8toA(_)
+    | StoreConst16toA(_)
+    | StoreConst32toA(_)
+    | StoreConst8toY(_)
+    | StoreConst16toY(_)
+    | StoreConst32toY(_)
+    | Store8AtoB  (_)
+    | Store16AtoB (_)
+    | Store32AtoB (_)
+    | Store8AtoY  (_)
+    | Store16AtoY (_)
+    | Store32AtoY (_)
+        -> true
+    | _ -> false
+
+
+let IsAssignToA = function
+    | Const(A,_)
+    | FetchLoc(A,_)
+    | FetchGlo(A,_) 
+    // | TODO: every other fetch to A
+        -> true
+    | _ -> false
 
 
 
@@ -78,12 +88,16 @@ let WherePushPopAroundPreserving i (a:InstrSimpleReg32[]) =
     && IsBarrier a.[i+2] 
     && IsPopA a.[i+3]
 
+let WherePushPopAroundPreservingRequiringRename i (a:InstrSimpleReg32[]) = 
 
+    //    let A=int[@loc4]
+    //    push A
+    //    // ~~~ register barrier ~~~
+    //    let A=int[@loc1]
+    //    pop B
 
-
-//    let A=int[@loc4]
-//    push A
-//    // ~~~ register barrier ~~~
-//    let A=int[@loc1]
-//    pop B
-//    add A,B
+    IsAssignToA a.[i]
+    && IsPushA a.[i+1]
+    && IsBarrier a.[i+2] 
+    && IsAssignToA a.[i+3]
+    && IsPopB a.[i+4]
