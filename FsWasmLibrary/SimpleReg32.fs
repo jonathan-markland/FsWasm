@@ -13,7 +13,7 @@ type CONST32 = Const32 of int
 type LABELNAME = LabelName of string
 
 /// One of the general registers
-type REG = A | B | Y
+type REG = A | B | C | Y
 
 
 
@@ -58,41 +58,22 @@ type InstrSimpleReg32 =
     | GotoIndex   of tableLabel:LABELNAME * tableLength:int * defaultLabel:LABELNAME * lookupTable:LABELNAME array
 
 
-    /// Push reg A onto stack
-    | PushA       
+    /// Push reg onto stack
+    | Push of REG
+    
+    /// Pop top of stack into reg
+    | Pop of REG
     
     /// Load top-of-stack to A, without any stack adjustment
     | PeekA       
     
-    /// Pop top of stack into reg A
-    | PopA        
-    
-    /// Pop top of stack into reg B
-    | PopB        
-    
-    /// Pop top of stack into reg C
-    | PopC        
+
+    /// Copy RHS reg value into LHS reg
+    | Let of REG * REG
 
 
-    /// Copy reg B value into reg A
-    | LetAB       
-
-    /// Copy reg C value into reg A
-    | LetAC       
-
-    /// Copy reg A value into reg C
-    | LetCA
-
-
-    /// Calculate A+Y, result in A.  Used for relocation of the Linear address space.
-    | AddAY
-    
-    /// Calculate B+Y, result in B.  Used for relocation of the Linear address space.
-    | AddBY
-
-
-    /// Calculate A+B, result in A
-    | AddAB
+    /// Calculate sum of two registers, result in LHS
+    | Add of REG * REG
     
     /// Calculate A+n, result in A
     | AddAN of I32

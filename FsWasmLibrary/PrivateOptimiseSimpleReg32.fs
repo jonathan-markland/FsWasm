@@ -33,10 +33,10 @@ let ReplaceAll patternLength patternMatcher getReplacementRegarding (sourceArray
 
 
 
-let IsPushA   i = match i with | PushA   -> true | _ -> false
-let IsPeekA   i = match i with | PeekA   -> true | _ -> false
-let IsPopA    i = match i with | PopA    -> true | _ -> false
-let IsPopB    i = match i with | PopB    -> true | _ -> false
+let IsPushA   i = match i with | Push(A)   -> true | _ -> false
+let IsPeekA   i = match i with | PeekA     -> true | _ -> false
+let IsPopA    i = match i with | Pop(A)    -> true | _ -> false
+let IsPopB    i = match i with | Pop(B)    -> true | _ -> false
 let IsBarrier i = match i with | Barrier -> true | _ -> false
 let IsDrop    i = match i with | Drop    -> true | _ -> false
 
