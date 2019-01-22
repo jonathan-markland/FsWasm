@@ -471,12 +471,30 @@ let WasmMemoryBlockMultiplier = 65536u
 
 
 
-let WriteOutLoadLinearMemoryRegister writeOutCode =
+let TranslateThunkIn () =
     // The translated code requires the Y register to
     // point to the base of the linear memory region.
     // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
-    writeOutCode (sprintf "let Y=%s%d" AsmMemPrefix 0)
+    [ sprintf "let Y=%s%d" AsmMemPrefix 0 ]
     
+
+let TranslateGotoIndex tableLabel numMax defaultLabel =
+    [
+        // A is already the index to branch to
+        sprintf "cmp A,%d:if >>= goto %s" numMax (LabelTextOf defaultLabel) ;
+        "shl A,2" ;  // TODO: assumes 32-bit target
+        sprintf "goto [A+%s]" (LabelTextOf tableLabel)
+    ]
+
+
+let TranslateCallTableIndirect () =
+    // TODO: We really need to emit some code to validate the signatures.
+    // A is already the index to call.
+    // TODO: We need to validate index A lies within wasm table [0]
+    [
+        "shl A,2" ;  // TODO: assumes 32-bit target
+        (sprintf "goto [A+%s0]" AsmTableNamePrefix)  // WASM 1.0 always looks in table #0
+    ]
 
 
 
@@ -508,7 +526,7 @@ let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory2[]) =
 
     let writeOutIns s = writeOutCode ("    " + s)
 
-    WriteOutLoadLinearMemoryRegister writeOutIns
+    TranslateThunkIn () |> List.iter writeOutIns
     writeOutCode "ret"
 
 
@@ -542,12 +560,20 @@ let WriteOutHexDump writeLine byteArray =
 let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemory2Record) =
 
     let linearMemorySize = 
+
         match thisMem with 
             | { MemoryType={ MemoryLimits=lims } } -> 
+
             match lims with 
-                | { LimitMin=U32(0u); LimitMax=None; }      -> failwith "Cannot translate module with Mem that is size 0"   // At least we expect to initalise GCC's stack pointer.
-                | { LimitMin=U32(memSize); LimitMax=None; } -> memSize * WasmMemoryBlockMultiplier
-                | { LimitMin=_; LimitMax=Some(_); }         -> failwith "Cannot translate module with Mem that has max size limit"
+
+                | { LimitMin = U32(0u); LimitMax = None; }      
+                    -> failwith "Cannot translate module with Mem that is size 0"   
+
+                | { LimitMin = U32(memSize); LimitMax = None; } 
+                    -> memSize * WasmMemoryBlockMultiplier
+
+                | { LimitMin = _; LimitMax = Some(_); }
+                    -> failwith "Cannot translate module with Mem that has max size limit"
 
     writeOutVar "global"
     writeOutVar "    align ptr"
@@ -577,98 +603,95 @@ let WriteOutWasmGlobal writeOut i (m:Module2) (g:InternalGlobal2Record) =
 
 
 
+let OfsIfNeeded u = 
+    match u with
+        | U32(0u) -> ""   // indexed addressing not needed
+        | U32(n)  -> ("+" + n.ToString())   // indexed addressing
+
+
+let TranslateREGU32 s1 r u s2 = 
+    [ sprintf "%s%s%s%s" s1 (RegNameOf r) (OfsIfNeeded u) s2 ]
+
+
+let TranslateREGU32I32 s1 r u s2 n = 
+    [ sprintf "%s%s%s%s%d" s1 (RegNameOf r) (OfsIfNeeded u) s2 n ]
+
+
+
+let TranslateInstructionToAsmSequence subTree =
+
+    // These translations can assume a 32-bit target for now.
+
+    match subTree with
+        | Barrier               -> [ "// ~~~ register barrier ~~~" ]
+        | Breakpoint            -> [ "break" ]
+        | Drop                  -> [ "add SP,4" ]  // TODO: Assumes 32-bit target
+        | Label(l)              -> [ "label " + (LabelTextOf l) ]   // TODO: sort out ASM local label references
+        | Const(r,Const32(n))   -> [ sprintf "let %s=%d" (RegNameOf r) n ]
+        | Goto(l)               -> [ "goto " + LabelTextOf l ]
+        | CallFunc(l)           -> [ "call " + FuncNameOf l ]
+        | CallTableIndirect     -> TranslateCallTableIndirect ()
+        | BranchAZ(l)           -> [ "cmp A,0:if z goto " + LabelTextOf l ]
+        | BranchANZ(l)          -> [ "cmp A,0:if nz goto " + LabelTextOf l ]
+        | GotoIndex(t,n,d,_)    -> TranslateGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
+        | Push(r)               -> [ sprintf "push %s" (RegNameOf r) ]
+        | Pop(r)                -> [ sprintf "pop %s" (RegNameOf r) ]
+        | PeekA                 -> [ "let A=int [SP]" ]  // TODO: Assumes 32-bit target
+        | Let(r1,r2)            -> [ sprintf "let %s=%s" (RegNameOf r1) (RegNameOf r2) ]
+        | AddAN(I32(n))         -> [ sprintf "add A,%d" n ]
+        | SubAN(I32(n))         -> [ sprintf "sub A,%d" n ]
+        | AndAN(I32(n))         -> [ sprintf "and A,%d" n ]
+        | OrAN(I32(n))          -> [ sprintf "or A,%d"  n ]
+        | XorAN(I32(n))         -> [ sprintf "xor A,%d" n ]
+        | Add(r1,r2)            -> [ sprintf "add %s,%s" (RegNameOf r1) (RegNameOf r2) ]  // commutative
+        | SubBA                 -> [ "sub B,A" ]
+        | MulAB                 -> [ "mul A,B" ]  // commutative
+        | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have division or remainder instructions"
+        | AndAB                 -> [ "and A,B" ]  // commutative
+        | OrAB                  -> [ "or A,B" ]   // commutative
+        | XorAB                 -> [ "xor A,B" ]  // commutative
+        | ShlBC                 -> [ "shl B,C" ]
+        | ShrsBC                -> [ "sar B,C" ]
+        | ShruBC                -> [ "shr B,C" ]
+        | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
+        | CmpEqBA               -> [ "cmp B,A:set z A" ]
+        | CmpNeBA               -> [ "cmp B,A:set nz A" ]
+        | CmpLtsBA              -> [ "cmp B,A:set < A" ]
+        | CmpLtuBA              -> [ "cmp B,A:set << A" ]
+        | CmpGtsBA              -> [ "cmp B,A:set > A" ]
+        | CmpGtuBA              -> [ "cmp B,A:set >> A" ]
+        | CmpLesBA              -> [ "cmp B,A:set <= A" ]
+        | CmpLeuBA              -> [ "cmp B,A:set <<= A" ]
+        | CmpGesBA              -> [ "cmp B,A:set >= A" ]
+        | CmpGeuBA              -> [ "cmp B,A:set >>= A" ]
+        | CmpAZ                 -> [ "cmp A,0:set z A" ]
+        | FetchLoc(r,i)         -> [ sprintf "let %s=int[@%s]" (RegNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
+        | StoreLoc(r,i)         -> [ sprintf "let int[@%s]=%s" (LocalIdxNameString i) (RegNameOf r) ]  // TODO: Assumes 32-bit target
+        | FetchGlo(r,i)         -> [ sprintf "let %s=int[%s]" (RegNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
+        | StoreGlo(r,i)         -> [ sprintf "let int[%s]=%s" (GlobalIdxNameString i) (RegNameOf r) ]  // TODO: Eventually use the type rather than "int"
+        | StoreConst8(r,ofs,I32(v))   -> TranslateREGU32I32 "let byte[" r ofs "]=" v
+        | StoreConst16(r,ofs,I32(v))  -> TranslateREGU32I32 "let ushort[" r ofs "]=" v
+        | StoreConst32(r,ofs,I32(v))  -> TranslateREGU32I32 "let uint[" r ofs "]=" v  
+        | Store8A(r,ofs)       -> TranslateREGU32 "let byte[" r ofs "]=A"  
+        | Store16A(r,ofs)      -> TranslateREGU32 "let ushort[" r ofs "]=A"
+        | Store32A(r,ofs)      -> TranslateREGU32 "let uint[" r ofs "]=A"  
+        | Fetch8s(r,ofs)       -> TranslateREGU32 "let A=sbyte[" r ofs "]" 
+        | Fetch8u(r,ofs)       -> TranslateREGU32 "let A=byte[" r ofs "]"  
+        | Fetch16s(r,ofs)      -> TranslateREGU32 "let A=short[" r ofs "]" 
+        | Fetch16u(r,ofs)      -> TranslateREGU32 "let A=ushort[" r ofs "]"
+        | Fetch32(r,ofs)       -> TranslateREGU32 "let A=uint[" r ofs "]"  
+        | ThunkIn              -> TranslateThunkIn ()
+
+
+
 
 let WriteOutInstructionsToText writeOut instrs thisFuncType =
 
     let writeIns s = writeOut ("    " + s)
 
-    let writeOfs u = 
-        match u with
-            | U32(0u) -> ""   // indexed addressing not needed
-            | U32(n)  -> ("+" + n.ToString())   // indexed addressing
-
-    let writeREGU32    s1 r u s2   = writeIns (sprintf "%s%s%s%s"   s1 (RegNameOf r) (writeOfs u) s2)
-    let writeREGU32I32 s1 r u s2 n = writeIns (sprintf "%s%s%s%s%d" s1 (RegNameOf r) (writeOfs u) s2 n)
-    let writeLoc       s1 i s2     = writeIns (sprintf "%s%d%s"     s1 (LocalIdxAsUint32 i) s2)
-
-    let writeGotoIndex tableLabel numMax defaultLabel =
-        // A is already the index to branch to
-        writeIns (sprintf "cmp A,%d:if >>= goto %s" numMax (LabelTextOf defaultLabel))
-        writeIns "shl A,2"  // TODO: assumes 32-bit target
-        writeIns (sprintf "goto [A+%s]" (LabelTextOf tableLabel))
-
-    let writeCallTableIndirect () =
-        // TODO: We really need to emit some code to validate the signatures.
-        // A is already the index to call.
-        // TODO: We need to validate index A lies within wasm table [0]
-        writeIns "shl A,2"  // TODO: assumes 32-bit target
-        writeIns (sprintf "goto [A+%s0]" AsmTableNamePrefix)  // WASM 1.0 always looks in table #0
-
-    let instructionToText ins =  // These translations can assume a 32-bit target for now.
-
-        match ins with
-            | Barrier               -> writeIns "// ~~~ register barrier ~~~"
-            | Breakpoint            -> writeIns "break"
-            | Drop                  -> writeIns "add SP,4"  // TODO: Assumes 32-bit target
-            | Label(l)              -> writeOut ("label " + LabelTextOf l)   // TODO: sort out ASM local label references
-            | Const(r,Const32(n))   -> writeIns (sprintf "let %s=%d" (RegNameOf r) n)
-            | Goto(l)               -> writeIns ("goto " + LabelTextOf l)
-            | CallFunc(l)           -> writeIns ("call " + FuncNameOf l)
-            | CallTableIndirect     -> writeCallTableIndirect ()
-            | BranchAZ(l)           -> writeIns ("cmp A,0:if z goto " + LabelTextOf l)
-            | BranchANZ(l)          -> writeIns ("cmp A,0:if nz goto " + LabelTextOf l)
-            | GotoIndex(t,n,d,_)    -> writeGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
-            | Push(r)               -> writeIns (sprintf "push %s" (RegNameOf r))
-            | Pop(r)                -> writeIns (sprintf "pop %s" (RegNameOf r))
-            | PeekA                 -> writeIns "let A=int [SP]"  // TODO: Assumes 32-bit target
-            | Let(r1,r2)            -> writeIns (sprintf "let %s=%s" (RegNameOf r1) (RegNameOf r2))
-            | AddAN(I32(n))         -> writeIns (sprintf "add A,%d" n)
-            | SubAN(I32(n))         -> writeIns (sprintf "sub A,%d" n)
-            | AndAN(I32(n))         -> writeIns (sprintf "and A,%d" n)
-            | OrAN(I32(n))          -> writeIns (sprintf "or A,%d"  n)
-            | XorAN(I32(n))         -> writeIns (sprintf "xor A,%d" n)
-            | Add(r1,r2)            -> writeIns (sprintf "add %s,%s" (RegNameOf r1) (RegNameOf r2))  // commutative
-            | SubBA                 -> writeIns "sub B,A"
-            | MulAB                 -> writeIns "mul A,B"  // commutative
-            | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have a division instruction"
-            | AndAB                 -> writeIns "and A,B"  // commutative
-            | OrAB                  -> writeIns "or A,B"   // commutative
-            | XorAB                 -> writeIns "xor A,B"  // commutative
-            | ShlBC                 -> writeIns "shl B,C"
-            | ShrsBC                -> writeIns "sar B,C"
-            | ShruBC                -> writeIns "shr B,C"
-            | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
-            | CmpEqBA               -> writeIns "cmp B,A:set z A"
-            | CmpNeBA               -> writeIns "cmp B,A:set nz A"
-            | CmpLtsBA              -> writeIns "cmp B,A:set < A"
-            | CmpLtuBA              -> writeIns "cmp B,A:set << A"
-            | CmpGtsBA              -> writeIns "cmp B,A:set > A"
-            | CmpGtuBA              -> writeIns "cmp B,A:set >> A"
-            | CmpLesBA              -> writeIns "cmp B,A:set <= A"
-            | CmpLeuBA              -> writeIns "cmp B,A:set <<= A"
-            | CmpGesBA              -> writeIns "cmp B,A:set >= A"
-            | CmpGeuBA              -> writeIns "cmp B,A:set >>= A"
-            | CmpAZ                 -> writeIns "cmp A,0:set z A"
-            | FetchLoc(r,i)         -> writeIns (sprintf "let %s=int[@%s]" (RegNameOf r) (LocalIdxNameString i))  // TODO: Assumes 32-bit target
-            | StoreLoc(r,i)         -> writeIns (sprintf "let int[@%s]=%s" (LocalIdxNameString i) (RegNameOf r))  // TODO: Assumes 32-bit target
-            | FetchGlo(r,i)         -> writeIns (sprintf "let %s=int[%s]" (RegNameOf r) (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
-            | StoreGlo(r,i)         -> writeIns (sprintf "let int[%s]=%s" (GlobalIdxNameString i) (RegNameOf r))  // TODO: Eventually use the type rather than "int"
-            | StoreConst8(r,ofs,I32(v))   -> writeREGU32I32 "let byte[" r ofs "]=" v  
-            | StoreConst16(r,ofs,I32(v))  -> writeREGU32I32 "let ushort[" r ofs "]=" v
-            | StoreConst32(r,ofs,I32(v))  -> writeREGU32I32 "let uint[" r ofs "]=" v  
-            | Store8A(r,ofs)       -> writeREGU32 "let byte[" r ofs "]=A"
-            | Store16A(r,ofs)      -> writeREGU32 "let ushort[" r ofs "]=A"
-            | Store32A(r,ofs)      -> writeREGU32 "let uint[" r ofs "]=A"
-            | Fetch8s(r,ofs)       -> writeREGU32 "let A=sbyte[" r ofs "]"
-            | Fetch8u(r,ofs)       -> writeREGU32 "let A=byte[" r ofs "]"
-            | Fetch16s(r,ofs)      -> writeREGU32 "let A=short[" r ofs "]"
-            | Fetch16u(r,ofs)      -> writeREGU32 "let A=ushort[" r ofs "]"
-            | Fetch32(r,ofs)       -> writeREGU32 "let A=uint[" r ofs "]"
-            | ThunkIn              -> WriteOutLoadLinearMemoryRegister writeIns
-
     // Kick off the whole thing here:
 
-    instrs |> List.iter instructionToText
+    instrs |> List.iter (fun i -> TranslateInstructionToAsmSequence i |> List.iter writeIns)
 
     // Handle the function's return (may need pop into A):
 
