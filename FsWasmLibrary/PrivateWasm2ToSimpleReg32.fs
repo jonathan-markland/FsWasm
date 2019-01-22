@@ -249,37 +249,38 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
                     // (Wouldn't fit my application anyway, since it will not be possible
                     // to guarantee contiguous extension of the Linear Memory).
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst8toY( O -+- O2,v); Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst16toY(O -+- O2,v); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst32toY(O -+- O2,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst8( Y, O -+- O2,v); Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst16(Y, O -+- O2,v); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst32(Y, O -+- O2,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ Pop(A); Add(A,Y); StoreConst8toA(O,v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ Pop(A); Add(A,Y); StoreConst16toA(O,v); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ Pop(A); Add(A,Y); StoreConst32toA(O,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ Pop(A); Add(A,Y); StoreConst8(A,O,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ Pop(A); Add(A,Y); StoreConst16(A,O,v); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ Pop(A); Add(A,Y); StoreConst32(A,O,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ Pop(A); Store8AtoY( O -+- O2); Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ Pop(A); Store16AtoY(O -+- O2); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ Pop(A); Store32AtoY(O -+- O2); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ Pop(A); Store8A(Y,O -+- O2); Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ Pop(A); Store16A(Y,O -+- O2); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ Pop(A); Store32A(Y,O -+- O2); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ Pop(A); Pop(B); Add(B,Y); Store8AtoB(O);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ Pop(A); Pop(B); Add(B,Y); Store16AtoB(O); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ Pop(A); Pop(B); Add(B,Y); Store32AtoB(O); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ Pop(A); Pop(B); Add(B,Y); Store8A(B,O);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ Pop(A); Pop(B); Add(B,Y); Store16A(B,O); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ Pop(A); Pop(B); Add(B,Y); Store32A(B,O); Barrier ]
 
             | I32Store16( {Align=U32(_);  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32(_);  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
-            | I32Load8s(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8sFromY( O -+- O2); Push(A); Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8uFromY( O -+- O2); Push(A); Barrier ]
-            | I32Load16s( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16sFromY(O -+- O2); Push(A); Barrier ]
-            | I32Load16u( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16uFromY(O -+- O2); Push(A); Barrier ]
-            | I32Load(    {Align=U32(2u); Offset=O}, I32Const(O2)) -> [ Fetch32FromY( O -+- O2); Push(A); Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8s( Y, O -+- O2); Push(A); Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8u( Y, O -+- O2); Push(A); Barrier ]
+            | I32Load16s( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16s(Y, O -+- O2); Push(A); Barrier ]
+            | I32Load16u( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16u(Y, O -+- O2); Push(A); Barrier ]
+            | I32Load(    {Align=U32(2u); Offset=O}, I32Const(O2)) -> [ Fetch32( Y, O -+- O2); Push(A); Barrier ]
 
-            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch8sFromA(O);  Push(A); Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch8uFromA(O);  Push(A); Barrier ]
-            | I32Load16s( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch16sFromA(O); Push(A); Barrier ]
-            | I32Load16u( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch16uFromA(O); Push(A); Barrier ]
-            | I32Load(    {Align=U32(2u); Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch32FromA(O);  Push(A); Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch8s(A,O);  Push(A); Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch8u(A,O);  Push(A); Barrier ]
+            | I32Load16s( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch16s(A,O); Push(A); Barrier ]
+            | I32Load16u( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch16u(A,O); Push(A); Barrier ]
+            | I32Load(    {Align=U32(2u); Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch32(A,O);  Push(A); Barrier ]
             
+            // TODO: Could capitulate given X86 target, but make that configurable:
             | I32Load16s( {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
             | I32Load16u( {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
             | I32Load(    {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
@@ -586,9 +587,9 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
             | U32(0u) -> ""   // indexed addressing not needed
             | U32(n)  -> ("+" + n.ToString())   // indexed addressing
 
-    let writeU32    s1 u s2   = writeIns (sprintf "%s%s%s"   s1 (writeOfs u) s2)
-    let writeU32I32 s1 u s2 n = writeIns (sprintf "%s%s%s%d" s1 (writeOfs u) s2 n)
-    let writeLoc    s1 i s2   = writeIns (sprintf "%s%d%s"   s1 (LocalIdxAsUint32 i) s2)
+    let writeREGU32    s1 r u s2   = writeIns (sprintf "%s%s%s%s"   s1 (RegNameOf r) (writeOfs u) s2)
+    let writeREGU32I32 s1 r u s2 n = writeIns (sprintf "%s%s%s%s%d" s1 (RegNameOf r) (writeOfs u) s2 n)
+    let writeLoc       s1 i s2     = writeIns (sprintf "%s%d%s"     s1 (LocalIdxAsUint32 i) s2)
 
     let writeGotoIndex tableLabel numMax defaultLabel =
         // A is already the index to branch to
@@ -652,29 +653,18 @@ let WriteOutInstructionsToText writeOut instrs thisFuncType =
             | StoreLoc(r,i)         -> writeIns (sprintf "let int[@%s]=%s" (LocalIdxNameString i) (RegNameOf r))  // TODO: Assumes 32-bit target
             | FetchGlo(r,i)         -> writeIns (sprintf "let %s=int[%s]" (RegNameOf r) (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
             | StoreGlo(r,i)         -> writeIns (sprintf "let int[%s]=%s" (GlobalIdxNameString i) (RegNameOf r))  // TODO: Eventually use the type rather than "int"
-            | StoreConst8toA(ofs,I32(v))   -> writeU32I32 "let byte[A" ofs "]=" v  
-            | StoreConst16toA(ofs,I32(v))  -> writeU32I32 "let ushort[A" ofs "]=" v
-            | StoreConst32toA(ofs,I32(v))  -> writeU32I32 "let uint[A" ofs "]=" v  
-            | StoreConst8toY(ofs,I32(v))   -> writeU32I32 "let byte[Y" ofs "]=" v
-            | StoreConst16toY(ofs,I32(v))  -> writeU32I32 "let ushort[Y" ofs "]=" v
-            | StoreConst32toY(ofs,I32(v))  -> writeU32I32 "let uint[Y" ofs "]=" v
-            | Store8AtoB(ofs)         -> writeU32 "let byte[B" ofs "]=A"
-            | Store16AtoB(ofs)        -> writeU32 "let ushort[B" ofs "]=A"
-            | Store32AtoB(ofs)        -> writeU32 "let uint[B" ofs "]=A"
-            | Store8AtoY(ofs)         -> writeU32 "let byte[Y" ofs "]=A"
-            | Store16AtoY(ofs)        -> writeU32 "let ushort[Y" ofs "]=A"
-            | Store32AtoY(ofs)        -> writeU32 "let uint[Y" ofs "]=A"
-            | Fetch8sFromA(ofs)       -> writeU32 "let A=sbyte[A" ofs "]"
-            | Fetch8uFromA(ofs)       -> writeU32 "let A=byte[A" ofs "]"
-            | Fetch16sFromA(ofs)      -> writeU32 "let A=short[A" ofs "]"
-            | Fetch16uFromA(ofs)      -> writeU32 "let A=ushort[A" ofs "]"
-            | Fetch32FromA(ofs)       -> writeU32 "let A=uint[A" ofs "]"
-            | Fetch8sFromY(ofs)       -> writeU32 "let A=sbyte[Y" ofs "]"
-            | Fetch8uFromY(ofs)       -> writeU32 "let A=byte[Y" ofs "]"
-            | Fetch16sFromY(ofs)      -> writeU32 "let A=short[Y" ofs "]"
-            | Fetch16uFromY(ofs)      -> writeU32 "let A=ushort[Y" ofs "]"
-            | Fetch32FromY(ofs)       -> writeU32 "let A=uint[Y" ofs "]"
-            | ThunkIn                 -> WriteOutLoadLinearMemoryRegister writeIns
+            | StoreConst8(r,ofs,I32(v))   -> writeREGU32I32 "let byte[" r ofs "]=" v  
+            | StoreConst16(r,ofs,I32(v))  -> writeREGU32I32 "let ushort[" r ofs "]=" v
+            | StoreConst32(r,ofs,I32(v))  -> writeREGU32I32 "let uint[" r ofs "]=" v  
+            | Store8A(r,ofs)       -> writeREGU32 "let byte[" r ofs "]=A"
+            | Store16A(r,ofs)      -> writeREGU32 "let ushort[" r ofs "]=A"
+            | Store32A(r,ofs)      -> writeREGU32 "let uint[" r ofs "]=A"
+            | Fetch8s(r,ofs)       -> writeREGU32 "let A=sbyte[" r ofs "]"
+            | Fetch8u(r,ofs)       -> writeREGU32 "let A=byte[" r ofs "]"
+            | Fetch16s(r,ofs)      -> writeREGU32 "let A=short[" r ofs "]"
+            | Fetch16u(r,ofs)      -> writeREGU32 "let A=ushort[" r ofs "]"
+            | Fetch32(r,ofs)       -> writeREGU32 "let A=uint[" r ofs "]"
+            | ThunkIn              -> WriteOutLoadLinearMemoryRegister writeIns
 
     // Kick off the whole thing here:
 

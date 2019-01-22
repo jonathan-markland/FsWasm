@@ -43,20 +43,14 @@ let IsDrop    i = match i with | Drop    -> true | _ -> false
 
 let IsRegisterPreserving = function
     | StoreLoc(_)
-    | Store16AtoB(_)
+    | Store16A(_)
     | StoreGlo(_)
-    | StoreConst8toA(_)
-    | StoreConst16toA(_)
-    | StoreConst32toA(_)
-    | StoreConst8toY(_)
-    | StoreConst16toY(_)
-    | StoreConst32toY(_)
-    | Store8AtoB  (_)
-    | Store16AtoB (_)
-    | Store32AtoB (_)
-    | Store8AtoY  (_)
-    | Store16AtoY (_)
-    | Store32AtoY (_)
+    | StoreConst8(_)
+    | StoreConst16(_)
+    | StoreConst32(_)
+    | Store8A(_)
+    | Store16A(_)
+    | Store32A(_)
         -> true
     | _ -> false
 
