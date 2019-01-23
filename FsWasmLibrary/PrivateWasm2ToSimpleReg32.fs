@@ -81,15 +81,15 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             | 1 -> [ Push(A) ]
             | _ -> failwith "Cannot translate functions which return more than 1 result"
 
-    let rec TranslateInstrList ws =
+    let rec translateInstrList ws =
 
-        List.concat (ws |> List.map TranslateInstr)
+        List.concat (ws |> List.map translateInstr)
 
-    and TranslateInstr w =
+    and translateInstr w =
 
         let binaryCommutativeOp lhs rhs op = 
-            (TranslateInstr lhs) @ 
-            (TranslateInstr rhs) @ 
+            (translateInstr lhs) @ 
+            (translateInstr rhs) @ 
             [
                 Pop(A); // RHS operand
                 Pop(B); // LHS operand
@@ -99,7 +99,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             ]
 
         let binaryOpWithConst lhs getOp =
-            (TranslateInstr lhs) @ 
+            (translateInstr lhs) @ 
             [
                 Pop(A);       // LHS operand
                 getOp ();   // Result in A
@@ -108,8 +108,8 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             ]
 
         let compareOp lhs rhs op = 
-            (TranslateInstr lhs) @ 
-            (TranslateInstr rhs) @ 
+            (translateInstr lhs) @ 
+            (translateInstr rhs) @ 
             [
                 Pop(A); // RHS operand
                 Pop(B); // LHS operand
@@ -119,8 +119,8 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             ]
 
         let binaryNonCommutativeOp lhs rhs op = 
-            (TranslateInstr lhs) @ 
-            (TranslateInstr rhs) @ 
+            (translateInstr lhs) @ 
+            (translateInstr rhs) @ 
             [
                 Pop(A); // RHS operand
                 Pop(B); // LHS operand
@@ -131,8 +131,8 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             ]
 
         let shiftOp lhs rhs op = 
-            (TranslateInstr lhs) @ 
-            (TranslateInstr rhs) @ 
+            (translateInstr lhs) @ 
+            (translateInstr rhs) @ 
             [
                 Pop(A);  // RHS operand
                 Pop(B);  // LHS operand
@@ -145,83 +145,93 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
 
         let translateConstruct sourceBody putInOrder =
             let constructLabel = pushNewLabel ()
-            let translatedBody = TranslateInstrList sourceBody
+            let translatedBody = translateInstrList sourceBody
             popLabel ()
-            (putInOrder translatedBody [ Label(constructLabel) ])
+            putInOrder translatedBody [ Label(constructLabel) ]
 
         match w with
 
-            | Unreachable -> [ Breakpoint; Barrier ]
-            | Nop -> []
+            | Unreachable -> 
+                [ Breakpoint ; Barrier ]
 
-            // The following translations must all end with Barrier
+            | Nop -> 
+                []
 
-            | Instr.Drop(ins) -> TranslateInstr(ins) @ [ Drop; Barrier ]
+            | Instr.Drop(ins) -> 
+                translateInstr(ins) @ [ Drop ; Barrier ]
         
             | Select(a,b,c) -> 
                 let l1 = newLabel ()
                 let l2 = newLabel ()
-                TranslateInstr(a)  @ 
-                TranslateInstr(b)  @ 
-                TranslateInstr(c)  @ 
+                translateInstr(a) @ 
+                translateInstr(b) @ 
+                translateInstr(c) @ 
                 [
-                    Pop(A); 
-                    Pop(B); // val2  (desired if A == 0)
-                    Pop(C); // val1  (desired if A <> 0)
-                    BranchAZ(l1);
-                    Let(A,C);
-                    Goto(l2);
-                    Label(l1);
-                    Let(A,B);
-                    Label(l2);
-                    Push(A);
-                    Barrier;
+                    Pop(A) ; 
+                    Pop(B) ; // val2  (desired if A == 0)
+                    Pop(C) ; // val1  (desired if A <> 0)
+                    BranchAZ(l1) ;
+                    Let(A,C) ;
+                    Goto(l2) ;
+                    Label(l1) ;
+                    Let(A,B) ;
+                    Label(l2) ;
+                    Push(A) ;
+                    Barrier
                 ]
    
-            | Block(_, body) -> translateConstruct body (List.append) @ [Barrier]
-            | Loop(_, body)  -> translateConstruct body (fun a b -> List.append (b @ [Barrier]) a)
+            | Block(_, body) -> 
+                translateConstruct body (List.append) @ [Barrier]
+
+            | Loop(_, body) -> 
+                translateConstruct body (fun a b -> List.append (b @ [Barrier]) a)
 
             | If(_, body) -> 
+
                 let skipLabel = pushNewLabel ()
-                let translatedBody = TranslateInstrList body
+                let translatedBody = translateInstrList body
+
                 popLabel ()
-                [ Pop(A); BranchAZ(skipLabel); ] 
+                [ Pop(A) ; BranchAZ(skipLabel); ] 
                     @ translatedBody 
-                    @ [ Label(skipLabel); Barrier ]
+                    @ [ Label(skipLabel) ; Barrier ]
                     
             | IfElse(_, ifbody, elsebody) ->
 
                 let skipIfLabel = pushNewLabel ()
-                let translatedIfBody = TranslateInstrList ifbody
+                let translatedIfBody = translateInstrList ifbody
                 popLabel ()
 
                 let skipElseLabel = pushNewLabel ()
-                let translatedElseBody = TranslateInstrList elsebody
+                let translatedElseBody = translateInstrList elsebody
                 popLabel ()
 
-                [ Pop(A); BranchAZ(skipIfLabel); ] 
+                [ Pop(A) ; BranchAZ(skipIfLabel); ] 
                     @ translatedIfBody 
-                    @ [ Goto(skipElseLabel); Label(skipIfLabel); Barrier; ] 
+                    @ [ Goto(skipElseLabel) ; Label(skipIfLabel) ; Barrier; ] 
                     @ translatedElseBody 
-                    @ [ Label(skipElseLabel); Barrier ]
+                    @ [ Label(skipElseLabel) ; Barrier ]
 
-            | Br(target) -> [ Goto(labelFor target); Barrier ]
+            | Br(target) -> 
+                [ Goto(labelFor target) ; Barrier ]
 
-            | BrIf(cond,target) -> TranslateInstr(cond) @ [ Pop(A); BranchANZ(labelFor target); Barrier ]
+            | BrIf(cond,target) ->
+                translateInstr(cond) @ [ Pop(A) ; BranchANZ(labelFor target) ; Barrier ]
 
             | BrTable(indexExpression, labelArray, defaultLabel) -> 
                 let tableLabel = newLabel ()
-                (TranslateInstr indexExpression)  @ 
+                (translateInstr indexExpression)  @ 
                 [
-                    Pop(A); 
-                    GotoIndex(tableLabel, labelArray.Length, labelFor defaultLabel, Array.map labelFor labelArray);
+                    Pop(A) ; 
+                    GotoIndex(tableLabel, labelArray.Length, labelFor defaultLabel, Array.map labelFor labelArray) ;
                     Barrier
                 ]
 
-            | Return -> [ Goto(returnLabel); Barrier ]
+            | Return -> 
+                [ Goto(returnLabel) ; Barrier ]
             
             | Call(funcIdx, argsList) -> 
-                let codeToPushArguments = argsList |> TranslateInstrList
+                let codeToPushArguments = argsList |> translateInstrList
                 codeToPushArguments
                     @ [ CallFunc(FuncLabelFor funcIdx moduleFuncsArray) ]
                     @ (thunkInIfNeeded funcIdx) 
@@ -230,20 +240,29 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
 
             | CallIndirect(funcType, argsList, indexExpr) ->
                 // TODO: runtime validation of funcType, in order to be safe per-spec
-                let codeToPushArguments = argsList |> TranslateInstrList
-                let translatedIndex     = indexExpr |> TranslateInstr   // TODO: We could see if this would statically evaluate, and reduce this to a regular call, although the compiler would probably optimise that.
+                let codeToPushArguments = argsList |> translateInstrList
+                let translatedIndex     = indexExpr |> translateInstr   // TODO: We could see if this would statically evaluate, and reduce this to a regular call, although the compiler would probably optimise that.
                 codeToPushArguments 
                     @ translatedIndex 
-                    @ [ Pop(A); CallTableIndirect; Barrier ]
+                    @ [ Pop(A) ; CallTableIndirect ; Barrier ]
 
-            | I32Const(I32(c)) -> [ Const(A, Const32(c)); Push(A); Barrier ]
+            | I32Const(I32(c)) -> 
+                [ Const(A, Const32(c)) ; Push(A) ; Barrier ]
 
-            | GetLocal(L)   -> [ FetchLoc(A,L); Push(A); Barrier ]
-            | SetLocal(L,V) -> (TranslateInstr V) @ [ Pop(A);  StoreLoc(A,L); Barrier ]
-            | TeeLocal(L,V) -> (TranslateInstr V) @ [ PeekA; StoreLoc(A,L); Barrier ]
+            | GetLocal(l) -> 
+                [ FetchLoc(A,l) ; Push(A) ; Barrier ]
+
+            | SetLocal(l,v) -> 
+                (translateInstr v) @ [ Pop(A) ; StoreLoc(A,l) ; Barrier ]
+
+            | TeeLocal(l,v) ->
+                (translateInstr v) @ [ PeekA ; StoreLoc(A,l) ; Barrier ]
         
-            | GetGlobal(G)   -> [ FetchGlo(A,G); Push(A); Barrier ]
-            | SetGlobal(G,V) -> (TranslateInstr V) @ [ Pop(A); StoreGlo(A,G);  Barrier ]
+            | GetGlobal(g) ->
+                [ FetchGlo(A,g) ; Push(A) ; Barrier ]
+
+            | SetGlobal(g,v) ->
+                (translateInstr v) @ [ Pop(A) ; StoreGlo(A,g) ; Barrier ]
 
                     // TODO: runtime restriction of addressing to the Linear Memory extent.
                     // (Wouldn't fit my application anyway, since it will not be possible
@@ -253,39 +272,39 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst16(Y, O -+- O2,v); Barrier ]
             | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst32(Y, O -+- O2,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ Pop(A); Add(A,Y); StoreConst8(A,O,v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ Pop(A); Add(A,Y); StoreConst16(A,O,v); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ Pop(A); Add(A,Y); StoreConst32(A,O,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},          lhs, I32Const(v)) -> (translateInstr lhs) @ [ Pop(A) ; Add(A,Y) ; StoreConst8(A,O,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O},          lhs, I32Const(v)) -> (translateInstr lhs) @ [ Pop(A) ; Add(A,Y) ; StoreConst16(A,O,v); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O},          lhs, I32Const(v)) -> (translateInstr lhs) @ [ Pop(A) ; Add(A,Y) ; StoreConst32(A,O,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ Pop(A); Store8A(Y,O -+- O2); Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ Pop(A); Store16A(Y,O -+- O2); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ Pop(A); Store32A(Y,O -+- O2); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2),         rhs) -> (translateInstr rhs) @ [ Pop(A) ; Store8A( Y,O -+- O2) ; Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2),         rhs) -> (translateInstr rhs) @ [ Pop(A) ; Store16A(Y,O -+- O2) ; Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2),         rhs) -> (translateInstr rhs) @ [ Pop(A) ; Store32A(Y,O -+- O2) ; Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ Pop(A); Pop(B); Add(B,Y); Store8A(B,O);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ Pop(A); Pop(B); Add(B,Y); Store16A(B,O); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ Pop(A); Pop(B); Add(B,Y); Store32A(B,O); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},          lhs,         rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop(A) ; Pop(B) ; Add(B,Y) ; Store8A(B,O)  ; Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O},          lhs,         rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop(A) ; Pop(B) ; Add(B,Y) ; Store16A(B,O) ; Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O},          lhs,         rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop(A) ; Pop(B) ; Add(B,Y) ; Store32A(B,O) ; Barrier ]
 
             | I32Store16( {Align=U32(_);  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32(_);  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
-            | I32Load8s(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8s( Y, O -+- O2); Push(A); Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8u( Y, O -+- O2); Push(A); Barrier ]
-            | I32Load16s( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16s(Y, O -+- O2); Push(A); Barrier ]
-            | I32Load16u( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16u(Y, O -+- O2); Push(A); Barrier ]
-            | I32Load(    {Align=U32(2u); Offset=O}, I32Const(O2)) -> [ Fetch32( Y, O -+- O2); Push(A); Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8s( Y, O -+- O2) ; Push(A) ; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8u( Y, O -+- O2) ; Push(A) ; Barrier ]
+            | I32Load16s( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16s(Y, O -+- O2) ; Push(A) ; Barrier ]
+            | I32Load16u( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16u(Y, O -+- O2) ; Push(A) ; Barrier ]
+            | I32Load(    {Align=U32(2u); Offset=O}, I32Const(O2)) -> [ Fetch32( Y, O -+- O2) ; Push(A) ; Barrier ]
 
-            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch8s(A,O);  Push(A); Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch8u(A,O);  Push(A); Barrier ]
-            | I32Load16s( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch16s(A,O); Push(A); Barrier ]
-            | I32Load16u( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch16u(A,O); Push(A); Barrier ]
-            | I32Load(    {Align=U32(2u); Offset=O}, operand) -> (TranslateInstr operand) @ [ Pop(A); Add(A,Y); Fetch32(A,O);  Push(A); Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop(A) ; Add(A,Y) ; Fetch8s(A,O)  ; Push(A) ; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop(A) ; Add(A,Y) ; Fetch8u(A,O)  ; Push(A) ; Barrier ]
+            | I32Load16s( {Align=U32(1u); Offset=O}, operand) -> (translateInstr operand) @ [ Pop(A) ; Add(A,Y) ; Fetch16s(A,O) ; Push(A) ; Barrier ]
+            | I32Load16u( {Align=U32(1u); Offset=O}, operand) -> (translateInstr operand) @ [ Pop(A) ; Add(A,Y) ; Fetch16u(A,O) ; Push(A) ; Barrier ]
+            | I32Load(    {Align=U32(2u); Offset=O}, operand) -> (translateInstr operand) @ [ Pop(A) ; Add(A,Y) ; Fetch32(A,O)  ; Push(A) ; Barrier ]
             
             // TODO: Could capitulate given X86 target, but make that configurable:
             | I32Load16s( {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
             | I32Load16u( {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
             | I32Load(    {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
 
-            | I32Eqz(operand) -> (TranslateInstr operand) @ [ Pop(A); CmpAZ; Push(A); Barrier ]
+            | I32Eqz(operand) -> (translateInstr operand) @ [ Pop(A) ; CmpAZ ; Push(A) ; Barrier ]
 
             | I32Eq(a,b)   -> compareOp a b CmpEqBA 
             | I32Ne(a,b)   -> compareOp a b CmpNeBA
@@ -324,7 +343,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
 
     // Do the translation with the above nested functions:
 
-    let finalTranslation = (TranslateInstrList ws) @ [ Label(returnLabel) ] 
+    let finalTranslation = (translateInstrList ws) @ [ Label(returnLabel) ] 
     let updatedTranslationState = ModuleTranslationState(labelCount)
 
     (finalTranslation, updatedTranslationState)
