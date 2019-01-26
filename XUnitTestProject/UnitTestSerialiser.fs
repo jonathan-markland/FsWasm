@@ -220,14 +220,16 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                     -> addLine (instr.ToString())
 
                 | Drop(ins) -> 
-                    addInstruction ins
                     addLine "Drop"
+                    withIndent (fun () ->
+                        addInstruction ins)
 
                 | Select(a,b,c) ->
-                    addInstruction a
-                    addInstruction b
-                    addInstruction c
                     addLine "Select"
+                    withIndent (fun () ->
+                        addInstruction a
+                        addInstruction b
+                        addInstruction c)
 
                 | I32Const(c) -> addConst c
                 | I64Const(c) -> addConst c
