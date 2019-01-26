@@ -692,6 +692,6 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
         theModule.Custom12 |> AddArraySection "Custom section #12"    
 
-    Title ("Unit test serialisation for: " + fileName)
+    Title (sprintf "Unit test serialisation for: '%s'." (System.IO.Path.GetFileName fileName))
     m |> WithConvenientLookupTables |> AddModule
     sb.ToString ()

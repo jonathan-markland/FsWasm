@@ -2,17 +2,19 @@
 FsWasm -- Notes
 ===============
 
+[ ] TEST - For now, let's try and get an IMPORT section into the automated test framework.
 
-[ ] DESIGN - A test framework (integration level) is needed.	
+[ ] TEST - the Func and the Type sections are the same on the "program (8)" test.  Need a stonger case too.
 
 [ ] DESIGN - Decide new name for "Wasm2" - something proprietary.
 
 [ ] DESIGN - Design a command line parameter format, and sort out that we have hard-coded config.
 
 
-^^^ MUST RELEASE ^^^
+^^^ MUST HAVE for RELEASE 1.0 ^^^
 
-
+[ ] TEST DESIGN - We need to know what we have covered in the automated tests.
+	So - We need to know which WASM instructions were  NOT USED by the C compiler.
 
 [ ] INVESTIGATE - Need a GCC -> WASM toolchain setting up on the Linux box.
     Test this system.
@@ -51,12 +53,12 @@ FsWasm -- Notes
 	
 	
 	
+
 	
 	
 	
 	
-COMPLETE
-========	
+vvv COMPLETE vvv
 
 [X] Need the output to be in the correct order!  Currently we mix three streams.
     Separate program to re-order the output?
@@ -132,4 +134,6 @@ ret
 [X] CODE - wasm_table0 : must omit if empty
 [X] CODE - wasm_table0 : bad syntax with "int" positioning!!
 [X] CODE - A procedure with local variables must end with "endproc".
+
+[X] DESIGN - A test framework (integration level) is needed.	
 
