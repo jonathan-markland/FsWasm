@@ -474,7 +474,6 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             localsArray |> Array.iter (fun locals -> 
                 match locals.NumRepeats with
                     | U32(repeatCounter) -> addIndividualLocal repeatCounter locals.LocalsType
-                NewLine ()
             )
 
         // CODE
@@ -490,6 +489,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             let firstLocalIndex = thisFuncType.ParameterTypes.Length
             addParams thisFuncType.ParameterTypes
             addLocals firstLocalIndex c.Function.Locals
+            if thisFuncType.ParameterTypes.Length > 0 || c.Function.Locals.Length > 0 then NewLine ()
             AddBody c.Function.Body (uint32 firstLocalIndex)
 
         cso |> Array.iteri addCodeDetail 

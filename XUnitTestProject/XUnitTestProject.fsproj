@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <Content Include="program (1).txt" />
+    <Content Include="program %282%29.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="program (3).txt" />
     <Content Include="program (4).txt" />
     <Content Include="program (5).txt" />
