@@ -3,63 +3,52 @@ FsWasm -- Notes
 ===============
 
 
-INVESTIGATION
-=============
+[ ] DESIGN - Decide new name for "Wasm2" - something proprietary.
 
-[ ] Need a GCC -> WASM toolchain setting up on the Linux box.
-    Test this system.
+[ ] DESIGN - Design a command line parameter format, and sort out that we have hard-coded config.
 
+[ ] DESIGN - A test framework (integration level) is needed.	
 
-
-
-DESIGN ISSUES - decide how to do.
-=============
-
-[ ] We do not allow the hosting assembler program to use multiple WASM modules, as this
-    translator would generate name-clashes.  (Only allowing one WASM
-	module per host).
-
-[ ] Decide new name for "Wasm2" - something proprietary.
-
-[ ] Review naming since moving WASM to trees, where the instructions
-    that have operands *bind* them as child sub-tree fields.
-
-[ ] Idea: Output -- annotate code with commentary eg:  // Prepare wasm_fn1 / Param1:
-	
-[ ] Look at whether to insert extra line-gaps in the output ASM
-
-[ ] A test framework (integration level) is needed.	
-
-[ ] Design a command line parameter format, as we have hard-coded config.
-	
-	
-
-CODE
-====
-
-[ ] A procedure with local variables must end with "endproc".
-[ ] wasm_table0 : must omit if empty
-[ ] wasm_table0 : bad syntax with "int" positioning!!
+[ ] CODE - A procedure with local variables must end with "endproc".
+[ ] CODE - wasm_table0 : must omit if empty
+[ ] CODE - wasm_table0 : bad syntax with "int" positioning!!
 
 ^^^ MUST RELEASE ^^^
 
-[ ] Could we word-align the data sections, and copy them in word-at-a-time rather 
+
+
+[ ] INVESTIGATE - Need a GCC -> WASM toolchain setting up on the Linux box.
+    Test this system.
+
+[ ] DESIGN - We do not allow the hosting assembler program to use multiple WASM modules, as this
+    translator would generate name-clashes.  (Only allowing one WASM
+	module per host).
+	
+[ ] DESIGN - Idea: Output -- annotate code with commentary eg:  // Prepare wasm_fn1 / Param1:
+	
+[ ] DESIGN - Look at whether to insert extra line-gaps in the output ASM
+
+[ ] CODE - Review naming since moving WASM to trees, where the instructions
+    that have operands *bind* them as child sub-tree fields.
+	eg: WATree instead of Instr ?
+
+[ ] CODE - Could we word-align the data sections, and copy them in word-at-a-time rather 
     than byte-at-a-time?
 	
-[ ] Separate the F# listing files a bit.  The following file is troubling:
+[ ] CODE - Separate the F# listing files a bit.  The following file is troubling:
     C:\Users\Jonathan\Documents\Work\FsWasm\FsWasmLibrary\PrivateWasm2ToSimpleReg32.fs
 
-[ ] Sort out the writeIns:  We have multiple instances where we specify four spaces.
+[ ] CODE - Sort out the writeIns:  We have multiple instances where we specify four spaces.
 
-[ ] Optimise to use 386OS ASM push-constant:
+[ ] CODE - Optimise to use 386OS ASM push-constant:
     let A=20
     push A                ->    push 20
 	
-[ ] Optimise:   cmp B,A:if > goto label2
+[ ] CODE - Optimise:   cmp B,A:if > goto label2
     cmp B,A:set > A
     cmp A,0:if nz goto label2
 	
-[ ] Optimise: Compare-With-Constant	
+[ ] CODE - Optimise: Compare-With-Constant	
 	
 	
 	
