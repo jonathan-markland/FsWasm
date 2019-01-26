@@ -10,8 +10,10 @@ let EOF         (r:BinaryReaderAndContext) = r.Reader.EndOfFile
 let Byte        (r:BinaryReaderAndContext) = r.Reader.ReadByte()
 let PeekByte    (r:BinaryReaderAndContext) = r.Reader.PeekByte()
 let SkipByte    (r:BinaryReaderAndContext) = r.Reader.SkipByte()
-let Leb32       (r:BinaryReaderAndContext) = r.Reader.ReadLebUnsigned32()
-let Leb64       (r:BinaryReaderAndContext) = r.Reader.ReadLebUnsigned64()
+let LebUns32    (r:BinaryReaderAndContext) = r.Reader.ReadLebUnsigned32()
+let LebUns64    (r:BinaryReaderAndContext) = r.Reader.ReadLebUnsigned64()
+let LebSig32    (r:BinaryReaderAndContext) = r.Reader.ReadLebSigned32()
+let LebSig64    (r:BinaryReaderAndContext) = r.Reader.ReadLebSigned64()
 let Float32     (r:BinaryReaderAndContext) = r.Reader.ReadFloat32()
 let Float64     (r:BinaryReaderAndContext) = r.Reader.ReadDouble64()
 let NameString  (r:BinaryReaderAndContext) = r.Reader.ReadString()
@@ -22,9 +24,9 @@ let Reverse amount (r:BinaryReaderAndContext) = r.Reader.Reverse amount
 
 // Interfacing the BinaryReader with Wasm type wrappers, for convenience:
 
-let I32 r = I32(int (r |> Leb32))
-let U32 r = U32(r |> Leb32)
-let I64 r = I64(int64 (r |> Leb64))
+let I32 r = I32(r |> LebSig32)
+let U32 r = U32(r |> LebUns32)
+let I64 r = I64(r |> LebSig64)
 let F32 r = F32(r |> Float32)
 let F64 r = F64(r |> Float64)
 
@@ -34,7 +36,7 @@ let ParseFailWith messageText byteThatWasRead r =
     failwith (sprintf "%s (%d) at file offset %d" messageText byteThatWasRead (r |> ReadOffset))
 
 let ReadSequence (f:BinaryReaderAndContext -> 'a) r =
-    let mutable elementCount = r |> Leb32
+    let mutable elementCount = r |> LebUns32
     seq { while elementCount > 0u 
     do
         elementCount <- elementCount - 1u
@@ -119,7 +121,7 @@ let ValType r =
 
 let SectionHeader r =
     let sectionType = r |> Byte
-    let sectionLength = r |> Leb32
+    let sectionLength = r |> LebUns32
     (sectionType, sectionLength)
 
 // Wasm Type reading

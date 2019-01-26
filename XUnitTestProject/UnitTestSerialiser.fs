@@ -440,6 +440,11 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         addInstructions instructionsList
 
 
+    // WASM "EXPRESSIONS"
+
+    let AddVerySimpleBody ins = 
+        AddBody ins 0u   // passing 0 because WASM 1.0 spec is actually really restrictive on what the "expression" can be anyway
+
     // CODE SECTION
 
     let AddCodeSec (funcsForCodeSec:FuncType[]) cso =
@@ -485,7 +490,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             let firstLocalIndex = thisFuncType.ParameterTypes.Length
             addParams thisFuncType.ParameterTypes
             addLocals firstLocalIndex c.Function.Locals
-            AddBody c.Function.Body firstLocalIndex
+            AddBody c.Function.Body (uint32 firstLocalIndex)
 
         cso |> Array.iteri addCodeDetail 
 
@@ -539,7 +544,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
     let AddGlobalTypeAndInstructions gt ins =
         AddGlobalType gt
         NewLine ()
-        AddBody ins
+        AddVerySimpleBody ins
         NewLine ()
         NewLine ()
 
@@ -620,7 +625,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             match elems.[i] with
                 | { TableIndex=TableIdx(U32(ti)); OffsetExpr=e; Init=fa } ->
                     Text (sprintf "In table %d, expr =" ti)
-                    AddBody e
+                    AddVerySimpleBody e
                     fa |> Array.iteri (fun i fidx -> 
                         match fidx with 
                             | FuncIdx(U32(fi)) -> 
@@ -643,7 +648,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             match datas.[i] with
                 | { DataMemoryIndex=MemIdx(U32(mi)); OffsetExpr=e; InitImageBytes=imageData } ->
                     Text (sprintf "Fill memory[%d], where the offset-expr and image-data are as follows:" mi)
-                    AddBody e
+                    AddVerySimpleBody e
                     AddByteArray imageData "      | "
                     NewLine ()
 

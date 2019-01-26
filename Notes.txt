@@ -2,9 +2,9 @@
 FsWasm -- Notes
 ===============
 
-[ ] CODE - DROP command must have 1 parameter: the expression being dropped (tree re-jig).
+[X] CODE - DROP command must have 1 parameter: the expression being dropped (tree re-jig).
 
-[ ] CODE - "Const I32 127" should be shown as -1 in the unit test serialisation
+[X] CODE - "Const I32 127" should be shown as -1 in the unit test serialisation
 
 [ ] CODE - Can we number the blocks in the unit test serialisation
 
