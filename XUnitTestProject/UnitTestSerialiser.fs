@@ -484,7 +484,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             NewLine ()
             NewLine ()
             let thisFuncType = funcsForCodeSec.[i]
-            Text (sprintf "CodeSec[%d]  (%d bytes)  " i (match c with { CodeSize=U32(n) } -> n))
+            Add (sprintf "CodeSec[%d]  (%d bytes)  " i (match c with { CodeSize=U32(n) } -> n))
             AddFuncType thisFuncType
             NewLine ()
             let firstLocalIndex = thisFuncType.ParameterTypes.Length
