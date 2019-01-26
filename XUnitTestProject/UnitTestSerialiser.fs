@@ -457,7 +457,6 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
             parameterList |> Array.iteri (fun i p ->
                 Text (sprintf "        Param[%d] %s" i (PrettyValType p))
-                NewLine ()
             )
 
         // LOCALS
