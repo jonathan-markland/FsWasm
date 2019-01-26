@@ -54,9 +54,9 @@ ExportSec[1] => main == FuncSec[1] => -> I32
 
 
 
-CodeSec[0]  (46 bytes)
+CodeSec[0]  (46 bytes)  -> I32 
 
-        Local[0] I32Type
+        Local[0] I32
 
     0 | I32Store +4 
     1 |   Const I32 0
