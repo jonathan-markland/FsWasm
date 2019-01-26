@@ -3,15 +3,12 @@ FsWasm -- Notes
 ===============
 
 
+[ ] DESIGN - A test framework (integration level) is needed.	
+
 [ ] DESIGN - Decide new name for "Wasm2" - something proprietary.
 
 [ ] DESIGN - Design a command line parameter format, and sort out that we have hard-coded config.
 
-[ ] DESIGN - A test framework (integration level) is needed.	
-
-[ ] CODE - A procedure with local variables must end with "endproc".
-[ ] CODE - wasm_table0 : must omit if empty
-[ ] CODE - wasm_table0 : bad syntax with "int" positioning!!
 
 ^^^ MUST RELEASE ^^^
 
@@ -131,4 +128,8 @@ ret
 [X] Raise error on Custom sections being present.
 
 [X] Catch exceptions at base, and report the file that was being interpreted at the time.
+
+[X] CODE - wasm_table0 : must omit if empty
+[X] CODE - wasm_table0 : bad syntax with "int" positioning!!
+[X] CODE - A procedure with local variables must end with "endproc".
 

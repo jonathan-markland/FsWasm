@@ -438,13 +438,16 @@ let AsmSignatureOf (funcType:FuncType) =
 
 
 
-let WriteOutFunctionLocals writeOut (funcType:FuncType) valTypes =
+let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
 
-    let localBaseIndex = funcType.ParameterTypes.Length
+    let indexOfFirstLocal = funcType.ParameterTypes.Length
 
-    valTypes |> Array.iteri (fun arrayIndex v ->
-        let indexOfVariable = localBaseIndex + arrayIndex
-        let prefixStr = if arrayIndex = 0 then "var " else "  , "
+    funcLocals |> Array.iteri (fun arrayIndex v ->
+        let indexOfVariable = indexOfFirstLocal + arrayIndex
+        let prefixStr = 
+            match arrayIndex with 
+                | 0 -> "var "
+                | _ -> "  , "
         writeOut (sprintf "%s@%s%d:%s" prefixStr AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v)))
 
 
@@ -457,10 +460,10 @@ let ReturnsSingleValue (ft:FuncType) =
 
 
 
-let ReturnCommandFor (ft:FuncType) =
-    match ft.ParameterTypes.Length with
-        | 0 -> "ret"
-        | _ -> "endproc"    // TODO: Not sure if this can't just be endproc everywhere now in the ASM ?
+let ReturnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
+    match (funcType.ParameterTypes.Length, funcLocals.Length) with
+        | (0,0) -> "ret"
+        | (_,_) -> "endproc"
 
 
 
@@ -469,20 +472,24 @@ let ReturnCommandFor (ft:FuncType) =
 
 let WriteOutWasmTable writeOut i (m:Module2) (t:InternalTable2Record) =
 
-    let writeIns s = writeOut ("    " + s)  // TODO: repetition throughout routines!
+    match t.InitData.Length with
+        | 0 -> ()
+        | 1 ->
 
-    // TODO: assumed 32-bit target:
-    writeOut "align int"
-    writeOut (sprintf "data int %s%d" AsmTableNamePrefix i)
+            let writeIns s = writeOut ("    " + s)  // TODO: repetition throughout routines!
 
-    if t.InitData.Length > 1 then failwith "Cannot translate module with more than one Elem in a TableSec table"
+            writeOut "align ptr"
+            writeOut (sprintf "data %s%d" AsmTableNamePrefix i)
 
-    t.InitData |> Array.iter (fun elem ->
-            let ofsExpr, funcIdxList = elem
-            let ofsValue = StaticEvaluate ofsExpr
-            if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
-            funcIdxList |> Array.iter (fun funcIdx -> writeIns (FuncIdxNameString funcIdx))
-        )
+            t.InitData |> Array.iter (fun elem ->
+                    let ofsExpr, funcIdxList = elem
+                    let ofsValue = StaticEvaluate ofsExpr
+                    if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
+                    funcIdxList |> Array.iter (fun funcIdx -> 
+                        writeIns (sprintf "ptr %s" (FuncIdxNameString funcIdx)))
+                )
+
+        | _ -> failwith "Cannot translate module with more than one Elem in a TableSec table"
 
 
 
@@ -501,7 +508,7 @@ let TranslateGotoIndex tableLabel numMax defaultLabel =
     [
         // A is already the index to branch to
         sprintf "cmp A,%d:if >>= goto %s" numMax (LabelTextOf defaultLabel) ;
-        "shl A,2" ;  // TODO: assumes 32-bit target
+        "shl A,logptr" ;
         sprintf "goto [A+%s]" (LabelTextOf tableLabel)
     ]
 
@@ -511,7 +518,7 @@ let TranslateCallTableIndirect () =
     // A is already the index to call.
     // TODO: We need to validate index A lies within wasm table [0]
     [
-        "shl A,2" ;  // TODO: assumes 32-bit target
+        "shl A,logptr" ;
         (sprintf "goto [A+%s0]" AsmTableNamePrefix)  // WASM 1.0 always looks in table #0
     ]
 
@@ -728,15 +735,15 @@ let WriteOutBranchTables writeOut funcInstructions =
     funcInstructions |> List.iter (fun ins ->
         match ins with
             | GotoIndex(tableLabel,_,_,codePointLabels) ->
-                writeOut "align int"
+                writeOut "align ptr"
                 writeOut (sprintf "data %s" (LabelTextOf tableLabel))
-                codePointLabels |> Array.iter (fun lbl -> writeIns (sprintf "int %s" (LabelTextOf lbl)))
+                codePointLabels |> Array.iter (fun lbl -> writeIns (sprintf "ptr %s" (LabelTextOf lbl)))
             | _ -> ()
         )
 
 
 
-let WriteOutFunction writeOut thisFuncType funcInstructions config =   // TODO:  Can we reduce f to inner components ?
+let WriteOutFunction writeOut thisFuncType thisFuncLocals funcInstructions config =   // TODO:  Can we reduce f to inner components ?
 
     let phase1 = 
         match config with
@@ -751,7 +758,7 @@ let WriteOutFunction writeOut thisFuncType funcInstructions config =   // TODO: 
     let desiredInstructions = phase2
 
     WriteOutInstructionsToText writeOut desiredInstructions thisFuncType
-    writeOut (ReturnCommandFor thisFuncType)
+    writeOut (ReturnCommandFor thisFuncType thisFuncLocals)
 
 
 
@@ -765,7 +772,7 @@ let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2
     try
         writeOut procedureCommand
         WriteOutFunctionLocals writeOut f.FuncType f.Locals
-        WriteOutFunction writeOut f.FuncType funcInstructions config
+        WriteOutFunction writeOut f.FuncType f.Locals funcInstructions config
         WriteOutBranchTables writeOutTables funcInstructions
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
