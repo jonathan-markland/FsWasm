@@ -131,10 +131,13 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     // BODY
 
-    let AddBody instructionsList =
+    let AddBody instructionsList firstLocalIndex =
 
         let mutable ip = 0
         let mutable indent = 0
+
+        let whichOf s1 s2 idx =
+            if idx < firstLocalIndex then s1 else s2
 
         let addLineStart () = 
             sb.Append (sprintf "  %3d | " ip) |> ignore
@@ -231,11 +234,12 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
                 | F32Const(c) -> addConst c
                 | F64Const(c) -> addConst c
 
-                | GetLocal  (LocalIdx(U32(idx)))         -> addIndex "Get Local"  idx 
+                | GetLocal  (LocalIdx(U32(idx)))         -> addIndex (whichOf "Get Param" "Get Local" idx) idx 
+                | SetLocal  (LocalIdx(U32(idx)), instr)  -> addSet   (whichOf "Set Param" "Set Local" idx) idx instr
+                | TeeLocal  (LocalIdx(U32(idx)), instr)  -> addSet   (whichOf "Tee Param" "Tee Local" idx) idx instr
+
                 | GetGlobal (GlobalIdx(U32(idx)))        -> addIndex "Get Global" idx 
-                | SetLocal  (LocalIdx(U32(idx)), instr)  -> addSet "Set Local"  idx instr
-                | TeeLocal  (LocalIdx(U32(idx)), instr)  -> addSet "Tee Local"  idx instr
-                | SetGlobal (GlobalIdx(U32(idx)), instr) -> addSet "Set Global" idx instr
+                | SetGlobal (GlobalIdx(U32(idx)), instr) -> addSet   "Set Global" idx instr
 
                 | I32Load    (memArg, instr) -> addLoad "I32Load"    memArg instr 2
                 | I64Load    (memArg, instr) -> addLoad "I64Load"    memArg instr 3
@@ -436,38 +440,50 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
     // CODE SECTION
 
-    let AddCodeSec cso =
+    let AddCodeSec (funcsForCodeSec:FuncType[]) cso =
 
         Title "Code section"
 
+        // PARAMS
+
+        let addParams parameterList =
+
+            parameterList |> Array.iteri (fun i p ->
+                Text (sprintf "        Param[%d] %A" i (PrettyValType p))
+                NewLine ()
+            )
+
         // LOCALS
 
-        let addLocals localsArray =
+        let addLocals firstLocalIndex localsArray =
 
-            let mutable localIndex = 0
+            let mutable localIndex = firstLocalIndex
 
             let rec addIndividualLocal repeatCounter t =
                 if repeatCounter >= 1u then
-                    Text (sprintf "        Local[%d] %A" localIndex t)
+                    Text (sprintf "        Local[%d] %A" localIndex (PrettyValType t))
                     localIndex <- localIndex + 1
                     addIndividualLocal (repeatCounter - 1u) t
 
-            let addLocals (locals:Locals) =
+            localsArray |> Array.iter (fun locals -> 
                 match locals.NumRepeats with
                     | U32(repeatCounter) -> addIndividualLocal repeatCounter locals.LocalsType
                 NewLine ()
-
-            localsArray |> Array.iter addLocals
+            )
 
         // CODE
 
         let addCodeDetail i c =
             NewLine ()
             NewLine ()
-            Text (sprintf "CodeSec[%d]  (%d bytes)" i (match c with { CodeSize=U32(n) } -> n))
+            let thisFuncType = funcsForCodeSec.[i]
+            Text (sprintf "CodeSec[%d]  (%d bytes)  " i (match c with { CodeSize=U32(n) } -> n))
+            AddFuncType thisFuncType
             NewLine ()
-            addLocals c.Function.Locals
-            AddBody c.Function.Body
+            let firstLocalIndex = thisFuncType.ParameterTypes.Length
+            addParams thisFuncType.ParameterTypes
+            addLocals firstLocalIndex c.Function.Locals
+            AddBody c.Function.Body firstLocalIndex
 
         cso |> Array.iteri addCodeDetail 
 
@@ -655,7 +671,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             Mems    = newLists.MasterMems; 
             Globals = newLists.MasterGlobals }
 
-    let AddModule theModule =
+    let AddModule funcsForCodeSec theModule =
 
         theModule.Custom1 |> AddArraySection "Custom section #1"     
         theModule.Types |> AddTypeSec 
@@ -685,7 +701,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         theModule.Elems |> AddElemSec
 
         theModule.Custom10 |> AddArraySection "Custom section #10"    
-        theModule.Codes |> AddCodeSec 
+        theModule.Codes |> AddCodeSec funcsForCodeSec
 
         theModule.Custom11 |> AddArraySection "Custom section #11"    
         theModule.Datas |> AddDataSec 
@@ -693,5 +709,5 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         theModule.Custom12 |> AddArraySection "Custom section #12"    
 
     Title (sprintf "Unit test serialisation for: '%s'." (System.IO.Path.GetFileName fileName))
-    m |> WithConvenientLookupTables |> AddModule
+    m |> WithConvenientLookupTables |> (AddModule m.Funcs)
     sb.ToString ()

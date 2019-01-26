@@ -4,14 +4,24 @@ FsWasm -- Notes
 
 [ ] CODE - DROP command must have 1 parameter: the expression being dropped (tree re-jig).
 
-[ ] CODE - "Const I32 127" should be shown as -1
+[ ] CODE - "Const I32 127" should be shown as -1 in the unit test serialisation
 
-[ ] The function locals Unit test serialisation always starts at index 0
-    when it need to really start at the next index after the function parameters.
-	
-        Local[0] I32Type   // should be:        Local[5] => I32
+[ ] CODE - Can we number the blocks in the unit test serialisation
 
-[ ] Should show the function parameters in the CodeSec dump:
+[X] CODE - Program (5) is a model:
+
+			CodeSec[0]  (103 bytes)
+
+					Param[0] => I32
+					Param[1] => I32
+					Param[2] => I32
+					Param[3] => I32
+					Param[4] => I32
+					Local[5] => I32
+					Local[6] => I32
+					Local[7] => I32
+
+[X] CODE - Should show the function parameters in the CodeSec dump:
 
 		FuncSec[0] => I32 I32 I32 I32 I32 ->
 
@@ -22,6 +32,7 @@ FsWasm -- Notes
 
 [ ] DESIGN - Design a command line parameter format, and sort out that we have hard-coded config.
 
+[ ] Move UnitTestSerialiser into an assembly of its own.
 
 ^^^ MUST HAVE for RELEASE 1.0 ^^^
 
