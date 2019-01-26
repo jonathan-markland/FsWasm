@@ -1,0 +1,93 @@
+
+
+--- Unit test serialisation for: 'program (3).wasm'. ---
+
+
+
+--- Types section ---
+
+TypeSec[0] = I32 -> I32 
+TypeSec[1] = I32 I32 -> I32 
+TypeSec[2] = -> I32 
+
+
+--- Imports section ---
+
+ImportSec[0] => from 'env' import 'printf' == I32 I32 -> I32 
+
+
+--- Funcs section ---
+
+FuncSec[0] => I32 I32 -> I32 
+FuncSec[1] => -> I32 
+
+
+--- Tables section ---
+
+TableSec[0] => AnyFuncType [|0|]
+
+
+--- Mems section ---
+
+MemSec[0] => [|1|] x 64KB
+
+
+--- Globals section ---
+
+
+
+--- Exports section ---
+
+ExportSec[0] => memory == MemSec[0] => [|1|] x 64KB
+ExportSec[1] => main == FuncSec[1] => -> I32 
+
+
+--- Start section ---
+
+
+
+--- Elems section ---
+
+
+
+--- Code section ---
+
+
+
+CodeSec[0]  (46 bytes)
+
+        Local[0] I32Type
+
+    0 | I32Store +4 
+    1 |   Const I32 0
+    2 |   Tee Local[0]
+    3 |     I32Sub
+    4 |       I32Load +4 
+    5 |         Const I32 0
+    6 |       Const I32 16
+    7 | I32Store  
+    8 |   Get Local[0]
+    9 |   Const I32 32
+   10 | Drop
+   11 |   Call FuncIdx[0] -> I32 
+   12 |     Const I32 16
+   13 |     Get Local[0]
+   14 | I32Store +4 
+   15 |   Const I32 0
+   16 |   I32Add
+   17 |     Get Local[0]
+   18 |     Const I32 16
+   19 | Const I32 100
+
+
+--- Data section ---
+
+DataSec[0] => Fill memory[0], where the offset-expr and image-data are as follows:
+    0 | Const I32 16
+      | 25 73 00 
+
+DataSec[1] => Fill memory[0], where the offset-expr and image-data are as follows:
+    0 | Const I32 32
+      | 48 65 6c 6c 6f 20 74 68 65 72 65 2c 20 74 68 69 
+      | 73 20 69 73 20 61 20 74 65 73 74 21 00 
+

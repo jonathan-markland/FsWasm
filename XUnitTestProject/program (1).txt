@@ -1,0 +1,59 @@
+
+
+--- Unit test serialisation for: 'program (1).wasm'. ---
+
+
+
+--- Types section ---
+
+TypeSec[0] = -> I32 
+
+
+--- Imports section ---
+
+
+
+--- Funcs section ---
+
+FuncSec[0] => -> I32 
+
+
+--- Tables section ---
+
+TableSec[0] => AnyFuncType [|0|]
+
+
+--- Mems section ---
+
+MemSec[0] => [|1|] x 64KB
+
+
+--- Globals section ---
+
+
+
+--- Exports section ---
+
+ExportSec[0] => memory == MemSec[0] => [|1|] x 64KB
+ExportSec[1] => main == FuncSec[0] => -> I32 
+
+
+--- Start section ---
+
+
+
+--- Elems section ---
+
+
+
+--- Code section ---
+
+
+
+CodeSec[0]  (4 bytes)
+
+    0 | Const I32 42
+
+
+--- Data section ---
+

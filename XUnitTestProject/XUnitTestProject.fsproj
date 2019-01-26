@@ -7,16 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="program %288%29.txt">
+    <Content Include="program (1).txt" />
+    <Content Include="program (3).txt" />
+    <Content Include="program (4).txt" />
+    <Content Include="program (5).txt" />
+    <None Include="program (1).wasm" />
+    <None Include="program (2).wasm" />
+    <None Include="program %283%29.wasm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="program (8).wasm" />
+    </None>
+    <None Include="program (4).wasm" />
+    <None Include="program (5).wasm" />
     <Compile Include="UnitTestSerialiser.fs" />
     <Compile Include="Tests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
@@ -31,7 +36,31 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="program %288%29.wasm">
+    <Content Update="program %281%29.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="program %283%29.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="program %284%29.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="program %285%29.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="program %281%29.wasm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="program %282%29.wasm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="program %284%29.wasm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="program %285%29.wasm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

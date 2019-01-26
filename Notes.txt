@@ -2,9 +2,21 @@
 FsWasm -- Notes
 ===============
 
-[ ] TEST - For now, let's try and get an IMPORT section into the automated test framework.
+[ ] CODE - DROP command must have 1 parameter: the expression being dropped (tree re-jig).
 
-[ ] TEST - the Func and the Type sections are the same on the "program (8)" test.  Need a stonger case too.
+[ ] CODE - "Const I32 127" should be shown as -1
+
+[ ] The function locals Unit test serialisation always starts at index 0
+    when it need to really start at the next index after the function parameters.
+	
+        Local[0] I32Type   // should be:        Local[5] => I32
+
+[ ] Should show the function parameters in the CodeSec dump:
+
+		FuncSec[0] => I32 I32 I32 I32 I32 ->
+
+[ ] Manually inspect all of the "program (n).txt" files and compare against the WAT files to see
+    that we have everything as expected.  Only then are they accepted as 'expectation' files.
 
 [ ] DESIGN - Decide new name for "Wasm2" - something proprietary.
 
@@ -137,3 +149,6 @@ ret
 
 [X] DESIGN - A test framework (integration level) is needed.	
 
+[X] TEST - For now, let's try and get an IMPORT section into the automated test framework.
+
+[X] TEST - the Func and the Type sections are the same on the "program (8)" test.  Need a stonger case too.
