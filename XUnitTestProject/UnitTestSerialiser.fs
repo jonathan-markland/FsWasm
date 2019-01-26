@@ -456,7 +456,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
         let addParams parameterList =
 
             parameterList |> Array.iteri (fun i p ->
-                Text (sprintf "        Param[%d] %A" i (PrettyValType p))
+                Text (sprintf "        Param[%d] %s" i (PrettyValType p))
                 NewLine ()
             )
 
@@ -468,7 +468,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
 
             let rec addIndividualLocal repeatCounter t =
                 if repeatCounter >= 1u then
-                    Text (sprintf "        Local[%d] %A" localIndex (PrettyValType t))
+                    Text (sprintf "        Local[%d] %s" localIndex (PrettyValType t))
                     localIndex <- localIndex + 1
                     addIndividualLocal (repeatCounter - 1u) t
 
@@ -486,6 +486,7 @@ let ModuleToUnitTestString (fileName:string) (m:Module) =
             let thisFuncType = funcsForCodeSec.[i]
             Add (sprintf "CodeSec[%d]  (%d bytes)  " i (match c with { CodeSize=U32(n) } -> n))
             AddFuncType thisFuncType
+            NewLine ()
             NewLine ()
             let firstLocalIndex = thisFuncType.ParameterTypes.Length
             addParams thisFuncType.ParameterTypes
