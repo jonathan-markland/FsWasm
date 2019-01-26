@@ -12,6 +12,7 @@ open System.Text
 let RegNameOf = function
         | A -> "A"
         | B -> "B"
+        | C -> "C"
         | Y -> "Y"
 
 
@@ -77,150 +78,160 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
         let ft = (getFuncType fidx)
         match ft.ReturnTypes.Length with
             | 0 -> []
-            | 1 -> [ PushA ]
+            | 1 -> [ Push(A) ]
             | _ -> failwith "Cannot translate functions which return more than 1 result"
 
-    let rec TranslateInstrList ws =
+    let rec translateInstrList ws =
 
-        List.concat (ws |> List.map TranslateInstr)
+        List.concat (ws |> List.map translateInstr)
 
-    and TranslateInstr w =
+    and translateInstr w =
 
         let binaryCommutativeOp lhs rhs op = 
-            (TranslateInstr lhs) @ 
-            (TranslateInstr rhs) @ 
+            (translateInstr lhs) @ 
+            (translateInstr rhs) @ 
             [
-                PopA; // RHS operand
-                PopB; // LHS operand
+                Pop(A); // RHS operand
+                Pop(B); // LHS operand
                 op;   // Result in A
-                PushA; 
+                Push(A); 
                 Barrier 
             ]
 
         let binaryOpWithConst lhs getOp =
-            (TranslateInstr lhs) @ 
+            (translateInstr lhs) @ 
             [
-                PopA;       // LHS operand
+                Pop(A);       // LHS operand
                 getOp ();   // Result in A
-                PushA; 
+                Push(A); 
                 Barrier 
             ]
 
         let compareOp lhs rhs op = 
-            (TranslateInstr lhs) @ 
-            (TranslateInstr rhs) @ 
+            (translateInstr lhs) @ 
+            (translateInstr rhs) @ 
             [
-                PopA; // RHS operand
-                PopB; // LHS operand
+                Pop(A); // RHS operand
+                Pop(B); // LHS operand
                 op;   // Compare B (LHS) with A (RHS) and set boolean into A
-                PushA; 
+                Push(A); 
                 Barrier 
             ]
 
         let binaryNonCommutativeOp lhs rhs op = 
-            (TranslateInstr lhs) @ 
-            (TranslateInstr rhs) @ 
+            (translateInstr lhs) @ 
+            (translateInstr rhs) @ 
             [
-                PopA; // RHS operand
-                PopB; // LHS operand
+                Pop(A); // RHS operand
+                Pop(B); // LHS operand
                 op;   // Result in B
-                LetAB;
-                PushA; 
+                Let(A,B);
+                Push(A); 
                 Barrier 
             ]
 
         let shiftOp lhs rhs op = 
-            (TranslateInstr lhs) @ 
-            (TranslateInstr rhs) @ 
+            (translateInstr lhs) @ 
+            (translateInstr rhs) @ 
             [
-                PopA;  // RHS operand
-                PopB;  // LHS operand
-                LetCA;
+                Pop(A);  // RHS operand
+                Pop(B);  // LHS operand
+                Let(C,A);
                 op;    // Result in B
-                LetAB;
-                PushA; 
+                Let(A,B);
+                Push(A); 
                 Barrier 
             ]
 
         let translateConstruct sourceBody putInOrder =
             let constructLabel = pushNewLabel ()
-            let translatedBody = TranslateInstrList sourceBody
+            let translatedBody = translateInstrList sourceBody
             popLabel ()
-            (putInOrder translatedBody [ Label(constructLabel) ])
+            putInOrder translatedBody [ Label(constructLabel) ]
 
         match w with
 
-            | Unreachable -> [ Breakpoint; Barrier ]
-            | Nop -> []
+            | Unreachable -> 
+                [ Breakpoint ; Barrier ]
 
-            // The following translations must all end with Barrier
+            | Nop -> 
+                []
 
-            | Instr.Drop(ins) -> TranslateInstr(ins) @ [ Drop; Barrier ]
+            | Instr.Drop(ins) -> 
+                translateInstr(ins) @ [ Drop ; Barrier ]
         
             | Select(a,b,c) -> 
                 let l1 = newLabel ()
                 let l2 = newLabel ()
-                TranslateInstr(a)  @ 
-                TranslateInstr(b)  @ 
-                TranslateInstr(c)  @ 
+                translateInstr(a) @ 
+                translateInstr(b) @ 
+                translateInstr(c) @ 
                 [
-                    PopA; 
-                    PopB; // val2  (desired if A == 0)
-                    PopC; // val1  (desired if A <> 0)
-                    BranchAZ(l1);
-                    LetAC;
-                    Goto(l2);
-                    Label(l1);
-                    LetAB;
-                    Label(l2);
-                    PushA;
-                    Barrier;
+                    Pop(A) ; 
+                    Pop(B) ; // val2  (desired if A == 0)
+                    Pop(C) ; // val1  (desired if A <> 0)
+                    BranchAZ(l1) ;
+                    Let(A,C) ;
+                    Goto(l2) ;
+                    Label(l1) ;
+                    Let(A,B) ;
+                    Label(l2) ;
+                    Push(A) ;
+                    Barrier
                 ]
    
-            | Block(_, body) -> translateConstruct body (List.append) @ [Barrier]
-            | Loop(_, body)  -> translateConstruct body (fun a b -> List.append (b @ [Barrier]) a)
+            | Block(_, body) -> 
+                translateConstruct body (List.append) @ [Barrier]
+
+            | Loop(_, body) -> 
+                translateConstruct body (fun a b -> List.append (b @ [Barrier]) a)
 
             | If(_, body) -> 
+
                 let skipLabel = pushNewLabel ()
-                let translatedBody = TranslateInstrList body
+                let translatedBody = translateInstrList body
+
                 popLabel ()
-                [ PopA; BranchAZ(skipLabel); ] 
+                [ Pop(A) ; BranchAZ(skipLabel); ] 
                     @ translatedBody 
-                    @ [ Label(skipLabel); Barrier ]
+                    @ [ Label(skipLabel) ; Barrier ]
                     
             | IfElse(_, ifbody, elsebody) ->
 
                 let skipIfLabel = pushNewLabel ()
-                let translatedIfBody = TranslateInstrList ifbody
+                let translatedIfBody = translateInstrList ifbody
                 popLabel ()
 
                 let skipElseLabel = pushNewLabel ()
-                let translatedElseBody = TranslateInstrList elsebody
+                let translatedElseBody = translateInstrList elsebody
                 popLabel ()
 
-                [ PopA; BranchAZ(skipIfLabel); ] 
+                [ Pop(A) ; BranchAZ(skipIfLabel); ] 
                     @ translatedIfBody 
-                    @ [ Goto(skipElseLabel); Label(skipIfLabel); Barrier; ] 
+                    @ [ Goto(skipElseLabel) ; Label(skipIfLabel) ; Barrier; ] 
                     @ translatedElseBody 
-                    @ [ Label(skipElseLabel); Barrier ]
+                    @ [ Label(skipElseLabel) ; Barrier ]
 
-            | Br(target) -> [ Goto(labelFor target); Barrier ]
+            | Br(target) -> 
+                [ Goto(labelFor target) ; Barrier ]
 
-            | BrIf(cond,target) -> TranslateInstr(cond) @ [ PopA; BranchANZ(labelFor target); Barrier ]
+            | BrIf(cond,target) ->
+                translateInstr(cond) @ [ Pop(A) ; BranchANZ(labelFor target) ; Barrier ]
 
             | BrTable(indexExpression, labelArray, defaultLabel) -> 
                 let tableLabel = newLabel ()
-                (TranslateInstr indexExpression)  @ 
+                (translateInstr indexExpression)  @ 
                 [
-                    PopA; 
-                    GotoIndex(tableLabel, labelArray.Length, labelFor defaultLabel, Array.map labelFor labelArray);
+                    Pop(A) ; 
+                    GotoIndex(tableLabel, labelArray.Length, labelFor defaultLabel, Array.map labelFor labelArray) ;
                     Barrier
                 ]
 
-            | Return -> [ Goto(returnLabel); Barrier ]
+            | Return -> 
+                [ Goto(returnLabel) ; Barrier ]
             
             | Call(funcIdx, argsList) -> 
-                let codeToPushArguments = argsList |> TranslateInstrList
+                let codeToPushArguments = argsList |> translateInstrList
                 codeToPushArguments
                     @ [ CallFunc(FuncLabelFor funcIdx moduleFuncsArray) ]
                     @ (thunkInIfNeeded funcIdx) 
@@ -229,61 +240,71 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
 
             | CallIndirect(funcType, argsList, indexExpr) ->
                 // TODO: runtime validation of funcType, in order to be safe per-spec
-                let codeToPushArguments = argsList |> TranslateInstrList
-                let translatedIndex     = indexExpr |> TranslateInstr   // TODO: We could see if this would statically evaluate, and reduce this to a regular call, although the compiler would probably optimise that.
+                let codeToPushArguments = argsList |> translateInstrList
+                let translatedIndex     = indexExpr |> translateInstr   // TODO: We could see if this would statically evaluate, and reduce this to a regular call, although the compiler would probably optimise that.
                 codeToPushArguments 
                     @ translatedIndex 
-                    @ [ PopA; CallTableIndirect; Barrier ]
+                    @ [ Pop(A) ; CallTableIndirect ; Barrier ]
 
-            | I32Const(I32(C)) -> [ Const(A, Const32(C)); PushA; Barrier ]
+            | I32Const(I32(c)) -> 
+                [ Const(A, Const32(c)) ; Push(A) ; Barrier ]
 
-            | GetLocal(L)   -> [ FetchLoc(A,L); PushA; Barrier ]
-            | SetLocal(L,V) -> (TranslateInstr V) @ [ PopA;  StoreLoc(A,L); Barrier ]
-            | TeeLocal(L,V) -> (TranslateInstr V) @ [ PeekA; StoreLoc(A,L); Barrier ]
+            | GetLocal(l) -> 
+                [ FetchLoc(A,l) ; Push(A) ; Barrier ]
+
+            | SetLocal(l,v) -> 
+                (translateInstr v) @ [ Pop(A) ; StoreLoc(A,l) ; Barrier ]
+
+            | TeeLocal(l,v) ->
+                (translateInstr v) @ [ PeekA ; StoreLoc(A,l) ; Barrier ]
         
-            | GetGlobal(G)   -> [ FetchGlo(A,G); PushA; Barrier ]
-            | SetGlobal(G,V) -> (TranslateInstr V) @ [ PopA; StoreGlo(A,G);  Barrier ]
+            | GetGlobal(g) ->
+                [ FetchGlo(A,g) ; Push(A) ; Barrier ]
+
+            | SetGlobal(g,v) ->
+                (translateInstr v) @ [ Pop(A) ; StoreGlo(A,g) ; Barrier ]
 
                     // TODO: runtime restriction of addressing to the Linear Memory extent.
                     // (Wouldn't fit my application anyway, since it will not be possible
                     // to guarantee contiguous extension of the Linear Memory).
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst8toY( O -+- O2,v); Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst16toY(O -+- O2,v); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst32toY(O -+- O2,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst8( Y, O -+- O2,v); Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst16(Y, O -+- O2,v); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2), I32Const(v)) -> [ StoreConst32(Y, O -+- O2,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ PopA; AddAY; StoreConst8toA(O,v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ PopA; AddAY; StoreConst16toA(O,v); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O},          lhs, I32Const(v)) -> (TranslateInstr lhs) @ [ PopA; AddAY; StoreConst32toA(O,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},          lhs, I32Const(v)) -> (translateInstr lhs) @ [ Pop(A) ; Add(A,Y) ; StoreConst8(A,O,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O},          lhs, I32Const(v)) -> (translateInstr lhs) @ [ Pop(A) ; Add(A,Y) ; StoreConst16(A,O,v); Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O},          lhs, I32Const(v)) -> (translateInstr lhs) @ [ Pop(A) ; Add(A,Y) ; StoreConst32(A,O,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ PopA; Store8AtoY( O -+- O2); Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ PopA; Store16AtoY(O -+- O2); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2),         rhs) -> (TranslateInstr rhs) @ [ PopA; Store32AtoY(O -+- O2); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const(O2),         rhs) -> (translateInstr rhs) @ [ Pop(A) ; Store8A( Y,O -+- O2) ; Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O}, I32Const(O2),         rhs) -> (translateInstr rhs) @ [ Pop(A) ; Store16A(Y,O -+- O2) ; Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O}, I32Const(O2),         rhs) -> (translateInstr rhs) @ [ Pop(A) ; Store32A(Y,O -+- O2) ; Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ PopA; PopB; AddBY; Store8AtoB(O);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32(1u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ PopA; PopB; AddBY; Store16AtoB(O); Barrier ]
-            | I32Store(   {Align=U32(2u); Offset=O},          lhs,         rhs) -> (TranslateInstr lhs) @ (TranslateInstr rhs) @ [ PopA; PopB; AddBY; Store32AtoB(O); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},          lhs,         rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop(A) ; Pop(B) ; Add(B,Y) ; Store8A(B,O)  ; Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32(1u); Offset=O},          lhs,         rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop(A) ; Pop(B) ; Add(B,Y) ; Store16A(B,O) ; Barrier ]
+            | I32Store(   {Align=U32(2u); Offset=O},          lhs,         rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop(A) ; Pop(B) ; Add(B,Y) ; Store32A(B,O) ; Barrier ]
 
             | I32Store16( {Align=U32(_);  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32(_);  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
-            | I32Load8s(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8sFromY( O -+- O2); PushA; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8uFromY( O -+- O2); PushA; Barrier ]
-            | I32Load16s( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16sFromY(O -+- O2); PushA; Barrier ]
-            | I32Load16u( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16uFromY(O -+- O2); PushA; Barrier ]
-            | I32Load(    {Align=U32(2u); Offset=O}, I32Const(O2)) -> [ Fetch32FromY( O -+- O2); PushA; Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8s( Y, O -+- O2) ; Push(A) ; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, I32Const(O2)) -> [ Fetch8u( Y, O -+- O2) ; Push(A) ; Barrier ]
+            | I32Load16s( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16s(Y, O -+- O2) ; Push(A) ; Barrier ]
+            | I32Load16u( {Align=U32(1u); Offset=O}, I32Const(O2)) -> [ Fetch16u(Y, O -+- O2) ; Push(A) ; Barrier ]
+            | I32Load(    {Align=U32(2u); Offset=O}, I32Const(O2)) -> [ Fetch32( Y, O -+- O2) ; Push(A) ; Barrier ]
 
-            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch8sFromA(O);  PushA; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch8uFromA(O);  PushA; Barrier ]
-            | I32Load16s( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch16sFromA(O); PushA; Barrier ]
-            | I32Load16u( {Align=U32(1u); Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch16uFromA(O); PushA; Barrier ]
-            | I32Load(    {Align=U32(2u); Offset=O}, operand) -> (TranslateInstr operand) @ [ PopA; AddAY; Fetch32FromA(O);  PushA; Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop(A) ; Add(A,Y) ; Fetch8s(A,O)  ; Push(A) ; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop(A) ; Add(A,Y) ; Fetch8u(A,O)  ; Push(A) ; Barrier ]
+            | I32Load16s( {Align=U32(1u); Offset=O}, operand) -> (translateInstr operand) @ [ Pop(A) ; Add(A,Y) ; Fetch16s(A,O) ; Push(A) ; Barrier ]
+            | I32Load16u( {Align=U32(1u); Offset=O}, operand) -> (translateInstr operand) @ [ Pop(A) ; Add(A,Y) ; Fetch16u(A,O) ; Push(A) ; Barrier ]
+            | I32Load(    {Align=U32(2u); Offset=O}, operand) -> (translateInstr operand) @ [ Pop(A) ; Add(A,Y) ; Fetch32(A,O)  ; Push(A) ; Barrier ]
             
+            // TODO: Could capitulate given X86 target, but make that configurable:
             | I32Load16s( {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
             | I32Load16u( {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
             | I32Load(    {Align=U32(_); Offset=_}, _) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
 
-            | I32Eqz(operand) -> (TranslateInstr operand) @ [ PopA; CmpAZ; PushA; Barrier ]
+            | I32Eqz(operand) -> (translateInstr operand) @ [ Pop(A) ; CmpAZ ; Push(A) ; Barrier ]
 
             | I32Eq(a,b)   -> compareOp a b CmpEqBA 
             | I32Ne(a,b)   -> compareOp a b CmpNeBA
@@ -302,7 +323,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
             | I32Or  (a,I32Const(n)) -> binaryOpWithConst a (fun () -> OrAN (n))
             | I32Xor (a,I32Const(n)) -> binaryOpWithConst a (fun () -> XorAN(n))
 
-            | I32Add (a,b) -> binaryCommutativeOp     a b AddAB
+            | I32Add (a,b) -> binaryCommutativeOp     a b (Add(A,B))
             | I32Sub (a,b) -> binaryNonCommutativeOp  a b SubBA
             | I32Mul (a,b) -> binaryCommutativeOp     a b MulAB
             | I32Divs(a,b) -> binaryNonCommutativeOp  a b DivsBA
@@ -322,7 +343,7 @@ let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wa
 
     // Do the translation with the above nested functions:
 
-    let finalTranslation = (TranslateInstrList ws) @ [ Label(returnLabel) ] 
+    let finalTranslation = (translateInstrList ws) @ [ Label(returnLabel) ] 
     let updatedTranslationState = ModuleTranslationState(labelCount)
 
     (finalTranslation, updatedTranslationState)
@@ -417,13 +438,16 @@ let AsmSignatureOf (funcType:FuncType) =
 
 
 
-let WriteOutFunctionLocals writeOut (funcType:FuncType) valTypes =
+let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
 
-    let localBaseIndex = funcType.ParameterTypes.Length
+    let indexOfFirstLocal = funcType.ParameterTypes.Length
 
-    valTypes |> Array.iteri (fun arrayIndex v ->
-        let indexOfVariable = localBaseIndex + arrayIndex
-        let prefixStr = if arrayIndex = 0 then "var " else "  , "
+    funcLocals |> Array.iteri (fun arrayIndex v ->
+        let indexOfVariable = indexOfFirstLocal + arrayIndex
+        let prefixStr = 
+            match arrayIndex with 
+                | 0 -> "var "
+                | _ -> "  , "
         writeOut (sprintf "%s@%s%d:%s" prefixStr AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v)))
 
 
@@ -436,10 +460,10 @@ let ReturnsSingleValue (ft:FuncType) =
 
 
 
-let ReturnCommandFor (ft:FuncType) =
-    match ft.ParameterTypes.Length with
-        | 0 -> "ret"
-        | _ -> "endproc"    // TODO: Not sure if this can't just be endproc everywhere now in the ASM ?
+let ReturnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
+    match (funcType.ParameterTypes.Length, funcLocals.Length) with
+        | (0,0) -> "ret"
+        | (_,_) -> "endproc"
 
 
 
@@ -448,20 +472,24 @@ let ReturnCommandFor (ft:FuncType) =
 
 let WriteOutWasmTable writeOut i (m:Module2) (t:InternalTable2Record) =
 
-    let writeIns s = writeOut ("    " + s)  // TODO: repetition throughout routines!
+    match t.InitData.Length with
+        | 0 -> ()
+        | 1 ->
 
-    // TODO: assumed 32-bit target:
-    writeOut "align int"
-    writeOut (sprintf "data int %s%d" AsmTableNamePrefix i)
+            let writeIns s = writeOut ("    " + s)  // TODO: repetition throughout routines!
 
-    if t.InitData.Length > 1 then failwith "Cannot translate module with more than one Elem in a TableSec table"
+            writeOut "align ptr"
+            writeOut (sprintf "data %s%d" AsmTableNamePrefix i)
 
-    t.InitData |> Array.iter (fun elem ->
-            let ofsExpr, funcIdxList = elem
-            let ofsValue = StaticEvaluate ofsExpr
-            if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
-            funcIdxList |> Array.iter (fun funcIdx -> writeIns (FuncIdxNameString funcIdx))
-        )
+            t.InitData |> Array.iter (fun elem ->
+                    let ofsExpr, funcIdxList = elem
+                    let ofsValue = StaticEvaluate ofsExpr
+                    if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
+                    funcIdxList |> Array.iter (fun funcIdx -> 
+                        writeIns (sprintf "ptr %s" (FuncIdxNameString funcIdx)))
+                )
+
+        | _ -> failwith "Cannot translate module with more than one Elem in a TableSec table"
 
 
 
@@ -469,12 +497,30 @@ let WasmMemoryBlockMultiplier = 65536u
 
 
 
-let WriteOutLoadLinearMemoryRegister writeOutCode =
+let TranslateThunkIn () =
     // The translated code requires the Y register to
     // point to the base of the linear memory region.
     // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
-    writeOutCode (sprintf "let Y=%s%d" AsmMemPrefix 0)
+    [ sprintf "let Y=%s%d" AsmMemPrefix 0 ]
     
+
+let TranslateGotoIndex tableLabel numMax defaultLabel =
+    [
+        // A is already the index to branch to
+        sprintf "cmp A,%d:if >>= goto %s" numMax (LabelTextOf defaultLabel) ;
+        "shl A,logptr" ;
+        sprintf "goto [A+%s]" (LabelTextOf tableLabel)
+    ]
+
+
+let TranslateCallTableIndirect () =
+    // TODO: We really need to emit some code to validate the signatures.
+    // A is already the index to call.
+    // TODO: We need to validate index A lies within wasm table [0]
+    [
+        "shl A,logptr" ;
+        (sprintf "goto [A+%s0]" AsmTableNamePrefix)  // WASM 1.0 always looks in table #0
+    ]
 
 
 
@@ -506,7 +552,7 @@ let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory2[]) =
 
     let writeOutIns s = writeOutCode ("    " + s)
 
-    WriteOutLoadLinearMemoryRegister writeOutIns
+    TranslateThunkIn () |> List.iter writeOutIns
     writeOutCode "ret"
 
 
@@ -540,12 +586,20 @@ let WriteOutHexDump writeLine byteArray =
 let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemory2Record) =
 
     let linearMemorySize = 
+
         match thisMem with 
             | { MemoryType={ MemoryLimits=lims } } -> 
+
             match lims with 
-                | { LimitMin=U32(0u); LimitMax=None; }      -> failwith "Cannot translate module with Mem that is size 0"   // At least we expect to initalise GCC's stack pointer.
-                | { LimitMin=U32(memSize); LimitMax=None; } -> memSize * WasmMemoryBlockMultiplier
-                | { LimitMin=_; LimitMax=Some(_); }         -> failwith "Cannot translate module with Mem that has max size limit"
+
+                | { LimitMin = U32(0u); LimitMax = None; }      
+                    -> failwith "Cannot translate module with Mem that is size 0"   
+
+                | { LimitMin = U32(memSize); LimitMax = None; } 
+                    -> memSize * WasmMemoryBlockMultiplier
+
+                | { LimitMin = _; LimitMax = Some(_); }
+                    -> failwith "Cannot translate module with Mem that has max size limit"
 
     writeOutVar "global"
     writeOutVar "    align ptr"
@@ -575,115 +629,95 @@ let WriteOutWasmGlobal writeOut i (m:Module2) (g:InternalGlobal2Record) =
 
 
 
+let OfsIfNeeded u = 
+    match u with
+        | U32(0u) -> ""   // indexed addressing not needed
+        | U32(n)  -> ("+" + n.ToString())   // indexed addressing
+
+
+let TranslateREGU32 s1 r u s2 = 
+    [ sprintf "%s%s%s%s" s1 (RegNameOf r) (OfsIfNeeded u) s2 ]
+
+
+let TranslateREGU32I32 s1 r u s2 n = 
+    [ sprintf "%s%s%s%s%d" s1 (RegNameOf r) (OfsIfNeeded u) s2 n ]
+
+
+
+let TranslateInstructionToAsmSequence subTree =
+
+    // These translations can assume a 32-bit target for now.
+
+    match subTree with
+        | Barrier               -> [ "// ~~~ register barrier ~~~" ]
+        | Breakpoint            -> [ "break" ]
+        | Drop                  -> [ "add SP,4" ]  // TODO: Assumes 32-bit target
+        | Label(l)              -> [ "label " + (LabelTextOf l) ]   // TODO: sort out ASM local label references
+        | Const(r,Const32(n))   -> [ sprintf "let %s=%d" (RegNameOf r) n ]
+        | Goto(l)               -> [ "goto " + LabelTextOf l ]
+        | CallFunc(l)           -> [ "call " + FuncNameOf l ]
+        | CallTableIndirect     -> TranslateCallTableIndirect ()
+        | BranchAZ(l)           -> [ "cmp A,0:if z goto " + LabelTextOf l ]
+        | BranchANZ(l)          -> [ "cmp A,0:if nz goto " + LabelTextOf l ]
+        | GotoIndex(t,n,d,_)    -> TranslateGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
+        | Push(r)               -> [ sprintf "push %s" (RegNameOf r) ]
+        | Pop(r)                -> [ sprintf "pop %s" (RegNameOf r) ]
+        | PeekA                 -> [ "let A=int [SP]" ]  // TODO: Assumes 32-bit target
+        | Let(r1,r2)            -> [ sprintf "let %s=%s" (RegNameOf r1) (RegNameOf r2) ]
+        | AddAN(I32(n))         -> [ sprintf "add A,%d" n ]
+        | SubAN(I32(n))         -> [ sprintf "sub A,%d" n ]
+        | AndAN(I32(n))         -> [ sprintf "and A,%d" n ]
+        | OrAN(I32(n))          -> [ sprintf "or A,%d"  n ]
+        | XorAN(I32(n))         -> [ sprintf "xor A,%d" n ]
+        | Add(r1,r2)            -> [ sprintf "add %s,%s" (RegNameOf r1) (RegNameOf r2) ]  // commutative
+        | SubBA                 -> [ "sub B,A" ]
+        | MulAB                 -> [ "mul A,B" ]  // commutative
+        | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have division or remainder instructions"
+        | AndAB                 -> [ "and A,B" ]  // commutative
+        | OrAB                  -> [ "or A,B" ]   // commutative
+        | XorAB                 -> [ "xor A,B" ]  // commutative
+        | ShlBC                 -> [ "shl B,C" ]
+        | ShrsBC                -> [ "sar B,C" ]
+        | ShruBC                -> [ "shr B,C" ]
+        | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
+        | CmpEqBA               -> [ "cmp B,A:set z A" ]
+        | CmpNeBA               -> [ "cmp B,A:set nz A" ]
+        | CmpLtsBA              -> [ "cmp B,A:set < A" ]
+        | CmpLtuBA              -> [ "cmp B,A:set << A" ]
+        | CmpGtsBA              -> [ "cmp B,A:set > A" ]
+        | CmpGtuBA              -> [ "cmp B,A:set >> A" ]
+        | CmpLesBA              -> [ "cmp B,A:set <= A" ]
+        | CmpLeuBA              -> [ "cmp B,A:set <<= A" ]
+        | CmpGesBA              -> [ "cmp B,A:set >= A" ]
+        | CmpGeuBA              -> [ "cmp B,A:set >>= A" ]
+        | CmpAZ                 -> [ "cmp A,0:set z A" ]
+        | FetchLoc(r,i)         -> [ sprintf "let %s=int[@%s]" (RegNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
+        | StoreLoc(r,i)         -> [ sprintf "let int[@%s]=%s" (LocalIdxNameString i) (RegNameOf r) ]  // TODO: Assumes 32-bit target
+        | FetchGlo(r,i)         -> [ sprintf "let %s=int[%s]" (RegNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
+        | StoreGlo(r,i)         -> [ sprintf "let int[%s]=%s" (GlobalIdxNameString i) (RegNameOf r) ]  // TODO: Eventually use the type rather than "int"
+        | StoreConst8(r,ofs,I32(v))   -> TranslateREGU32I32 "let byte[" r ofs "]=" v
+        | StoreConst16(r,ofs,I32(v))  -> TranslateREGU32I32 "let ushort[" r ofs "]=" v
+        | StoreConst32(r,ofs,I32(v))  -> TranslateREGU32I32 "let uint[" r ofs "]=" v  
+        | Store8A(r,ofs)       -> TranslateREGU32 "let byte[" r ofs "]=A"  
+        | Store16A(r,ofs)      -> TranslateREGU32 "let ushort[" r ofs "]=A"
+        | Store32A(r,ofs)      -> TranslateREGU32 "let uint[" r ofs "]=A"  
+        | Fetch8s(r,ofs)       -> TranslateREGU32 "let A=sbyte[" r ofs "]" 
+        | Fetch8u(r,ofs)       -> TranslateREGU32 "let A=byte[" r ofs "]"  
+        | Fetch16s(r,ofs)      -> TranslateREGU32 "let A=short[" r ofs "]" 
+        | Fetch16u(r,ofs)      -> TranslateREGU32 "let A=ushort[" r ofs "]"
+        | Fetch32(r,ofs)       -> TranslateREGU32 "let A=uint[" r ofs "]"  
+        | ThunkIn              -> TranslateThunkIn ()
+
+
+
 
 let WriteOutInstructionsToText writeOut instrs thisFuncType =
 
     let writeIns s = writeOut ("    " + s)
 
-    let writeOfs u = 
-        match u with
-            | U32(0u) -> ""   // indexed addressing not needed
-            | U32(n)  -> ("+" + n.ToString())   // indexed addressing
-
-    let writeU32    s1 u s2   = writeIns (sprintf "%s%s%s"   s1 (writeOfs u) s2)
-    let writeU32I32 s1 u s2 n = writeIns (sprintf "%s%s%s%d" s1 (writeOfs u) s2 n)
-    let writeLoc    s1 i s2   = writeIns (sprintf "%s%d%s"   s1 (LocalIdxAsUint32 i) s2)
-
-    let writeGotoIndex tableLabel numMax defaultLabel =
-        // A is already the index to branch to
-        writeIns (sprintf "cmp A,%d:if >>= goto %s" numMax (LabelTextOf defaultLabel))
-        writeIns "shl A,2"  // TODO: assumes 32-bit target
-        writeIns (sprintf "goto [A+%s]" (LabelTextOf tableLabel))
-
-    let writeCallTableIndirect () =
-        // TODO: We really need to emit some code to validate the signatures.
-        // A is already the index to call.
-        // TODO: We need to validate index A lies within wasm table [0]
-        writeIns "shl A,2"  // TODO: assumes 32-bit target
-        writeIns (sprintf "goto [A+%s0]" AsmTableNamePrefix)  // WASM 1.0 always looks in table #0
-
-    let instructionToText ins =  // These translations can assume a 32-bit target for now.
-
-        match ins with
-            | Barrier               -> writeIns "// ~~~ register barrier ~~~"
-            | Breakpoint            -> writeIns "break"
-            | Drop                  -> writeIns "add SP,4"  // TODO: Assumes 32-bit target
-            | Label(l)              -> writeOut ("label " + LabelTextOf l)   // TODO: sort out ASM local label references
-            | Const(r,Const32(n))   -> writeIns (sprintf "let %s=%d" (RegNameOf r) n)
-            | Goto(l)               -> writeIns ("goto " + LabelTextOf l)
-            | CallFunc(l)           -> writeIns ("call " + FuncNameOf l)
-            | CallTableIndirect     -> writeCallTableIndirect ()
-            | BranchAZ(l)           -> writeIns ("cmp A,0:if z goto " + LabelTextOf l)
-            | BranchANZ(l)          -> writeIns ("cmp A,0:if nz goto " + LabelTextOf l)
-            | GotoIndex(t,n,d,_)    -> writeGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
-            | PushA                 -> writeIns "push A"
-            | PeekA                 -> writeIns "let A=int [SP]"  // TODO: Assumes 32-bit target
-            | PopA                  -> writeIns "pop A"
-            | PopB                  -> writeIns "pop B"
-            | PopC                  -> writeIns "pop C"
-            | LetAB                 -> writeIns "let A=B"
-            | LetAC                 -> writeIns "let A=C"
-            | LetCA                 -> writeIns "let C=A"
-            | AddAY                 -> writeIns "add A,Y"  // used for address space relocation
-            | AddBY                 -> writeIns "add B,Y"  // used for address space relocation
-            | AddAN(I32(n))         -> writeIns (sprintf "add A,%d" n)
-            | SubAN(I32(n))         -> writeIns (sprintf "sub A,%d" n)
-            | AndAN(I32(n))         -> writeIns (sprintf "and A,%d" n)
-            | OrAN(I32(n))          -> writeIns (sprintf "or A,%d"  n)
-            | XorAN(I32(n))         -> writeIns (sprintf "xor A,%d" n)
-            | AddAB                 -> writeIns "add A,B"  // commutative
-            | SubBA                 -> writeIns "sub B,A"
-            | MulAB                 -> writeIns "mul A,B"  // commutative
-            | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have a division instruction"
-            | AndAB                 -> writeIns "and A,B"  // commutative
-            | OrAB                  -> writeIns "or A,B"   // commutative
-            | XorAB                 -> writeIns "xor A,B"  // commutative
-            | ShlBC                 -> writeIns "shl B,C"
-            | ShrsBC                -> writeIns "sar B,C"
-            | ShruBC                -> writeIns "shr B,C"
-            | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
-            | CmpEqBA               -> writeIns "cmp B,A:set z A"
-            | CmpNeBA               -> writeIns "cmp B,A:set nz A"
-            | CmpLtsBA              -> writeIns "cmp B,A:set < A"
-            | CmpLtuBA              -> writeIns "cmp B,A:set << A"
-            | CmpGtsBA              -> writeIns "cmp B,A:set > A"
-            | CmpGtuBA              -> writeIns "cmp B,A:set >> A"
-            | CmpLesBA              -> writeIns "cmp B,A:set <= A"
-            | CmpLeuBA              -> writeIns "cmp B,A:set <<= A"
-            | CmpGesBA              -> writeIns "cmp B,A:set >= A"
-            | CmpGeuBA              -> writeIns "cmp B,A:set >>= A"
-            | CmpAZ                 -> writeIns "cmp A,0:set z A"
-            | FetchLoc(r,i)         -> writeIns (sprintf "let %s=int[@%s]" (RegNameOf r) (LocalIdxNameString i))  // TODO: Assumes 32-bit target
-            | StoreLoc(r,i)         -> writeIns (sprintf "let int[@%s]=%s" (LocalIdxNameString i) (RegNameOf r))  // TODO: Assumes 32-bit target
-            | FetchGlo(r,i)         -> writeIns (sprintf "let %s=int[%s]" (RegNameOf r) (GlobalIdxNameString i))  // TODO: Eventually use the type rather than "int"
-            | StoreGlo(r,i)         -> writeIns (sprintf "let int[%s]=%s" (GlobalIdxNameString i) (RegNameOf r))  // TODO: Eventually use the type rather than "int"
-            | StoreConst8toA(ofs,I32(v))   -> writeU32I32 "let byte[A" ofs "]=" v  
-            | StoreConst16toA(ofs,I32(v))  -> writeU32I32 "let ushort[A" ofs "]=" v
-            | StoreConst32toA(ofs,I32(v))  -> writeU32I32 "let uint[A" ofs "]=" v  
-            | StoreConst8toY(ofs,I32(v))   -> writeU32I32 "let byte[Y" ofs "]=" v
-            | StoreConst16toY(ofs,I32(v))  -> writeU32I32 "let ushort[Y" ofs "]=" v
-            | StoreConst32toY(ofs,I32(v))  -> writeU32I32 "let uint[Y" ofs "]=" v
-            | Store8AtoB(ofs)         -> writeU32 "let byte[B" ofs "]=A"
-            | Store16AtoB(ofs)        -> writeU32 "let ushort[B" ofs "]=A"
-            | Store32AtoB(ofs)        -> writeU32 "let uint[B" ofs "]=A"
-            | Store8AtoY(ofs)         -> writeU32 "let byte[Y" ofs "]=A"
-            | Store16AtoY(ofs)        -> writeU32 "let ushort[Y" ofs "]=A"
-            | Store32AtoY(ofs)        -> writeU32 "let uint[Y" ofs "]=A"
-            | Fetch8sFromA(ofs)       -> writeU32 "let A=sbyte[A" ofs "]"
-            | Fetch8uFromA(ofs)       -> writeU32 "let A=byte[A" ofs "]"
-            | Fetch16sFromA(ofs)      -> writeU32 "let A=short[A" ofs "]"
-            | Fetch16uFromA(ofs)      -> writeU32 "let A=ushort[A" ofs "]"
-            | Fetch32FromA(ofs)       -> writeU32 "let A=uint[A" ofs "]"
-            | Fetch8sFromY(ofs)       -> writeU32 "let A=sbyte[Y" ofs "]"
-            | Fetch8uFromY(ofs)       -> writeU32 "let A=byte[Y" ofs "]"
-            | Fetch16sFromY(ofs)      -> writeU32 "let A=short[Y" ofs "]"
-            | Fetch16uFromY(ofs)      -> writeU32 "let A=ushort[Y" ofs "]"
-            | Fetch32FromY(ofs)       -> writeU32 "let A=uint[Y" ofs "]"
-            | ThunkIn                 -> WriteOutLoadLinearMemoryRegister writeIns
-
     // Kick off the whole thing here:
 
-    instrs |> List.iter instructionToText
+    instrs |> List.iter (fun i -> TranslateInstructionToAsmSequence i |> List.iter writeIns)
 
     // Handle the function's return (may need pop into A):
 
@@ -701,15 +735,15 @@ let WriteOutBranchTables writeOut funcInstructions =
     funcInstructions |> List.iter (fun ins ->
         match ins with
             | GotoIndex(tableLabel,_,_,codePointLabels) ->
-                writeOut "align int"
+                writeOut "align ptr"
                 writeOut (sprintf "data %s" (LabelTextOf tableLabel))
-                codePointLabels |> Array.iter (fun lbl -> writeIns (sprintf "int %s" (LabelTextOf lbl)))
+                codePointLabels |> Array.iter (fun lbl -> writeIns (sprintf "ptr %s" (LabelTextOf lbl)))
             | _ -> ()
         )
 
 
 
-let WriteOutFunction writeOut thisFuncType funcInstructions config =   // TODO:  Can we reduce f to inner components ?
+let WriteOutFunction writeOut thisFuncType thisFuncLocals funcInstructions config =   // TODO:  Can we reduce f to inner components ?
 
     let phase1 = 
         match config with
@@ -724,7 +758,7 @@ let WriteOutFunction writeOut thisFuncType funcInstructions config =   // TODO: 
     let desiredInstructions = phase2
 
     WriteOutInstructionsToText writeOut desiredInstructions thisFuncType
-    writeOut (ReturnCommandFor thisFuncType)
+    writeOut (ReturnCommandFor thisFuncType thisFuncLocals)
 
 
 
@@ -738,7 +772,7 @@ let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2
     try
         writeOut procedureCommand
         WriteOutFunctionLocals writeOut f.FuncType f.Locals
-        WriteOutFunction writeOut f.FuncType funcInstructions config
+        WriteOutFunction writeOut f.FuncType f.Locals funcInstructions config
         WriteOutBranchTables writeOutTables funcInstructions
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))

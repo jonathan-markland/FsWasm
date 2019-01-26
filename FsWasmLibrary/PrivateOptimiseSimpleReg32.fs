@@ -33,30 +33,24 @@ let ReplaceAll patternLength patternMatcher getReplacementRegarding (sourceArray
 
 
 
-let IsPushA   i = match i with | PushA   -> true | _ -> false
-let IsPeekA   i = match i with | PeekA   -> true | _ -> false
-let IsPopA    i = match i with | PopA    -> true | _ -> false
-let IsPopB    i = match i with | PopB    -> true | _ -> false
+let IsPushA   i = match i with | Push(A)   -> true | _ -> false
+let IsPeekA   i = match i with | PeekA     -> true | _ -> false
+let IsPopA    i = match i with | Pop(A)    -> true | _ -> false
+let IsPopB    i = match i with | Pop(B)    -> true | _ -> false
 let IsBarrier i = match i with | Barrier -> true | _ -> false
 let IsDrop    i = match i with | Drop    -> true | _ -> false
 
 
 let IsRegisterPreserving = function
     | StoreLoc(_)
-    | Store16AtoB(_)
+    | Store16A(_)
     | StoreGlo(_)
-    | StoreConst8toA(_)
-    | StoreConst16toA(_)
-    | StoreConst32toA(_)
-    | StoreConst8toY(_)
-    | StoreConst16toY(_)
-    | StoreConst32toY(_)
-    | Store8AtoB  (_)
-    | Store16AtoB (_)
-    | Store32AtoB (_)
-    | Store8AtoY  (_)
-    | Store16AtoY (_)
-    | Store32AtoY (_)
+    | StoreConst8(_)
+    | StoreConst16(_)
+    | StoreConst32(_)
+    | Store8A(_)
+    | Store16A(_)
+    | Store32A(_)
         -> true
     | _ -> false
 

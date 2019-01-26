@@ -25,7 +25,7 @@ let Optimise (originalList:InstrSimpleReg32 list) =
     originalArray
         |> ReplaceAll 3 WherePushBarrierPop  WithEmptyList
         |> ReplaceAll 3 WherePushBarrierDrop WithEmptyList
-        |> ReplaceAll 3 WherePushBarrierPeek (fun _ _ -> [| PushA |])
+        |> ReplaceAll 3 WherePushBarrierPeek (fun _ _ -> [| Push(A) |])
         |> ReplaceAll 4 WherePushPopAroundPreserving (fun a i -> [| a.[i+1] |])
         |> ReplaceAll 5 WherePushPopAroundPreservingRequiringRename (fun a i -> [| (a.[i] |> AssigningInsteadTo B) ; a.[i+3] |])
         |> Array.toList
