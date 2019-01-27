@@ -193,7 +193,7 @@ namespace WasmSerialiser
                     RaiseExceptionsIfOverflow64(readerMode, thisByte);
                 }
 
-                resultValue |= (uint)((uint)(thisByte & 0x7F) << positioningShift);
+                resultValue |= (ulong)((ulong)(thisByte & 0x7F) << positioningShift);
                 positioningShift += 7;
 
                 if ((thisByte & 0x80) == 0)
