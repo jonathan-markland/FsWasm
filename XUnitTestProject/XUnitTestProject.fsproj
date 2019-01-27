@@ -14,6 +14,9 @@
     <Content Include="program (3).txt" />
     <Content Include="program (4).txt" />
     <Content Include="program (5).txt" />
+    <Content Include="program %286%29.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="program (1).wasm" />
     <None Include="program (2).wasm" />
     <None Include="program %283%29.wasm">
@@ -21,6 +24,9 @@
     </None>
     <None Include="program (4).wasm" />
     <None Include="program (5).wasm" />
+    <None Include="program %286%29.wasm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="UnitTestSerialiser.fs" />
     <Compile Include="Tests.fs" />
     <Compile Include="Program.fs" />

@@ -346,5 +346,94 @@ int main() {
 
 
 
+program (6).wasm
+----------------
+
+
+void DoSomething(float f, double d, int i, long long l)
+{
+  *(float     *)  0x100 = 0.5f + f - (f / 2);
+  *(double    *)  0x108 = 123.456 + d - (d / 2);
+  *(int       *)  0x110 = 123456 + i - (i / 2);
+  *(long long *)  0x118 = 123456789123456 + l - (l / 2);
+}
+
+
+int main() {
+  DoSomething(1.0f, 2.0, 3, 4);
+  return 42;
+}
+
+
+(module
+ (table 0 anyfunc)
+ (memory $0 1)
+ (export "memory" (memory $0))
+ (export "DoSomething" (func $DoSomething))
+ (export "main" (func $main))
+ (func $DoSomething (; 0 ;) (param $0 f32) (param $1 f64) (param $2 i32) (param $3 i64)
+  (f64.store offset=264
+   (i32.const 0)
+   (f64.add
+    (f64.add
+     (get_local $1)
+     (f64.const 123.456)
+    )
+    (f64.mul
+     (get_local $1)
+     (f64.const -0.5)
+    )
+   )
+  )
+  (f32.store offset=256
+   (i32.const 0)
+   (f32.sub
+    (f32.add
+     (get_local $0)
+     (f32.const 0.5)
+    )
+    (f32.mul
+     (get_local $0)
+     (f32.const 0.5)
+    )
+   )
+  )
+  (i32.store offset=272
+   (i32.const 0)
+   (i32.add
+    (i32.add
+     (get_local $2)
+     (i32.div_s
+      (get_local $2)
+      (i32.const -2)
+     )
+    )
+    (i32.const 123456)
+   )
+  )
+  (i64.store offset=280
+   (i32.const 0)
+   (i64.add
+    (i64.add
+     (get_local $3)
+     (i64.div_s
+      (get_local $3)
+      (i64.const -2)
+     )
+    )
+    (i64.const 123456789123456)
+   )
+  )
+ )
+ (func $main (; 1 ;) (result i32)
+  (call $DoSomething
+   (f32.const 1)
+   (f64.const 2)
+   (i32.const 3)
+   (i64.const 4)
+  )
+  (i32.const 42)
+ )
+)
 
 
