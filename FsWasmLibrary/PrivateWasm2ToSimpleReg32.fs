@@ -4,7 +4,7 @@ open WasmFileTypes
 open WasmBetterTypes
 open Wasm2ToSimpleReg32ConfigTypes
 open SimpleReg32
-open SimpleReg32Constants
+open AsmPrefixes
 open OptimiseSimpleReg32
 open System.Text
 

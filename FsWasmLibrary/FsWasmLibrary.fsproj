@@ -12,7 +12,7 @@
     <Compile Include="WasmToBetterWasm.fs" />
     <Compile Include="PrivateWasmFileReader.fs" />
     <Compile Include="WasmFileReader.fs" />
-    <Compile Include="SimpleReg32Constants.fs" />
+    <Compile Include="AsmPrefixes.fs" />
     <Compile Include="SimpleReg32.fs" />
     <Compile Include="PrivateOptimiseSimpleReg32.fs" />
     <Compile Include="OptimiseSimpleReg32.fs" />

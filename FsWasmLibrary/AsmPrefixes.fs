@@ -1,4 +1,4 @@
-﻿module SimpleReg32Constants
+﻿module AsmPrefixes
 
 let AsmImportedFuncNamePrefix   = "wasm_host_"
 let AsmInternalFuncNamePrefix   = "wasm_fn"
