@@ -8,8 +8,8 @@
     <Compile Include="WasmFileTypes.fs" />
     <Compile Include="WasmAlgorithms.fs" />
     <Compile Include="WasmBetterTypes.fs" />
-    <Compile Include="PrivateWasmToWasm2.fs" />
-    <Compile Include="WasmToWasm2.fs" />
+    <Compile Include="PrivateWasmToBetterWasm.fs" />
+    <Compile Include="WasmToBetterWasm.fs" />
     <Compile Include="PrivateWasmFileReader.fs" />
     <Compile Include="WasmFileReader.fs" />
     <Compile Include="SimpleReg32Constants.fs" />

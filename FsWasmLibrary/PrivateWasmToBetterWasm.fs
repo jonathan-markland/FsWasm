@@ -1,4 +1,4 @@
-﻿module PrivateWasmToWasm2
+﻿module PrivateWasmToBetterWasm
 
 open WasmFileTypes
 open WasmBetterTypes

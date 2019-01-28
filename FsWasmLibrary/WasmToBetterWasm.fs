@@ -1,10 +1,10 @@
-﻿module WasmToWasm2
+﻿module WasmToBetterWasm
 
 open WasmFileTypes
 open WasmBetterTypes
-open PrivateWasmToWasm2
+open PrivateWasmToBetterWasm
 
-let TranslateWasmToWasm2 (oldModule:WasmFileTypes.Module) =
+let ToBetterWasm (oldModule:WasmFileTypes.Module) =
 
     let raiseErrorIfExists (customArray:Custom[]) =
         if customArray.Length > 0

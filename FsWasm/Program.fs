@@ -24,7 +24,7 @@ let main argv =
         let thisModule = r |> Module
         // TODO:  Should this be an optional output?  let unitTestSerialisation = thisModule |> UnitTestSerialiser.ModuleToUnitTestString fileName
 
-        let translatedToWasm2 = thisModule |> WasmToWasm2.TranslateWasmToWasm2
+        let translatedToWasm2 = thisModule |> WasmToBetterWasm.ToBetterWasm
 
         let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, FinalOutputOrder)  // TODO: Hard-code config!!
 
