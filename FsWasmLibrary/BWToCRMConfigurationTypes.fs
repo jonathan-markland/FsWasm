@@ -1,4 +1,4 @@
-﻿module Wasm2ToSimpleReg32ConfigTypes
+﻿module BWToCRMConfigurationTypes
 
 type BarrierConfig = WithBarriers | WithoutBarriers
 type OptimisationConfig = FullyOptimised | NoOptimisation

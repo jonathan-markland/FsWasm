@@ -1,11 +1,11 @@
-﻿module PrivateWasm2ToSimpleReg32
+﻿module PrivateBetterWasmToCommonRegisterMachine
 
 open WasmFileTypes
 open WasmBetterTypes
-open Wasm2ToSimpleReg32ConfigTypes
+open BWToCRMConfigurationTypes
 open CommonRegisterMachineTypes
 open AsmPrefixes
-open OptimiseSimpleReg32
+open OptimiseCommonRegisterMachine
 open System.Text
 
 

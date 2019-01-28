@@ -1,4 +1,6 @@
-﻿module CommonRegisterMachineTypes
+﻿/// The Common Register Machine is 32-bit, and can translate
+/// to the X86/ARM/MIPS.
+module CommonRegisterMachineTypes
 
 open WasmFileTypes
 

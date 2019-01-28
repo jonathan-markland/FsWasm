@@ -2,8 +2,8 @@
 open System.IO
 open WasmSerialiser
 open WasmFileReader
-open Wasm2ToSimpleReg32
-open Wasm2ToSimpleReg32ConfigTypes
+open BetterWasmToCommonRegisterMachine
+open BWToCRMConfigurationTypes
 open CompilationOutputting
 
 // Main

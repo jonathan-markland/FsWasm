@@ -14,11 +14,11 @@
     <Compile Include="WasmFileReader.fs" />
     <Compile Include="AsmPrefixes.fs" />
     <Compile Include="CommonRegisterMachineTypes.fs" />
-    <Compile Include="PrivateOptimiseSimpleReg32.fs" />
-    <Compile Include="OptimiseSimpleReg32.fs" />
-    <Compile Include="Wasm2ToSimpleReg32ConfigTypes.fs" />
-    <Compile Include="PrivateWasm2ToSimpleReg32.fs" />
-    <Compile Include="Wasm2ToSimpleReg32.fs" />
+    <Compile Include="PrivateOptimiseCommonRegisterMachine.fs" />
+    <Compile Include="OptimiseCommonRegisterMachine.fs" />
+    <Compile Include="BWToCRMConfigurationTypes.fs" />
+    <Compile Include="PrivateBetterWasmToCommonRegisterMachine.fs" />
+    <Compile Include="BetterWasmToCommonRegisterMachine.fs" />
   </ItemGroup>
 
   <ItemGroup>

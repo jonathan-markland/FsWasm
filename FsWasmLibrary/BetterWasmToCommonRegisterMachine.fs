@@ -1,7 +1,7 @@
-﻿module Wasm2ToSimpleReg32
+﻿module BetterWasmToCommonRegisterMachine
 
 open WasmBetterTypes
-open PrivateWasm2ToSimpleReg32
+open PrivateBetterWasmToCommonRegisterMachine
 
 
 
