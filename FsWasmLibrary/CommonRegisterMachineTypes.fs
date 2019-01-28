@@ -1,9 +1,9 @@
-﻿module SimpleReg32
+﻿module CommonRegisterMachineTypes
 
 open WasmFileTypes
 
 
-/// A register of the 32-bit machine
+/// A register of the Common Register Machine
 type REG32 = Reg32 of int
 
 /// A 32-bit constant
@@ -17,8 +17,8 @@ type REG = A | B | C | Y
 
 
 
-/// A 32-bit register machine instruction
-type InstrSimpleReg32 =
+/// A Common Register Machine instruction  (32-bit machine with WASM 1.0)
+type CRMInstruction32 =
 
     /// Thunk In.  (Loads Y register to point to linear memory in this implementation).
     | ThunkIn

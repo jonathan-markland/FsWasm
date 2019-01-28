@@ -1,10 +1,10 @@
 ﻿module PrivateOptimiseSimpleReg32
 
-open SimpleReg32
+open CommonRegisterMachineTypes
 
 
 
-let ReplaceAll patternLength patternMatcher getReplacementRegarding (sourceArray:InstrSimpleReg32[]) =
+let ReplaceAll patternLength patternMatcher getReplacementRegarding (sourceArray:CRMInstruction32[]) =
 
     let sourceLength = sourceArray.Length
 
@@ -12,7 +12,7 @@ let ReplaceAll patternLength patternMatcher getReplacementRegarding (sourceArray
     then 
         sourceArray  // Trivially can't be any matches
     else
-        let result = new ResizeArray<InstrSimpleReg32> ()
+        let result = new ResizeArray<CRMInstruction32> ()
         let mutable i = 0
 
         while i < (sourceLength - patternLength) do
@@ -65,12 +65,12 @@ let IsAssignToA = function
 
 
 
-let WherePushBarrierPop  i (a:InstrSimpleReg32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPopA a.[i+2]
-let WherePushBarrierDrop i (a:InstrSimpleReg32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsDrop a.[i+2]
-let WherePushBarrierPeek i (a:InstrSimpleReg32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPeekA a.[i+2]
-let WhereBarrier         i (a:InstrSimpleReg32[]) = IsBarrier a.[i]
+let WherePushBarrierPop  i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPopA a.[i+2]
+let WherePushBarrierDrop i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsDrop a.[i+2]
+let WherePushBarrierPeek i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPeekA a.[i+2]
+let WhereBarrier         i (a:CRMInstruction32[]) = IsBarrier a.[i]
 
-let WherePushPopAroundPreserving i (a:InstrSimpleReg32[]) = 
+let WherePushPopAroundPreserving i (a:CRMInstruction32[]) = 
 
     //    push A
     //    let int[@loc2]=A
@@ -82,7 +82,7 @@ let WherePushPopAroundPreserving i (a:InstrSimpleReg32[]) =
     && IsBarrier a.[i+2] 
     && IsPopA a.[i+3]
 
-let WherePushPopAroundPreservingRequiringRename i (a:InstrSimpleReg32[]) = 
+let WherePushPopAroundPreservingRequiringRename i (a:CRMInstruction32[]) = 
 
     //    let A=int[@loc4]
     //    push A

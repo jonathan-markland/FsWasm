@@ -1,6 +1,6 @@
 ﻿module OptimiseSimpleReg32
 
-open SimpleReg32
+open CommonRegisterMachineTypes
 open PrivateOptimiseSimpleReg32
 
 
@@ -16,7 +16,7 @@ let AssigningInsteadTo otherReg = function   // Note: is counterpart to IsAssign
 
 
 
-let Optimise (originalList:InstrSimpleReg32 list) =
+let Optimise (originalList:CRMInstruction32 list) =
 
     let originalArray = List.toArray originalList   // TODO: re-write ReplaceAll (etc) for F# lists
 
@@ -32,7 +32,7 @@ let Optimise (originalList:InstrSimpleReg32 list) =
 
 
 
-let RemoveBarriers (originalList:InstrSimpleReg32 list) =
+let RemoveBarriers (originalList:CRMInstruction32 list) =
 
     let originalArray = List.toArray originalList   // TODO: re-write ReplaceAll (etc) for F# lists
 
