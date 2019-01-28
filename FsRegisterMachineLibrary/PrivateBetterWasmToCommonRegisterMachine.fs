@@ -4,7 +4,7 @@ open WasmFileTypes
 open WasmBetterTypes
 open BWToCRMConfigurationTypes
 open CommonRegisterMachineTypes
-open JasmPrefixes
+open AsmPrefixes
 open OptimiseCommonRegisterMachine
 open System.Text
 
