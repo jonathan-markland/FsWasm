@@ -3,7 +3,7 @@ open System.IO
 open WasmSerialiser
 open WasmFileReader
 open BetterWasmToCommonRegisterMachine
-open BWToCRMConfigurationTypes
+open Wasm2ToSimpleReg32ConfigTypes
 open CompilationOutputting
 
 // Main

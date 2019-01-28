@@ -1,4 +1,4 @@
-﻿module AsmPrefixes
+﻿module JasmPrefixes
 
 let AsmImportedFuncNamePrefix   = "wasm_host_"
 let AsmInternalFuncNamePrefix   = "wasm_fn"
