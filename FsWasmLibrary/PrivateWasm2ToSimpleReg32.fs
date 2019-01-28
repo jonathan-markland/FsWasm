@@ -470,7 +470,7 @@ let ReturnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
 
 
 
-let WriteOutWasmTable writeOut i (m:Module2) (t:InternalTable2Record) =
+let WriteOutWasmTable writeOut i (m:Module2) (t:InternalTableRecord) =
 
     match t.InitData.Length with
         | 0 -> ()
@@ -533,7 +533,7 @@ let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory2[]) =
     // writeOutCode (sprintf "    // Caller must pass stack pointer (relative to %s%d) in A" AsmMemPrefix 0)
     // writeOutCode (sprintf "    let uint [%s%d+4]=A // Initialise WasmFiddle stack pointer at address offset 4" AsmMemPrefix 0)
 
-    let writeOutDataCopyCommand i (thisMem:InternalMemory2Record) =
+    let writeOutDataCopyCommand i (thisMem:InternalMemoryRecord) =
         if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
         thisMem.InitData |> Array.iteri (fun j elem ->
                 let ofsExpr, byteArray = elem
@@ -583,7 +583,7 @@ let WriteOutHexDump writeLine byteArray =
 
 
 
-let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemory2Record) =
+let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemoryRecord) =
 
     let linearMemorySize = 
 
@@ -618,7 +618,7 @@ let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemory2Record) =
 
 
 
-let WriteOutWasmGlobal writeOut i (m:Module2) (g:InternalGlobal2Record) =
+let WriteOutWasmGlobal writeOut i (m:Module2) (g:InternalGlobalRecord) =
 
     // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
 
@@ -762,7 +762,7 @@ let WriteOutFunction writeOut thisFuncType thisFuncLocals funcInstructions confi
 
 
 
-let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2) translationState config (f:InternalFunction2Record) =   // TODO: module only needed to query function metadata in TranslateInstructions
+let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
     
     let funcInstructions, updatedTranslationState = 
         f.Body |> TranslateInstructions m.Funcs translationState

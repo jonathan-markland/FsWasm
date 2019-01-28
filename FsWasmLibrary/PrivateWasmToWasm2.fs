@@ -20,7 +20,7 @@ let MakeArrayUsing arrayMaker =
 // -------------------------------------------------------------------------------------------------
 
 
-let FindExport (oldModule:Module) desc : Export2 option =
+let FindExport (oldModule:Module) desc : Export option =
 
     let oldExportOpt = oldModule.Exports |> Array.tryFind (fun exp ->
         match exp with
