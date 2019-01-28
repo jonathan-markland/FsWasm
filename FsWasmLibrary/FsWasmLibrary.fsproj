@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <Compile Include="WasmFileTypes.fs" />
-    <Compile Include="Wasm2.fs" />
+    <Compile Include="WasmBetterTypes.fs" />
     <Compile Include="WasmAlgorithms.fs" />
     <Compile Include="PrivateWasmToWasm2.fs" />
     <Compile Include="WasmToWasm2.fs" />

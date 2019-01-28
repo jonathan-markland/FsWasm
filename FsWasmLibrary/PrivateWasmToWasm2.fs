@@ -1,7 +1,7 @@
 ﻿module PrivateWasmToWasm2
 
 open WasmFileTypes
-open Wasm2
+open WasmBetterTypes
 
 // -------------------------------------------------------------------------------------------------
 //  Completely Generic Library

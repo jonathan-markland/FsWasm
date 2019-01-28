@@ -1,7 +1,7 @@
 ﻿module PrivateWasm2ToSimpleReg32
 
 open WasmFileTypes
-open Wasm2
+open WasmBetterTypes
 open Wasm2ToSimpleReg32ConfigTypes
 open SimpleReg32
 open SimpleReg32Constants

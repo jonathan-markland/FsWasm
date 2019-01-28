@@ -1,6 +1,6 @@
 ﻿module Wasm2ToSimpleReg32
 
-open Wasm2
+open WasmBetterTypes
 open PrivateWasm2ToSimpleReg32
 
 

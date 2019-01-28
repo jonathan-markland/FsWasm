@@ -1,7 +1,7 @@
 ﻿module WasmToWasm2
 
 open WasmFileTypes
-open Wasm2
+open WasmBetterTypes
 open PrivateWasmToWasm2
 
 let TranslateWasmToWasm2 (oldModule:Module) =
