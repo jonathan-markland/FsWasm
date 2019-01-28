@@ -22,7 +22,7 @@ let (-+-) a b =
 
 
 
-let FuncLabelFor fidx (moduleFuncsArray:Function2[]) =
+let FuncLabelFor fidx (moduleFuncsArray:Function[]) =
     match fidx with
         | FuncIdx(U32(i)) -> 
             match moduleFuncsArray.[int i] with
@@ -38,7 +38,7 @@ type ModuleTranslationState =
 
 
 
-let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:WasmFileTypes.Instr list) =
+let TranslateInstructions (moduleFuncsArray:Function[]) translationState (ws:WasmFileTypes.Instr list) =
 
     let mutable labelCount = match translationState with ModuleTranslationState(count) -> count
     let mutable labelStack = new ResizeArray<LABELNAME>()
@@ -524,7 +524,7 @@ let TranslateCallTableIndirect () =
 
 
 
-let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory2[]) =
+let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory[]) =
 
     writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
     

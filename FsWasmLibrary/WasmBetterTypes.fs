@@ -22,19 +22,19 @@ type InternalTableRecord  = { Export:Export option; TableType:TableType; InitDat
 
 
 
-type Function2 =
+type Function =
     | ImportedFunction2 of ImportedFunctionRecord
     | InternalFunction2 of InternalFunctionRecord
 
-type Global2 =
+type Global =
     | ImportedGlobal2 of ImportedGlobalRecord
     | InternalGlobal2 of InternalGlobalRecord
 
-type Memory2 =
+type Memory =
     | ImportedMemory2 of ImportedMemoryRecord
     | InternalMemory2 of InternalMemoryRecord
 
-type Table2 =
+type Table =
     | ImportedTable2 of ImportedTableRecord
     | InternalTable2 of InternalTableRecord
 
@@ -42,8 +42,8 @@ type Table2 =
 
 type Module2 = {
     // NB: Decision made to drop custom sections, I could not, in general, interpret them anyway.
-    Funcs:   Function2[];
-    Mems:    Memory2[];
-    Tables:  Table2[];
-    Globals: Global2[];
+    Funcs:   Function[];
+    Mems:    Memory[];
+    Tables:  Table[];
+    Globals: Global[];
     Start:   Start option; }
