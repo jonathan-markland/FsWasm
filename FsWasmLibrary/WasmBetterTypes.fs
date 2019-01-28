@@ -40,7 +40,7 @@ type Table =
 
 
 
-type Module2 = {
+type Module = {
     // NB: Decision made to drop custom sections, I could not, in general, interpret them anyway.
     Funcs:   Function[];
     Mems:    Memory[];

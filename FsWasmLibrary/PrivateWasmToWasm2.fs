@@ -20,7 +20,7 @@ let MakeArrayUsing arrayMaker =
 // -------------------------------------------------------------------------------------------------
 
 
-let FindExport (oldModule:Module) desc : Export option =
+let FindExport (oldModule:WasmFileTypes.Module) desc : Export option =
 
     let oldExportOpt = oldModule.Exports |> Array.tryFind (fun exp ->
         match exp with
@@ -33,14 +33,14 @@ let FindExport (oldModule:Module) desc : Export option =
 
 
 
-let GetAllElemsForTableIdx (tableIndex:TableIdx) (oldModule:Module) =
+let GetAllElemsForTableIdx (tableIndex:TableIdx) (oldModule:WasmFileTypes.Module) =
     oldModule.Elems 
         |> Array.where (fun elem -> elem.TableIndex = tableIndex)
         |> Array.map (fun e -> (e.OffsetExpr, e.Init))
 
 
 
-let GetFuncType (oldModule:Module) (codeSecIndex:int) =
+let GetFuncType (oldModule:WasmFileTypes.Module) (codeSecIndex:int) =
     oldModule.Funcs.[codeSecIndex]
 
 
@@ -70,7 +70,7 @@ let GetAllInitialisationsForThisMem oldModule thisMemIdx =
 // -------------------------------------------------------------------------------------------------
 
 
-let HarvestTable2sFromImports (oldModule:Module) =
+let HarvestTable2sFromImports (oldModule:WasmFileTypes.Module) =
 
     let mutable exportIndex = 0u
 
@@ -84,7 +84,7 @@ let HarvestTable2sFromImports (oldModule:Module) =
             | _ -> None)
 
 
-let HarvestMemory2sFromImports (oldModule:Module) =
+let HarvestMemory2sFromImports (oldModule:WasmFileTypes.Module) =
 
     let mutable exportIndex = 0u
 
@@ -98,7 +98,7 @@ let HarvestMemory2sFromImports (oldModule:Module) =
             | _ -> None)
 
 
-let HarvestGlobal2sFromImports (oldModule:Module) =
+let HarvestGlobal2sFromImports (oldModule:WasmFileTypes.Module) =
 
     let mutable exportIndex = 0u
 
@@ -112,7 +112,7 @@ let HarvestGlobal2sFromImports (oldModule:Module) =
             | _ -> None)
 
 
-let HarvestFunction2sFromImports (oldModule:Module) =
+let HarvestFunction2sFromImports (oldModule:WasmFileTypes.Module) =
 
     let mutable exportIndex = 0u
 
@@ -131,7 +131,7 @@ let HarvestFunction2sFromImports (oldModule:Module) =
 // -------------------------------------------------------------------------------------------------
 
 
-let HarvestInternalTables countOfImportedTables (oldModule:Module) =
+let HarvestInternalTables countOfImportedTables (oldModule:WasmFileTypes.Module) =
 
     // There is only max one Table in the Wasm 1.0 spec, but we allow for more.
 
@@ -154,7 +154,7 @@ let HarvestInternalTables countOfImportedTables (oldModule:Module) =
 
 
 
-let HarvestInternalGlobals countOfImportedGlobals (oldModule:Module) =
+let HarvestInternalGlobals countOfImportedGlobals (oldModule:WasmFileTypes.Module) =
 
     let mutable objectIndex = (uint32 countOfImportedGlobals)
 
@@ -168,7 +168,7 @@ let HarvestInternalGlobals countOfImportedGlobals (oldModule:Module) =
 
 
 
-let HarvestInternalMems countOfImportedMems (oldModule:Module) =
+let HarvestInternalMems countOfImportedMems (oldModule:WasmFileTypes.Module) =
 
     let mutable objectIndex = (uint32 countOfImportedMems)
 
@@ -184,7 +184,7 @@ let HarvestInternalMems countOfImportedMems (oldModule:Module) =
 
 
 
-let HarvestInternalFuncs countOfImportedFuncs (oldModule:Module) =
+let HarvestInternalFuncs countOfImportedFuncs (oldModule:WasmFileTypes.Module) =
 
     let mutable objectIndex = (uint32 countOfImportedFuncs)
     let mutable codeSecIndex = 0

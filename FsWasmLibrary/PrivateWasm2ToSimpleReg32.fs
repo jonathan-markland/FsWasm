@@ -470,7 +470,7 @@ let ReturnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
 
 
 
-let WriteOutWasmTable writeOut i (m:Module2) (t:InternalTableRecord) =
+let WriteOutWasmTable writeOut i (m:Module) (t:InternalTableRecord) =
 
     match t.InitData.Length with
         | 0 -> ()
@@ -618,7 +618,7 @@ let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemoryRecord) =
 
 
 
-let WriteOutWasmGlobal writeOut i (m:Module2) (g:InternalGlobalRecord) =
+let WriteOutWasmGlobal writeOut i (m:Module) (g:InternalGlobalRecord) =
 
     // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
 
@@ -762,7 +762,7 @@ let WriteOutFunction writeOut thisFuncType thisFuncLocals funcInstructions confi
 
 
 
-let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module2) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
+let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
     
     let funcInstructions, updatedTranslationState = 
         f.Body |> TranslateInstructions m.Funcs translationState

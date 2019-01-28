@@ -4,7 +4,7 @@ open WasmFileTypes
 open WasmBetterTypes
 open PrivateWasmToWasm2
 
-let TranslateWasmToWasm2 (oldModule:Module) =
+let TranslateWasmToWasm2 (oldModule:WasmFileTypes.Module) =
 
     let raiseErrorIfExists (customArray:Custom[]) =
         if customArray.Length > 0
