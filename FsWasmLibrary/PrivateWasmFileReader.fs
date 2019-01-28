@@ -1,6 +1,6 @@
 ﻿module PrivateWasmFileReader
 
-open Wasm
+open WasmFileTypes
 
 // Interfacing the BinaryReader:
 

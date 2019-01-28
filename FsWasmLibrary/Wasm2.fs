@@ -1,6 +1,6 @@
 ﻿module Wasm2
 
-open Wasm
+open WasmFileTypes
 
 
 type Export2 = { ExportName:Name; }

@@ -1,6 +1,6 @@
 ﻿module PrivateWasm2ToSimpleReg32
 
-open Wasm
+open WasmFileTypes
 open Wasm2
 open Wasm2ToSimpleReg32ConfigTypes
 open SimpleReg32
@@ -38,7 +38,7 @@ type ModuleTranslationState =
 
 
 
-let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:Wasm.Instr list) =
+let TranslateInstructions (moduleFuncsArray:Function2[]) translationState (ws:WasmFileTypes.Instr list) =
 
     let mutable labelCount = match translationState with ModuleTranslationState(count) -> count
     let mutable labelStack = new ResizeArray<LABELNAME>()

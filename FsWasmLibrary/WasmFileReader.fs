@@ -1,6 +1,6 @@
 ﻿module WasmFileReader
 
-open Wasm
+open WasmFileTypes
 open PrivateWasmFileReader
 
 

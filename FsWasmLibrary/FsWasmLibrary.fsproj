@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Wasm.fs" />
+    <Compile Include="WasmFileTypes.fs" />
     <Compile Include="Wasm2.fs" />
     <Compile Include="WasmAlgorithms.fs" />
     <Compile Include="PrivateWasmToWasm2.fs" />

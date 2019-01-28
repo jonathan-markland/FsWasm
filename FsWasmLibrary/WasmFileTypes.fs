@@ -1,4 +1,4 @@
-﻿module Wasm
+﻿module WasmFileTypes
 
 open System
 

@@ -1,7 +1,7 @@
 ﻿module UnitTestSerialiser
 
 open System.Text
-open Wasm
+open WasmFileTypes
 open WasmAlgorithms
 
 let ModuleToUnitTestString (fileName:string) (m:Module) =

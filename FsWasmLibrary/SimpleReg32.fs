@@ -1,6 +1,6 @@
 ﻿module SimpleReg32
 
-open Wasm
+open WasmFileTypes
 
 
 /// A register of the 32-bit machine

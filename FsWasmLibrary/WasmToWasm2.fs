@@ -1,6 +1,6 @@
 ﻿module WasmToWasm2
 
-open Wasm
+open WasmFileTypes
 open Wasm2
 open PrivateWasmToWasm2
 

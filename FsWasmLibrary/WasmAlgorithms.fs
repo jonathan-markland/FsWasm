@@ -1,6 +1,6 @@
 ﻿module WasmAlgorithms
 
-open Wasm
+open WasmFileTypes
 
 
 
@@ -28,7 +28,7 @@ let GetConvenientTypeIdxArray thisModuleImports thisModuleFuncs =
 
 
 
-let GetConvenientLookupTables (thisModule:Wasm.Module) =
+let GetConvenientLookupTables (thisModule:WasmFileTypes.Module) =
 
     // 2.5.1  "The index space for functions, tables, memories and 
     //         globals includes respective imports declared in the 
