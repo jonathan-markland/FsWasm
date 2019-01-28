@@ -38,6 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FsRegisterMachineLibrary\FsRegisterMachineLibrary.fsproj" />
     <ProjectReference Include="..\FsWasmLibrary\FsWasmLibrary.fsproj" />
     <ProjectReference Include="..\WasmSerialiser\WasmSerialiser.csproj" />
   </ItemGroup>

@@ -1,6 +1,6 @@
-﻿module PrivateOptimiseSimpleReg32
+﻿module PrivateOptimiseCommonRegisterMachine
 
-open SimpleReg32
+open CommonRegisterMachineTypes
 
 
 

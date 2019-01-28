@@ -12,13 +12,6 @@
     <Compile Include="WasmToBetterWasm.fs" />
     <Compile Include="PrivateWasmFileReader.fs" />
     <Compile Include="WasmFileReader.fs" />
-    <Compile Include="AsmPrefixes.fs" />
-    <Compile Include="CommonRegisterMachineTypes.fs" />
-    <Compile Include="PrivateOptimiseCommonRegisterMachine.fs" />
-    <Compile Include="OptimiseCommonRegisterMachine.fs" />
-    <Compile Include="BWToCRMConfigurationTypes.fs" />
-    <Compile Include="PrivateBetterWasmToCommonRegisterMachine.fs" />
-    <Compile Include="BetterWasmToCommonRegisterMachine.fs" />
   </ItemGroup>
 
   <ItemGroup>

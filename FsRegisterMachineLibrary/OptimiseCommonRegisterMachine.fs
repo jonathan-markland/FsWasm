@@ -1,7 +1,7 @@
-﻿module OptimiseSimpleReg32
+﻿module OptimiseCommonRegisterMachine
 
-open SimpleReg32
-open PrivateOptimiseSimpleReg32
+open CommonRegisterMachineTypes
+open PrivateOptimiseCommonRegisterMachine
 
 
 

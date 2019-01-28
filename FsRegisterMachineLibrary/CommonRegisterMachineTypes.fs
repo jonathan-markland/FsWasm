@@ -1,4 +1,4 @@
-﻿module SimpleReg32
+﻿module CommonRegisterMachineTypes
 
 open WasmFileTypes
 

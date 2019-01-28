@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="AsmPrefixes.fs" />
+    <Compile Include="BWToCRMConfigurationTypes.fs" />
+    <Compile Include="CommonRegisterMachineTypes.fs" />
+    <Compile Include="PrivateOptimiseCommonRegisterMachine.fs" />
+    <Compile Include="OptimiseCommonRegisterMachine.fs" />
+    <Compile Include="PrivateBetterWasmToCommonRegisterMachine.fs" />
+    <Compile Include="BetterWasmToCommonRegisterMachine.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FsWasmLibrary\FsWasmLibrary.fsproj" />
+    <ProjectReference Include="..\WasmSerialiser\WasmSerialiser.csproj" />
+  </ItemGroup>
+
+</Project>
