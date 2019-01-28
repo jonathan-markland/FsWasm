@@ -1,4 +1,6 @@
-﻿module WasmBetterTypes
+﻿/// This module is designed to be 'open'ed *after* WasmFileTypes.
+/// Re-orders the file's data into a much more convenient format.
+module WasmBetterTypes
 
 open WasmFileTypes
 

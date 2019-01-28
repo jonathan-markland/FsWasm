@@ -1,4 +1,6 @@
-﻿module WasmFileTypes
+﻿/// Types defined by the W3C WebAssembly commission.
+/// These support WASM 1.0 (MVP) files.
+module WasmFileTypes
 
 open System
 

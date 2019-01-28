@@ -1,4 +1,5 @@
-﻿module WasmAlgorithms
+﻿/// Some support functions for WasmFileTypes
+module WasmAlgorithms
 
 open WasmFileTypes
 
