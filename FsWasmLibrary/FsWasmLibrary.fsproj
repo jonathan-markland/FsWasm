@@ -5,15 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="SimpleReg32Constants.fs" />
     <Compile Include="Wasm.fs" />
-    <Compile Include="SimpleReg32.fs" />
     <Compile Include="Wasm2.fs" />
     <Compile Include="WasmAlgorithms.fs" />
     <Compile Include="PrivateWasmToWasm2.fs" />
     <Compile Include="WasmToWasm2.fs" />
     <Compile Include="PrivateWasmFileReader.fs" />
     <Compile Include="WasmFileReader.fs" />
+    <Compile Include="SimpleReg32Constants.fs" />
+    <Compile Include="SimpleReg32.fs" />
     <Compile Include="PrivateOptimiseSimpleReg32.fs" />
     <Compile Include="OptimiseSimpleReg32.fs" />
     <Compile Include="Wasm2ToSimpleReg32ConfigTypes.fs" />
