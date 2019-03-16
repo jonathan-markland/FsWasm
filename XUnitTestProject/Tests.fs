@@ -13,7 +13,7 @@ let serialisationMatchesOriginalWasmFile  wasmModulePath expectationTextFilePath
     let fileName  = Path.GetFullPath wasmModulePath
     let fileImage = File.ReadAllBytes fileName
     let theReader = new BinaryReader(fileImage)
-    let theSerialisation = theReader |> Module |> ModuleToUnitTestString fileName
+    let theSerialisation = theReader |> ReadWasmModule |> ModuleToUnitTestString fileName
     let expectationFileAsString = File.ReadAllText expectationTextFilePath
     String.Compare(expectationFileAsString, theSerialisation, StringComparison.InvariantCulture) = 0
 

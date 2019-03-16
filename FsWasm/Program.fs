@@ -5,6 +5,7 @@ open WasmFileReader
 open BetterWasmToCommonRegisterMachine
 open BWToCRMConfigurationTypes
 open CompilationOutputting
+open WasmToBetterWasm
 
 // Main
 
@@ -19,12 +20,12 @@ let main argv =
         let fileImage = File.ReadAllBytes fileName
         let fileDate  = File.GetLastWriteTime(fileName).ToString()
 
-        let r = new BinaryReader(fileImage)
+        let binaryReader = new BinaryReader(fileImage)
 
-        let thisModule = r |> Module
+        let thisModule = binaryReader |> ReadWasmModule
         // TODO:  Should this be an optional output?  let unitTestSerialisation = thisModule |> UnitTestSerialiser.ModuleToUnitTestString fileName
 
-        let translatedToWasm2 = thisModule |> WasmToBetterWasm.ToBetterWasm
+        let translatedToWasm2 = thisModule |> ToBetterWasm
 
         let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, FinalOutputOrder)  // TODO: Hard-code config!!
 

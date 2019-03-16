@@ -9,7 +9,7 @@ open PrivateWasmFileReader
 /// Read the WASM file from the reader, and return a tree structure
 /// representing the file, verbatim.  See also the Module function.
 /// </summary>
-let Module binaryReader =
+let ReadWasmModule binaryReader =
 
     let r = { Reader=binaryReader; TypeSec=[||]; ConvenientFuncTypeArray=null }  // TODO: prefer not to expose the null and empty TypeSec
 
