@@ -7,27 +7,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="program (1).txt" />
-    <Content Include="program %282%29.txt">
+    <Content Include="program-1-serialised.txt" />
+    <Content Include="program-2-serialised.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="program (3).txt" />
-    <Content Include="program (4).txt" />
-    <Content Include="program (5).txt" />
-    <Content Include="program %286%29.txt">
+    <Content Include="program-3-serialised.txt" />
+    <Content Include="program-4-serialised.txt" />
+    <Content Include="program-5-serialised.txt" />
+    <Content Include="program-6-serialised.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="program (1).wasm" />
-    <None Include="program (2).wasm" />
-    <None Include="program %283%29.wasm">
+    <None Include="program-1.wasm" />
+    <None Include="program-2.wasm" />
+    <None Include="program-3.wasm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="program (4).wasm" />
-    <None Include="program (5).wasm" />
-    <None Include="program %286%29.wasm">
+    <None Include="program-4.wasm" />
+    <None Include="program-5.wasm" />
+    <None Include="program-6.wasm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Compile Include="UnitTestSerialiser.fs" />
+    <Compile Include="WasmToSerialised.fs" />
     <Compile Include="Tests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
@@ -46,31 +46,31 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="program %281%29.txt">
+    <Content Update="program-1-serialised.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Update="program %283%29.txt">
+    <Content Update="program-3-serialised.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Update="program %284%29.txt">
+    <Content Update="program-4-serialised.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Update="program %285%29.txt">
+    <Content Update="program-5-serialised.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="program %281%29.wasm">
+    <None Update="program-1.wasm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="program %282%29.wasm">
+    <None Update="program-2.wasm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="program %284%29.wasm">
+    <None Update="program-4.wasm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="program %285%29.wasm">
+    <None Update="program-5.wasm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

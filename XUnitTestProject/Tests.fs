@@ -3,7 +3,7 @@ module Tests
 open Xunit
 open System
 open System.IO
-open UnitTestSerialiser
+open WasmToSerialised
 open WasmSerialiser
 open WasmFileReader
 
@@ -13,16 +13,16 @@ let serialisationMatchesOriginalWasmFile  wasmModulePath expectationTextFilePath
     let fileName  = Path.GetFullPath wasmModulePath
     let fileImage = File.ReadAllBytes fileName
     let theReader = new BinaryReader(fileImage)
-    let theSerialisation = theReader |> ReadWasmModule |> ModuleToUnitTestString fileName
+    let theSerialisationAsString = theReader |> ReadWasmModule |> ModuleToUnitTestString fileName
     let expectationFileAsString = File.ReadAllText expectationTextFilePath
-    String.Compare(expectationFileAsString, theSerialisation, StringComparison.InvariantCulture) = 0
+    String.Compare(expectationFileAsString, theSerialisationAsString, StringComparison.InvariantCulture) = 0
 
 
 
 
 let filePassesTest n =
-    let inputFile = (sprintf "program (%d).wasm" n)
-    let expectationFile = (sprintf "program (%d).txt" n)
+    let inputFile = (sprintf "program-%d.wasm" n)
+    let expectationFile = (sprintf "program-%d-serialised.txt" n)
     serialisationMatchesOriginalWasmFile inputFile expectationFile
 
 

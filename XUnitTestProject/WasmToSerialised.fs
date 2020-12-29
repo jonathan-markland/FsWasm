@@ -1,4 +1,4 @@
-﻿module UnitTestSerialiser
+﻿module WasmToSerialised
 
 open System.Text
 open WasmFileTypes

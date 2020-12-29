@@ -1,6 +1,6 @@
 
 
---- Unit test serialisation for: 'program (6).wasm'. ---
+--- Unit test serialisation for: 'program-6.wasm'. ---
 
 
 
