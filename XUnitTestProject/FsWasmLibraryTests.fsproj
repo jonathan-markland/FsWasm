@@ -43,7 +43,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="WasmToSerialised.fs" />
-    <Compile Include="Tests.fs" />
+    <Compile Include="ReadWasmModuleTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
