@@ -10,6 +10,7 @@ open WasmStaticExpressionEvaluator
 open BWToCRMConfigurationTypes
 open OptimiseCommonRegisterMachine
 open WasmInstructionsToCRMInstructions
+open Library
 
 
 
@@ -277,32 +278,6 @@ let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory[]) =
 
 
 
-let WriteOutHexDump writeLine byteArray =
-
-    let sb = new StringBuilder()
-
-    byteArray |> Array.iteri (fun i byteVal -> 
-
-        let c = i &&& 15
-    
-        sb.Append (
-            match c with
-                | 0 -> sprintf "byte 0x%02X" byteVal
-                | _ -> sprintf ",0x%02X" byteVal
-            )
-            |> ignore
-
-        match c with
-            | 15 -> 
-                writeLine (sb.ToString())
-                sb.Clear() |> ignore
-            | _ -> ()
-    )
-
-    if sb.Length > 0 then writeLine (sb.ToString())
-
-
-
 let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemoryRecord) =
 
     let linearMemorySize = 
@@ -331,7 +306,7 @@ let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemoryRecord) =
 
     thisMem.InitData |> Array.iteri (fun j (_, byteArray) ->
         writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix i j)
-        WriteOutHexDump writeIns byteArray
+        WriteOutHexDump "byte" "," "0x" writeIns byteArray
     )
 
 
@@ -431,27 +406,16 @@ let WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray =
 
 
 
-let WriteOutWasmStart writeOut startOption moduleFuncsArray =
-    match startOption with 
-        | Some { StartFuncIdx = startFuncIdx } -> 
-            WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray
-        | None -> 
-            writeOut "// No entry point in this translation"
-
-
-
-
-
-
-
-
 
 
 let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
 
-    writeOutData ("// Translation of WASM module: " + headingText)
+    let toComment commentText = 
+        ("// " + commentText)
+
+    ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 
     m.Tables |> Array.iteri (fun i t ->
@@ -478,13 +442,15 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
 
     m.Funcs |> Array.iteri (fun i g ->
         match g with 
+
             | InternalFunction2(g) -> 
-                moduleTranslationState <- g |> 
-                    WriteOutFunctionAndBranchTables writeOutCode writeOutData i m moduleTranslationState config
+                moduleTranslationState <- 
+                    g |> WriteOutFunctionAndBranchTables writeOutCode writeOutData i m moduleTranslationState config
+
             | ImportedFunction2({Import={ImportModuleName=m; ImportName=n}}) ->
-                writeOutCode (sprintf "// WASM Import: %s.%s" m n)
+                (sprintf "WASM Import: %s.%s" m n) |> toComment |> writeOutCode 
         )
 
-    WriteOutWasmStart writeOutCode m.Start m.Funcs
+    WriteOutWasmStart WriteOutBranchToEntryLabel writeOutCode toComment m.Start m.Funcs
 
 

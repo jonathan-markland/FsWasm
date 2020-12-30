@@ -12,6 +12,7 @@
     <Compile Include="WasmStaticExpressionEvaluator.fs" />
     <Compile Include="AsmPrefixes.fs" />
     <Compile Include="WasmInstructionsToCRMInstructions.fs" />
+    <Compile Include="Library.fs" />
     <Compile Include="BetterWasmToJonathansAsm.fs" />
   </ItemGroup>
 
