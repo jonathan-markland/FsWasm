@@ -27,7 +27,7 @@ let main argv =
 
         let betterWasm = thisModule |> ToBetterWasm
 
-        let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, FinalOutputOrder)  // TODO: Hard-code config!!
+        let config = TranslationConfiguration(WithoutBarriers, FullyOptimised)  // TODO: Hard-code config!!
 
         let headingText = (sprintf "%s (%d bytes) %s" fileName (fileImage.Length) fileDate)
 
@@ -35,9 +35,7 @@ let main argv =
             betterWasm
                 |> WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar
 
-        match config with
-            | TranslationConfiguration(_,_,DebugOutputOrder) -> theProcess |> OutputForDebug
-            | TranslationConfiguration(_,_,FinalOutputOrder) -> theProcess |> OutputInFinalOrder
+        theProcess |> OutputInFinalOrder  // or use OutputForDebug to see one-the-go emission ordering.
 
     with
 
