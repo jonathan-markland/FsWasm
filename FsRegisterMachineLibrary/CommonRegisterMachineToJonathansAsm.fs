@@ -1,9 +1,14 @@
 ﻿module CommonRegisterMachineToJonathansAsm
 
+open System.Text
 open WasmFileTypes
 open WasmBetterTypes
 open CommonRegisterMachineTypes
 open AsmPrefixes
+open WasmStaticExpressionEvaluator
+open BWToCRMConfigurationTypes
+open OptimiseCommonRegisterMachine
+open PrivateBetterWasmToCommonRegisterMachine
 
 
     
@@ -117,4 +122,320 @@ let TranslateInstructionToAsmSequence instruction =
             // point to the base of the linear memory region.
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
             [ sprintf "let Y=%s%d" AsmMemPrefix 0 ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let Surrounded (before:string) (after:string) (content:string) =
+    match content.Length with
+        | 0 -> ""
+        | _ -> before + content + after
+
+
+let Bracketed s =           s |> Surrounded "(" ")"
+let Prefixed thePrefix s =  s |> Surrounded thePrefix ""
+let ColonPrefixed s =       s |> Prefixed ": "
+
+
+
+let ValTypeTranslationOf =
+    function
+        | I32Type -> "int"
+        | I64Type -> failwith "Cannot translate I64 type with this simple translator"
+        | F32Type -> failwith "Cannot translate F32 type with this simple translator"
+        | F64Type -> failwith "Cannot translate F64 type with this simple translator"
+
+
+let ParamListOf (ps:ValType[]) =
+    String.concat ", " (ps |> Array.map ValTypeTranslationOf)
+
+
+let TextSignatureOf (funcType:FuncType) =
+    let translatedParameters = ParamListOf funcType.ParameterTypes
+    let translatedReturns    = ParamListOf funcType.ReturnTypes
+    (Bracketed translatedParameters) + (ColonPrefixed translatedReturns)
+
+
+let AsmSignatureOf (funcType:FuncType) =
+
+    let atParamDecls (ps:ValType[]) =
+        String.concat ", " (ps |> Array.mapi (fun i t -> (sprintf "@%s%d" AsmLocalNamePrefix i)))
+
+    let atParamsString = 
+        atParamDecls funcType.ParameterTypes
+
+    (Bracketed atParamsString) + "  // " + (TextSignatureOf funcType)
+
+
+
+
+let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
+
+    let indexOfFirstLocal = funcType.ParameterTypes.Length
+
+    funcLocals |> Array.iteri (fun arrayIndex v ->
+        let indexOfVariable = indexOfFirstLocal + arrayIndex
+        let prefixStr = 
+            match arrayIndex with 
+                | 0 -> "var "
+                | _ -> "  , "
+        writeOut (sprintf "%s@%s%d:%s" prefixStr AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v)))
+
+
+
+let ReturnsSingleValue (ft:FuncType) =
+    match ft.ReturnTypes.Length with
+        | 0 -> false
+        | 1 -> true
+        | _ -> failwith "Cannot translate function that returns more than one value"
+
+
+
+let ReturnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
+    match (funcType.ParameterTypes.Length, funcLocals.Length) with
+        | (0,0) -> "ret"
+        | (_,_) -> "endproc"
+
+
+
+
+
+
+let WriteOutWasmTable writeOut i (m:Module) (t:InternalTableRecord) =
+
+    match t.InitData.Length with
+        | 0 -> ()
+        | 1 ->
+
+            let writeIns s = writeOut ("    " + s)  // TODO: repetition throughout routines!
+
+            writeOut "align ptr"
+            writeOut (sprintf "data %s%d" AsmTableNamePrefix i)
+
+            t.InitData |> Array.iter (fun elem ->
+                    let ofsExpr, funcIdxList = elem
+                    let ofsValue = StaticEvaluate ofsExpr
+                    if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
+                    funcIdxList |> Array.iter (fun funcIdx -> 
+                        writeIns (sprintf "ptr %s" (FuncIdxNameString funcIdx)))
+                )
+
+        | _ -> failwith "Cannot translate module with more than one Elem in a TableSec table"
+
+
+
+let WasmMemoryBlockMultiplier = 65536u
+
+
+
+
+
+
+
+let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory[]) =
+
+    writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
+    
+    // NO!!  The following is absolutely wrong, as this translator
+    //       should not pretend to know who its input generator is:
+    // writeOutCode (sprintf "    // Caller must pass stack pointer (relative to %s%d) in A" AsmMemPrefix 0)
+    // writeOutCode (sprintf "    let uint [%s%d+4]=A // Initialise WasmFiddle stack pointer at address offset 4" AsmMemPrefix 0)
+
+    let writeOutDataCopyCommand i (thisMem:InternalMemoryRecord) =
+        if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
+        thisMem.InitData |> Array.iteri (fun j elem ->
+                let ofsExpr, byteArray = elem
+                let ofsValue = StaticEvaluate ofsExpr
+                writeOutCode (sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue)
+                writeOutCode (sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j)
+                writeOutCode (sprintf "    let C=%d" byteArray.Length)
+                writeOutCode          "    cld rep movsb"
+            )
+
+    mems |> Array.iteri (fun i me ->
+        match me with
+            | InternalMemory2(mem) -> mem |> writeOutDataCopyCommand i 
+            | ImportedMemory2(mem) -> failwith "Error:  Cannot support importing a 'memory' region.  WASM module must be expect self-contained."
+        )
+
+    let writeOutIns s = writeOutCode ("    " + s)
+
+    (TranslateInstructionToAsmSequence ThunkIn) |> List.iter writeOutIns
+    writeOutCode "ret"
+
+
+
+let WriteOutHexDump writeLine byteArray =
+    
+    let sb = new StringBuilder()
+    
+    byteArray |> Array.iteri (fun i byteVal -> 
+
+        let c = i &&& 15
+        
+        sb.Append (
+            match c with
+                | 0 -> sprintf "byte 0x%02X" byteVal
+                | _ -> sprintf ",0x%02X" byteVal
+            )
+            |> ignore
+
+        match c with
+            | 15 -> 
+                writeLine (sb.ToString())
+                sb.Clear() |> ignore
+            | _ -> ()
+    )
+
+    if sb.Length > 0 then writeLine (sb.ToString())
+
+
+
+let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemoryRecord) =
+
+    let linearMemorySize = 
+
+        match thisMem with 
+            | { MemoryType={ MemoryLimits=lims } } -> 
+
+            match lims with 
+
+                | { LimitMin = U32 0u ; LimitMax = None }
+                    -> failwith "Cannot translate module with Mem that is size 0"   
+
+                | { LimitMin = U32 memSize ; LimitMax = None } 
+                    -> memSize * WasmMemoryBlockMultiplier
+
+                | { LimitMin = _ ; LimitMax = Some _ }
+                    -> failwith "Cannot translate module with Mem that has max size limit"
+
+    writeOutVar "global"
+    writeOutVar "    align ptr"
+    writeOutVar (sprintf "    %s%d: %d" AsmMemPrefix i linearMemorySize)
+
+    let writeIns s = writeOutData ("    " + s)
+
+    writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix i) // TODO: If there is none, omit this.
+
+    thisMem.InitData |> Array.iteri (fun j (_, byteArray) ->
+        writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix i j)
+        WriteOutHexDump writeIns byteArray
+    )
+
+
+
+
+let WriteOutWasmGlobal writeOut i (m:Module) (g:InternalGlobalRecord) =
+
+    // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
+
+    let initValue = StaticEvaluate g.InitExpr
+    let globalIdx = GlobalIdx(U32(uint32 i))   // TODO: not ideal construction of temporary
+
+    writeOut (sprintf "data %s int %d" (GlobalIdxNameString globalIdx) initValue)
+
+
+
+
+
+let WriteOutInstructionsToText writeOut instructionsList thisFuncType =
+
+    let writeIns s = writeOut ("    " + s)
+
+    // Kick off the whole thing here:
+
+    instructionsList |> List.iter (fun i -> TranslateInstructionToAsmSequence i |> List.iter writeIns)
+
+    // Handle the function's return (may need pop into A):
+
+    let returnHandlingCode = 
+        match thisFuncType |> ReturnsSingleValue with
+            | true  -> TranslateInstructionToAsmSequence (Pop A)  // TODO: not ideal construction of temporary
+            | false -> []
+
+    returnHandlingCode |> List.iter writeIns
+
+    
+
+
+let WriteOutBranchTables writeOut funcInstructions =
+
+    let writeIns s = writeOut ("    " + s)
+
+    funcInstructions |> List.iter (fun ins ->
+        match ins with
+            | GotoIndex(LabelName tableLabel,_,_,codePointLabels) ->
+                writeOut "align ptr"
+                writeOut (sprintf "data %s" tableLabel)
+                codePointLabels |> Array.iter (fun (LabelName lbl) -> writeIns (sprintf "ptr %s" lbl))
+            | _ -> ()
+        )
+
+
+
+let WriteOutFunction writeOut thisFuncType thisFuncLocals funcInstructions config =   // TODO:  Can we reduce f to inner components ?
+
+    let phase1 = 
+        match config with
+            | TranslationConfiguration(_,FullyOptimised) -> funcInstructions |> Optimise
+            | TranslationConfiguration(_,NoOptimisation) -> funcInstructions
+    
+    let phase2 =
+        match config with
+            | TranslationConfiguration(WithBarriers,_)    -> phase1
+            | TranslationConfiguration(WithoutBarriers,_) -> phase1 |> RemoveBarriers
+
+    let desiredInstructions = phase2
+
+    WriteOutInstructionsToText writeOut desiredInstructions thisFuncType
+    writeOut (ReturnCommandFor thisFuncType thisFuncLocals)
+
+
+
+let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
+    
+    let funcInstructions, updatedTranslationState = 
+        f.Body |> TranslateInstructions m.Funcs translationState
+
+    let procedureCommand = 
+        sprintf "procedure %s%d%s" AsmInternalFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType)
+
+    try
+        writeOut procedureCommand
+        WriteOutFunctionLocals writeOut f.FuncType f.Locals
+        WriteOutFunction writeOut f.FuncType f.Locals funcInstructions config
+        WriteOutBranchTables writeOutTables funcInstructions
+    with
+        | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
+
+    updatedTranslationState
+
+
+
+let WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray =
+    writeOut ("procedure " + AsmEntryPointLabel)
+    let (LabelName labelName) = FuncLabelFor startFuncIdx moduleFuncsArray
+    writeOut (sprintf "goto %s" labelName)
+
+
+
+let WriteOutWasmStart writeOut startOption moduleFuncsArray =
+    match startOption with 
+        | Some { StartFuncIdx = startFuncIdx } -> 
+            WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray
+        | None -> 
+            writeOut "// No entry point in this translation"
+
 

@@ -2,6 +2,7 @@
 
 open WasmBetterTypes
 open PrivateBetterWasmToCommonRegisterMachine
+open CommonRegisterMachineToJonathansAsm
 
 
 

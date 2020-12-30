@@ -9,10 +9,10 @@
     <Compile Include="AsmPrefixes.fs" />
     <Compile Include="BWToCRMConfigurationTypes.fs" />
     <Compile Include="CommonRegisterMachineTypes.fs" />
-    <Compile Include="CommonRegisterMachineToJonathansAsm.fs" />
     <Compile Include="PrivateOptimiseCommonRegisterMachine.fs" />
     <Compile Include="OptimiseCommonRegisterMachine.fs" />
     <Compile Include="PrivateBetterWasmToCommonRegisterMachine.fs" />
+    <Compile Include="CommonRegisterMachineToJonathansAsm.fs" />
     <Compile Include="BetterWasmToCommonRegisterMachine.fs" />
   </ItemGroup>
 
