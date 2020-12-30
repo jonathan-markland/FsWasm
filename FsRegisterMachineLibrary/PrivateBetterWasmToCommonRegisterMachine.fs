@@ -714,9 +714,12 @@ let WriteOutInstructionsToText writeOut instructionsList thisFuncType =
 
     // Handle the function's return (may need pop into A):
 
-    match thisFuncType |> ReturnsSingleValue with
-        | true  -> writeIns "pop A"
-        | false -> ()
+    let returnHandlingCode = 
+        match thisFuncType |> ReturnsSingleValue with
+            | true  -> TranslateInstructionToAsmSequence (Pop A)
+            | false -> []
+
+    returnHandlingCode |> List.iter writeIns
 
     
 
