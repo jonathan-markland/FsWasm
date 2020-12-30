@@ -5,12 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="WasmStaticExpressionEvaluator.fs" />
-    <Compile Include="AsmPrefixes.fs" />
     <Compile Include="BWToCRMConfigurationTypes.fs" />
     <Compile Include="CommonRegisterMachineTypes.fs" />
     <Compile Include="PrivateOptimiseCommonRegisterMachine.fs" />
     <Compile Include="OptimiseCommonRegisterMachine.fs" />
+    <Compile Include="WasmStaticExpressionEvaluator.fs" />
+    <Compile Include="AsmPrefixes.fs" />
     <Compile Include="WasmInstructionsToCRMInstructions.fs" />
     <Compile Include="CommonRegisterMachineToJonathansAsm.fs" />
     <Compile Include="BetterWasmToJonathansAsm.fs" />
