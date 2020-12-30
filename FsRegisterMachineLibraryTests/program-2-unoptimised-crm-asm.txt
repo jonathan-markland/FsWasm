@@ -1,0 +1,27 @@
+﻿DATA> // Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-2.wasm (156 bytes) 26/01/2019 18:06:48
+DATA> 
+VAR > global
+VAR >     align ptr
+VAR >     wasm_mem0: 65536
+DATA> // Data for WASM mem wasm_mem_init_data0
+CODE> procedure init_wasm_mem
+CODE>     let Y=wasm_mem0
+CODE> ret
+CODE> procedure wasm_fn0(@loc0)  // (int): int
+CODE>     let A=int[@loc0]
+CODE>     add A,Y
+CODE>     let uint[A]=305419896
+CODE>     let A=uint[Y+2864434397]
+CODE>     push A
+CODE>     label wasm_l1
+CODE>     pop A
+CODE> endproc
+CODE> procedure wasm_fn1  // : int
+CODE>     let A=-2005440939
+CODE>     push A
+CODE>     call wasm_fn0
+CODE>     push A
+CODE>     label wasm_l2
+CODE>     pop A
+CODE> ret
+CODE> // No entry point in this translation

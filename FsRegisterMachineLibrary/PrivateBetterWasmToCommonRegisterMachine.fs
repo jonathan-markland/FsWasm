@@ -747,13 +747,13 @@ let WriteOutFunction writeOut thisFuncType thisFuncLocals funcInstructions confi
 
     let phase1 = 
         match config with
-            | TranslationConfiguration(_,FullyOptimised,_) -> funcInstructions |> Optimise
-            | TranslationConfiguration(_,NoOptimisation,_) -> funcInstructions
+            | TranslationConfiguration(_,FullyOptimised) -> funcInstructions |> Optimise
+            | TranslationConfiguration(_,NoOptimisation) -> funcInstructions
     
     let phase2 =
         match config with
-            | TranslationConfiguration(WithBarriers,_,_)    -> phase1
-            | TranslationConfiguration(WithoutBarriers,_,_) -> phase1 |> RemoveBarriers
+            | TranslationConfiguration(WithBarriers,_)    -> phase1
+            | TranslationConfiguration(WithoutBarriers,_) -> phase1 |> RemoveBarriers
 
     let desiredInstructions = phase2
 

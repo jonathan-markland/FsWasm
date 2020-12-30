@@ -8,22 +8,41 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="program-1-crm-asm.txt">
+    <Compile Include="WasmToBetterWasmTests.fs" />
+    <Content Include="program-1-optimised-crm-asm.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="program-2-crm-asm.txt">
+    <Content Include="program-2-optimised-crm-asm.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="program-3-crm-asm.txt">
+    <Content Include="program-3-optimised-crm-asm.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="program-4-crm-asm.txt">
+    <Content Include="program-4-optimised-crm-asm.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="program-5-crm-asm.txt">
+    <Content Include="program-5-optimised-crm-asm.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="program-6-crm-asm.txt">
+    <Content Include="program-6-optimised-crm-asm.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="program-1-unoptimised-crm-asm.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="program-2-unoptimised-crm-asm.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="program-3-unoptimised-crm-asm.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="program-4-unoptimised-crm-asm.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="program-5-unoptimised-crm-asm.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="program-6-unoptimised-crm-asm.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="WasmToCommonRegisterMachineTests.fs" />

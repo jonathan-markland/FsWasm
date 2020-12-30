@@ -1,0 +1,48 @@
+﻿DATA> // Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-3.wasm (214 bytes) 26/01/2019 18:16:47
+DATA> 
+VAR > global
+VAR >     align ptr
+VAR >     wasm_mem0: 65536
+DATA> // Data for WASM mem wasm_mem_init_data0
+DATA> data wasm_mem_init_data0_0
+DATA>     byte 0x25,0x73,0x00
+DATA> data wasm_mem_init_data0_1
+DATA>     byte 0x48,0x65,0x6C,0x6C,0x6F,0x20,0x74,0x68,0x65,0x72,0x65,0x2C,0x20,0x74,0x68,0x69
+DATA>     byte 0x73,0x20,0x69,0x73,0x20,0x61,0x20,0x74,0x65,0x73,0x74,0x21,0x00
+CODE> procedure init_wasm_mem
+CODE>     let Y=wasm_mem0+16
+CODE>     let X=wasm_mem_init_data0_0
+CODE>     let C=3
+CODE>     cld rep movsb
+CODE>     let Y=wasm_mem0+32
+CODE>     let X=wasm_mem_init_data0_1
+CODE>     let C=29
+CODE>     cld rep movsb
+CODE>     let Y=wasm_mem0
+CODE> ret
+CODE> // WASM Import: env.printf
+CODE> procedure wasm_fn1  // : int
+CODE> var @loc0:int
+CODE>   , @loc1:int
+CODE>     let A=uint[Y+4]
+CODE>     sub A,16
+CODE>     let int[@loc0]=A
+CODE>     let uint[Y+4]=A
+CODE>     let A=int[@loc0]
+CODE>     add A,Y
+CODE>     let uint[A]=32
+CODE>     let A=16
+CODE>     push A
+CODE>     let A=int[@loc0]
+CODE>     push A
+CODE>     call wasm_fnenv_printf
+CODE>     let Y=wasm_mem0
+CODE>     let A=int[@loc0]
+CODE>     add A,16
+CODE>     let uint[Y+4]=A
+CODE>     let A=100
+CODE>     push A
+CODE>     label wasm_l1
+CODE>     pop A
+CODE> endproc
+CODE> // No entry point in this translation

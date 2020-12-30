@@ -52,40 +52,58 @@ let WasmToCommonRegisterMachineText config paramFileName =
 
 
 
-let FilePassesTest n =
+type OptimisationCase = Optimised | Unoptimised
+
+
+
+let FilePassesTest n optimisationCase =
+    
+    let fileSubType = 
+        match optimisationCase with
+            | Optimised   -> "optimised"
+            | Unoptimised -> "unoptimised"
+
     let inputFile = (sprintf "program-%d.wasm" n)
-    let expectationFile = (sprintf "program-%d-crm-asm.txt" n)
-    let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, FinalOutputOrder)  // TODO: Hard-code config!!
+    let expectationFile = (sprintf "program-%d-%s-crm-asm.txt" n fileSubType)
+    
+    let config =
+        match optimisationCase with
+            | Optimised   -> TranslationConfiguration (WithoutBarriers, FullyOptimised)
+            | Unoptimised -> TranslationConfiguration (WithBarriers,    NoOptimisation)
+
     let actual = WasmToCommonRegisterMachineText config inputFile
-    let actualFileImage = actual |> String.concat "\r\n"
     let expected = System.IO.File.ReadAllLines expectationFile  // TODO: More detail on failed comparison.
     let b = (actual = expected)
+
+    let actualFileImage = actual |> String.concat "\r\n"  // This is useful for developing a new test case.
+
     b
 
 
 
+[<Fact>] 
+let ``Program 1 to CRM optimised`` () = Assert.True(FilePassesTest 1 Optimised)
+[<Fact>] 
+let ``Program 2 to CRM optimised`` () = Assert.True(FilePassesTest 2 Optimised)
+[<Fact>] 
+let ``Program 3 to CRM optimised`` () = Assert.True(FilePassesTest 3 Optimised)
+[<Fact>] 
+let ``Program 4 to CRM optimised`` () = Assert.True(FilePassesTest 4 Optimised)
+[<Fact>] 
+let ``Program 5 to CRM optimised`` () = Assert.True(FilePassesTest 5 Optimised)
+[<Fact>] 
+let ``Program 6 to CRM optimised`` () = Assert.True(FilePassesTest 6 Optimised)
 
-[<Fact>]
-let ``Program 1 to CRM`` () =
-    Assert.True(FilePassesTest 1)
-
-[<Fact>]
-let ``Program 2 to CRM`` () =
-    Assert.True(FilePassesTest 2)
-
-[<Fact>]
-let ``Program 3 to CRM`` () =
-    Assert.True(FilePassesTest 3)
-
-[<Fact>]
-let ``Program 4 to CRM`` () =
-    Assert.True(FilePassesTest 4)
-
-[<Fact>]
-let ``Program 5 to CRM`` () =
-    Assert.True(FilePassesTest 5)
-
-[<Fact>]
-let ``Program 6 to CRM`` () =
-    Assert.True(FilePassesTest 6)
+[<Fact>] 
+let ``Program 1 to CRM unoptimised`` () = Assert.True(FilePassesTest 1 Unoptimised)
+[<Fact>] 
+let ``Program 2 to CRM unoptimised`` () = Assert.True(FilePassesTest 2 Unoptimised)
+[<Fact>] 
+let ``Program 3 to CRM unoptimised`` () = Assert.True(FilePassesTest 3 Unoptimised)
+[<Fact>] 
+let ``Program 4 to CRM unoptimised`` () = Assert.True(FilePassesTest 4 Unoptimised)
+[<Fact>] 
+let ``Program 5 to CRM unoptimised`` () = Assert.True(FilePassesTest 5 Unoptimised)
+[<Fact>] 
+let ``Program 6 to CRM unoptimised`` () = Assert.True(FilePassesTest 6 Unoptimised)
 
