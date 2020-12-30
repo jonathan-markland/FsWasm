@@ -13,7 +13,7 @@
     <Compile Include="OptimiseCommonRegisterMachine.fs" />
     <Compile Include="PrivateBetterWasmToCommonRegisterMachine.fs" />
     <Compile Include="CommonRegisterMachineToJonathansAsm.fs" />
-    <Compile Include="BetterWasmToCommonRegisterMachine.fs" />
+    <Compile Include="BetterWasmToJonathansAsm.fs" />
   </ItemGroup>
 
   <ItemGroup>

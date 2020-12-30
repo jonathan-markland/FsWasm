@@ -1,4 +1,4 @@
-﻿module BetterWasmToCommonRegisterMachine
+﻿module BetterWasmToJonathansAsm
 
 open WasmBetterTypes
 open PrivateBetterWasmToCommonRegisterMachine

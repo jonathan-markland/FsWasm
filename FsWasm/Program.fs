@@ -2,7 +2,7 @@
 open System.IO
 open WasmSerialiser
 open WasmFileReader
-open BetterWasmToCommonRegisterMachine
+open BetterWasmToJonathansAsm
 open BWToCRMConfigurationTypes
 open CompilationOutputting
 open WasmToBetterWasm
