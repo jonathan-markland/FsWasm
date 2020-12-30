@@ -8,6 +8,7 @@ open AsmPrefixes
 open OptimiseCommonRegisterMachine
 open System.Text
 open CommonRegisterMachineToJonathansAsm
+open WasmStaticExpressionEvaluator
 
 
 let (-+-) (U32 a) (I32 b) =
@@ -341,19 +342,6 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState (ws:Was
 
 
 
-
-
-
-let StaticEvaluate (instrs:Instr list) : int =
-
-    match instrs.Length with // TODO: proper list matching
-        | 0 -> failwith "Cannot statically evaluate empty sequence of instructions"
-        | 1 -> ()
-        | _ -> failwith "Cannot statically evaluate instruction sequence because we only support a single instruction, and there is more than one"
-
-    match instrs.[0] with
-        | I32Const(I32 n) -> n
-        | _ -> failwith "Cannot statically evaluate instruction sequence -- unsupported single instruction"  // TODO: clarify
 
 
 

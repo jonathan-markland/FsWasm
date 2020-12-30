@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="WasmStaticExpressionEvaluator.fs" />
     <Compile Include="AsmPrefixes.fs" />
     <Compile Include="BWToCRMConfigurationTypes.fs" />
     <Compile Include="CommonRegisterMachineTypes.fs" />
