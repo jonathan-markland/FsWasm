@@ -48,4 +48,5 @@ type Module = {
     Mems:    Memory[];
     Tables:  Table[];
     Globals: Global[];
-    Start:   Start option; }
+    Start:   Start option;
+}

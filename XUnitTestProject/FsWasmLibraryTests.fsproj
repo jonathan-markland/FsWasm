@@ -24,30 +24,10 @@
     <Content Include="program-6-serialised.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="program-1.wasm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="program-2.wasm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="program-3.wasm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="program-4.wasm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="program-5.wasm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="program-6.wasm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <Compile Include="WasmToSerialised.fs" />
     <Compile Include="ReadWasmModuleTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
@@ -61,6 +41,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FsRegisterMachineLibrary\FsRegisterMachineLibrary.fsproj" />
     <ProjectReference Include="..\FsWasmLibrary\FsWasmLibrary.fsproj" />
+    <ProjectReference Include="..\SharedTestResources\SharedTestResources.fsproj" />
     <ProjectReference Include="..\WasmSerialiser\WasmSerialiser.csproj" />
   </ItemGroup>
 

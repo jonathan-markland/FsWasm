@@ -1,18 +1,26 @@
-﻿
+module WasmToCommonRegisterMachineTests
+
+open System
 open System.IO
 open WasmSerialiser
 open WasmFileReader
 open BetterWasmToCommonRegisterMachine
 open BWToCRMConfigurationTypes
-open CompilationOutputting
 open WasmToBetterWasm
 
-// Main
+open Xunit
 
-[<EntryPoint>]
-let main argv =
 
-    let paramFileName = "program (2).wasm"  // TODO: pass on command line
+let WasmToCommonRegisterMachineText paramFileName =
+
+    let outputInOrderOfGeneration f =
+        let sb = new System.Text.StringBuilder()
+        let append s1 s2 = sb.Append(sprintf "%s> %s\n" s1 s2) |> ignore
+        let writeOutData s = append "DATA" s
+        let writeOutVar  s = append "VAR " s
+        let writeOutCode s = append "CODE" s
+        f writeOutData writeOutCode writeOutVar
+        sb.ToString()
 
     try
 
@@ -35,13 +43,26 @@ let main argv =
             betterWasm
                 |> WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar
 
-        match config with
-            | TranslationConfiguration(_,_,DebugOutputOrder) -> theProcess |> OutputForDebug
-            | TranslationConfiguration(_,_,FinalOutputOrder) -> theProcess |> OutputInFinalOrder
+        outputInOrderOfGeneration theProcess
 
     with
 
-        | _ as ex -> printf "%s: %s" paramFileName (ex.ToString())
-    
-    0 // return an integer exit code
- 
+        | _ as ex -> sprintf "Exception: %s" (ex.ToString())
+
+
+
+
+let FilePassesTest n =
+    let inputFile = (sprintf "program-%d.wasm" n)
+    let expectationFile = (sprintf "program-%d-crm-asm.txt" n)
+    let actual = WasmToCommonRegisterMachineText inputFile
+    let expected = System.IO.File.ReadAllText expectationFile
+    String.Compare(expected, actual, StringComparison.InvariantCulture) = 0
+
+
+
+
+[<Fact>]
+let ``Program 1 to CRM`` () =
+    Assert.True(FilePassesTest 1)
+

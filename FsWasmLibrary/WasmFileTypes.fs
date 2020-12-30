@@ -269,17 +269,18 @@ open System
         // following allows these to be preserved
         // if the file is saved out:
 
-        Custom1:  Custom[]; Types:FuncType array;
-        Custom2:  Custom[]; Imports:Import array;
-        Custom3:  Custom[]; Funcs:FuncType array;
-        Custom4:  Custom[]; Tables:Table array;
-        Custom5:  Custom[]; Mems:Mem array;
-        Custom6:  Custom[]; Globals:Global array;
-        Custom7:  Custom[]; Exports:Export array;
-        Custom8:  Custom[]; Start:Start option;
-        Custom9:  Custom[]; Elems:Elem array;
-        Custom10: Custom[]; Codes:Code array;
-        Custom11: Custom[]; Datas:Data array;
-        Custom12: Custom[] }
+        Custom1:  Custom[];  Types   : FuncType array;
+        Custom2:  Custom[];  Imports : Import array;
+        Custom3:  Custom[];  Funcs   : FuncType array;
+        Custom4:  Custom[];  Tables  : Table array;
+        Custom5:  Custom[];  Mems    : Mem array;
+        Custom6:  Custom[];  Globals : Global array;
+        Custom7:  Custom[];  Exports : Export array;
+        Custom8:  Custom[];  Start   : Start option;
+        Custom9:  Custom[];  Elems   : Elem array;
+        Custom10: Custom[];  Codes   : Code array;
+        Custom11: Custom[];  Datas   : Data array;
+        Custom12: Custom[] 
+    }
 
         
