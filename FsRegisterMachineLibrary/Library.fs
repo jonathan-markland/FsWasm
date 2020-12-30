@@ -65,11 +65,9 @@ let WriteOutInstructions writeOut translate funcInstructions thisFuncType config
 
     let finalInstructions = optimisationPhase2
 
-    let writeIns s = writeOut ("    " + s)
-
     // Kick off the whole thing here:
 
-    finalInstructions |> List.iter (fun instruction -> translate instruction |> List.iter writeIns)
+    finalInstructions |> List.iter (fun instruction -> translate instruction |> List.iter writeOut)
 
     // Handle the function's return (may need pop into A):
 
@@ -78,7 +76,7 @@ let WriteOutInstructions writeOut translate funcInstructions thisFuncType config
             | true  -> translate (Pop A)  // TODO: not ideal construction of temporary
             | false -> []
 
-    returnHandlingCode |> List.iter writeIns
+    returnHandlingCode |> List.iter writeOut
 
 
 

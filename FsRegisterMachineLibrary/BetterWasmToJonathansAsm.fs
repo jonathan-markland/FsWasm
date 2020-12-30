@@ -340,10 +340,13 @@ let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module)
     let procedureCommand = 
         sprintf "procedure %s%d%s" AsmInternalFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType)
 
+    let writeIns s = 
+        writeOut ("    " + s)
+
     try
         writeOut procedureCommand
         WriteOutFunctionLocals writeOut f.FuncType f.Locals
-        WriteOutInstructions writeOut TranslateInstructionToAsmSequence funcInstructions f.FuncType config
+        WriteOutInstructions writeIns TranslateInstructionToAsmSequence funcInstructions f.FuncType config
         writeOut (ReturnCommandFor f.FuncType f.Locals)
         WriteOutBranchTables writeOutTables funcInstructions
     with
