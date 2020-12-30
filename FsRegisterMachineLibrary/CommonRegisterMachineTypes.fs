@@ -18,7 +18,7 @@ type REG = A | B | C | Y
 
 
 /// A 32-bit register machine instruction
-type InstrSimpleReg32 =
+type CRMInstruction32 =
 
     /// Thunk In.  (Loads Y register to point to linear memory in this implementation).
     | ThunkIn

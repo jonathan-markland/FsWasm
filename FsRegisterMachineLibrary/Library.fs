@@ -51,12 +51,13 @@ let private ReturnsSingleValue (ft:FuncType) =
 
 
 
-let WriteOutInstructions writeOut translate funcInstructions thisFuncType config =
+/// Iterate through all of the translated versions of the function's instructions.
+let IterFunctionTranslated action translate thisFuncType config crmInstructions =
 
     let optimisationPhase1 = 
         match config with
-            | TranslationConfiguration(_,FullyOptimised) -> funcInstructions |> Optimise
-            | TranslationConfiguration(_,NoOptimisation) -> funcInstructions
+            | TranslationConfiguration(_,FullyOptimised) -> crmInstructions |> Optimise
+            | TranslationConfiguration(_,NoOptimisation) -> crmInstructions
 
     let optimisationPhase2 =
         match config with
@@ -67,7 +68,7 @@ let WriteOutInstructions writeOut translate funcInstructions thisFuncType config
 
     // Kick off the whole thing here:
 
-    finalInstructions |> List.iter (fun instruction -> translate instruction |> List.iter writeOut)
+    finalInstructions |> List.iter (fun crmInstruction -> translate crmInstruction |> List.iter action)
 
     // Handle the function's return (may need pop into A):
 
@@ -76,8 +77,22 @@ let WriteOutInstructions writeOut translate funcInstructions thisFuncType config
             | true  -> translate (Pop A)  // TODO: not ideal construction of temporary
             | false -> []
 
-    returnHandlingCode |> List.iter writeOut
+    returnHandlingCode |> List.iter action
 
 
+
+/// Iterate all of the branch tables in the given function's instructions.
+let IterBranchTables branchTableStart branchTableItem crmInstructions =
+
+    crmInstructions |> List.iter (fun instruction ->
+
+        match instruction with
+            
+            | GotoIndex(LabelName tableLabel,_,_,codePointLabels) ->
+                branchTableStart tableLabel
+                codePointLabels |> Array.iter (fun (LabelName targetLabel) -> branchTableItem targetLabel)
+
+            | _ -> ()
+        )
 
 

@@ -317,38 +317,33 @@ let WriteOutWasmGlobal writeOut i (m:Module) (g:InternalGlobalRecord) =
 
 
 
-let WriteOutBranchTables writeOut funcInstructions =
-
-    let writeIns s = writeOut ("    " + s)
-
-    funcInstructions |> List.iter (fun ins ->
-        match ins with
-            | GotoIndex(LabelName tableLabel,_,_,codePointLabels) ->
-                writeOut "align ptr"
-                writeOut (sprintf "data %s" tableLabel)
-                codePointLabels |> Array.iter (fun (LabelName lbl) -> writeIns (sprintf "ptr %s" lbl))
-            | _ -> ()
-        )
 
 
 
-let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
+let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
-    let funcInstructions, updatedTranslationState = 
+    let crmInstructions, updatedTranslationState = 
         f.Body |> TranslateInstructions m.Funcs translationState
 
     let procedureCommand = 
         sprintf "procedure %s%d%s" AsmInternalFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType)
 
-    let writeIns s = 
-        writeOut ("    " + s)
+    let writeInstruction instructionText = 
+        writeOutCode ("    " + instructionText)
+
+    let branchTableStart tableLabel =
+        writeOutTables "align ptr"
+        writeOutTables (sprintf "data %s" tableLabel)
+
+    let branchTableItem targetLabel =
+        writeOutTables (sprintf "    ptr %s" targetLabel)
 
     try
-        writeOut procedureCommand
-        WriteOutFunctionLocals writeOut f.FuncType f.Locals
-        WriteOutInstructions writeIns TranslateInstructionToAsmSequence funcInstructions f.FuncType config
-        writeOut (ReturnCommandFor f.FuncType f.Locals)
-        WriteOutBranchTables writeOutTables funcInstructions
+        writeOutCode procedureCommand
+        WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
+        crmInstructions |> IterFunctionTranslated writeInstruction TranslateInstructionToAsmSequence f.FuncType config
+        writeOutCode (ReturnCommandFor f.FuncType f.Locals)
+        crmInstructions |> IterBranchTables branchTableStart branchTableItem
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
 
@@ -357,6 +352,7 @@ let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module)
 
 
 let WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray =
+
     writeOut ("procedure " + AsmEntryPointLabel)
     let (LabelName labelName) = FuncLabelFor startFuncIdx moduleFuncsArray
     writeOut (sprintf "goto %s" labelName)
