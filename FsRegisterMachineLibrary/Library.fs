@@ -2,9 +2,12 @@
 
 open System.Text
 open WasmFileTypes
+open WasmBetterTypes
 open BWToCRMConfigurationTypes
 open CommonRegisterMachineTypes
 open OptimiseCommonRegisterMachine
+open WasmStaticExpressionEvaluator
+open AsmPrefixes
 
 
 
@@ -94,5 +97,26 @@ let IterBranchTables branchTableStart branchTableItem crmInstructions =
 
             | _ -> ()
         )
+
+
+
+/// Iterate wasm table heading and content.
+let IterWasmTable wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
+
+    match t.InitData.Length with
+
+        | 0 -> ()
+
+        | 1 ->
+            wasmTableHeading i
+            t.InitData |> Array.iter (fun elem ->
+                    let ofsExpr, funcIdxList = elem
+                    let ofsValue = StaticEvaluate ofsExpr
+                    if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
+                    funcIdxList |> Array.iter (fun funcIdx -> wasmTableRow (FuncIdxNameString funcIdx))
+                )
+
+        | _ -> failwith "Cannot translate module with more than one Elem in a TableSec table"
+
 
 

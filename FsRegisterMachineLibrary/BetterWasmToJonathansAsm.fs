@@ -206,29 +206,6 @@ let ReturnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
 
 
 
-let WriteOutWasmTable writeOut i (m:Module) (t:InternalTableRecord) =
-
-    match t.InitData.Length with
-        | 0 -> ()
-        | 1 ->
-
-            let writeIns s = writeOut ("    " + s)  // TODO: repetition throughout routines!
-
-            writeOut "align ptr"
-            writeOut (sprintf "data %s%d" AsmTableNamePrefix i)
-
-            t.InitData |> Array.iter (fun elem ->
-                    let ofsExpr, funcIdxList = elem
-                    let ofsValue = StaticEvaluate ofsExpr
-                    if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
-                    funcIdxList |> Array.iter (fun funcIdx -> 
-                        writeIns (sprintf "ptr %s" (FuncIdxNameString funcIdx)))
-                )
-
-        | _ -> failwith "Cannot translate module with more than one Elem in a TableSec table"
-
-
-
 let WasmMemoryBlockMultiplier = 65536u
 
 
@@ -368,25 +345,32 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     let toComment commentText = 
         ("// " + commentText)
 
+    let wasmTableHeading i =
+        writeOutData "align ptr"
+        writeOutData (sprintf "data %s%d" AsmTableNamePrefix i)
+
+    let wasmTableRow nameString =
+        writeOutData (sprintf "    ptr %s" nameString)
+
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 
     m.Tables |> Array.iteri (fun i t ->
         match t with
-            | InternalTable2(tbl) -> tbl |> WriteOutWasmTable writeOutData i m 
-            | ImportedTable2(tbl) -> failwith "Error:  Cannot support importing a 'table'.  WASM module must be self-contained."
+            | InternalTable2 tbl -> tbl |> IterWasmTable wasmTableHeading wasmTableRow i
+            | ImportedTable2 tbl -> failwith "Error:  Cannot support importing a 'table'.  WASM module must be self-contained."
         )
 
     m.Globals |> Array.iteri (fun i g ->
         match g with
-            | InternalGlobal2(glo) -> glo |> WriteOutWasmGlobal writeOutData i m 
-            | ImportedGlobal2(glo) -> failwith "Error:  Cannot support importing a 'global'.  WASM module must be self-contained."
+            | InternalGlobal2 glo -> glo |> WriteOutWasmGlobal writeOutData i m 
+            | ImportedGlobal2 glo -> failwith "Error:  Cannot support importing a 'global'.  WASM module must be self-contained."
         )
 
     m.Mems |> Array.iteri (fun i me ->
         match me with
-            | InternalMemory2(mem) -> mem |> WriteOutWasmMem writeOutData writeOutVar i 
-            | ImportedMemory2(mem) -> failwith "Error:  Cannot support importing a 'memory'.  WASM module must be self-contained."
+            | InternalMemory2 mem -> mem |> WriteOutWasmMem writeOutData writeOutVar i 
+            | ImportedMemory2 mem -> failwith "Error:  Cannot support importing a 'memory'.  WASM module must be self-contained."
         )
 
     m.Mems |> WriteOutAllDataInitialisationFunction writeOutCode
