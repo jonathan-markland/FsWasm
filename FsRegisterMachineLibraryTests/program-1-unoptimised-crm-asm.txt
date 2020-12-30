@@ -10,6 +10,7 @@ CODE> ret
 CODE> procedure wasm_fn0  // : int
 CODE>     let A=42
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l1
 CODE>     pop A
 CODE> ret
