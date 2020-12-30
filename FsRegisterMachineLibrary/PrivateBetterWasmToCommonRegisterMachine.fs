@@ -491,13 +491,6 @@ let WasmMemoryBlockMultiplier = 65536u
 
 
 
-let TranslateThunkIn () =
-    // The translated code requires the Y register to
-    // point to the base of the linear memory region.
-    // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
-    [ sprintf "let Y=%s%d" AsmMemPrefix 0 ]
-    
-
 let TranslateGotoIndex tableLabel numMax defaultLabel =
     [
         // A is already the index to branch to
@@ -515,110 +508,6 @@ let TranslateCallTableIndirect () =
         "shl A,logptr"
         sprintf "goto [A+%s0]" AsmTableNamePrefix  // WASM 1.0 always looks in table #0
     ]
-
-
-
-let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory[]) =
-
-    writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
-    
-    // NO!!  The following is absolutely wrong, as this translator
-    //       should not pretend to know who its input generator is:
-    // writeOutCode (sprintf "    // Caller must pass stack pointer (relative to %s%d) in A" AsmMemPrefix 0)
-    // writeOutCode (sprintf "    let uint [%s%d+4]=A // Initialise WasmFiddle stack pointer at address offset 4" AsmMemPrefix 0)
-
-    let writeOutDataCopyCommand i (thisMem:InternalMemoryRecord) =
-        if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
-        thisMem.InitData |> Array.iteri (fun j elem ->
-                let ofsExpr, byteArray = elem
-                let ofsValue = StaticEvaluate ofsExpr
-                writeOutCode (sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue)
-                writeOutCode (sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j)
-                writeOutCode (sprintf "    let C=%d" byteArray.Length)
-                writeOutCode          "    cld rep movsb"
-            )
-
-    mems |> Array.iteri (fun i me ->
-        match me with
-            | InternalMemory2(mem) -> mem |> writeOutDataCopyCommand i 
-            | ImportedMemory2(mem) -> failwith "Error:  Cannot support importing a 'memory' region.  WASM module must be expect self-contained."
-        )
-
-    let writeOutIns s = writeOutCode ("    " + s)
-
-    TranslateThunkIn () |> List.iter writeOutIns
-    writeOutCode "ret"
-
-
-
-let WriteOutHexDump writeLine byteArray =
-    
-    let sb = new StringBuilder()
-    
-    byteArray |> Array.iteri (fun i byteVal -> 
-
-        let c = i &&& 15
-        
-        sb.Append (
-            match c with
-                | 0 -> sprintf "byte 0x%02X" byteVal
-                | _ -> sprintf ",0x%02X" byteVal
-            )
-            |> ignore
-
-        match c with
-            | 15 -> 
-                writeLine (sb.ToString())
-                sb.Clear() |> ignore
-            | _ -> ()
-    )
-
-    if sb.Length > 0 then writeLine (sb.ToString())
-
-
-
-let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemoryRecord) =
-
-    let linearMemorySize = 
-
-        match thisMem with 
-            | { MemoryType={ MemoryLimits=lims } } -> 
-
-            match lims with 
-
-                | { LimitMin = U32 0u ; LimitMax = None }
-                    -> failwith "Cannot translate module with Mem that is size 0"   
-
-                | { LimitMin = U32 memSize ; LimitMax = None } 
-                    -> memSize * WasmMemoryBlockMultiplier
-
-                | { LimitMin = _ ; LimitMax = Some _ }
-                    -> failwith "Cannot translate module with Mem that has max size limit"
-
-    writeOutVar "global"
-    writeOutVar "    align ptr"
-    writeOutVar (sprintf "    %s%d: %d" AsmMemPrefix i linearMemorySize)
-
-    let writeIns s = writeOutData ("    " + s)
-
-    writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix i) // TODO: If there is none, omit this.
-
-    thisMem.InitData |> Array.iteri (fun j (_, byteArray) ->
-        writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix i j)
-        WriteOutHexDump writeIns byteArray
-    )
-
-
-
-
-let WriteOutWasmGlobal writeOut i (m:Module) (g:InternalGlobalRecord) =
-
-    // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
-
-    let initValue = StaticEvaluate g.InitExpr
-    let globalIdx = GlobalIdx(U32(uint32 i))   // TODO: not ideal construction of temporary
-
-    writeOut (sprintf "data %s int %d" (GlobalIdxNameString globalIdx) initValue)
 
 
 
@@ -699,7 +588,118 @@ let TranslateInstructionToAsmSequence instruction =
         | Fetch16s(r,ofs)      -> TranslateREGU32 "let A=short[" r ofs "]" 
         | Fetch16u(r,ofs)      -> TranslateREGU32 "let A=ushort[" r ofs "]"
         | Fetch32(r,ofs)       -> TranslateREGU32 "let A=uint[" r ofs "]"  
-        | ThunkIn              -> TranslateThunkIn ()
+        | ThunkIn              -> 
+            // The translated code requires the Y register to
+            // point to the base of the linear memory region.
+            // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
+            [ sprintf "let Y=%s%d" AsmMemPrefix 0 ]
+
+
+
+
+
+let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory[]) =
+
+    writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
+    
+    // NO!!  The following is absolutely wrong, as this translator
+    //       should not pretend to know who its input generator is:
+    // writeOutCode (sprintf "    // Caller must pass stack pointer (relative to %s%d) in A" AsmMemPrefix 0)
+    // writeOutCode (sprintf "    let uint [%s%d+4]=A // Initialise WasmFiddle stack pointer at address offset 4" AsmMemPrefix 0)
+
+    let writeOutDataCopyCommand i (thisMem:InternalMemoryRecord) =
+        if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
+        thisMem.InitData |> Array.iteri (fun j elem ->
+                let ofsExpr, byteArray = elem
+                let ofsValue = StaticEvaluate ofsExpr
+                writeOutCode (sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue)
+                writeOutCode (sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j)
+                writeOutCode (sprintf "    let C=%d" byteArray.Length)
+                writeOutCode          "    cld rep movsb"
+            )
+
+    mems |> Array.iteri (fun i me ->
+        match me with
+            | InternalMemory2(mem) -> mem |> writeOutDataCopyCommand i 
+            | ImportedMemory2(mem) -> failwith "Error:  Cannot support importing a 'memory' region.  WASM module must be expect self-contained."
+        )
+
+    let writeOutIns s = writeOutCode ("    " + s)
+
+    (TranslateInstructionToAsmSequence ThunkIn) |> List.iter writeOutIns
+    writeOutCode "ret"
+
+
+
+let WriteOutHexDump writeLine byteArray =
+    
+    let sb = new StringBuilder()
+    
+    byteArray |> Array.iteri (fun i byteVal -> 
+
+        let c = i &&& 15
+        
+        sb.Append (
+            match c with
+                | 0 -> sprintf "byte 0x%02X" byteVal
+                | _ -> sprintf ",0x%02X" byteVal
+            )
+            |> ignore
+
+        match c with
+            | 15 -> 
+                writeLine (sb.ToString())
+                sb.Clear() |> ignore
+            | _ -> ()
+    )
+
+    if sb.Length > 0 then writeLine (sb.ToString())
+
+
+
+let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemoryRecord) =
+
+    let linearMemorySize = 
+
+        match thisMem with 
+            | { MemoryType={ MemoryLimits=lims } } -> 
+
+            match lims with 
+
+                | { LimitMin = U32 0u ; LimitMax = None }
+                    -> failwith "Cannot translate module with Mem that is size 0"   
+
+                | { LimitMin = U32 memSize ; LimitMax = None } 
+                    -> memSize * WasmMemoryBlockMultiplier
+
+                | { LimitMin = _ ; LimitMax = Some _ }
+                    -> failwith "Cannot translate module with Mem that has max size limit"
+
+    writeOutVar "global"
+    writeOutVar "    align ptr"
+    writeOutVar (sprintf "    %s%d: %d" AsmMemPrefix i linearMemorySize)
+
+    let writeIns s = writeOutData ("    " + s)
+
+    writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix i) // TODO: If there is none, omit this.
+
+    thisMem.InitData |> Array.iteri (fun j (_, byteArray) ->
+        writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix i j)
+        WriteOutHexDump writeIns byteArray
+    )
+
+
+
+
+let WriteOutWasmGlobal writeOut i (m:Module) (g:InternalGlobalRecord) =
+
+    // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
+
+    let initValue = StaticEvaluate g.InitExpr
+    let globalIdx = GlobalIdx(U32(uint32 i))   // TODO: not ideal construction of temporary
+
+    writeOut (sprintf "data %s int %d" (GlobalIdxNameString globalIdx) initValue)
+
 
 
 
