@@ -51,7 +51,7 @@ let private ReturnsSingleValue (ft:FuncType) =
 
 
 
-let WriteOutInstructionsToText writeOut translate funcInstructions thisFuncType config =
+let WriteOutInstructions writeOut translate funcInstructions thisFuncType config =
 
     let optimisationPhase1 = 
         match config with

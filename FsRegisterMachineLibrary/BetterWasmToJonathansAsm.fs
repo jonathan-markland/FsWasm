@@ -332,12 +332,6 @@ let WriteOutBranchTables writeOut funcInstructions =
 
 
 
-let WriteOutFunction writeOut thisFuncType thisFuncLocals funcInstructions config =   // TODO:  Can we reduce f to inner components ?
-    WriteOutInstructionsToText writeOut TranslateInstructionToAsmSequence funcInstructions thisFuncType config
-    writeOut (ReturnCommandFor thisFuncType thisFuncLocals)
-
-
-
 let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
     let funcInstructions, updatedTranslationState = 
@@ -349,7 +343,8 @@ let WriteOutFunctionAndBranchTables writeOut writeOutTables funcIndex (m:Module)
     try
         writeOut procedureCommand
         WriteOutFunctionLocals writeOut f.FuncType f.Locals
-        WriteOutFunction writeOut f.FuncType f.Locals funcInstructions config
+        WriteOutInstructions writeOut TranslateInstructionToAsmSequence funcInstructions f.FuncType config
+        writeOut (ReturnCommandFor f.FuncType f.Locals)
         WriteOutBranchTables writeOutTables funcInstructions
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
