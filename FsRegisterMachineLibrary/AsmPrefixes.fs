@@ -9,3 +9,15 @@ let AsmEntryPointLabel        = "wasm_entry"
 let AsmTableNamePrefix        = "wasm_table"  // There is only one, for the TableSec
 let AsmMemoryNamePrefix       = "wasm_mem_init_data"
 let AsmMemPrefix              = "wasm_mem"
+
+open WasmFileTypes
+
+let LocalIdxNameString (LocalIdx(U32 localIdx)) = 
+    sprintf "%s%d" AsmLocalNamePrefix localIdx
+
+let GlobalIdxNameString (GlobalIdx(U32 globalIdx)) = 
+    sprintf "%s%d" AsmGlobalNamePrefix globalIdx
+    
+let FuncIdxNameString (FuncIdx(U32 funcIdx)) = 
+    sprintf "%s%d" AsmInternalFuncNamePrefix funcIdx
+
