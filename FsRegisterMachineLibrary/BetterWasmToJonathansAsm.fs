@@ -1,7 +1,7 @@
 ﻿module BetterWasmToJonathansAsm
 
 open WasmBetterTypes
-open PrivateBetterWasmToCommonRegisterMachine
+open WasmInstructionsToCRMInstructions
 open CommonRegisterMachineToJonathansAsm
 
 

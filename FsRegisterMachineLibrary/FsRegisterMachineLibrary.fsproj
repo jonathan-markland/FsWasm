@@ -11,7 +11,7 @@
     <Compile Include="CommonRegisterMachineTypes.fs" />
     <Compile Include="PrivateOptimiseCommonRegisterMachine.fs" />
     <Compile Include="OptimiseCommonRegisterMachine.fs" />
-    <Compile Include="PrivateBetterWasmToCommonRegisterMachine.fs" />
+    <Compile Include="WasmInstructionsToCRMInstructions.fs" />
     <Compile Include="CommonRegisterMachineToJonathansAsm.fs" />
     <Compile Include="BetterWasmToJonathansAsm.fs" />
   </ItemGroup>

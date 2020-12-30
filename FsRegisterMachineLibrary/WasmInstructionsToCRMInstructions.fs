@@ -1,4 +1,4 @@
-﻿module PrivateBetterWasmToCommonRegisterMachine
+﻿module WasmInstructionsToCRMInstructions
 
 open System.Text
 open WasmFileTypes

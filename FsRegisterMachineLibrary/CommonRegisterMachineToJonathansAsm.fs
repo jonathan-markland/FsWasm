@@ -8,7 +8,7 @@ open AsmPrefixes
 open WasmStaticExpressionEvaluator
 open BWToCRMConfigurationTypes
 open OptimiseCommonRegisterMachine
-open PrivateBetterWasmToCommonRegisterMachine
+open WasmInstructionsToCRMInstructions
 
 
     
