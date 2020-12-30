@@ -339,7 +339,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState (ws:Was
             | I32Rotl(a,b) -> shiftOp a b RotlBC
             | I32Rotr(a,b) -> shiftOp a b RotrBC
 
-            | _ -> failwith "Cannot translate this instruction to simple 32-bit machine."
+            | _ -> failwith (sprintf "Cannot translate this instruction to simple 32-bit machine: %A" w)   // TODO: Possibly avoid %A
 
     // Do the translation with the above nested functions:
 
@@ -607,7 +607,7 @@ let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemoryRecord) =
 
     let writeIns s = writeOutData ("    " + s)
 
-    writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix i)
+    writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix i) // TODO: If there is none, omit this.
 
     thisMem.InitData |> Array.iteri (fun j elem ->
             let _, byteArray = elem
