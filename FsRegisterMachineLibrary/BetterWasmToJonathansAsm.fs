@@ -196,14 +196,6 @@ let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
 
 
 
-let ReturnsSingleValue (ft:FuncType) =
-    match ft.ReturnTypes.Length with
-        | 0 -> false
-        | 1 -> true
-        | _ -> failwith "Cannot translate function that returns more than one value"
-
-
-
 let ReturnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
     match (funcType.ParameterTypes.Length, funcLocals.Length) with
         | (0,0) -> "ret"
@@ -325,26 +317,6 @@ let WriteOutWasmGlobal writeOut i (m:Module) (g:InternalGlobalRecord) =
 
 
 
-let WriteOutInstructionsToText writeOut instructionsList thisFuncType =
-
-    let writeIns s = writeOut ("    " + s)
-
-    // Kick off the whole thing here:
-
-    instructionsList |> List.iter (fun i -> TranslateInstructionToAsmSequence i |> List.iter writeIns)
-
-    // Handle the function's return (may need pop into A):
-
-    let returnHandlingCode = 
-        match thisFuncType |> ReturnsSingleValue with
-            | true  -> TranslateInstructionToAsmSequence (Pop A)  // TODO: not ideal construction of temporary
-            | false -> []
-
-    returnHandlingCode |> List.iter writeIns
-
-
-
-
 let WriteOutBranchTables writeOut funcInstructions =
 
     let writeIns s = writeOut ("    " + s)
@@ -361,20 +333,7 @@ let WriteOutBranchTables writeOut funcInstructions =
 
 
 let WriteOutFunction writeOut thisFuncType thisFuncLocals funcInstructions config =   // TODO:  Can we reduce f to inner components ?
-
-    let phase1 = 
-        match config with
-            | TranslationConfiguration(_,FullyOptimised) -> funcInstructions |> Optimise
-            | TranslationConfiguration(_,NoOptimisation) -> funcInstructions
-
-    let phase2 =
-        match config with
-            | TranslationConfiguration(WithBarriers,_)    -> phase1
-            | TranslationConfiguration(WithoutBarriers,_) -> phase1 |> RemoveBarriers
-
-    let desiredInstructions = phase2
-
-    WriteOutInstructionsToText writeOut desiredInstructions thisFuncType
+    WriteOutInstructionsToText writeOut TranslateInstructionToAsmSequence funcInstructions thisFuncType config
     writeOut (ReturnCommandFor thisFuncType thisFuncLocals)
 
 
