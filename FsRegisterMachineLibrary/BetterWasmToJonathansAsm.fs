@@ -275,7 +275,7 @@ let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemoryRecord) =
 
     thisMem.InitData |> Array.iteri (fun j (_, byteArray) ->
         writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix i j)
-        WriteOutHexDump "byte" "," "0x" writeIns byteArray
+        ForEachLineOfHexDumpDo "byte" "," "0x" writeIns byteArray
     )
 
 
@@ -318,9 +318,9 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     try
         writeOutCode procedureCommand
         WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
-        crmInstructions |> IterFunctionTranslated writeInstruction TranslateInstructionToAsmSequence f.FuncType config
+        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f.FuncType config
         writeOutCode (ReturnCommandFor f.FuncType f.Locals)
-        crmInstructions |> IterBranchTables branchTableStart branchTableItem
+        crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
 
@@ -357,7 +357,7 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
 
     m.Tables |> Array.iteri (fun i t ->
         match t with
-            | InternalTable2 tbl -> tbl |> IterWasmTable wasmTableHeading wasmTableRow i
+            | InternalTable2 tbl -> tbl |> ForWasmTableDo wasmTableHeading wasmTableRow i
             | ImportedTable2 tbl -> failwith "Error:  Cannot support importing a 'table'.  WASM module must be self-contained."
         )
 
@@ -388,6 +388,6 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
                 (sprintf "WASM Import: %s.%s" m n) |> toComment |> writeOutCode 
         )
 
-    WriteOutWasmStart WriteOutBranchToEntryLabel writeOutCode toComment m.Start m.Funcs
+    WithWasmStartDo WriteOutBranchToEntryLabel writeOutCode toComment m.Start m.Funcs
 
 

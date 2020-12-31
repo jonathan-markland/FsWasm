@@ -11,7 +11,7 @@ open AsmPrefixes
 
 
 
-let WriteOutHexDump (command:string) (byteSeparator:string) (hexPrefix:string) writeLine (byteArray:byte[]) =
+let ForEachLineOfHexDumpDo (command:string) (byteSeparator:string) (hexPrefix:string) writeLine (byteArray:byte[]) =
 
     let sb = new StringBuilder(16 * (2 + byteSeparator.Length + hexPrefix.Length) + command.Length)
 
@@ -37,7 +37,7 @@ let WriteOutHexDump (command:string) (byteSeparator:string) (hexPrefix:string) w
 
 
 
-let WriteOutWasmStart writeOutBranchToEntryLabel writeOut toComment startOption moduleFuncsArray =
+let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption moduleFuncsArray =
     match startOption with 
         | Some { StartFuncIdx = startFuncIdx } -> 
             writeOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray
@@ -55,7 +55,7 @@ let private ReturnsSingleValue (ft:FuncType) =
 
 
 /// Iterate through all of the translated versions of the function's instructions.
-let IterFunctionTranslated action translate thisFuncType config crmInstructions =
+let ForTranslatedCrmInstructionsDo action translate thisFuncType config crmInstructions =
 
     let optimisationPhase1 = 
         match config with
@@ -85,7 +85,7 @@ let IterFunctionTranslated action translate thisFuncType config crmInstructions 
 
 
 /// Iterate all of the branch tables in the given function's instructions.
-let IterBranchTables branchTableStart branchTableItem crmInstructions =
+let ForAllBranchTablesDo branchTableStart branchTableItem crmInstructions =
 
     crmInstructions |> List.iter (fun instruction ->
 
@@ -101,7 +101,7 @@ let IterBranchTables branchTableStart branchTableItem crmInstructions =
 
 
 /// Iterate wasm table heading and content.
-let IterWasmTable wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
+let ForWasmTableDo wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
 
     match t.InitData.Length with
 
