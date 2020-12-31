@@ -116,34 +116,11 @@ let TranslateInstructionToAsmSequence instruction =
 
 
 
-let ValTypeTranslationOf =
-    function
-        | I32Type -> "int"
-        | I64Type -> failwith "Cannot translate I64 type with this simple translator"
-        | F32Type -> failwith "Cannot translate F32 type with this simple translator"
-        | F64Type -> failwith "Cannot translate F64 type with this simple translator"
-
-
-let ParamListOf (ps:ValType[]) =
-    String.concat ", " (ps |> Array.map ValTypeTranslationOf)
-
-
-let TextSignatureOf (funcType:FuncType) =
-    let translatedParameters = ParamListOf funcType.ParameterTypes
-    let translatedReturns    = ParamListOf funcType.ReturnTypes
-    (Bracketed translatedParameters) + (ColonPrefixed translatedReturns)
-
-
-let AsmSignatureOf (funcType:FuncType) =
-
-    let atParamDecls (ps:ValType[]) =
-        String.concat ", " (ps |> Array.mapi (fun i t -> (sprintf "@%s%d" AsmLocalNamePrefix i)))
-
-    let atParamsString = 
-        atParamDecls funcType.ParameterTypes
-
-    (Bracketed atParamsString) + "  // " + (TextSignatureOf funcType)
-
+let ValTypeTranslationOf = function
+    | I32Type -> "int"
+    | I64Type -> failwith "Cannot translate I64 type with this simple translator"
+    | F32Type -> failwith "Cannot translate F32 type with this simple translator"
+    | F64Type -> failwith "Cannot translate F64 type with this simple translator"
 
 
 let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
@@ -171,18 +148,31 @@ let WriteOutWasmGlobal writeOut (m:Module) i (g:InternalGlobalRecord) =
 
 
 
-
-
-
-
-
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
     let crmInstructions, updatedTranslationState = 
         f.Body |> TranslateInstructions m.Funcs translationState
 
+    let paramListOf (ps:ValType[]) =
+        String.concat ", " (ps |> Array.map ValTypeTranslationOf)
+
+    let textSignatureOf (funcType:FuncType) =
+        let translatedParameters = paramListOf funcType.ParameterTypes
+        let translatedReturns    = paramListOf funcType.ReturnTypes
+        (Bracketed translatedParameters) + (ColonPrefixed translatedReturns)
+
+    let asmSignatureOf (funcType:FuncType) =
+
+        let atParamDecls (ps:ValType[]) =
+            String.concat ", " (ps |> Array.mapi (fun i t -> (sprintf "@%s%d" AsmLocalNamePrefix i)))
+
+        let atParamsString = 
+            atParamDecls funcType.ParameterTypes
+
+        (Bracketed atParamsString) + "  // " + (textSignatureOf funcType)
+
     let procedureCommand = 
-        sprintf "procedure %s%d%s" AsmInternalFuncNamePrefix funcIndex (AsmSignatureOf f.FuncType)
+        sprintf "procedure %s%d%s" AsmInternalFuncNamePrefix funcIndex (asmSignatureOf f.FuncType)
 
     let writeInstruction instructionText = 
         writeOutCode ("    " + instructionText)
