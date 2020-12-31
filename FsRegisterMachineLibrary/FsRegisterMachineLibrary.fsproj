@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TextFormatting.fs" />
     <Compile Include="BWToCRMConfigurationTypes.fs" />
     <Compile Include="CommonRegisterMachineTypes.fs" />
     <Compile Include="PrivateOptimiseCommonRegisterMachine.fs" />

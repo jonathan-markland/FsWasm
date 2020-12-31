@@ -6,10 +6,9 @@ open WasmBetterTypes
 open CommonRegisterMachineTypes
 open AsmPrefixes
 open WasmStaticExpressionEvaluator
-open BWToCRMConfigurationTypes
-open OptimiseCommonRegisterMachine
 open WasmInstructionsToCRMInstructions
 open Library
+open TextFormatting
 
 
 
@@ -117,31 +116,6 @@ let TranslateInstructionToAsmSequence instruction =
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-let Surrounded (before:string) (after:string) (content:string) =
-    match content.Length with
-        | 0 -> ""
-        | _ -> before + content + after
-
-
-let Bracketed s =           s |> Surrounded "(" ")"
-let Prefixed thePrefix s =  s |> Surrounded thePrefix ""
-let ColonPrefixed s =       s |> Prefixed ": "
-
-
-
 let ValTypeTranslationOf =
     function
         | I32Type -> "int"
@@ -172,7 +146,6 @@ let AsmSignatureOf (funcType:FuncType) =
 
 
 
-
 let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
 
     let indexOfFirstLocal = funcType.ParameterTypes.Length
@@ -184,18 +157,6 @@ let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
                 | 0 -> "var "
                 | _ -> "  , "
         writeOut (sprintf "%s@%s%d:%s" prefixStr AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v)))
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -259,8 +220,6 @@ let WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray =
 
 
 
-
-
 let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
@@ -320,5 +279,3 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         )
 
     WithWasmStartDo WriteOutBranchToEntryLabel writeOutCode toComment m.Start m.Funcs
-
-
