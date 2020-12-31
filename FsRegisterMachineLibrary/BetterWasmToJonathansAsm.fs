@@ -213,39 +213,6 @@ let ReturnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
 
 
 
-let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory[]) =
-
-    writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
-
-    // NO!!  The following is absolutely wrong, as this translator
-    //       should not pretend to know who its input generator is:
-    // writeOutCode (sprintf "    // Caller must pass stack pointer (relative to %s%d) in A" AsmMemPrefix 0)
-    // writeOutCode (sprintf "    let uint [%s%d+4]=A // Initialise WasmFiddle stack pointer at address offset 4" AsmMemPrefix 0)
-
-    let writeOutDataCopyCommand i (thisMem:InternalMemoryRecord) =
-        if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
-        thisMem.InitData |> Array.iteri (fun j elem ->
-                let ofsExpr, byteArray = elem
-                let ofsValue = StaticEvaluate ofsExpr
-                writeOutCode (sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue)
-                writeOutCode (sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j)
-                writeOutCode (sprintf "    let C=%d" byteArray.Length)
-                writeOutCode          "    cld rep movsb"
-            )
-
-    mems |> Array.iteri (fun i me ->
-        match me with
-            | InternalMemory2(mem) -> mem |> writeOutDataCopyCommand i 
-            | ImportedMemory2(mem) -> failwith "Error:  Cannot support importing a 'memory' region.  WASM module must be expect self-contained."
-        )
-
-    let writeOutIns s = writeOutCode ("    " + s)
-
-    (TranslateInstructionToAsmSequence ThunkIn) |> List.iter writeOutIns
-    writeOutCode "ret"
-
-
-
 let WriteOutWasmGlobal writeOut i (m:Module) (g:InternalGlobalRecord) =
 
     // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
@@ -328,6 +295,12 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex)
         ForEachLineOfHexDumpDo "byte" "," "0x" writeIns byteArray
 
+    let writeOutCopyBlockCode i j ofsValue byteArrayLength =
+        writeOutCode (sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue)
+        writeOutCode (sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j)
+        writeOutCode (sprintf "    let C=%d" byteArrayLength)
+        writeOutCode          "    cld rep movsb"
+
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 
@@ -349,7 +322,10 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
             | ImportedMemory2 mem -> failwith "Error:  Cannot support importing a 'memory'.  WASM module must be self-contained."
         )
 
-    m.Mems |> WriteOutAllDataInitialisationFunction writeOutCode
+    writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
+    let writeOutIns s = writeOutCode ("    " + s)
+    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TranslateInstructionToAsmSequence
+    writeOutCode "ret"
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
 

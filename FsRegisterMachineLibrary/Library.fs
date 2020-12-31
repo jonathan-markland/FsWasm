@@ -148,6 +148,29 @@ let WithWasmMemDo wasmMemHeading wasmMemRow memIndex (thisMem:InternalMemoryReco
 
 
 
+/// Generate the initialisation function that arranges the statically-initialised
+/// data blocks in the memory space.
+let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns translate (mems:Memory[]) =
+
+    let writeOutDataCopyCommand i (thisMem:InternalMemoryRecord) =
+        if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
+        thisMem.InitData |> Array.iteri (fun j elem ->
+                let ofsExpr, byteArray = elem
+                let ofsValue = StaticEvaluate ofsExpr
+                writeOutCopyBlockCode i j ofsValue byteArray.Length
+            )
+
+    mems |> Array.iteri (fun i me ->
+        match me with
+            | InternalMemory2(mem) -> mem |> writeOutDataCopyCommand i 
+            | ImportedMemory2(mem) -> failwith "Error:  Cannot support importing a 'memory' region.  WASM module must be expect self-contained."
+        )
+
+    (translate ThunkIn) |> List.iter writeOutIns
+
+
+
+
 
 
 
