@@ -120,12 +120,12 @@ let ForWasmTableDo wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
 
 
 
-let private WasmMemoryBlockMultiplier = 65536u
 
 
-
-/// Iterate wasm table heading and content.
+/// Do actions with WASM memory and any initialisation data blocks.
 let WithWasmMemDo wasmMemHeading wasmMemRow memIndex (thisMem:InternalMemoryRecord) =
+
+    let WasmMemoryBlockMultiplier = 65536u
 
     let linearMemorySize = 
 
@@ -148,6 +148,42 @@ let WithWasmMemDo wasmMemHeading wasmMemRow memIndex (thisMem:InternalMemoryReco
 
 
 
+/// Do the action for all WASM tables, raising exception if an 
+/// imported table is seen, since these are not yet supported.
+let ForAllWasmTablesDo action tables =
+
+    tables |> Array.iteri (fun tableIndex t ->
+        match t with
+            | InternalTable2 tbl -> action tableIndex tbl
+            | ImportedTable2 tbl -> failwith "Error:  Cannot support importing a WASM 'table'.  WASM module must be self-contained."
+        )
+
+
+
+/// Do the action for all WASM globals, raising exception if an 
+/// imported global is seen, since these are not yet supported.
+let ForAllWasmGlobalsDo action globals =
+
+    globals |> Array.iteri (fun globalIndex g ->
+        match g with
+            | InternalGlobal2 glo -> action globalIndex glo
+            | ImportedGlobal2 glo -> failwith "Error:  Cannot support importing a WASM 'global'.  WASM module must be self-contained."
+        )
+
+
+
+/// Do the action for all WASM memories, raising exception if an 
+/// imported memory is seen, since these are not yet supported.
+let ForAllWasmMemsDo action mems =
+
+    mems |> Array.iteri (fun memIndex me ->
+        match me with
+            | InternalMemory2 mem -> action memIndex mem
+            | ImportedMemory2 mem -> failwith "Error:  Cannot support importing a WASM 'memory'.  WASM module must be self-contained."
+        )
+
+
+
 /// Generate the initialisation function that arranges the statically-initialised
 /// data blocks in the memory space.
 let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns translate (mems:Memory[]) =
@@ -160,40 +196,8 @@ let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns transla
                 writeOutCopyBlockCode i j ofsValue byteArray.Length
             )
 
-    mems |> Array.iteri (fun i me ->
-        match me with
-            | InternalMemory2(mem) -> mem |> writeOutDataCopyCommand i 
-            | ImportedMemory2(mem) -> failwith "Error:  Cannot support importing a 'memory' region.  WASM module must be expect self-contained."
-        )
-
+    mems |> ForAllWasmMemsDo writeOutDataCopyCommand
     (translate ThunkIn) |> List.iter writeOutIns
 
 
 
-let ForAllWasmTablesDo action tables =
-
-    tables |> Array.iteri (fun tableIndex t ->
-        match t with
-            | InternalTable2 tbl -> action tableIndex tbl
-            | ImportedTable2 tbl -> failwith "Error:  Cannot support importing a WASM 'table'.  WASM module must be self-contained."
-        )
-
-
-
-let ForAllWasmGlobalsDo action globals =
-
-    globals |> Array.iteri (fun globalIndex g ->
-        match g with
-            | InternalGlobal2 glo -> action globalIndex glo
-            | ImportedGlobal2 glo -> failwith "Error:  Cannot support importing a 'global'.  WASM module must be self-contained."
-        )
-
-
-
-let ForAllWasmMemsDo action mems =
-
-    mems |> Array.iteri (fun memIndex me ->
-        match me with
-            | InternalMemory2 mem -> action memIndex mem
-            | ImportedMemory2 mem -> failwith "Error:  Cannot support importing a 'memory'.  WASM module must be self-contained."
-        )

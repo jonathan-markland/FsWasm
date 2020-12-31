@@ -1,6 +1,5 @@
 ﻿module BetterWasmToJonathansAsm
 
-
 open System.Text
 open WasmFileTypes
 open WasmBetterTypes
@@ -24,10 +23,9 @@ let TranslateInstructionToAsmSequence instruction =
         | C -> "C"
         | Y -> "Y"
 
-    let offsetIfNeeded u = 
-        match u with
-            | U32 0u -> ""                   // indexed addressing not needed with zero offset
-            | U32 n  -> "+" + n.ToString()   // indexed addressing needed
+    let offsetIfNeeded = function
+        | U32 0u -> ""                   // indexed addressing not needed with zero offset
+        | U32 n  -> "+" + n.ToString()   // indexed addressing needed
 
     let translateREGU32 s1 r u s2 = 
         [ sprintf "%s%s%s%s" s1 (regNameOf r) (offsetIfNeeded u) s2 ]
