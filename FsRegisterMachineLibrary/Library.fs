@@ -120,3 +120,34 @@ let ForWasmTableDo wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
 
 
 
+let private WasmMemoryBlockMultiplier = 65536u
+
+
+
+/// Iterate wasm table heading and content.
+let WithWasmMemDo wasmMemHeading wasmMemRow memIndex (thisMem:InternalMemoryRecord) =
+
+    let linearMemorySize = 
+
+        match thisMem with 
+            | { MemoryType={ MemoryLimits=lims } } -> 
+
+            match lims with 
+
+                | { LimitMin = U32 0u ; LimitMax = None }
+                    -> failwith "Cannot translate module with Mem that is size 0"   
+
+                | { LimitMin = U32 memSize ; LimitMax = None } 
+                    -> memSize * WasmMemoryBlockMultiplier
+
+                | { LimitMin = _ ; LimitMax = Some _ }
+                    -> failwith "Cannot translate module with Mem that has max size limit"
+
+    wasmMemHeading memIndex linearMemorySize
+    thisMem.InitData |> Array.iteri (fun dataBlockIndex (_, byteArray) -> wasmMemRow memIndex dataBlockIndex byteArray)
+
+
+
+
+
+

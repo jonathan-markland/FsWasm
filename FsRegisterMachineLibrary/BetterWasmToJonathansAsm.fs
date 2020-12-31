@@ -206,7 +206,6 @@ let ReturnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
 
 
 
-let WasmMemoryBlockMultiplier = 65536u
 
 
 
@@ -244,40 +243,6 @@ let WriteOutAllDataInitialisationFunction  writeOutCode (mems:Memory[]) =
 
     (TranslateInstructionToAsmSequence ThunkIn) |> List.iter writeOutIns
     writeOutCode "ret"
-
-
-
-let WriteOutWasmMem writeOutData writeOutVar i (thisMem:InternalMemoryRecord) =
-
-    let linearMemorySize = 
-
-        match thisMem with 
-            | { MemoryType={ MemoryLimits=lims } } -> 
-
-            match lims with 
-
-                | { LimitMin = U32 0u ; LimitMax = None }
-                    -> failwith "Cannot translate module with Mem that is size 0"   
-
-                | { LimitMin = U32 memSize ; LimitMax = None } 
-                    -> memSize * WasmMemoryBlockMultiplier
-
-                | { LimitMin = _ ; LimitMax = Some _ }
-                    -> failwith "Cannot translate module with Mem that has max size limit"
-
-    writeOutVar "global"
-    writeOutVar "    align ptr"
-    writeOutVar (sprintf "    %s%d: %d" AsmMemPrefix i linearMemorySize)
-
-    let writeIns s = writeOutData ("    " + s)
-
-    writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix i) // TODO: If there is none, omit this.
-
-    thisMem.InitData |> Array.iteri (fun j (_, byteArray) ->
-        writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix i j)
-        ForEachLineOfHexDumpDo "byte" "," "0x" writeIns byteArray
-    )
-
 
 
 
@@ -345,31 +310,42 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     let toComment commentText = 
         ("// " + commentText)
 
-    let wasmTableHeading i =
+    let wasmTableHeading tableIndex =
         writeOutData "align ptr"
-        writeOutData (sprintf "data %s%d" AsmTableNamePrefix i)
+        writeOutData (sprintf "data %s%d" AsmTableNamePrefix tableIndex)
 
     let wasmTableRow nameString =
         writeOutData (sprintf "    ptr %s" nameString)
 
+    let wasmMemHeading memIndex linearMemorySize =
+        writeOutVar "global"
+        writeOutVar "    align ptr"
+        writeOutVar (sprintf "    %s%d: %d" AsmMemPrefix memIndex linearMemorySize)
+        writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex) // TODO: If there is none, omit this.
+
+    let wasmMemRow memIndex dataBlockIndex byteArray =
+        let writeIns s = writeOutData ("    " + s)
+        writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex)
+        ForEachLineOfHexDumpDo "byte" "," "0x" writeIns byteArray
+
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 
-    m.Tables |> Array.iteri (fun i t ->
+    m.Tables |> Array.iteri (fun tableIndex t ->
         match t with
-            | InternalTable2 tbl -> tbl |> ForWasmTableDo wasmTableHeading wasmTableRow i
+            | InternalTable2 tbl -> tbl |> ForWasmTableDo wasmTableHeading wasmTableRow tableIndex
             | ImportedTable2 tbl -> failwith "Error:  Cannot support importing a 'table'.  WASM module must be self-contained."
         )
 
-    m.Globals |> Array.iteri (fun i g ->
+    m.Globals |> Array.iteri (fun globalIndex g ->
         match g with
-            | InternalGlobal2 glo -> glo |> WriteOutWasmGlobal writeOutData i m 
+            | InternalGlobal2 glo -> glo |> WriteOutWasmGlobal writeOutData globalIndex m 
             | ImportedGlobal2 glo -> failwith "Error:  Cannot support importing a 'global'.  WASM module must be self-contained."
         )
 
-    m.Mems |> Array.iteri (fun i me ->
+    m.Mems |> Array.iteri (fun memIndex me ->
         match me with
-            | InternalMemory2 mem -> mem |> WriteOutWasmMem writeOutData writeOutVar i 
+            | InternalMemory2 mem -> mem |> WithWasmMemDo wasmMemHeading wasmMemRow memIndex 
             | ImportedMemory2 mem -> failwith "Error:  Cannot support importing a 'memory'.  WASM module must be self-contained."
         )
 
