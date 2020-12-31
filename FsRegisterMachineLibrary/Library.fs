@@ -170,7 +170,30 @@ let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns transla
 
 
 
+let ForAllWasmTablesDo action tables =
+
+    tables |> Array.iteri (fun tableIndex t ->
+        match t with
+            | InternalTable2 tbl -> action tableIndex tbl
+            | ImportedTable2 tbl -> failwith "Error:  Cannot support importing a WASM 'table'.  WASM module must be self-contained."
+        )
 
 
 
+let ForAllWasmGlobalsDo action globals =
 
+    globals |> Array.iteri (fun globalIndex g ->
+        match g with
+            | InternalGlobal2 glo -> action globalIndex glo
+            | ImportedGlobal2 glo -> failwith "Error:  Cannot support importing a 'global'.  WASM module must be self-contained."
+        )
+
+
+
+let ForAllWasmMemsDo action mems =
+
+    mems |> Array.iteri (fun memIndex me ->
+        match me with
+            | InternalMemory2 mem -> action memIndex mem
+            | ImportedMemory2 mem -> failwith "Error:  Cannot support importing a 'memory'.  WASM module must be self-contained."
+        )

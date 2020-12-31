@@ -201,7 +201,7 @@ let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
 
 
 
-let WriteOutWasmGlobal writeOut i (m:Module) (g:InternalGlobalRecord) =
+let WriteOutWasmGlobal writeOut (m:Module) i (g:InternalGlobalRecord) =
 
     // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
 
@@ -294,29 +294,17 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         writeOutCode (sprintf "    let C=%d" byteArrayLength)
         writeOutCode          "    cld rep movsb"
 
+    let writeOutIns s = 
+        writeOutCode ("    " + s)
+
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 
-    m.Tables |> Array.iteri (fun tableIndex t ->
-        match t with
-            | InternalTable2 tbl -> tbl |> ForWasmTableDo wasmTableHeading wasmTableRow tableIndex
-            | ImportedTable2 tbl -> failwith "Error:  Cannot support importing a 'table'.  WASM module must be self-contained."
-        )
-
-    m.Globals |> Array.iteri (fun globalIndex g ->
-        match g with
-            | InternalGlobal2 glo -> glo |> WriteOutWasmGlobal writeOutData globalIndex m 
-            | ImportedGlobal2 glo -> failwith "Error:  Cannot support importing a 'global'.  WASM module must be self-contained."
-        )
-
-    m.Mems |> Array.iteri (fun memIndex me ->
-        match me with
-            | InternalMemory2 mem -> mem |> WithWasmMemDo wasmMemHeading wasmMemRow memIndex 
-            | ImportedMemory2 mem -> failwith "Error:  Cannot support importing a 'memory'.  WASM module must be self-contained."
-        )
+    m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo wasmTableHeading wasmTableRow)
+    m.Globals |> ForAllWasmGlobalsDo (WriteOutWasmGlobal writeOutData m)
+    m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
     writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
-    let writeOutIns s = writeOutCode ("    " + s)
     m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TranslateInstructionToAsmSequence
     writeOutCode "ret"
 
