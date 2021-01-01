@@ -198,7 +198,7 @@ let WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray =
 
 
 
-let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
+let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
 

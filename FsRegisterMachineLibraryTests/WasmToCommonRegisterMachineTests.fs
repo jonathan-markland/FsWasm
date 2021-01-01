@@ -4,14 +4,13 @@ open System
 open System.IO
 open WasmSerialiser
 open WasmFileReader
-open BetterWasmToJonathansAsm
 open BWToCRMConfigurationTypes
 open WasmToBetterWasm
 
 open Xunit
 
 
-let WasmToCommonRegisterMachineText config paramFileName =
+let WasmToCommonRegisterMachineText asAssemblyLanguage config paramFileName =
 
     let outputInOrderOfGeneration f =
         let resizeArray = new ResizeArray<string>();
@@ -39,7 +38,7 @@ let WasmToCommonRegisterMachineText config paramFileName =
 
         let theProcess writeOutData writeOutCode writeOutVar =
             betterWasm
-                |> WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar
+                |> asAssemblyLanguage config headingText writeOutData writeOutCode writeOutVar
 
         outputInOrderOfGeneration theProcess
 
@@ -56,30 +55,35 @@ type OptimisationCase = Optimised | Unoptimised
 
 
 
-let FilePassesTest n optimisationCase =
+let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationCase =
     
     let fileSubType = 
         match optimisationCase with
             | Optimised   -> "optimised"
             | Unoptimised -> "unoptimised"
 
-    let inputFile = (sprintf "program-%d.wasm" n)
-    let expectationFile = (sprintf "program-%d-%s-crm-asm.txt" n fileSubType)
-    
     let config =
         match optimisationCase with
             | Optimised   -> TranslationConfiguration (WithoutBarriers, FullyOptimised)
             | Unoptimised -> TranslationConfiguration (WithBarriers,    NoOptimisation)
 
-    let actual = WasmToCommonRegisterMachineText config inputFile
-    let expected = System.IO.File.ReadAllLines expectationFile  // TODO: More detail on failed comparison.
-    let b = (actual = expected)
-
+    let inputFile = (sprintf "program-%d.wasm" n)
+    
+    let actual = WasmToCommonRegisterMachineText asAssemblyLanguage config inputFile
     let actualFileImage = actual |> String.concat "\r\n"  // This is useful for developing a new test case.
+
+    let expectationFile = (sprintf "program-%d-%s-%s-asm.txt" n fileSubType cpuKind)
+    let expected = System.IO.File.ReadAllLines expectationFile  // TODO: More detail on failed comparison.
+
+    let b = (actual = expected)
 
     b
 
 
+
+
+
+let FilePassesTest = FilePassesTestWhenTranslatedUsing "crm" BetterWasmToJonathansAsm.WriteOutWasm2AsJonathansAssemblerText
 
 [<Fact>] 
 let ``Program 1 to CRM optimised`` () = Assert.True(FilePassesTest 1 Optimised)
@@ -107,3 +111,21 @@ let ``Program 5 to CRM unoptimised`` () = Assert.True(FilePassesTest 5 Unoptimis
 [<Fact>] 
 let ``Program 6 to CRM unoptimised`` () = Assert.True(FilePassesTest 6 Unoptimised)
 
+
+
+
+
+let FilePassesTestX86 = FilePassesTestWhenTranslatedUsing "x8632" BetterWasmToX86Asm.WriteOutWasm2AsX86AssemblerText
+
+[<Fact>] 
+let ``Program 1 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 1 Optimised)
+[<Fact>] 
+let ``Program 2 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 2 Optimised)
+[<Fact>] 
+let ``Program 3 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 3 Optimised)
+[<Fact>] 
+let ``Program 4 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 4 Optimised)
+[<Fact>] 
+let ``Program 5 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 5 Optimised)
+[<Fact>] 
+let ``Program 6 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 6 Optimised)
