@@ -136,18 +136,6 @@ let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
 
 
 
-let WriteOutWasmGlobal writeOut (m:Module) i (g:InternalGlobalRecord) =
-
-    // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
-
-    let initValue = StaticEvaluate g.InitExpr
-    let globalIdx = GlobalIdx(U32(uint32 i))   // TODO: not ideal construction of temporary
-
-    writeOut (sprintf ".%s" (GlobalIdxNameString globalIdx))
-    writeOut (sprintf "dd %d" initValue)
-
-
-
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
     let crmInstructions, updatedTranslationState = 
@@ -245,11 +233,15 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     let writeOutIns s = 
         writeOutCode ("    " + s)
 
+    let writeOutWasmGlobal writeOut globalIdxNameString initValue =
+        writeOut (sprintf ".%s" globalIdxNameString)
+        writeOut (sprintf "dd %d" initValue)
+
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo wasmTableHeading wasmTableRow)
-    m.Globals |> ForAllWasmGlobalsDo (WriteOutWasmGlobal writeOutData m)
+    m.Globals |> ForAllWasmGlobalsDo (writeOutWasmGlobal writeOutData)
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
     writeOutCode (sprintf ".init_%s" AsmMemPrefix)

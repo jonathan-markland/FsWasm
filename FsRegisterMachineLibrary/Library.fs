@@ -166,7 +166,11 @@ let ForAllWasmGlobalsDo action globals =
 
     globals |> Array.iteri (fun globalIndex g ->
         match g with
-            | InternalGlobal2 glo -> action globalIndex glo
+            | InternalGlobal2 glo -> 
+                let initValue = StaticEvaluate glo.InitExpr
+                let globalIdx = GlobalIdx(U32(uint32 globalIndex))   // TODO: not ideal construction of temporary
+                let globalIdxNameString = (GlobalIdxNameString globalIdx)
+                action globalIdxNameString initValue
             | ImportedGlobal2 glo -> failwith "Error:  Cannot support importing a WASM 'global'.  WASM module must be self-contained."
         )
 
