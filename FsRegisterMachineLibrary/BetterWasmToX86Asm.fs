@@ -52,8 +52,8 @@ let TranslateInstructionToAsmSequence instruction =
     match instruction with
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
         | Breakpoint            -> [ "int 3" ]
-        | Drop                  -> [ "add ESP,4" ]  // TODO: Assumes 32-bit target
-        | Label(LabelName l)    -> [ ".label " + l ]   // TODO: sort out using the local label references in Jonathan's ASM
+        | Drop                  -> [ "add ESP,4" ]
+        | Label(LabelName l)    -> [ "." + l ]
         | Const(r,Const32(n))   -> [ sprintf "mov %s,%d" (regNameOf r) n ]
         | Goto(LabelName l)     -> [ "jmp " + l ]
         | CallFunc(LabelName l) -> [ "call " + l ]
@@ -63,7 +63,7 @@ let TranslateInstructionToAsmSequence instruction =
         | GotoIndex(t,n,d,_)    -> translateGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
         | Push(r)               -> [ sprintf "push %s" (regNameOf r) ]
         | Pop(r)                -> [ sprintf "pop %s" (regNameOf r) ]
-        | PeekA                 -> [ "mov EAX,dword ptr [ESP]" ]  // TODO: Assumes 32-bit target
+        | PeekA                 -> [ "mov EAX,dword ptr [ESP]" ]
         | Let(r1,r2)            -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
         | AddAN(I32(n))         -> [ sprintf "add EAX,%d" n ]
         | SubAN(I32(n))         -> [ sprintf "sub EAX,%d" n ]
