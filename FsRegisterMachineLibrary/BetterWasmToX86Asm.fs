@@ -233,15 +233,15 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     let writeOutIns s = 
         writeOutCode ("    " + s)
 
-    let writeOutWasmGlobal writeOut globalIdxNameString initValue =
-        writeOut (sprintf ".%s" globalIdxNameString)
-        writeOut (sprintf "dd %d" initValue)
+    let writeOutWasmGlobal globalIdxNameString initValue =
+        writeOutData (sprintf ".%s" globalIdxNameString)
+        writeOutData (sprintf "dd %d" initValue)
 
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo wasmTableHeading wasmTableRow)
-    m.Globals |> ForAllWasmGlobalsDo (writeOutWasmGlobal writeOutData)
+    m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
     writeOutCode (sprintf ".init_%s" AsmMemPrefix)

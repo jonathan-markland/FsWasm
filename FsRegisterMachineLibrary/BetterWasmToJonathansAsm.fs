@@ -233,15 +233,15 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     let writeOutIns s = 
         writeOutCode ("    " + s)
 
-    let writeOutWasmGlobal writeOut globalIdxNameString initValue =
+    let writeOutWasmGlobal globalIdxNameString initValue =
         // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
-        writeOut (sprintf "data %s int %d" globalIdxNameString initValue)
+        writeOutData (sprintf "data %s int %d" globalIdxNameString initValue)
 
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo wasmTableHeading wasmTableRow)
-    m.Globals |> ForAllWasmGlobalsDo (writeOutWasmGlobal writeOutData)
+    m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
     writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
