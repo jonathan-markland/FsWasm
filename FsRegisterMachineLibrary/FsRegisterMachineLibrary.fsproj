@@ -15,6 +15,7 @@
     <Compile Include="WasmInstructionsToCRMInstructions.fs" />
     <Compile Include="Library.fs" />
     <Compile Include="BetterWasmToJonathansAsm.fs" />
+    <Compile Include="BetterWasmToX86Asm.fs" />
   </ItemGroup>
 
   <ItemGroup>
