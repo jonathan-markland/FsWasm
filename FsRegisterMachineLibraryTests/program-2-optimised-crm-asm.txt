@@ -7,7 +7,7 @@ DATA> // Data for WASM mem wasm_mem_init_data0
 CODE> procedure init_wasm_mem
 CODE>     let Y=wasm_mem0
 CODE> ret
-CODE> procedure wasm_fn0(@loc0)  // (int): int
+CODE> procedure wasm_fn0(@loc0)  // (loc0: int): int
 CODE>     let A=int[@loc0]
 CODE>     add A,Y
 CODE>     let uint[A]=305419896

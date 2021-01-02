@@ -8,6 +8,7 @@ open CommonRegisterMachineTypes
 open OptimiseCommonRegisterMachine
 open WasmStaticExpressionEvaluator
 open AsmPrefixes
+open TextFormatting
 
 
 
@@ -204,4 +205,30 @@ let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns thisFun
     (translate thisFunc ThunkIn) |> List.iter writeOutIns
 
 
+
+let ValTypeTranslationOf = function
+    | I32Type -> "int"
+    | I64Type -> failwith "Cannot translate I64 type with this simple translator"
+    | F32Type -> failwith "Cannot translate F32 type with this simple translator"
+    | F64Type -> failwith "Cannot translate F64 type with this simple translator"
+
+
+
+/// Return the given function type's parameters and returns lists
+/// in a format suitable for use in a comment.  The comment character
+/// is not included here.
+let FunctionSignatureAsComment (funcType:FuncType) =
+
+    let translatedParameters = 
+        funcType.ParameterTypes
+            |> Array.mapi (fun i paramType ->
+                sprintf "%s%d: %s" AsmLocalNamePrefix i (ValTypeTranslationOf paramType) )
+            |> String.concat ", "
+
+    let translatedReturns = 
+        funcType.ReturnTypes
+            |> Array.map ValTypeTranslationOf
+            |> String.concat ", "
+
+    (Bracketed translatedParameters) + (ColonPrefixed translatedReturns)
 

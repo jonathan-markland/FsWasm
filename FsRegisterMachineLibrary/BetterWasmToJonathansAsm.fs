@@ -141,14 +141,6 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     let crmInstructions, updatedTranslationState = 
         f.Body |> TranslateInstructions m.Funcs translationState
 
-    let paramListOf (ps:ValType[]) =
-        String.concat ", " (ps |> Array.map ValTypeTranslationOf)
-
-    let textSignatureOf (funcType:FuncType) =
-        let translatedParameters = paramListOf funcType.ParameterTypes
-        let translatedReturns    = paramListOf funcType.ReturnTypes
-        (Bracketed translatedParameters) + (ColonPrefixed translatedReturns)
-
     let asmSignatureOf (funcType:FuncType) =
 
         let atParamDecls (ps:ValType[]) =
@@ -157,7 +149,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         let atParamsString = 
             atParamDecls funcType.ParameterTypes
 
-        (Bracketed atParamsString) + "  // " + (textSignatureOf funcType)
+        (Bracketed atParamsString) + "  // " + (FunctionSignatureAsComment funcType)
 
     let procedureCommand = 
         sprintf "procedure %s%d%s" AsmInternalFuncNamePrefix funcIndex (asmSignatureOf f.FuncType)
