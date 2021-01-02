@@ -16,9 +16,11 @@
     <Compile Include="Library.fs" />
     <Compile Include="BetterWasmToJonathansAsm.fs" />
     <Compile Include="BetterWasmToX86Asm.fs" />
+    <Compile Include="BetterWasmToArm32Asm.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ArmSupportLibrary\ArmSupportLibrary.fsproj" />
     <ProjectReference Include="..\FsWasmLibrary\FsWasmLibrary.fsproj" />
     <ProjectReference Include="..\WasmSerialiser\WasmSerialiser.csproj" />
   </ItemGroup>

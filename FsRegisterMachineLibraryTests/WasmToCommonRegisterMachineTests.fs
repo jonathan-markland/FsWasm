@@ -129,3 +129,26 @@ let ``Program 4 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 4 Optim
 let ``Program 5 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 5 Optimised)
 [<Fact>] 
 let ``Program 6 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 6 Optimised)
+
+
+
+
+
+let FilePassesTestARM = FilePassesTestWhenTranslatedUsing "arm32" BetterWasmToArm32Asm.WriteOutWasm2AsArm32AssemblerText
+
+[<Fact>] 
+let ``Program 1 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 1 Optimised)
+[<Fact>] 
+let ``Program 2 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 2 Optimised)
+[<Fact>] 
+let ``Program 3 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 3 Optimised)
+[<Fact>] 
+let ``Program 4 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 4 Optimised)
+[<Fact>] 
+let ``Program 5 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 5 Optimised)
+[<Fact>] 
+let ``Program 6 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 6 Optimised)
+
+
+
+

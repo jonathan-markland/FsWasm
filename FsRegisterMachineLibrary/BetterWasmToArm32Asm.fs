@@ -1,4 +1,4 @@
-﻿module BetterWasmToX86Asm
+﻿module BetterWasmToArm32Asm
 
 open System.Text
 open WasmFileTypes
@@ -8,109 +8,121 @@ open AsmPrefixes
 open WasmInstructionsToCRMInstructions
 open Library
 open TextFormatting
+open ArmSupportLibrary
 
 
 
 let TranslateInstructionToAsmSequence instruction =
 
-    // TODO:  These translations can assume a 32-bit target for now.
+    // TODO:  These translations can assume an ArmV7 target for now.
 
     let regNameOf = function
-        | A -> "EAX"
-        | B -> "EBX"
-        | C -> "ECX"
-        | Y -> "EDI"
+        | A -> "R0"
+        | B -> "R1"
+        | C -> "R2"
+        | Y -> "R9"  // Conventionally the "Static base" register
 
-    let offsetIfNeeded = function
-        | U32 0u -> ""                   // indexed addressing not needed with zero offset
-        | U32 n  -> "+" + n.ToString()   // indexed addressing needed
+    let armTempRegister = "R8"
+    let offsetTempRegister = "R10"
 
-    let translateREGU32 s1 r u s2 = 
-        [ sprintf "%s%s%s%s" s1 (regNameOf r) (offsetIfNeeded u) s2 ]
+    let loadConstant r value =
+        LoadConstantInto (regNameOf r) value
 
-    let translateREGU32I32 s1 r u s2 n = 
-        [ sprintf "%s%s%s%s%d" s1 (regNameOf r) (offsetIfNeeded u) s2 n ]
+    let loadStoreRegOffset fetchStoreType loadStoreInstruction addressReg offsetDesired = 
+        let offsetStrategy = 
+            ArmOffsetHandlingStrategyFor fetchStoreType offsetDesired offsetTempRegister 
+        (OffsetLoadInstructionFor offsetStrategy)
+            @ [ sprintf "%s R0,[%s%s]" loadStoreInstruction (regNameOf addressReg) (ArmOffset offsetStrategy) ]
+
+    let storeConstant fetchStoreType armStoreInstruction addressReg offsetDesired value = 
+        let offsetStrategy = 
+            ArmOffsetHandlingStrategyFor fetchStoreType offsetDesired offsetTempRegister 
+        (LoadConstantInto armTempRegister value) @
+        (OffsetLoadInstructionFor offsetStrategy) @
+        [ sprintf "%s %s,[%s%s]" armStoreInstruction armTempRegister (regNameOf addressReg) (ArmOffset offsetStrategy) ] 
 
     let translateGotoIndex (LabelName tableLabel) numMax (LabelName defaultLabel) =
+        // A is already the index to branch to
+        (MathsWithConstant "cmp" "R0" numMax armTempRegister) @  // ie: cmp R0,numMax
         [
-            // A is already the index to branch to
-            sprintf "cmp EAX,%d" numMax
-            sprintf "jae %s" defaultLabel
-            sprintf "jmp [%s+EAX*4]" tableLabel
+            sprintf "bhs %s" defaultLabel
+            sprintf "jmp [%s+R0*4]" tableLabel
         ]
 
     let translateCallTableIndirect () =
         // TODO: We really need to emit some code to validate the signatures.
         // A is already the index to call.
         // TODO: We need to validate index A lies within wasm table [0]
-        [
-            sprintf "jmp [%s0+EAX*4]" AsmTableNamePrefix  // WASM 1.0 always looks in table #0
-        ]
+        [ sprintf "jmp [%s0+R0*4]" AsmTableNamePrefix ] // WASM 1.0 always looks in table #0 
 
+    (* TODO: consider:
+        ldr r0, [pc, #xx] ; My constant
+        add r0, r0, r0 ; try to use r0 straight away, incurring a 3 cycle wait on use of r0    
+    *)
 
     match instruction with
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
-        | Breakpoint            -> [ "int 3" ]
-        | Drop                  -> [ "add ESP,4" ]
+        | Breakpoint            -> [ "bkpt #0" ]
+        | Drop                  -> [ "add R13,R13,#4" ]
         | Label(LabelName l)    -> [ "." + l ]
-        | Const(r,Const32(n))   -> [ sprintf "mov %s,%d" (regNameOf r) n ]
-        | Goto(LabelName l)     -> [ "jmp " + l ]
-        | CallFunc(LabelName l) -> [ "call " + l ]
+        | Const(r,Const32(n))   -> loadConstant r (uint32 n)
+        | Goto(LabelName l)     -> [ "b " + l ]
+        | CallFunc(LabelName l) -> [ "bl " + l ]
         | CallTableIndirect     -> translateCallTableIndirect ()
-        | BranchAZ(LabelName l) -> [ "cmp EAX,0" ; "jz " + l ]
-        | BranchANZ(LabelName l)-> [ "cmp EAX,0" ; "jnz " + l ]
-        | GotoIndex(t,n,d,_)    -> translateGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
-        | Push(r)               -> [ sprintf "push %s" (regNameOf r) ]
-        | Pop(r)                -> [ sprintf "pop %s" (regNameOf r) ]
-        | PeekA                 -> [ "mov EAX,dword ptr [ESP]" ]
+        | BranchAZ(LabelName l) -> [ "cmp R0,#0" ; "beq " + l ]
+        | BranchANZ(LabelName l)-> [ "cmp R0,#0" ; "bne " + l ]
+        | GotoIndex(t,n,d,_)    -> translateGotoIndex t (uint32 n) d   // The ignored parameter is the lookup table, which we separately output.
+        | Push(r)               -> [ sprintf "push {%s}" (regNameOf r) ]
+        | Pop(r)                -> [ sprintf "pop {%s}" (regNameOf r) ]
+        | PeekA                 -> [ "ldr R0,[R13]" ]
         | Let(r1,r2)            -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
-        | AddAN(I32(n))         -> [ sprintf "add EAX,%d" n ]
-        | SubAN(I32(n))         -> [ sprintf "sub EAX,%d" n ]
-        | AndAN(I32(n))         -> [ sprintf "and EAX,%d" n ]
-        | OrAN(I32(n))          -> [ sprintf "or EAX,%d"  n ]
-        | XorAN(I32(n))         -> [ sprintf "xor EAX,%d" n ]
-        | Add(r1,r2)            -> [ sprintf "add %s,%s" (regNameOf r1) (regNameOf r2) ]  // commutative
-        | SubBA                 -> [ "sub EBX,EAX" ]
-        | MulAB                 -> [ "mul EAX,EBX" ]  // commutative
+        | AddAN(I32(n))         -> MathsWithConstant "add" "R0" (uint32 n) armTempRegister
+        | SubAN(I32(n))         -> MathsWithConstant "sub" "R0" (uint32 n) armTempRegister
+        | AndAN(I32(n))         -> MathsWithConstant "and" "R0" (uint32 n) armTempRegister
+        | OrAN(I32(n))          -> MathsWithConstant "orr" "R0" (uint32 n) armTempRegister
+        | XorAN(I32(n))         -> MathsWithConstant "eor" "R0" (uint32 n) armTempRegister
+        | Add(r1,r2)            -> [ sprintf "add %s,%s,%s" (regNameOf r1) (regNameOf r1) (regNameOf r2) ]
+        | SubBA                 -> [ "sub R1,R1,R0" ]  // TODO: ARM could put result in R0
+        | MulAB                 -> [ "mul R0,R0,R1" ]
         | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have division or remainder instructions"
-        | AndAB                 -> [ "and EAX,EBX" ]  // commutative
-        | OrAB                  -> [ "or EAX,EBX" ]   // commutative
-        | XorAB                 -> [ "xor EAX,EBX" ]  // commutative
-        | ShlBC                 -> [ "shl EBX,CL" ]
-        | ShrsBC                -> [ "sar EBX,CL" ]
-        | ShruBC                -> [ "shr EBX,CL" ]
+        | AndAB                 -> [ "and R0,R0,R1" ]
+        | OrAB                  -> [ "orr R0,R0,R1" ]
+        | XorAB                 -> [ "eor R0,R0,R1" ]
+        | ShlBC                 -> [ "lsl R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
+        | ShrsBC                -> [ "asr R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
+        | ShruBC                -> [ "lsr R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
         | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
-        | CmpEqBA               -> [ "cmp EBX,EAX" ; "setz AL"  ; "movzx EAX,AL" ]
-        | CmpNeBA               -> [ "cmp EBX,EAX" ; "setnz AL" ; "movzx EAX,AL" ]
-        | CmpLtsBA              -> [ "cmp EBX,EAX" ; "setl AL"  ; "movzx EAX,AL" ]
-        | CmpLtuBA              -> [ "cmp EBX,EAX" ; "setb AL"  ; "movzx EAX,AL" ]
-        | CmpGtsBA              -> [ "cmp EBX,EAX" ; "setg AL"  ; "movzx EAX,AL" ]
-        | CmpGtuBA              -> [ "cmp EBX,EAX" ; "seta AL"  ; "movzx EAX,AL" ]
-        | CmpLesBA              -> [ "cmp EBX,EAX" ; "setle AL" ; "movzx EAX,AL" ]
-        | CmpLeuBA              -> [ "cmp EBX,EAX" ; "setbe AL" ; "movzx EAX,AL" ]
-        | CmpGesBA              -> [ "cmp EBX,EAX" ; "setge AL" ; "movzx EAX,AL" ]
-        | CmpGeuBA              -> [ "cmp EBX,EAX" ; "setae AL" ; "movzx EAX,AL" ]
-        | CmpAZ                 -> [ "cmp EAX,0"   ; "setz AL"  ; "movzx EAX,AL" ]
-        | FetchLoc(r,i)         -> [ sprintf "mov %s,[EBP+@%s]" (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
-        | StoreLoc(r,i)         -> [ sprintf "mov [EBP+@%s],%s" (LocalIdxNameString i) (regNameOf r) ]  // TODO: Assumes 32-bit target
-        | FetchGlo(r,i)         -> [ sprintf "mov %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
-        | StoreGlo(r,i)         -> [ sprintf "mov [%s],%s" (GlobalIdxNameString i) (regNameOf r) ]  // TODO: Eventually use the type rather than "int"
-        | StoreConst8(r,ofs,I32(v))   -> translateREGU32I32 "mov byte ptr [" r ofs "]," v
-        | StoreConst16(r,ofs,I32(v))  -> translateREGU32I32 "mov word ptr [" r ofs "]," v
-        | StoreConst32(r,ofs,I32(v))  -> translateREGU32I32 "mov dword ptr [" r ofs "]," v  
-        | Store8A(r,ofs)       -> translateREGU32 "mov byte ptr [" r ofs "],EAX"  
-        | Store16A(r,ofs)      -> translateREGU32 "mov word ptr [" r ofs "],EAX"
-        | Store32A(r,ofs)      -> translateREGU32 "mov dword ptr [" r ofs "],EAX"  
-        | Fetch8s(r,ofs)       -> translateREGU32 "movsx EAX, byte ptr [" r ofs "]" 
-        | Fetch8u(r,ofs)       -> translateREGU32 "movzx EAX, byte ptr [" r ofs "]"  
-        | Fetch16s(r,ofs)      -> translateREGU32 "movsx EAX, word ptr [" r ofs "]" 
-        | Fetch16u(r,ofs)      -> translateREGU32 "movzx EAX, word ptr [" r ofs "]"
-        | Fetch32(r,ofs)       -> translateREGU32 "mov EAX,[" r ofs "]"  
-        | ThunkIn              -> 
+        | CmpEqBA               -> [ "cmp R1,R0" ; "mov R0,#0" ; "moveq R0,#1" ]
+        | CmpNeBA               -> [ "cmp R1,R0" ; "mov R0,#0" ; "movne R0,#1" ]
+        | CmpLtsBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movlt R0,#1" ]
+        | CmpLtuBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movlo R0,#1" ]
+        | CmpGtsBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movgt R0,#1" ]
+        | CmpGtuBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movhi R0,#1" ]
+        | CmpLesBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movle R0,#1" ]
+        | CmpLeuBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movls R0,#1" ]
+        | CmpGesBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movge R0,#1" ]
+        | CmpGeuBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movhs R0,#1" ]
+        | CmpAZ                 -> [ "cmp R0,0"  ; "mov R0,#0" ; "moveq R0,#1" ]
+        | FetchLoc(r,i)         -> [ sprintf "ldr %s,[@%s]" (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
+        | StoreLoc(r,i)         -> [ sprintf "str %s,[@%s]" (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
+        | FetchGlo(r,i)         -> [ sprintf "ldr %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
+        | StoreGlo(r,i)         -> [ sprintf "str %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
+        | StoreConst8 (r,U32 ofs,I32 v) -> storeConstant ArmByte     "strb"  r ofs (uint32 v)
+        | StoreConst16(r,U32 ofs,I32 v) -> storeConstant ArmHalfword "strh"  r ofs (uint32 v)
+        | StoreConst32(r,U32 ofs,I32 v) -> storeConstant ArmWord     "str"   r ofs (uint32 v)
+        | Store8A (r,U32 ofs)   -> loadStoreRegOffset ArmByte     "strb"  r ofs
+        | Store16A(r,U32 ofs)   -> loadStoreRegOffset ArmHalfword "strh"  r ofs
+        | Store32A(r,U32 ofs)   -> loadStoreRegOffset ArmWord     "str"   r ofs
+        | Fetch8s (r,U32 ofs)   -> loadStoreRegOffset ArmByte     "ldrsb" r ofs
+        | Fetch8u (r,U32 ofs)   -> loadStoreRegOffset ArmByte     "ldrb"  r ofs
+        | Fetch16s(r,U32 ofs)   -> loadStoreRegOffset ArmHalfword "ldrsh" r ofs
+        | Fetch16u(r,U32 ofs)   -> loadStoreRegOffset ArmHalfword "ldrh"  r ofs
+        | Fetch32 (r,U32 ofs)   -> loadStoreRegOffset ArmWord     "ldr"   r ofs
+        | ThunkIn -> 
             // The translated code requires the Y register to
             // point to the base of the linear memory region.
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
-            [ sprintf "mov EDI,%s%d" AsmMemPrefix 0 ]
+            [ sprintf "mov R9,%s%d" AsmMemPrefix 0 ]
 
 
 
@@ -119,6 +131,7 @@ let ValTypeTranslationOf = function
     | I64Type -> failwith "Cannot translate I64 type with this simple translator"
     | F32Type -> failwith "Cannot translate F32 type with this simple translator"
     | F64Type -> failwith "Cannot translate F64 type with this simple translator"
+
 
 
 let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
@@ -197,7 +210,7 @@ let WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray =
 
 
 
-let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
+let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
 
@@ -223,7 +236,7 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
         ForEachLineOfHexDumpDo "db" "," "0x" writeIns byteArray
 
     let writeOutCopyBlockCode i j ofsValue byteArrayLength =
-        writeOutCode (sprintf "    mov EDI,(%s%d+%d)" AsmMemPrefix i ofsValue)
+        writeOutCode (sprintf "    mov R9,(%s%d+%d)" AsmMemPrefix i ofsValue)
         writeOutCode (sprintf "    mov ESI,%s%d_%d" AsmMemoryNamePrefix i j)
         writeOutCode (sprintf "    mov ECX,%d" byteArrayLength)
         writeOutCode          "    cld"

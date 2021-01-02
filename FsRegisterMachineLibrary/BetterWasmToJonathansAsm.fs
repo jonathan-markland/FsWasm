@@ -5,7 +5,6 @@ open WasmFileTypes
 open WasmBetterTypes
 open CommonRegisterMachineTypes
 open AsmPrefixes
-open WasmStaticExpressionEvaluator
 open WasmInstructionsToCRMInstructions
 open Library
 open TextFormatting
