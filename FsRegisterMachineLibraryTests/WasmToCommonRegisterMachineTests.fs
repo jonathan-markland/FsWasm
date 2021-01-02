@@ -86,30 +86,30 @@ let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationC
 let FilePassesTest = FilePassesTestWhenTranslatedUsing "crm" BetterWasmToJonathansAsm.WriteOutWasm2AsJonathansAssemblerText
 
 [<Fact>] 
-let ``Program 1 to CRM optimised`` () = Assert.True(FilePassesTest 1 Optimised)
+let ``Program 1 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 1 Optimised)
 [<Fact>] 
-let ``Program 2 to CRM optimised`` () = Assert.True(FilePassesTest 2 Optimised)
+let ``Program 2 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 2 Optimised)
 [<Fact>] 
-let ``Program 3 to CRM optimised`` () = Assert.True(FilePassesTest 3 Optimised)
+let ``Program 3 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 3 Optimised)
 [<Fact>] 
-let ``Program 4 to CRM optimised`` () = Assert.True(FilePassesTest 4 Optimised)
+let ``Program 4 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 4 Optimised)
 [<Fact>] 
-let ``Program 5 to CRM optimised`` () = Assert.True(FilePassesTest 5 Optimised)
+let ``Program 5 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 5 Optimised)
 [<Fact>] 
-let ``Program 6 to CRM optimised`` () = Assert.True(FilePassesTest 6 Optimised)
+let ``Program 6 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 6 Optimised)
 
 [<Fact>] 
-let ``Program 1 to CRM unoptimised`` () = Assert.True(FilePassesTest 1 Unoptimised)
+let ``Program 1 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 1 Unoptimised)
 [<Fact>] 
-let ``Program 2 to CRM unoptimised`` () = Assert.True(FilePassesTest 2 Unoptimised)
+let ``Program 2 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 2 Unoptimised)
 [<Fact>] 
-let ``Program 3 to CRM unoptimised`` () = Assert.True(FilePassesTest 3 Unoptimised)
+let ``Program 3 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 3 Unoptimised)
 [<Fact>] 
-let ``Program 4 to CRM unoptimised`` () = Assert.True(FilePassesTest 4 Unoptimised)
+let ``Program 4 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 4 Unoptimised)
 [<Fact>] 
-let ``Program 5 to CRM unoptimised`` () = Assert.True(FilePassesTest 5 Unoptimised)
+let ``Program 5 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 5 Unoptimised)
 [<Fact>] 
-let ``Program 6 to CRM unoptimised`` () = Assert.True(FilePassesTest 6 Unoptimised)
+let ``Program 6 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 6 Unoptimised)
 
 
 
@@ -118,17 +118,17 @@ let ``Program 6 to CRM unoptimised`` () = Assert.True(FilePassesTest 6 Unoptimis
 let FilePassesTestX86 = FilePassesTestWhenTranslatedUsing "x8632" BetterWasmToX86Asm.WriteOutWasm2AsX86AssemblerText
 
 [<Fact>] 
-let ``Program 1 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 1 Optimised)
+let ``Program 1 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 1 Optimised)
 [<Fact>] 
-let ``Program 2 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 2 Optimised)
+let ``Program 2 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 2 Optimised)
 [<Fact>] 
-let ``Program 3 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 3 Optimised)
+let ``Program 3 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 3 Optimised)
 [<Fact>] 
-let ``Program 4 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 4 Optimised)
+let ``Program 4 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 4 Optimised)
 [<Fact>] 
-let ``Program 5 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 5 Optimised)
+let ``Program 5 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 5 Optimised)
 [<Fact>] 
-let ``Program 6 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 6 Optimised)
+let ``Program 6 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 6 Optimised)
 
 
 
@@ -137,17 +137,17 @@ let ``Program 6 to X86 32 optimised`` () = Assert.True(FilePassesTestX86 6 Optim
 let FilePassesTestARM = FilePassesTestWhenTranslatedUsing "arm32" BetterWasmToArm32Asm.WriteOutWasm2AsArm32AssemblerText
 
 [<Fact>] 
-let ``Program 1 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 1 Optimised)
+let ``Program 1 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 1 Optimised)
 [<Fact>] 
-let ``Program 2 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 2 Optimised)
+let ``Program 2 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 2 Optimised)
 [<Fact>] 
-let ``Program 3 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 3 Optimised)
+let ``Program 3 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 3 Optimised)
 [<Fact>] 
-let ``Program 4 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 4 Optimised)
+let ``Program 4 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 4 Optimised)
 [<Fact>] 
-let ``Program 5 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 5 Optimised)
+let ``Program 5 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 5 Optimised)
 [<Fact>] 
-let ``Program 6 to ARM 32 optimised`` () = Assert.True(FilePassesTestARM 6 Optimised)
+let ``Program 6 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 6 Optimised)
 
 
 
