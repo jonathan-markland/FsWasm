@@ -55,7 +55,7 @@ let private ReturnsSingleValue (ft:FuncType) =
 
 
 /// Iterate through all of the translated versions of the function's instructions.
-let ForTranslatedCrmInstructionsDo action translate thisFuncType config crmInstructions =
+let ForTranslatedCrmInstructionsDo action translate thisFunc config crmInstructions =
 
     let optimisationPhase1 = 
         match config with
@@ -71,13 +71,13 @@ let ForTranslatedCrmInstructionsDo action translate thisFuncType config crmInstr
 
     // Kick off the whole thing here:
 
-    finalInstructions |> List.iter (fun crmInstruction -> translate crmInstruction |> List.iter action)
+    finalInstructions |> List.iter (fun crmInstruction -> translate thisFunc crmInstruction |> List.iter action)
 
     // Handle the function's return (may need pop into A):
 
     let returnHandlingCode = 
-        match thisFuncType |> ReturnsSingleValue with
-            | true  -> translate (Pop A)  // TODO: not ideal construction of temporary
+        match thisFunc.FuncType |> ReturnsSingleValue with
+            | true  -> translate thisFunc (Pop A)  // TODO: not ideal construction of temporary
             | false -> []
 
     returnHandlingCode |> List.iter action
@@ -190,7 +190,7 @@ let ForAllWasmMemsDo action mems =
 
 /// Generate the initialisation function that arranges the statically-initialised
 /// data blocks in the memory space.
-let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns translate (mems:Memory[]) =
+let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns thisFunc translate (mems:Memory[]) =
 
     let writeOutDataCopyCommand i (thisMem:InternalMemoryRecord) =
         if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
@@ -201,7 +201,7 @@ let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns transla
             )
 
     mems |> ForAllWasmMemsDo writeOutDataCopyCommand
-    (translate ThunkIn) |> List.iter writeOutIns
+    (translate thisFunc ThunkIn) |> List.iter writeOutIns
 
 
 

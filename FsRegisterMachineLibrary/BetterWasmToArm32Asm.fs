@@ -12,7 +12,7 @@ open ArmSupportLibrary
 
 
 
-let TranslateInstructionToAsmSequence instruction =
+let TranslateInstructionToAsmSequence thisFunc instruction =
 
     // TODO:  These translations can assume an ArmV7 target for now.
 
@@ -52,6 +52,8 @@ let TranslateInstructionToAsmSequence instruction =
         ldr r0, [pc, #xx] ; My constant
         add r0, r0, r0 ; try to use r0 straight away, incurring a 3 cycle wait on use of r0    
     *)
+
+    let frameOffsetForLoc i = 12345  // use thisFunc
 
     match instruction with
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
@@ -96,8 +98,8 @@ let TranslateInstructionToAsmSequence instruction =
         | CmpGesBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movge R0,#1" ]
         | CmpGeuBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movhs R0,#1" ]
         | CmpAZ                 -> [ "cmp R0,0"  ; "mov R0,#0" ; "moveq R0,#1" ]
-        | FetchLoc(r,i)         -> [ sprintf "ldr %s,[@%s]" (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
-        | StoreLoc(r,i)         -> [ sprintf "str %s,[@%s]" (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
+        | FetchLoc(r,i)         -> [ sprintf "ldr %s,[R11, #%d]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
+        | StoreLoc(r,i)         -> [ sprintf "str %s,[R11, #%d]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
         | FetchGlo(r,i)         -> [ sprintf "ldr %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
         | StoreGlo(r,i)         -> [ sprintf "str %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
         | StoreConst8 (r,U32 ofs,I32 v) -> storeConstant ArmByte     "strb"  r ofs (uint32 v)
@@ -185,7 +187,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     try
         writeOutCode procedureCommand
         WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f.FuncType config
+        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f config
         writeOutCode (returnCommandFor f.FuncType f.Locals)
         crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
     with
@@ -250,7 +252,7 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
     writeOutCode (sprintf ".init_%s" AsmMemPrefix)
-    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TranslateInstructionToAsmSequence
+    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
     writeOutCode "ret"
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally

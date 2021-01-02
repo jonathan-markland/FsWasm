@@ -42,11 +42,31 @@ type Table =
 
 
 
-type Module = {
-    // NB: Decision made to drop custom sections, I could not, in general, interpret them anyway.
-    Funcs:   Function[];
-    Mems:    Memory[];
-    Tables:  Table[];
-    Globals: Global[];
-    Start:   Start option;
-}
+type Module = 
+    {
+        // NB: Decision made to drop custom sections, I could not, in general, interpret them anyway.
+        Funcs   : Function[]
+        Mems    : Memory[]
+        Tables  : Table[]
+        Globals : Global[]
+        Start   : Start option
+    }
+
+
+
+/// This the metadata for the data section initialisation function.
+/// It is needed to pass to the translation-to-target-cpu functions.
+let TheInitialisationFunctionMetadata =
+    { 
+        Export = None
+        OriginalCodeSecIndex = U32 0u // TODO: Not right to lie about this.  It doesn't exist in the original WASM file code sec!
+        CodeSize             = U32 0u // TODO: Hopefully nobody ever reads this for this instance.
+        FuncType =
+            {
+                ParameterTypes = [| |]  // No parameters
+                ReturnTypes    = [| |]  // No return values
+            }
+        Locals = [| |]  // No locals
+        Body = []       // The body is never used because this function is separately generated.
+    }
+

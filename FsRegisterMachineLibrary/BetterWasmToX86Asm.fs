@@ -11,7 +11,7 @@ open TextFormatting
 
 
 
-let TranslateInstructionToAsmSequence instruction =
+let TranslateInstructionToAsmSequence thisFunc instruction =
 
     // TODO:  These translations can assume a 32-bit target for now.
 
@@ -46,6 +46,24 @@ let TranslateInstructionToAsmSequence instruction =
         [
             sprintf "jmp [%s0+EAX*4]" AsmTableNamePrefix  // WASM 1.0 always looks in table #0
         ]
+
+    /// Return the X86 EBP offset for the given local variable 
+    /// slot number,which includes the function's parameters.
+    let frameOffsetForLoc (LocalIdx(U32(locNumber))) =
+
+        // Loc0    |               [EBP+16]
+        // Loc1    | Params        [EBP+12]
+        // Loc2    |               [EBP+8]
+        // Return Address          [EBP+4]
+        // Parent EBP         <--- [EBP]
+        // Loc3    | Locals        [EBP-4]
+        // Loc4    |               [EBP-8]
+
+        let paramCount = uint32 thisFunc.FuncType.ParameterTypes.Length
+        if locNumber < paramCount then
+            "+" + ((paramCount - locNumber) * 4u + 4u).ToString()
+        else
+            "-" + ((locNumber - paramCount) * 4u + 4u).ToString()
 
 
     match instruction with
@@ -91,8 +109,8 @@ let TranslateInstructionToAsmSequence instruction =
         | CmpGesBA              -> [ "cmp EBX,EAX" ; "setge AL" ; "movzx EAX,AL" ]
         | CmpGeuBA              -> [ "cmp EBX,EAX" ; "setae AL" ; "movzx EAX,AL" ]
         | CmpAZ                 -> [ "cmp EAX,0"   ; "setz AL"  ; "movzx EAX,AL" ]
-        | FetchLoc(r,i)         -> [ sprintf "mov %s,[EBP+@%s]" (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
-        | StoreLoc(r,i)         -> [ sprintf "mov [EBP+@%s],%s" (LocalIdxNameString i) (regNameOf r) ]  // TODO: Assumes 32-bit target
+        | FetchLoc(r,i)         -> [ sprintf "mov %s,[EBP%s]  ; @%s" (regNameOf r) (frameOffsetForLoc i) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
+        | StoreLoc(r,i)         -> [ sprintf "mov [EBP%s],%s  ; @%s" (frameOffsetForLoc i) (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
         | FetchGlo(r,i)         -> [ sprintf "mov %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
         | StoreGlo(r,i)         -> [ sprintf "mov [%s],%s" (GlobalIdxNameString i) (regNameOf r) ]  // TODO: Eventually use the type rather than "int"
         | StoreConst8(r,ofs,I32(v))   -> translateREGU32I32 "mov byte ptr [" r ofs "]," v
@@ -179,7 +197,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     try
         writeOutCode procedureCommand
         WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f.FuncType config
+        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f config
         writeOutCode (returnCommandFor f.FuncType f.Locals)
         crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
     with
@@ -244,7 +262,7 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
     writeOutCode (sprintf ".init_%s" AsmMemPrefix)
-    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TranslateInstructionToAsmSequence
+    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
     writeOutCode "ret"
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally

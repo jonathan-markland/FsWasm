@@ -12,10 +12,10 @@ let AsmMemPrefix              = "wasm_mem"
 
 open WasmFileTypes
 
-let LocalIdxNameString (LocalIdx(U32 localIdx)) = 
+let LocalIdxNameString (LocalIdx(U32 localIdx)) =    // TODO: There is a case to be made for memoizing these.
     sprintf "%s%d" AsmLocalNamePrefix localIdx
 
-let GlobalIdxNameString (GlobalIdx(U32 globalIdx)) = 
+let GlobalIdxNameString (GlobalIdx(U32 globalIdx)) =     // TODO: There is a case to be made for memoizing these.
     sprintf "%s%d" AsmGlobalNamePrefix globalIdx
     
 let FuncIdxNameString (FuncIdx(U32 funcIdx)) = 

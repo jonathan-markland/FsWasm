@@ -11,7 +11,7 @@ open TextFormatting
 
 
 
-let TranslateInstructionToAsmSequence instruction =
+let TranslateInstructionToAsmSequence _thisFunc instruction =
 
     // TODO:  These translations can assume a 32-bit target for now.
 
@@ -180,7 +180,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     try
         writeOutCode procedureCommand
         WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f.FuncType config
+        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f config
         writeOutCode (returnCommandFor f.FuncType f.Locals)
         crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
     with
@@ -244,7 +244,7 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
     writeOutCode (sprintf "procedure init_%s" AsmMemPrefix)
-    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TranslateInstructionToAsmSequence
+    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
     writeOutCode "ret"
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
