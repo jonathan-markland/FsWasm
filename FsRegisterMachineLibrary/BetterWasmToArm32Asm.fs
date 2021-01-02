@@ -28,18 +28,11 @@ let TranslateInstructionToAsmSequence instruction =
     let loadConstant r value =
         LoadConstantInto (regNameOf r) value
 
-    let loadStoreRegOffset fetchStoreType loadStoreInstruction addressReg offsetDesired = 
-        let offsetStrategy = 
-            ArmOffsetHandlingStrategyFor fetchStoreType offsetDesired offsetTempRegister 
-        (OffsetLoadInstructionFor offsetStrategy)
-            @ [ sprintf "%s R0,[%s%s]" loadStoreInstruction (regNameOf addressReg) (ArmOffset offsetStrategy) ]
+    let loadStoreRegOffset fetchStoreType loadStoreInstruction addressReg offsetDesired =
+        LoadStoreRegOffset fetchStoreType loadStoreInstruction (regNameOf addressReg) offsetDesired offsetTempRegister
 
     let storeConstant fetchStoreType armStoreInstruction addressReg offsetDesired value = 
-        let offsetStrategy = 
-            ArmOffsetHandlingStrategyFor fetchStoreType offsetDesired offsetTempRegister 
-        (LoadConstantInto armTempRegister value) @
-        (OffsetLoadInstructionFor offsetStrategy) @
-        [ sprintf "%s %s,[%s%s]" armStoreInstruction armTempRegister (regNameOf addressReg) (ArmOffset offsetStrategy) ] 
+        StoreConstant fetchStoreType armStoreInstruction (regNameOf addressReg) offsetDesired value offsetTempRegister armTempRegister
 
     let translateGotoIndex (LabelName tableLabel) numMax (LabelName defaultLabel) =
         // A is already the index to branch to

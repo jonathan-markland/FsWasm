@@ -99,9 +99,12 @@ let MathsWithConstant armInstruction targetRegister value tempRegister =
 
 
 
+/// Data types for load/store instructions LDR and STR.
 type ArmTypeSize = ArmWord | ArmHalfword | ArmByte
 
 
+
+/// Describes how an immediate offset value is to be handled.
 type ArmOffsetStrategy =
 
     /// The offset is zero anyway, so no offset field is needed at all.   [...]
@@ -135,6 +138,8 @@ let ArmOffsetHandlingStrategyFor fetchStoreType offsetDesired offsetTempRegister
 
 
 
+/// Returns a load constant instruction sequence (if one is needed) for 
+/// the given ArmOffsetStrategy.
 let OffsetLoadInstructionFor = function
     | NoOffset -> []
     | ImmediateOffset _ -> []
@@ -142,7 +147,37 @@ let OffsetLoadInstructionFor = function
     
 
 
+/// Returns an immediate offset component for use in addressing, which
+/// may involve use of a temporary register for large offsets.
 let ArmOffset = function
     | NoOffset -> ""
     | ImmediateOffset o -> ", #" + (o.ToString())
     | OffsetUsingTempRegister (armReg, _) -> ", " + armReg
+
+
+
+/// Return an instruction sequence for load or store, with optional 
+/// immediate offset addressing.  May require an additional temporary
+/// register for the immediate offset, if it is too large for the 
+/// instruction fields.
+let LoadStoreRegOffset fetchStoreType loadStoreInstruction addressRegister offsetDesired offsetTempRegister = 
+
+    let offsetStrategy = 
+        ArmOffsetHandlingStrategyFor fetchStoreType offsetDesired offsetTempRegister 
+
+    (OffsetLoadInstructionFor offsetStrategy)
+        @ [ sprintf "%s R0,[%s%s]" loadStoreInstruction addressRegister (ArmOffset offsetStrategy) ]
+
+
+
+/// Returns an instruction sequence for storing a constant.
+/// May require up to two temporary registers for the constant and immediate 
+/// offset, if these values are too large for the instruction fields.
+let StoreConstant fetchStoreType armStoreInstruction addressRegister offsetDesired value offsetTempRegister constantTempRegister = 
+    
+    let offsetStrategy = 
+        ArmOffsetHandlingStrategyFor fetchStoreType offsetDesired offsetTempRegister 
+    
+    (LoadConstantInto constantTempRegister value) @
+    (OffsetLoadInstructionFor offsetStrategy) @
+    [ sprintf "%s %s,[%s%s]" armStoreInstruction constantTempRegister addressRegister (ArmOffset offsetStrategy) ] 
