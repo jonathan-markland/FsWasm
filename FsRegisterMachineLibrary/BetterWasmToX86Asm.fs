@@ -69,7 +69,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
     match instruction with
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
         | Breakpoint            -> [ "int 3" ]
-        | Drop                  -> [ "add ESP,4" ]
+        | Drop(U32 numSlots)    -> [ sprintf "add ESP,%d" (numSlots * 4u) ]
         | Label(LabelName l)    -> [ "." + l ]
         | Const(r,Const32(n))   -> [ sprintf "mov %s,%d" (regNameOf r) n ]
         | Goto(LabelName l)     -> [ "jmp " + l ]
@@ -134,8 +134,10 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
 
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
+    let wasmToCrmTranslationConfig = { ClearParametersAfterCall = true } 
+
     let crmInstructions, updatedTranslationState = 
-        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState config
+        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
 
     let procedureCommand =
         sprintf ".%s%d  ; %s" AsmInternalFuncNamePrefix funcIndex (FunctionSignatureAsComment f.FuncType)

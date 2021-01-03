@@ -1,5 +1,6 @@
 ﻿module PrivateOptimiseCommonRegisterMachine
 
+open WasmFileTypes
 open CommonRegisterMachineTypes
 
 
@@ -33,12 +34,12 @@ let ReplaceAll patternLength patternMatcher getReplacementRegarding (sourceArray
 
 
 
-let IsPushA   i = match i with | Push(A)   -> true | _ -> false
-let IsPeekA   i = match i with | PeekA     -> true | _ -> false
-let IsPopA    i = match i with | Pop(A)    -> true | _ -> false
-let IsPopB    i = match i with | Pop(B)    -> true | _ -> false
-let IsBarrier i = match i with | Barrier -> true | _ -> false
-let IsDrop    i = match i with | Drop    -> true | _ -> false
+let IsPushA   i = match i with | Push(A)       -> true | _ -> false
+let IsPeekA   i = match i with | PeekA         -> true | _ -> false
+let IsPopA    i = match i with | Pop(A)        -> true | _ -> false
+let IsPopB    i = match i with | Pop(B)        -> true | _ -> false
+let IsBarrier i = match i with | Barrier       -> true | _ -> false
+let IsDropOne i = match i with | Drop (U32 1u) -> true | _ -> false
 
 
 let IsRegisterPreserving = function
@@ -65,9 +66,9 @@ let IsAssignToA = function
 
 
 
-let WherePushBarrierPop  i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPopA a.[i+2]
-let WherePushBarrierDrop i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsDrop a.[i+2]
-let WherePushBarrierPeek i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPeekA a.[i+2]
+let WherePushBarrierPop  i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPopA    a.[i+2]
+let WherePushBarrierDrop i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsDropOne a.[i+2]
+let WherePushBarrierPeek i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPeekA   a.[i+2]
 let WhereBarrier         i (a:CRMInstruction32[]) = IsBarrier a.[i]
 
 let WherePushPopAroundPreserving i (a:CRMInstruction32[]) = 

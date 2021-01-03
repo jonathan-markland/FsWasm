@@ -29,8 +29,8 @@ type CRMInstruction32 =
     /// Breakpoint instruction
     | Breakpoint  
 
-    /// Discard top of stack
-    | Drop        
+    /// Discard top n stack slots
+    | Drop        of n:U32
 
     /// Emit local label
     | Label       of LABELNAME    

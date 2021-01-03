@@ -81,7 +81,6 @@ let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationC
 
 
 
-
 let FilePassesTest = FilePassesTestWhenTranslatedUsing "crm" BetterWasmToJonathansAsm.WriteOutWasm2AsJonathansAssemblerText
 
 [<Fact>] 

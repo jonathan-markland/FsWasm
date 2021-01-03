@@ -27,8 +27,18 @@ type ModuleTranslationState =
 
 
 
+type WasmToCrmTranslationConfig =
+    {
+        /// Should a stack pointer adjustment Drop be generated
+        /// after a call instruction, in order to clear off the
+        /// parameters.
+        ClearParametersAfterCall : bool
+    }
+
+
+
 /// Translate WASM instruction body tree to Common Register Machine (CRM) list.
-let TranslateInstructions (moduleFuncsArray:Function[]) translationState (ws:WasmFileTypes.Instr list) =
+let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToCrmTranslationConfig (ws:WasmFileTypes.Instr list) =
 
     let mutable (ModuleTranslationState labelCount) = translationState
     let mutable labelStack = new ResizeArray<LABELNAME>()
@@ -57,12 +67,18 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState (ws:Was
 
     let thunkInIfNeeded (FuncIdx (U32 i)) = 
         match moduleFuncsArray.[int i] with
-            | ImportedFunction2(_) -> [ ThunkIn ]   // Since we called an imported function, we reload Y on return.
+            | ImportedFunction2(_) -> [ ThunkIn ]   // Since we called an imported function, we reload Y on return.  TODO: This would be overzealous if the import is something *we* translated!
             | InternalFunction2(_) -> []
  
-    let pushAnyReturn fidx =
-        let ft = (getFuncType fidx)
-        match ft.ReturnTypes.Length with
+    let stackCleanupAfterCall funcType =
+        if wasmToCrmTranslationConfig.ClearParametersAfterCall then
+            let numParamsToRemove = uint32 funcType.ParameterTypes.Length
+            [ Drop (U32 numParamsToRemove) ]
+        else
+            []
+
+    let pushAnyReturn funcType =
+        match funcType.ReturnTypes.Length with
             | 0 -> []
             | 1 -> [ Push A ]
             | _ -> failwith "Cannot translate functions which return more than 1 result"
@@ -144,7 +160,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState (ws:Was
                 []
 
             | Instr.Drop(ins) -> 
-                translateInstr(ins) @ [ Drop ; Barrier ]
+                translateInstr(ins) @ [ Drop (U32 1u) ; Barrier ]
         
             | Select(a,b,c) -> 
                 let l1 = newLabel ()
@@ -218,10 +234,12 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState (ws:Was
             
             | Call(funcIdx, argsList) -> 
                 let codeToPushArguments = argsList |> translateInstrList
+                let funcType = getFuncType funcIdx
                 codeToPushArguments
                     @ [ CallFunc(FuncLabelFor funcIdx moduleFuncsArray) ]
                     @ (thunkInIfNeeded funcIdx) 
-                    @ (pushAnyReturn funcIdx) 
+                    @ (stackCleanupAfterCall funcType)
+                    @ (pushAnyReturn funcType) 
                     @ [ Barrier ]
 
             | CallIndirect(funcType, argsList, indexExpr) ->
@@ -230,7 +248,11 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState (ws:Was
                 let translatedIndex     = indexExpr |> translateInstr   // TODO: We could see if this would statically evaluate, and reduce this to a regular call, although the compiler would probably optimise that.
                 codeToPushArguments 
                     @ translatedIndex 
-                    @ [ Pop A ; CallTableIndirect ; Barrier ]
+                    @ [ Pop A ; CallTableIndirect ]
+                    // TODO: Do we ever need to do this? I suppose it depends on what the table points to!   @ (thunkInIfNeeded funcIdx) 
+                    @ (stackCleanupAfterCall funcType)
+                    @ (pushAnyReturn funcType)
+                    @ [ Barrier ]
 
             | I32Const(I32(c)) -> 
                 [ Const (A, Const32 c) ; Push A ; Barrier ]

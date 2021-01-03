@@ -52,7 +52,7 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
     match instruction with
         | Barrier               -> [ "// ~~~ register barrier ~~~" ]
         | Breakpoint            -> [ "break" ]
-        | Drop                  -> [ "add SP,4" ]  // TODO: Assumes 32-bit target
+        | Drop(U32 numSlots)    -> [ sprintf "add SP,%d" (numSlots * 4u) ]   // TODO: Assumes 32-bit target
         | Label(LabelName l)    -> [ "label " + l ]   // TODO: sort out using the local label references in Jonathan's ASM
         | Const(r,Const32(n))   -> [ sprintf "let %s=%d" (regNameOf r) n ]
         | Goto(LabelName l)     -> [ "goto " + l ]
@@ -138,8 +138,10 @@ let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
 
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
+    let wasmToCrmTranslationConfig = { ClearParametersAfterCall = false } 
+
     let crmInstructions, updatedTranslationState = 
-        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState config
+        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
 
     let asmSignatureOf (funcType:FuncType) =
 
