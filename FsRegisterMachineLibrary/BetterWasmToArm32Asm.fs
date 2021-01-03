@@ -13,6 +13,8 @@ open ArmSupportLibrary
 
 
 let StackSlotSizeU = 4u
+let armTempRegister = "R8"
+let offsetTempRegister = "R10"
 
 
 
@@ -25,9 +27,6 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         | B -> "R1"
         | C -> "R2"
         | Y -> "R9"  // Conventionally the "Static base" register
-
-    let armTempRegister = "R8"
-    let offsetTempRegister = "R10"
 
     let loadConstant r value =
         LoadConstantInto (regNameOf r) value
@@ -164,20 +163,6 @@ let ValTypeTranslationOf = function
 
 
 
-let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
-
-    let indexOfFirstLocal = funcType.ParameterTypes.Length
-
-    funcLocals |> Array.iteri (fun arrayIndex v ->
-        let indexOfVariable = indexOfFirstLocal + arrayIndex
-        let prefixStr = 
-            match arrayIndex with 
-                | 0 -> "var "
-                | _ -> "  , "
-        writeOut (sprintf "%s@%s%d:%s" prefixStr AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v)))
-
-
-
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
     let wasmToCrmTranslationConfig = { ClearParametersAfterCall = true } 
@@ -185,28 +170,46 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     let crmInstructions, updatedTranslationState = 
         TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
 
+    let thisFunctionCallsOut = crmInstructions |> CrmInstructionsListMakesCallsOut
+
     let procedureCommand = 
         sprintf ".%s%d ; %s" AsmInternalFuncNamePrefix funcIndex (FunctionSignatureAsComment f.FuncType)
+
+    let writeLabelAndPrologueCode f =
+        writeOutCode procedureCommand
+        if thisFunctionCallsOut then
+            writeOutCode "push {R14}"
+        if f |> HasParametersOrLocals then
+            writeOutCode "push {R11}"
+            writeOutCode "mov R11,R13"
+            if f |> HasLocals then
+                MathsWithConstant "sub" "R13" ((f |> LocalsCount) * StackSlotSizeU) armTempRegister    // TODO: show this as a comment?   (f |> FunctionLocalsAsComment))
+                    |> List.iter writeOutCode
+
+    let writeEpilogueCode f =
+        if f |> HasParametersOrLocals then
+            if f |> HasLocals then writeOutCode "mov R13,R11"
+            writeOutCode "pop {R11}"
+        if thisFunctionCallsOut then
+            writeOutCode "pop {R14}"
 
     let writeInstruction instructionText = 
         writeOutCode ("    " + instructionText)
 
     let branchTableStart tableLabel =
         writeOutTables "align ptr"
-        writeOutTables (sprintf "data %s" tableLabel)
+        writeOutTables (sprintf ".%s" tableLabel)
 
     let branchTableItem targetLabel =
-        writeOutTables (sprintf "    ptr %s" targetLabel)
+        writeOutTables (sprintf "    EQUD %s" targetLabel)
 
     let returnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
         "bx lr"
 
     try
-        let thisFunctionCallsOut = crmInstructions |> CrmInstructionsListMakesCallsOut
-
-        writeOutCode procedureCommand
-        WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
+        writeLabelAndPrologueCode f
         crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction (TranslateInstructionToAsmSequence thisFunctionCallsOut) f
+        writeEpilogueCode f
         writeOutCode (returnCommandFor f.FuncType f.Locals)
         crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
     with
@@ -220,7 +223,7 @@ let WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray =
 
     writeOut ("." + AsmEntryPointLabel)
     let (LabelName labelName) = FuncLabelFor startFuncIdx moduleFuncsArray
-    writeOut (sprintf "jmp %s" labelName)
+    writeOut (sprintf "b %s" labelName)
 
 
 
@@ -261,7 +264,7 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
 
     let writeOutWasmGlobal globalIdxNameString initValue =
         writeOutData (sprintf ".%s" globalIdxNameString)
-        writeOutData (sprintf "dd %d" initValue)
+        writeOutData (sprintf "EQUD %d" initValue)
 
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
