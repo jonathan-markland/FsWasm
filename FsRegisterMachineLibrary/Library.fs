@@ -57,18 +57,18 @@ let private ReturnsSingleValue (ft:FuncType) =
 
 
 let TranslateInstructionsAndApplyOptimisations 
-    (f:InternalFunctionRecord) (moduleFuncsArray:Function[]) translationState wasmToCrmTranslationConfig optimisationConfig =
+    (f:InternalFunctionRecord) (moduleFuncsArray:Function[]) translationState wasmToCrmTranslationConfig outputConfig =
 
     let crmInstructions, updatedTranslationState = 
         TranslateInstructions moduleFuncsArray translationState wasmToCrmTranslationConfig f.Body
 
     let optimisationPhase1 = 
-        match optimisationConfig with
+        match outputConfig with
             | TranslationConfiguration(_,FullyOptimised) -> crmInstructions |> Optimise
             | TranslationConfiguration(_,NoOptimisation) -> crmInstructions
 
     let optimisationPhase2 =
-        match optimisationConfig with
+        match outputConfig with
             | TranslationConfiguration(WithBarriers,_)    -> optimisationPhase1
             | TranslationConfiguration(WithoutBarriers,_) -> optimisationPhase1 |> RemoveBarriers
 

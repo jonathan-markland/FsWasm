@@ -21,6 +21,6 @@ type OptimisationConfig =
     | NoOptimisation
 
 
-type WriteOutFunctionConfig = 
+type WriteOutFunctionConfig =  // TODO: better name
     TranslationConfiguration of BarrierConfig * OptimisationConfig
 

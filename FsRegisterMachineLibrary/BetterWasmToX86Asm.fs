@@ -11,6 +11,10 @@ open TextFormatting
 
 
 
+let StackSlotSizeU = 4u
+
+
+
 let TranslateInstructionToAsmSequence thisFunc instruction =
 
     // TODO:  These translations can assume a 32-bit target for now.
@@ -61,15 +65,15 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
 
         let paramCount = uint32 thisFunc.FuncType.ParameterTypes.Length
         if locNumber < paramCount then
-            "+" + ((paramCount - locNumber) * 4u + 4u).ToString()
+            "+" + ((paramCount - locNumber) * StackSlotSizeU + StackSlotSizeU).ToString()
         else
-            "-" + ((locNumber - paramCount) * 4u + 4u).ToString()
+            "-" + ((locNumber - paramCount) * StackSlotSizeU + StackSlotSizeU).ToString()
 
 
     match instruction with
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
         | Breakpoint            -> [ "int 3" ]
-        | Drop(U32 numSlots)    -> [ sprintf "add ESP,%d" (numSlots * 4u) ]
+        | Drop(U32 numSlots)    -> [ sprintf "add ESP,%d" (numSlots * StackSlotSizeU) ]
         | Label(LabelName l)    -> [ "." + l ]
         | Const(r,Const32(n))   -> [ sprintf "mov %s,%d" (regNameOf r) n ]
         | Goto(LabelName l)     -> [ "jmp " + l ]
@@ -148,7 +152,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
             writeOutCode "push EBP"
             writeOutCode "mov EBP,ESP"
             if f |> HasLocals then
-                writeOutCode (sprintf "sub ESP,%d  ; %s" ((f |> LocalsCount) * 4u) (f |> FunctionLocalsAsComment))
+                writeOutCode (sprintf "sub ESP,%d  ; %s" ((f |> LocalsCount) * StackSlotSizeU) (f |> FunctionLocalsAsComment))
 
     let writeEpilogueCode f =
         if f |> HasParametersOrLocals then

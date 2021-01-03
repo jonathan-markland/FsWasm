@@ -12,7 +12,11 @@ open ArmSupportLibrary
 
 
 
-let TranslateInstructionToAsmSequence thisFunc instruction =
+let StackSlotSizeU = 4u
+
+
+
+let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction =
 
     // TODO:  These translations can assume an ArmV7 target for now.
 
@@ -53,12 +57,43 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         add r0, r0, r0 ; try to use r0 straight away, incurring a 3 cycle wait on use of r0    
     *)
 
-    let frameOffsetForLoc i = 12345  // use thisFunc
+    /// Return the R11 offset for the given local variable 
+    /// slot number,which includes the function's parameters.
+    let frameOffsetForLoc (LocalIdx(U32(locNumber))) =
+
+        // When thisFunctionCallsOut:
+
+            // Loc0    |               [R11+16]
+            // Loc1    | Params        [R11+12]
+            // Loc2    |               [R11+8]
+            // Return Address          [R11+4]    <--- This is where we preserve the link register R14
+            // Parent R11         <--- [R11]
+            // Loc3    | Locals        [R11-4]
+            // Loc4    |               [R11-8]
+
+        // When NOT thisFunctionCallsOut:    (No link register preservation needed for leaf function).
+
+            // Loc0    |               [R11+12]
+            // Loc1    | Params        [R11+8]
+            // Loc2    |               [R11+4]
+            // Parent R11         <--- [R11]
+            // Loc3    | Locals        [R11-4]
+            // Loc4    |               [R11-8]
+
+        let linkRegisterSlotSize =
+            if thisFunctionCallsOut then StackSlotSizeU else 0u
+
+        let paramCount = uint32 thisFunc.FuncType.ParameterTypes.Length
+        if locNumber < paramCount then
+            "+" + ((paramCount - locNumber) * StackSlotSizeU + linkRegisterSlotSize).ToString()
+        else
+            "-" + ((locNumber - paramCount) * StackSlotSizeU + StackSlotSizeU).ToString()
+
 
     match instruction with
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
         | Breakpoint            -> [ "bkpt #0" ]
-        | Drop(U32 numSlots)    -> [ sprintf "add R13,R13,#%d" (numSlots * 4u) ]
+        | Drop(U32 numSlots)    -> [ sprintf "add R13,R13,#%d" (numSlots * StackSlotSizeU) ]
         | Label(LabelName l)    -> [ "." + l ]
         | Const(r,Const32(n))   -> loadConstant r (uint32 n)
         | Goto(LabelName l)     -> [ "b " + l ]
@@ -98,8 +133,8 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | CmpGesBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movge R0,#1" ]
         | CmpGeuBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movhs R0,#1" ]
         | CmpAZ                 -> [ "cmp R0,0"  ; "mov R0,#0" ; "moveq R0,#1" ]
-        | FetchLoc(r,i)         -> [ sprintf "ldr %s,[R11, #%d]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
-        | StoreLoc(r,i)         -> [ sprintf "str %s,[R11, #%d]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
+        | FetchLoc(r,i)         -> [ sprintf "ldr %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
+        | StoreLoc(r,i)         -> [ sprintf "str %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
         | FetchGlo(r,i)         -> [ sprintf "ldr %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
         | StoreGlo(r,i)         -> [ sprintf "str %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
         | StoreConst8 (r,U32 ofs,I32 v) -> storeConstant ArmByte     "strb"  r ofs (uint32 v)
@@ -164,17 +199,14 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         writeOutTables (sprintf "    ptr %s" targetLabel)
 
     let returnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
-        match (funcType.ParameterTypes.Length, funcLocals.Length) with
-            | (0,0) -> "ret"
-            | (_,_) -> "endproc"
+        "bx lr"
 
     try
-        let tmp = if crmInstructions |> CrmInstructionsListMakesCallsOut then "*** FUNCTION CALLS OUT ***" else ""
-        writeOutCode tmp // TODO: remove this
+        let thisFunctionCallsOut = crmInstructions |> CrmInstructionsListMakesCallsOut
 
         writeOutCode procedureCommand
         WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f
+        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction (TranslateInstructionToAsmSequence thisFunctionCallsOut) f
         writeOutCode (returnCommandFor f.FuncType f.Locals)
         crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
     with
@@ -239,8 +271,8 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
     writeOutCode (sprintf ".init_%s" AsmMemPrefix)
-    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
-    writeOutCode "ret"
+    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata (TranslateInstructionToAsmSequence false)
+    writeOutCode "bx lr"
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
 
