@@ -1,7 +1,6 @@
 ﻿module ArmSupportLibrary
 
 
-
 type Operand2SignClass = 
 
     /// Use the positive logic version of the instruction.
@@ -181,3 +180,5 @@ let StoreConstant fetchStoreType armStoreInstruction addressRegister offsetDesir
     (LoadConstantInto constantTempRegister value) @
     (OffsetLoadInstructionFor offsetStrategy) @
     [ sprintf "%s %s,[%s%s]" armStoreInstruction constantTempRegister addressRegister (ArmOffset offsetStrategy) ] 
+
+

@@ -1,13 +1,12 @@
 module WasmToCommonRegisterMachineTests
 
-open System
 open System.IO
 open WasmSerialiser
 open WasmFileReader
 open BWToCRMConfigurationTypes
 open WasmToBetterWasm
-
 open Xunit
+
 
 
 let WasmToCommonRegisterMachineText asAssemblyLanguage config paramFileName =
