@@ -142,14 +142,14 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
     let writeLabelAndPrologueCode f =
         writeOutCode procedureCommand
-        if f |> HasParamsReturnsOrLocals then
+        if f |> HasParametersOrLocals then
             writeOutCode "push EBP"
             writeOutCode "mov EBP,ESP"
             if f |> HasLocals then
                 writeOutCode (sprintf "sub ESP,%d  ; %s" ((f |> LocalsCount) * 4u) (f |> FunctionLocalsAsComment))
 
     let writeEpilogueCode f =
-        if f |> HasParamsReturnsOrLocals then
+        if f |> HasParametersOrLocals then
             if f |> HasLocals then writeOutCode "mov ESP,EBP"
             writeOutCode "pop EBP"
 

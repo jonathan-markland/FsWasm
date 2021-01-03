@@ -250,13 +250,13 @@ let FunctionLocalsAsComment (f:InternalFunctionRecord) =
 
 
 
-/// Returns true if the function type has any parameters or any return values.
-let HasParamsOrReturns funcType =
-    funcType.ParameterTypes.Length > 0  ||  funcType.ReturnTypes.Length > 0
+/// Returns true if the function type has any parameters.
+let HasParams funcType =
+    funcType.ParameterTypes.Length > 0
 
-/// Returns true if the function type has any parameters, return values or any locals.
-let HasParamsReturnsOrLocals (func:InternalFunctionRecord) =
-    func.Locals.Length > 0  ||  func.FuncType |> HasParamsOrReturns
+/// Returns true if the function type has any parameters, or any locals.
+let HasParametersOrLocals (func:InternalFunctionRecord) =
+    func.Locals.Length > 0  ||  func.FuncType |> HasParams
 
 /// Returns true if the function has local variables.
 let HasLocals (func:InternalFunctionRecord) =
