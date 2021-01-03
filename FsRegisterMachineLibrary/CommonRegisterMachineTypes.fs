@@ -45,7 +45,7 @@ type CRMInstruction32 =
     | CallFunc    of LABELNAME    
 
     /// Reg A contains index into WASM Table[0]
-    | CallTableIndirect           
+    | CallTableIndirect
 
     /// Branch to given label when A==0
     | BranchAZ    of LABELNAME    

@@ -27,6 +27,7 @@ type ModuleTranslationState =
 
 
 
+/// Translate WASM instruction body tree to Common Register Machine (CRM) list.
 let TranslateInstructions (moduleFuncsArray:Function[]) translationState (ws:WasmFileTypes.Instr list) =
 
     let mutable (ModuleTranslationState labelCount) = translationState

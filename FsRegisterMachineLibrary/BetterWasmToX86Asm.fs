@@ -135,7 +135,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
     let crmInstructions, updatedTranslationState = 
-        f.Body |> TranslateInstructions m.Funcs translationState
+        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState config
 
     let procedureCommand =
         sprintf ".%s%d  ; %s" AsmInternalFuncNamePrefix funcIndex (FunctionSignatureAsComment f.FuncType)
@@ -170,7 +170,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
     try
         writeLabelAndPrologueCode f
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f config
+        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f
         writeEpilogueCode f
         writeOutCode (returnCommandFor f.FuncType f.Locals)
         crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem

@@ -146,7 +146,7 @@ let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
     let crmInstructions, updatedTranslationState = 
-        f.Body |> TranslateInstructions m.Funcs translationState
+        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState config
 
     let procedureCommand = 
         sprintf ".%s%d ; %s" AsmInternalFuncNamePrefix funcIndex (FunctionSignatureAsComment f.FuncType)
@@ -167,9 +167,12 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
             | (_,_) -> "endproc"
 
     try
+        let tmp = if crmInstructions |> CrmInstructionsListMakesCallsOut then "*** FUNCTION CALLS OUT ***" else ""
+        writeOutCode tmp // TODO: remove this
+
         writeOutCode procedureCommand
         WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f config
+        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f
         writeOutCode (returnCommandFor f.FuncType f.Locals)
         crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
     with

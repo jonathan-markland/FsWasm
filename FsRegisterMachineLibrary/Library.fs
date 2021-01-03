@@ -9,6 +9,7 @@ open OptimiseCommonRegisterMachine
 open WasmStaticExpressionEvaluator
 open AsmPrefixes
 open TextFormatting
+open WasmInstructionsToCRMInstructions
 
 
 
@@ -55,8 +56,11 @@ let private ReturnsSingleValue (ft:FuncType) =
 
 
 
-/// Iterate through all of the translated versions of the function's instructions.
-let ForTranslatedCrmInstructionsDo action translate thisFunc config crmInstructions =
+let TranslateInstructionsAndApplyOptimisations 
+    (f:InternalFunctionRecord) (moduleFuncsArray:Function[]) translationState config =
+
+    let crmInstructions, updatedTranslationState = 
+        TranslateInstructions moduleFuncsArray translationState f.Body
 
     let optimisationPhase1 = 
         match config with
@@ -68,11 +72,18 @@ let ForTranslatedCrmInstructionsDo action translate thisFunc config crmInstructi
             | TranslationConfiguration(WithBarriers,_)    -> optimisationPhase1
             | TranslationConfiguration(WithoutBarriers,_) -> optimisationPhase1 |> RemoveBarriers
 
-    let finalInstructions = optimisationPhase2
+    let optimisedCrmInstructions = optimisationPhase2
+
+    optimisedCrmInstructions, updatedTranslationState
+
+
+
+/// Iterate through all of the translated versions of the function's instructions.
+let ForTranslatedCrmInstructionsDo action translate thisFunc crmInstructions =
 
     // Kick off the whole thing here:
 
-    finalInstructions |> List.iter (fun crmInstruction -> translate thisFunc crmInstruction |> List.iter action)
+    crmInstructions |> List.iter (fun crmInstruction -> translate thisFunc crmInstruction |> List.iter action)
 
     // Handle the function's return (may need pop into A):
 
@@ -266,3 +277,15 @@ let HasLocals (func:InternalFunctionRecord) =
 let LocalsCount (func:InternalFunctionRecord) =
     uint32 (func.Locals.Length)
 
+
+
+/// Returns true if the CRM instruction sequence calls out to anything, false 
+/// if it makes no calls (is a leaf function).
+let CrmInstructionsListMakesCallsOut crmInstructions =
+    
+    crmInstructions |> List.exists (fun crmInstruction ->
+        match crmInstruction with
+            | CallFunc _
+            | CallTableIndirect _ -> true
+            | _ -> false
+    )
