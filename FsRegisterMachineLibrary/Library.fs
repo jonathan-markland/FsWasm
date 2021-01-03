@@ -232,3 +232,37 @@ let FunctionSignatureAsComment (funcType:FuncType) =
 
     (Bracketed translatedParameters) + (ColonPrefixed translatedReturns)
 
+
+
+/// Returns a list of function local variables in a form suitable
+/// for inclusion in a comment. The comment character
+/// is not included here.
+let FunctionLocalsAsComment (f:InternalFunctionRecord) =
+
+    let funcType = f.FuncType
+    let funcLocals = f.Locals
+    let indexOfFirstLocal = funcType.ParameterTypes.Length
+    funcLocals 
+        |> Array.mapi (fun arrayIndex v ->
+            let indexOfVariable = indexOfFirstLocal + arrayIndex
+            sprintf "%s%d:%s" AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v))
+        |> String.concat ", "
+
+
+
+/// Returns true if the function type has any parameters or any return values.
+let HasParamsOrReturns funcType =
+    funcType.ParameterTypes.Length > 0  ||  funcType.ReturnTypes.Length > 0
+
+/// Returns true if the function type has any parameters, return values or any locals.
+let HasParamsReturnsOrLocals (func:InternalFunctionRecord) =
+    func.Locals.Length > 0  ||  func.FuncType |> HasParamsOrReturns
+
+/// Returns true if the function has local variables.
+let HasLocals (func:InternalFunctionRecord) =
+    func.Locals.Length > 0
+
+/// Returns the number of local variables the function has.
+let LocalsCount (func:InternalFunctionRecord) =
+    uint32 (func.Locals.Length)
+
