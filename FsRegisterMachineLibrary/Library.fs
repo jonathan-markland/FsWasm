@@ -44,7 +44,7 @@ let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption mo
         | Some { StartFuncIdx = startFuncIdx } -> 
             writeOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray
         | None -> 
-            "No entry point in this translation" |> toComment |> writeOut
+            "No WASM entry point (start record) in this translation" |> toComment |> writeOut
 
 
 

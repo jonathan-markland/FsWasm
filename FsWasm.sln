@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WasmSerialiser", "WasmSeria
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F2F3B675-9CE0-4AA1-A608-EA27BC47CA01}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsWasmLibraryTests", "XUnitTestProject\FsWasmLibraryTests.fsproj", "{DE708E92-B478-41DA-B937-51006CA77BD2}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsWasmLibraryTests", "FsWasmLibraryTests\FsWasmLibraryTests.fsproj", "{DE708E92-B478-41DA-B937-51006CA77BD2}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsRegisterMachineLibrary", "FsRegisterMachineLibrary\FsRegisterMachineLibrary.fsproj", "{8C246632-F617-4F63-B23C-D960E1609C25}"
 EndProject

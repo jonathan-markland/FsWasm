@@ -215,4 +215,4 @@ CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l6
 CODE>     pop A
 CODE> ret
-CODE> // No entry point in this translation
+CODE> // No WASM entry point (start record) in this translation

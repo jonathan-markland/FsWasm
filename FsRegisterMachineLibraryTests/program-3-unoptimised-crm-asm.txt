@@ -72,4 +72,4 @@ CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l1
 CODE>     pop A
 CODE> endproc
-CODE> // No entry point in this translation
+CODE> // No WASM entry point (start record) in this translation

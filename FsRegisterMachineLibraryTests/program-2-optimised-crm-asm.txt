@@ -24,4 +24,4 @@ CODE>     push A
 CODE>     label wasm_l2
 CODE>     pop A
 CODE> ret
-CODE> // No entry point in this translation
+CODE> // No WASM entry point (start record) in this translation
