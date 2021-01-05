@@ -203,10 +203,10 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
 
     let wasmTableHeading tableIndex =
         writeOutData (sprintf "align %d" StackSlotSizeU)
-        writeOutData (sprintf "data %s%d" AsmTableNamePrefix tableIndex)
+        writeOutData (sprintf "%s%d:" AsmTableNamePrefix tableIndex)
 
     let wasmTableRow nameString =
-        writeOutData (sprintf "    ptr %s" nameString)
+        writeOutData (sprintf "    dd %s" nameString)
 
     let wasmMemHeading memIndex linearMemorySize =
         writeOutVar (sprintf "align %d" StackSlotSizeU)
@@ -215,7 +215,7 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
 
     let wasmMemRow memIndex dataBlockIndex byteArray =
         let writeIns s = writeOutData ("    " + s)
-        writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex)
+        writeOutData (sprintf "%s%d_%d:" AsmMemoryNamePrefix memIndex dataBlockIndex)
         ForEachLineOfHexDumpDo "db" "," "0x" writeIns byteArray
 
     let writeOutCopyBlockCode i j ofsValue byteArrayLength =
@@ -244,6 +244,7 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
     writeOutData "db 'I','A','3','2'    ; Indicates this is for X86/32"
     writeOutData "dq 0x40000000         ; Origin address for this fixed executable."
     writeOutData "dq TotalSize          ; Total size needed for this fixed flat image"
+    writeOutData "dq wasm_entry         ; Entry point address"  // TODO: If using WasmStartEntryPointIfPresent this will fail to resolve since the entry is optional.
 
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo wasmTableHeading wasmTableRow)
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal

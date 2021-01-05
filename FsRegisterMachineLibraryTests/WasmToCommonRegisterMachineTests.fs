@@ -54,7 +54,7 @@ type OptimisationCase = Optimised | Unoptimised
 
 
 
-let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationCase =
+let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationCase entryPointConfig =
     
     let fileSubType = 
         match optimisationCase with
@@ -63,8 +63,8 @@ let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationC
 
     let config =
         match optimisationCase with
-            | Optimised   -> TranslationConfiguration (WithoutBarriers, FullyOptimised, WasmStartEntryPointIfPresent)
-            | Unoptimised -> TranslationConfiguration (WithBarriers,    NoOptimisation, WasmStartEntryPointIfPresent)
+            | Optimised   -> TranslationConfiguration (WithoutBarriers, FullyOptimised, entryPointConfig)
+            | Unoptimised -> TranslationConfiguration (WithBarriers,    NoOptimisation, entryPointConfig)
 
     let inputFile = (sprintf "program-%d.wasm" n)
     
@@ -75,7 +75,6 @@ let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationC
     let expected = System.IO.File.ReadAllLines expectationFile  // TODO: More detail on failed comparison.
 
     let b = (actual = expected)
-
     b
 
 
@@ -84,30 +83,30 @@ let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationC
 let FilePassesTest = FilePassesTestWhenTranslatedUsing "crm" BetterWasmToJonathansAsm.WriteOutWasm2AsJonathansAssemblerText
 
 [<Fact>] 
-let ``Program 1 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 1 Optimised)
+let ``Program 1 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 1 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 2 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 2 Optimised)
+let ``Program 2 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 2 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 3 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 3 Optimised)
+let ``Program 3 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 3 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 4 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 4 Optimised)
+let ``Program 4 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 4 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 5 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 5 Optimised)
+let ``Program 5 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 5 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 6 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 6 Optimised)
+let ``Program 6 to CRM optimised to Jonathans Asm`` () = Assert.True(FilePassesTest 6 Optimised WasmStartEntryPointIfPresent)
 
 [<Fact>] 
-let ``Program 1 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 1 Unoptimised)
+let ``Program 1 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 1 Unoptimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 2 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 2 Unoptimised)
+let ``Program 2 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 2 Unoptimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 3 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 3 Unoptimised)
+let ``Program 3 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 3 Unoptimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 4 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 4 Unoptimised)
+let ``Program 4 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 4 Unoptimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 5 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 5 Unoptimised)
+let ``Program 5 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 5 Unoptimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 6 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 6 Unoptimised)
+let ``Program 6 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePassesTest 6 Unoptimised WasmStartEntryPointIfPresent)
 
 
 
@@ -116,17 +115,17 @@ let ``Program 6 to CRM unoptimised to Jonathans Asm`` () = Assert.True(FilePasse
 let FilePassesTestX86 = FilePassesTestWhenTranslatedUsing "x8632" BetterWasmToX86Asm.WriteOutWasm2AsX86AssemblerText
 
 [<Fact>] 
-let ``Program 1 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 1 Optimised)
+let ``Program 1 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 1 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 2 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 2 Optimised)
+let ``Program 2 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 2 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 3 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 3 Optimised)
+let ``Program 3 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 3 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 4 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 4 Optimised)
+let ``Program 4 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 4 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 5 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 5 Optimised)
+let ``Program 5 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 5 Optimised (ForceEntryPoint "main"))
 [<Fact>] 
-let ``Program 6 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 6 Optimised)
+let ``Program 6 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 6 Optimised WasmStartEntryPointIfPresent)
 
 
 
@@ -135,17 +134,17 @@ let ``Program 6 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 
 let FilePassesTestARM = FilePassesTestWhenTranslatedUsing "arm32" BetterWasmToArm32Asm.WriteOutWasm2AsArm32AssemblerText
 
 [<Fact>] 
-let ``Program 1 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 1 Optimised)
+let ``Program 1 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 1 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 2 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 2 Optimised)
+let ``Program 2 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 2 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 3 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 3 Optimised)
+let ``Program 3 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 3 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 4 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 4 Optimised)
+let ``Program 4 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 4 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 5 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 5 Optimised)
+let ``Program 5 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 5 Optimised (ForceEntryPoint "main"))
 [<Fact>] 
-let ``Program 6 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 6 Optimised)
+let ``Program 6 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 6 Optimised WasmStartEntryPointIfPresent)
 
 
 
