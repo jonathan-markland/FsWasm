@@ -288,4 +288,4 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
                 (sprintf "WASM Import: %s.%s" m n) |> toComment |> writeOutCode 
         )
 
-    WithWasmStartDo WriteOutBranchToEntryLabel writeOutCode toComment m.Start m.Funcs
+    WithWasmStartDo WriteOutBranchToEntryLabel writeOutCode toComment m.Start

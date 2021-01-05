@@ -11,7 +11,7 @@ type Import = { Export:Export option; ImportModuleName:Name; ImportName:Name }
 
 
 type ImportedFunctionRecord = { Import:Import; FuncType:FuncType }
-type InternalFunctionRecord = { Export:Export option; OriginalCodeSecIndex:U32; CodeSize:U32; FuncType:FuncType; Locals:ValType[]; Body:Instr list }
+type InternalFunctionRecord = { ModuleLocalFuncIdx:FuncIdx; Export:Export option; OriginalCodeSecIndex:U32; CodeSize:U32; FuncType:FuncType; Locals:ValType[]; Body:Instr list }
 
 type ImportedGlobalRecord = { Import:Import; GlobalType:GlobalType }
 type InternalGlobalRecord = { Export:Export option; GlobalType:GlobalType; InitExpr:Instr list }
@@ -49,7 +49,7 @@ type Module =
         Mems    : Memory[]
         Tables  : Table[]
         Globals : Global[]
-        Start   : Start option
+        Start   : Function option
     }
 
 
@@ -58,6 +58,7 @@ type Module =
 /// It is needed to pass to the translation-to-target-cpu functions.
 let TheInitialisationFunctionMetadata =
     { 
+        ModuleLocalFuncIdx   = FuncIdx (U32 0u)   // TODO: Not right to lie about this, or re-use FuncIdx 0.
         Export = None
         OriginalCodeSecIndex = U32 0u // TODO: Not right to lie about this.  It doesn't exist in the original WASM file code sec!
         CodeSize             = U32 0u // TODO: Hopefully nobody ever reads this for this instance.

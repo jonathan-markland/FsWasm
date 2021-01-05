@@ -37,11 +37,17 @@ let ToBetterWasm (oldModule:WasmFileTypes.Module) =
     let finalMems    = Array.append newImportedMems    newInternalMems
     let finalTables  = Array.append newImportedTables  newInternalTables
     let finalGlobals = Array.append newImportedGlobals newInternalGlobals
+    let finalStart =
+        match oldModule.Start with
+            | Some { StartFuncIdx=FuncIdx (U32 i) } ->
+                Some finalFuncs.[int i]
+            | None ->
+                None
 
     {
         Funcs   = finalFuncs;
         Mems    = finalMems;
         Tables  = finalTables;
         Globals = finalGlobals;
-        Start   = oldModule.Start;
+        Start   = finalStart;
     }

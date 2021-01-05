@@ -199,12 +199,14 @@ let HarvestInternalFuncs countOfImportedFuncs (oldModule:WasmFileTypes.Module) =
         objectIndex <- objectIndex + 1u
         codeSecIndex <- codeSecIndex + 1
 
-        InternalFunction2({ Export = exportOpt; 
-            OriginalCodeSecIndex = U32(uint32 codeSecIndex); 
-            CodeSize = oldCode.CodeSize; 
-            FuncType = funcType; 
-            Locals = newLocals; 
-            Body = oldCode.Function.Body })
+        InternalFunction2({ 
+            ModuleLocalFuncIdx = thisFuncIdx
+            Export   = exportOpt
+            OriginalCodeSecIndex = U32(uint32 codeSecIndex)
+            CodeSize = oldCode.CodeSize
+            FuncType = funcType
+            Locals   = newLocals
+            Body     = oldCode.Function.Body })
         )
 
 

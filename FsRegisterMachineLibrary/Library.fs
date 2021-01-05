@@ -39,10 +39,10 @@ let ForEachLineOfHexDumpDo (command:string) (byteSeparator:string) (hexPrefix:st
 
 
 
-let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption moduleFuncsArray =
+let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption =
     match startOption with 
-        | Some { StartFuncIdx = startFuncIdx } -> 
-            let labelName = FuncLabelFor startFuncIdx moduleFuncsArray
+        | Some func -> 
+            let labelName = FuncLabelFor func
             writeOutBranchToEntryLabel writeOut labelName
         | None -> 
             "No WASM entry point (start record) in this translation" |> toComment |> writeOut

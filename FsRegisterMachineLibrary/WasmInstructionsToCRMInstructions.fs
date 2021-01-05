@@ -13,11 +13,11 @@ let (-+-) (U32 a) (I32 b) =
 
 
 
-let FuncLabelFor (FuncIdx (U32 i)) (moduleFuncsArray:Function[]) =
-    match moduleFuncsArray.[int i] with
+let FuncLabelFor func =
+    match func with
         | ImportedFunction2({Import={ImportModuleName=m; ImportName=n}}) -> 
             LabelName(AsmInternalFuncNamePrefix + m + "_" + n)
-        | InternalFunction2(f) ->
+        | InternalFunction2({ModuleLocalFuncIdx=(FuncIdx (U32 i))}) ->
             LabelName(AsmInternalFuncNamePrefix + i.ToString()) 
 
 
@@ -59,6 +59,9 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
         labelStack.[labelStack.Count - (1 + (int i))]
 
     let returnLabel = newLabel ()
+
+    let getFunc (FuncIdx (U32 i)) =
+        moduleFuncsArray.[int i]
 
     let getFuncType (FuncIdx (U32 i)) =
         match moduleFuncsArray.[int i] with
@@ -236,7 +239,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 let codeToPushArguments = argsList |> translateInstrList
                 let funcType = getFuncType funcIdx
                 codeToPushArguments
-                    @ [ CallFunc(FuncLabelFor funcIdx moduleFuncsArray) ]
+                    @ [ CallFunc(FuncLabelFor (getFunc funcIdx)) ]
                     @ (thunkInIfNeeded funcIdx) 
                     @ (stackCleanupAfterCall funcType)
                     @ (pushAnyReturn funcType) 
