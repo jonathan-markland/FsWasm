@@ -16,6 +16,11 @@ let StackSlotSizeU = 4u
 
 
 
+let LabelCommand labelNameString = 
+    labelNameString + ":"
+
+
+
 let TranslateInstructionToAsmSequence thisFunc instruction =
 
     // TODO:  These translations can assume a 32-bit target for now.
@@ -75,7 +80,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
         | Breakpoint            -> [ "int 3" ]
         | Drop(U32 numSlots)    -> [ sprintf "add ESP,%d" (numSlots * StackSlotSizeU) ]
-        | Label(LabelName l)    -> [ l + ":" ]
+        | Label(LabelName l)    -> [ LabelCommand l ]
         | Const(r,Const32(n))   -> [ sprintf "mov %s,%d" (regNameOf r) n ]
         | Goto(LabelName l)     -> [ "jmp " + l ]
         | CallFunc(LabelName l) -> [ "call " + l ]
@@ -170,7 +175,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
     let branchTableStart tableLabel =
         writeOutTables (sprintf "align %d" StackSlotSizeU)
-        writeOutTables (sprintf "%s:" tableLabel)
+        writeOutTables (LabelCommand tableLabel)
 
     let branchTableItem targetLabel =
         writeOutTables (sprintf "    dd %s" targetLabel)
@@ -189,7 +194,10 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
 
 let WriteOutBranchToEntryLabel writeOut (LabelName labelName) =
-    writeOut (AsmEntryPointLabel + ":")
+    writeOut (LabelCommand AsmEntryPointLabel)
+    writeOut "pushad"
+    writeOut (sprintf "call %s" AsmInitMemoriesFuncName)
+    writeOut "popad"
     writeOut (sprintf "jmp %s" labelName)
 
 
@@ -203,7 +211,7 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
 
     let wasmTableHeading tableIndex =
         writeOutData (sprintf "align %d" StackSlotSizeU)
-        writeOutData (sprintf "%s%d:" AsmTableNamePrefix tableIndex)
+        writeOutData (LabelCommand (sprintf "%s%d" AsmTableNamePrefix tableIndex))
 
     let wasmTableRow nameString =
         writeOutData (sprintf "    dd %s" nameString)
@@ -215,7 +223,7 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
 
     let wasmMemRow memIndex dataBlockIndex byteArray =
         let writeIns s = writeOutData ("    " + s)
-        writeOutData (sprintf "%s%d_%d:" AsmMemoryNamePrefix memIndex dataBlockIndex)
+        writeOutData (LabelCommand (sprintf "%s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex))
         ForEachLineOfHexDumpDo "db" "," "0x" writeIns byteArray
 
     let writeOutCopyBlockCode i j ofsValue byteArrayLength =
@@ -229,7 +237,7 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
         writeOutCode ("    " + s)
 
     let writeOutWasmGlobal globalIdxNameString initValue =
-        writeOutData (sprintf "%s:" globalIdxNameString)
+        writeOutData (LabelCommand globalIdxNameString)
         writeOutData (sprintf "dd %d" initValue)
 
     // --- Start ---
@@ -249,9 +257,9 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo wasmTableHeading wasmTableRow)
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
-    writeOutVar "TotalSize:"
+    writeOutVar (LabelCommand "TotalSize")
 
-    writeOutCode (sprintf "init_%s:" AsmMemPrefix)
+    writeOutCode (LabelCommand AsmInitMemoriesFuncName)
     m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
     writeOutCode "ret"
 

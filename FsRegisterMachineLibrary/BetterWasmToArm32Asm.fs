@@ -222,6 +222,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
 let WriteOutBranchToEntryLabel writeOut (LabelName labelName) =
     writeOut ("." + AsmEntryPointLabel)
+    writeOut (sprintf "bl %s" AsmInitMemoriesFuncName)
     writeOut (sprintf "b %s" labelName)
 
 
@@ -272,7 +273,7 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
-    writeOutCode (sprintf ".init_%s" AsmMemPrefix)
+    writeOutCode AsmInitMemoriesFuncName
     m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata (TranslateInstructionToAsmSequence false)
     writeOutCode "bx lr"
 
