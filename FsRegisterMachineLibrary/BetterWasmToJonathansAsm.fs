@@ -12,6 +12,11 @@ open BWToCRMConfigurationTypes
 
 
 
+let LabelCommand labelNameString = 
+    labelNameString + ":"
+
+
+
 let TranslateInstructionToAsmSequence _thisFunc instruction =
 
     // TODO:  These translations can assume a 32-bit target for now.
@@ -237,7 +242,7 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
-    writeOutCode AsmInitMemoriesFuncName
+    writeOutCode ("procedure " + AsmInitMemoriesFuncName)
     m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
     writeOutCode "ret"
 
