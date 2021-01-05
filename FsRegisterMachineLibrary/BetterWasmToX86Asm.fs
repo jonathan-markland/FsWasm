@@ -187,10 +187,8 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
 
 
-let WriteOutBranchToEntryLabel writeOut startFuncIdx moduleFuncsArray =
-
+let WriteOutBranchToEntryLabel writeOut (LabelName labelName) =
     writeOut (AsmEntryPointLabel + ":")
-    let (LabelName labelName) = FuncLabelFor startFuncIdx moduleFuncsArray
     writeOut (sprintf "jmp %s" labelName)
 
 
