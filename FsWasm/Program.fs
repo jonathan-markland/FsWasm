@@ -3,6 +3,7 @@ open System.IO
 open WasmSerialiser
 open WasmFileReader
 open BetterWasmToJonathansAsm
+open BetterWasmToX86Asm
 open BWToCRMConfigurationTypes
 open CompilationOutputting
 open WasmToBetterWasm
@@ -12,7 +13,7 @@ open WasmToBetterWasm
 [<EntryPoint>]
 let main argv =
 
-    let paramFileName = "program (2).wasm"  // TODO: pass on command line
+    let paramFileName = "program-5.wasm"  // TODO: pass on command line
 
     try
 
@@ -27,15 +28,12 @@ let main argv =
 
         let betterWasm = thisModule |> ToBetterWasm
 
-        let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, WasmStartEntryPointIfPresent)  // TODO: Hard-code config!!
+        let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, (ForceEntryPoint "main"))
 
         let headingText = (sprintf "%s (%d bytes) %s" fileName (fileImage.Length) fileDate)
 
-        let theProcess writeOutData writeOutCode writeOutVar =
-            betterWasm
-                |> WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar
-
-        theProcess |> OutputInFinalOrder  // or use OutputForDebug to see one-the-go emission ordering.
+        betterWasm
+            |> TranslateBetterWasmToX86AssemblerStdOut config headingText
 
     with
 

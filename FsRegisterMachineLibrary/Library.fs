@@ -45,6 +45,9 @@ let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption mo
         let labelName = FuncLabelFor func
         writeOutBranchToEntryLabel writeOut labelName
 
+    let takesParameters intFunc =
+        intFunc.FuncType.ParameterTypes.Length > 0
+
     match entryPointConfig with
     
         | WasmStartEntryPointIfPresent ->
@@ -58,14 +61,17 @@ let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption mo
                     | InternalFunction2 intFunc ->
                         match intFunc.Export with
                             | Some { ExportName=name } -> 
-                                if name = exportFunctionName then Some f else None
+                                if name = exportFunctionName then Some (f,intFunc) else None
                             | None ->
                                 None
                     | ImportedFunction2 _impFunc ->
                         None // TODO: Do we need to check if the name occurs here?  If we allow other modules, the other module should generate the entry link perhaps?
                 )
             match entryFunctionOpt with
-                | Some func -> useFunc func
+                | Some (func,intFunc) -> 
+                    if intFunc |> takesParameters then
+                        failwith (sprintf "Cannot use function '%s' as the entry point because it requires parameters." exportFunctionName)
+                    useFunc func
                 | None -> failwith (sprintf "Cannot find entry point function '%s'" exportFunctionName)
 
 

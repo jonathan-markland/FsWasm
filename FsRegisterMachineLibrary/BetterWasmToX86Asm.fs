@@ -21,6 +21,10 @@ let LabelCommand labelNameString =
 
 
 
+let CodeAlign = "align 16"
+
+
+
 let TranslateInstructionToAsmSequence thisFunc instruction =
 
     // TODO:  These translations can assume a 32-bit target for now.
@@ -82,7 +86,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | Drop(U32 numSlots)    -> [ sprintf "add ESP,%d" (numSlots * StackSlotSizeU) ]
         | Label(LabelName l)    -> [ LabelCommand l ]
         | Const(r,Const32(n))   -> [ sprintf "mov %s,%d" (regNameOf r) n ]
-        | Goto(LabelName l)     -> [ "jmp " + l ]
+        | Goto(LabelName l)     -> [ ("jmp " + l) ; CodeAlign ]
         | CallFunc(LabelName l) -> [ "call " + l ]
         | CallTableIndirect     -> translateCallTableIndirect ()
         | BranchAZ(LabelName l) -> [ "cmp EAX,0" ; "jz " + l ]
@@ -90,7 +94,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | GotoIndex(t,n,d,_)    -> translateGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
         | Push(r)               -> [ sprintf "push %s" (regNameOf r) ]
         | Pop(r)                -> [ sprintf "pop %s" (regNameOf r) ]
-        | PeekA                 -> [ "mov EAX,dword ptr [ESP]" ]
+        | PeekA                 -> [ "mov EAX,[ESP]" ]
         | Let(r1,r2)            -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
         | AddAN(I32(n))         -> [ sprintf "add EAX,%d" n ]
         | SubAN(I32(n))         -> [ sprintf "sub EAX,%d" n ]
@@ -126,9 +130,9 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | StoreConst8(r,ofs,I32(v))   -> translateREGU32I32 "mov byte ptr [" r ofs "]," v
         | StoreConst16(r,ofs,I32(v))  -> translateREGU32I32 "mov word ptr [" r ofs "]," v
         | StoreConst32(r,ofs,I32(v))  -> translateREGU32I32 "mov dword ptr [" r ofs "]," v  
-        | Store8A(r,ofs)       -> translateREGU32 "mov byte ptr [" r ofs "],EAX"  
-        | Store16A(r,ofs)      -> translateREGU32 "mov word ptr [" r ofs "],EAX"
-        | Store32A(r,ofs)      -> translateREGU32 "mov dword ptr [" r ofs "],EAX"  
+        | Store8A(r,ofs)       -> translateREGU32 "mov [" r ofs "],AL"  
+        | Store16A(r,ofs)      -> translateREGU32 "mov [" r ofs "],AX"
+        | Store32A(r,ofs)      -> translateREGU32 "mov [" r ofs "],EAX"  
         | Fetch8s(r,ofs)       -> translateREGU32 "movsx EAX, byte ptr [" r ofs "]" 
         | Fetch8u(r,ofs)       -> translateREGU32 "movzx EAX, byte ptr [" r ofs "]"  
         | Fetch16s(r,ofs)      -> translateREGU32 "movsx EAX, word ptr [" r ofs "]" 
@@ -158,6 +162,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         sprintf "%s%d:  ; %s%s" AsmInternalFuncNamePrefix funcIndex functionExportNameIfPresent (FunctionSignatureAsComment f.FuncType)
 
     let writeLabelAndPrologueCode f =
+        writeOutCode CodeAlign
         writeOutCode procedureCommand
         if f |> HasParametersOrLocals then
             writeOutCode "push EBP"
@@ -194,6 +199,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
 
 let WriteOutBranchToEntryLabel writeOut (LabelName labelName) =
+    writeOut CodeAlign
     writeOut (LabelCommand AsmEntryPointLabel)
     writeOut "pushad"
     writeOut (sprintf "call %s" AsmInitMemoriesFuncName)
@@ -259,6 +265,7 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
     writeOutVar (LabelCommand "TotalSize")
 
+    writeOutCode CodeAlign
     writeOutCode (LabelCommand AsmInitMemoriesFuncName)
     m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
     writeOutCode "ret"
@@ -278,3 +285,22 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
 
     let (TranslationConfiguration (_,_,entryPointConfig)) = config
     WithWasmStartDo WriteOutBranchToEntryLabel writeOutCode toComment m.Start m.Funcs entryPointConfig
+
+
+
+let TranslateBetterWasmToX86AssemblerStdOut config headingText (m:Module) =
+
+    let dataStringBuilder = new StringBuilder ()
+    let varStringBuilder  = new StringBuilder ()
+    let codeStringBuilder = new StringBuilder ()
+
+    let writeOutData s = dataStringBuilder.AppendLine(s) |> ignore
+    let writeOutVar  s = varStringBuilder.AppendLine(s)  |> ignore
+    let writeOutCode s = codeStringBuilder.AppendLine(s) |> ignore
+
+    WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode writeOutVar m
+
+    printf "%s" (dataStringBuilder.ToString())
+    printf "%s" (codeStringBuilder.ToString())
+    printf "%s" (varStringBuilder.ToString())
+
