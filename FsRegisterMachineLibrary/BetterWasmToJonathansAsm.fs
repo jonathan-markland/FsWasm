@@ -8,6 +8,7 @@ open AsmPrefixes
 open WasmInstructionsToCRMInstructions
 open Library
 open TextFormatting
+open BWToCRMConfigurationTypes
 
 
 
@@ -252,4 +253,5 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
                 (sprintf "WASM Import: %s.%s" m n) |> toComment |> writeOutCode 
         )
 
-    WithWasmStartDo WriteOutBranchToEntryLabel writeOutCode toComment m.Start
+    let (TranslationConfiguration (_,_,entryPointConfig)) = config
+    WithWasmStartDo WriteOutBranchToEntryLabel writeOutCode toComment m.Start m.Funcs entryPointConfig

@@ -39,13 +39,36 @@ let ForEachLineOfHexDumpDo (command:string) (byteSeparator:string) (hexPrefix:st
 
 
 
-let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption =
-    match startOption with 
-        | Some func -> 
-            let labelName = FuncLabelFor func
-            writeOutBranchToEntryLabel writeOut labelName
-        | None -> 
-            "No WASM entry point (start record) in this translation" |> toComment |> writeOut
+let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption moduleFuncsArray entryPointConfig =
+
+    let useFunc func =
+        let labelName = FuncLabelFor func
+        writeOutBranchToEntryLabel writeOut labelName
+
+    match entryPointConfig with
+    
+        | WasmStartEntryPointIfPresent ->
+            match startOption with 
+                | Some func -> useFunc func
+                | None -> "No WASM entry point (start record) in this translation" |> toComment |> writeOut
+
+        | ForceEntryPoint exportFunctionName ->
+            let entryFunctionOpt = moduleFuncsArray |> Array.tryPick (fun f ->
+                match f with
+                    | InternalFunction2 intFunc ->
+                        match intFunc.Export with
+                            | Some { ExportName=name } -> 
+                                if name = exportFunctionName then Some f else None
+                            | None ->
+                                None
+                    | ImportedFunction2 _impFunc ->
+                        None // TODO: Do we need to check if the name occurs here?  If we allow other modules, the other module should generate the entry link perhaps?
+                )
+            match entryFunctionOpt with
+                | Some func -> useFunc func
+                | None -> failwith (sprintf "Cannot find entry point function '%s'" exportFunctionName)
+
+
 
 
 
@@ -65,13 +88,13 @@ let TranslateInstructionsAndApplyOptimisations
 
     let optimisationPhase1 = 
         match outputConfig with
-            | TranslationConfiguration(_,FullyOptimised) -> crmInstructions |> Optimise
-            | TranslationConfiguration(_,NoOptimisation) -> crmInstructions
+            | TranslationConfiguration(_,FullyOptimised,_) -> crmInstructions |> Optimise
+            | TranslationConfiguration(_,NoOptimisation,_) -> crmInstructions
 
     let optimisationPhase2 =
         match outputConfig with
-            | TranslationConfiguration(WithBarriers,_)    -> optimisationPhase1
-            | TranslationConfiguration(WithoutBarriers,_) -> optimisationPhase1 |> RemoveBarriers
+            | TranslationConfiguration(WithBarriers,_,_)    -> optimisationPhase1
+            | TranslationConfiguration(WithoutBarriers,_,_) -> optimisationPhase1 |> RemoveBarriers
 
     let optimisedCrmInstructions = optimisationPhase2
 

@@ -63,8 +63,8 @@ let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationC
 
     let config =
         match optimisationCase with
-            | Optimised   -> TranslationConfiguration (WithoutBarriers, FullyOptimised)
-            | Unoptimised -> TranslationConfiguration (WithBarriers,    NoOptimisation)
+            | Optimised   -> TranslationConfiguration (WithoutBarriers, FullyOptimised, WasmStartEntryPointIfPresent)
+            | Unoptimised -> TranslationConfiguration (WithBarriers,    NoOptimisation, WasmStartEntryPointIfPresent)
 
     let inputFile = (sprintf "program-%d.wasm" n)
     

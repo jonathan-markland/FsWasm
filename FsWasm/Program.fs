@@ -7,7 +7,7 @@ open BWToCRMConfigurationTypes
 open CompilationOutputting
 open WasmToBetterWasm
 
-// Main
+// Main  -- TODO: This is just a spike main program, essentially.
 
 [<EntryPoint>]
 let main argv =
@@ -27,7 +27,7 @@ let main argv =
 
         let betterWasm = thisModule |> ToBetterWasm
 
-        let config = TranslationConfiguration(WithoutBarriers, FullyOptimised)  // TODO: Hard-code config!!
+        let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, WasmStartEntryPointIfPresent)  // TODO: Hard-code config!!
 
         let headingText = (sprintf "%s (%d bytes) %s" fileName (fileImage.Length) fileDate)
 
