@@ -190,9 +190,11 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
 
 
-let WriteOutBranchToEntryLabel writeOut (LabelName labelName) =
+let WriteOutBranchToEntryLabel mems writeOut (LabelName labelName) =
     writeOut ("procedure " + AsmEntryPointLabel)
-    writeOut (sprintf "call %s" AsmInitMemoriesFuncName)
+    if mems |> HasAnyInitDataBlocks then
+        writeOut (sprintf "call %s" AsmInitMemoriesFuncName)
+    WriteThunkIn writeOut TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
     writeOut (sprintf "goto %s" labelName)
 
 
@@ -228,9 +230,6 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         writeOutCode (sprintf "    let C=%d" byteArrayLength)
         writeOutCode          "    cld rep movsb"
 
-    let writeOutIns s = 
-        writeOutCode ("    " + s)
-
     let writeOutWasmGlobal globalIdxNameString initValue =
         // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
         writeOutData (sprintf "data %s int %d" globalIdxNameString initValue)
@@ -242,9 +241,10 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
 
-    writeOutCode ("procedure " + AsmInitMemoriesFuncName)
-    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
-    writeOutCode "ret"
+    if m.Mems |> HasAnyInitDataBlocks then
+        writeOutCode ("procedure " + AsmInitMemoriesFuncName)
+        m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode
+        writeOutCode "ret"
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
 
@@ -260,4 +260,4 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         )
 
     let (TranslationConfiguration (_,_,entryPointConfig)) = config
-    WithWasmStartDo WriteOutBranchToEntryLabel writeOutCode toComment m.Start m.Funcs entryPointConfig
+    WithWasmStartDo (WriteOutBranchToEntryLabel m.Mems) writeOutCode toComment m.Start m.Funcs entryPointConfig

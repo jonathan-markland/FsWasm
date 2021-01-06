@@ -13,6 +13,19 @@ open WasmInstructionsToCRMInstructions
 
 
 
+/// Returns true if any WASM memory object within the array has
+/// any InitData blocks.
+let HasAnyInitDataBlocks mems =
+    
+    let memHasInitData mem =
+        match mem with
+            | InternalMemory2 intMem -> intMem.InitData.Length > 0
+            | ImportedMemory2 _ -> false
+
+    mems |> Array.exists memHasInitData
+
+
+
 let ForEachLineOfHexDumpDo (command:string) (byteSeparator:string) (hexPrefix:string) writeLine (byteArray:byte[]) =
 
     let sb = new StringBuilder(16 * (2 + byteSeparator.Length + hexPrefix.Length) + command.Length)
@@ -232,7 +245,7 @@ let ForAllWasmMemsDo action mems =
 
 /// Generate the initialisation function that arranges the statically-initialised
 /// data blocks in the memory space.
-let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns thisFunc translate (mems:Memory[]) =
+let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode (mems:Memory[]) =
 
     let writeOutDataCopyCommand i (thisMem:InternalMemoryRecord) =
         if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
@@ -243,6 +256,12 @@ let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns thisFun
             )
 
     mems |> ForAllWasmMemsDo writeOutDataCopyCommand
+
+
+
+/// Output the "thunk in" sequence to load the base register with the address
+/// of the WASM memory data block.
+let WriteThunkIn writeOutIns thisFunc translate =  // TODO: unfortunate amount of parameters.
     (translate thisFunc ThunkIn) |> List.iter writeOutIns
 
 

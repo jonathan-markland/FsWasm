@@ -121,7 +121,7 @@ let ``Program 2 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 
 [<Fact>] 
 let ``Program 3 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 3 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 4 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 4 Optimised WasmStartEntryPointIfPresent)
+let ``Program 4 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 4 Optimised (ForceEntryPoint "main"))
 [<Fact>] 
 let ``Program 5 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 5 Optimised (ForceEntryPoint "main"))
 [<Fact>] 
@@ -140,7 +140,7 @@ let ``Program 2 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 
 [<Fact>] 
 let ``Program 3 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 3 Optimised WasmStartEntryPointIfPresent)
 [<Fact>] 
-let ``Program 4 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 4 Optimised WasmStartEntryPointIfPresent)
+let ``Program 4 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 4 Optimised (ForceEntryPoint "main"))
 [<Fact>] 
 let ``Program 5 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 5 Optimised (ForceEntryPoint "main"))
 [<Fact>] 

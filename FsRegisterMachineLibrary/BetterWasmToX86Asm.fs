@@ -162,6 +162,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         sprintf "%s%d:  ; %s%s" AsmInternalFuncNamePrefix funcIndex functionExportNameIfPresent (FunctionSignatureAsComment f.FuncType)
 
     let writeLabelAndPrologueCode f =
+        writeOutCode ""
         writeOutCode CodeAlign
         writeOutCode procedureCommand
         if f |> HasParametersOrLocals then
@@ -198,13 +199,16 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
 
 
-let WriteOutBranchToEntryLabel writeOut (LabelName labelName) =
+let WriteOutBranchToEntryLabel mems writeOut (LabelName labelName) =
     writeOut CodeAlign
     writeOut (LabelCommand AsmEntryPointLabel)
-    writeOut "pushad"
-    writeOut (sprintf "call %s" AsmInitMemoriesFuncName)
+    writeOut "pushad"// TODO: In lieu of finding out about the caller's convention.
+    if mems |> HasAnyInitDataBlocks then
+        writeOut (sprintf "call %s" AsmInitMemoriesFuncName)
+    WriteThunkIn writeOut TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
+    writeOut (sprintf "call %s" labelName)
     writeOut "popad"
-    writeOut (sprintf "jmp %s" labelName)
+    writeOut "ret"
 
 
 
@@ -239,9 +243,6 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
         writeOutCode          "    cld"
         writeOutCode          "    rep movsb"
 
-    let writeOutIns s = 
-        writeOutCode ("    " + s)
-
     let writeOutWasmGlobal globalIdxNameString initValue =
         writeOutData (LabelCommand globalIdxNameString)
         writeOutData (sprintf "dd %d" initValue)
@@ -265,10 +266,11 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
     writeOutVar (LabelCommand "TotalSize")
 
-    writeOutCode CodeAlign
-    writeOutCode (LabelCommand AsmInitMemoriesFuncName)
-    m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode writeOutIns TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
-    writeOutCode "ret"
+    if m.Mems |> HasAnyInitDataBlocks then
+        writeOutCode CodeAlign
+        writeOutCode (LabelCommand AsmInitMemoriesFuncName)
+        m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode
+        writeOutCode "ret"
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
 
@@ -284,11 +286,14 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
         )
 
     let (TranslationConfiguration (_,_,entryPointConfig)) = config
-    WithWasmStartDo WriteOutBranchToEntryLabel writeOutCode toComment m.Start m.Funcs entryPointConfig
+    WithWasmStartDo (WriteOutBranchToEntryLabel m.Mems) writeOutCode toComment m.Start m.Funcs entryPointConfig
 
 
 
 let TranslateBetterWasmToX86AssemblerStdOut config headingText (m:Module) =
+
+    // TODO: I didn't really like having this front-end on, but it is
+    //       better to have this in the translation module than outside.
 
     let dataStringBuilder = new StringBuilder ()
     let varStringBuilder  = new StringBuilder ()

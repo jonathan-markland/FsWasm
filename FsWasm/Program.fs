@@ -4,6 +4,7 @@ open WasmSerialiser
 open WasmFileReader
 open BetterWasmToJonathansAsm
 open BetterWasmToX86Asm
+open BetterWasmToArm32Asm
 open BWToCRMConfigurationTypes
 open CompilationOutputting
 open WasmToBetterWasm
@@ -28,12 +29,14 @@ let main argv =
 
         let betterWasm = thisModule |> ToBetterWasm
 
-        let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, (ForceEntryPoint "main"))
+        // let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, (ForceEntryPoint "main"))
+        let config = TranslationConfiguration(WithBarriers, NoOptimisation, (ForceEntryPoint "main"))
 
         let headingText = (sprintf "%s (%d bytes) %s" fileName (fileImage.Length) fileDate)
 
         betterWasm
-            |> TranslateBetterWasmToX86AssemblerStdOut config headingText
+            // |> TranslateBetterWasmToX86AssemblerStdOut config headingText
+            |> TranslateBetterWasmToArm32AssemblerStdOut config headingText
 
     with
 

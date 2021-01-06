@@ -28,8 +28,10 @@ type EntryPointConfig =
     | ForceEntryPoint of exportName:string
 
     /// Use the WASM Start record as the entry point (if present).
+    /// TODO: This does NOT generate the initialisation pathway that ForceEntryPoint does,
+    /// because this case needs design consideration.
     | WasmStartEntryPointIfPresent
-
+    
 
 type WriteOutFunctionConfig =  // TODO: better name
     TranslationConfiguration of BarrierConfig * OptimisationConfig * EntryPointConfig
