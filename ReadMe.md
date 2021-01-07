@@ -35,6 +35,10 @@ myself:
   X86/32 assembly language code, as well as assembly code for
   a custom assembler I wrote myself (not included here).
 
+- Rudimentary hosting environments written in C++ that support
+  loading and executing the binary file that resulted from 
+  assembling the above output.
+
 Points:  
 
 - FsWasm is the main program (other than the test framework)
