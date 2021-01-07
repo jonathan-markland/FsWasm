@@ -39,7 +39,11 @@ myself:
   loading and executing the binary file that resulted from 
   assembling the above output.
 
-Points:  
+Points:
+
+- I used Wasm Fiddle website to generate the WASM binaries
+  that I use.  The test framework does NOT execute gcc->WASM
+  because this could be volatile and invalidate the tests.
 
 - FsWasm is the main program (other than the test framework)
   and is likely to be volatile.  At the time of writing, this
@@ -51,6 +55,13 @@ Points:
   so that when you build Debug, it will push the image file
   over SSH to the Raspberry PI.
   
+- The binary is a FIXED executable slab with origin at 1GB.
+  This should be free (in spite of ASLR!) on Windows and Linux.
+  It usually is(!)
+  
+- The WASM linear memory is adjacent to the code and static
+  data, you'll find it in the Memory View window.
+  
 - Use the Disassembly window to step into the entry point
   of the binary image in the 1GB memory region.  At the time
   of writing this does NOT correctly disassemble ARM MOVW/MOVT
@@ -60,10 +71,24 @@ Points:
   does (at the time of writing) have BAD bugs where it gives
   up showing everything there because of adjacent absent 
   memory pages.  This is VERY VERY BAD Microsoft!
+
+- The C code calls the entry point which is in a "thunk"
+  region that just preserves all the registers for C++-land
+  around the WASM session.
+  
+- R9 (ARM) and EDI (X86) are used to point to the base of the
+  WASM Linear Memory.
  
+- The user designates a WASM function as the entry point in
+  the translation configuration.  A WASM "start" point may
+  actually not exist in the executable anyway.
+
+- No runtime range checks on WASM load/store addresses are
+  done yet.
+  
 - No WASM verification is done.  I am choosing that this is
   out of scope.
-  
+
 - Translation is not supported for more than a single .wasm
   module at present.  I could throw several into a bucket and
   statically link them as a future subproject.  Support for 
