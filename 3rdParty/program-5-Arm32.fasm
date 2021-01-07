@@ -1,0 +1,126 @@
+; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsWasm\bin\Debug\netcoreapp2.0\program-5.wasm (266 bytes) 26/01/2019 18:34:43
+format binary
+org 0x40000000
+db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
+db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit
+dd 0x40000000         ; Origin address for this fixed executable.
+dd TotalSize          ; Total size needed for this fixed flat image
+dd wasm_entry         ; Entry point address
+; Data for WASM mem wasm_mem_init_data0
+
+wasm_fn0:  ; (loc0: int, loc1: int, loc2: int, loc3: int, loc4: int)
+push {R11}
+mov R11,R13
+sub R13,R13,#16 ; sub
+    ldr R1,[R11, #+12]
+    mov R0,#1  ; mov 1 LSL 0
+    cmp R1,R0
+    mov R0,#0
+    movlt R0,#1
+    cmp R0,#0
+    bne wasm_l2
+    ldr R0,[R11, #+16]
+    add R0,R0,#1 ; add
+    str R0,[R11, #-4]
+    ldr R1,[R11, #+8]
+    mov R0,#1  ; mov 1 LSL 0
+    mov R2,R0
+    lsl R1,R1,R2
+    mov R0,R1
+    str R0,[R11, #-8]
+    wasm_l3:
+    ldr R1,[R11, #+16]
+    mov R0,#1  ; mov 1 LSL 0
+    cmp R1,R0
+    mov R0,#0
+    movlt R0,#1
+    cmp R0,#0
+    bne wasm_l4
+    ldr R0,[R11, #-4]
+    str R0,[R11, #-12]
+    ldr R0,[R11, #+20]
+    str R0,[R11, #+8]
+    wasm_l5:
+    ldr R1,[R11, #+8]
+    ldr R0,[R11, #+4]
+    add R1,R1,R9
+    strh R0,[R1]
+    ldr R0,[R11, #+8]
+    add R0,R0,#2 ; add
+    str R0,[R11, #+8]
+    ldr R0,[R11, #-12]
+    add R0,R0,#4294967295 ; Expecting add's negative-partner
+    push {R0}
+    str R0,[R11, #-12]
+    mov R0,#1  ; mov 1 LSL 0
+    pop {R1}
+    cmp R1,R0
+    mov R0,#0
+    movgt R0,#1
+    cmp R0,#0
+    bne wasm_l5
+    wasm_l4:
+    ldr R1,[R11, #+20]
+    ldr R0,[R11, #-8]
+    add R0,R0,R1
+    str R0,[R11, #+20]
+    ldr R1,[R11, #+12]
+    mov R0,#1  ; mov 1 LSL 0
+    cmp R1,R0
+    mov R0,#0
+    movgt R0,#1
+    str R0,[R11, #+8]
+    ldr R0,[R11, #+12]
+    add R0,R0,#4294967295 ; Expecting add's negative-partner
+    str R0,[R11, #+12]
+    ldr R0,[R11, #+8]
+    cmp R0,#0
+    bne wasm_l3
+    wasm_l2:
+    wasm_l1:
+mov R13,R11
+pop {R11}
+bx lr
+
+wasm_fn1:  ; : int
+push {R14}
+    mov R0,#16  ; mov 16 LSL 0
+    push {R0}
+    mov R0,#80  ; mov 80 LSL 0
+    push {R0}
+    mov R0,#25  ; mov 25 LSL 0
+    push {R0}
+    mov R0,#80  ; mov 80 LSL 0
+    push {R0}
+    movw R0,8001
+    push {R0}
+    bl wasm_fn0
+    add R13,R13,#20
+    mov R0,#516  ; mov 129 LSL 2
+    push {R0}
+    mov R0,#40  ; mov 40 LSL 0
+    push {R0}
+    mov R0,#5  ; mov 5 LSL 0
+    push {R0}
+    mov R0,#80  ; mov 80 LSL 0
+    push {R0}
+    movw R0,20290
+    push {R0}
+    bl wasm_fn0
+    add R13,R13,#20
+    mov R0,#0  ; mov 0 LSL 0
+    push {R0}
+    wasm_l6:
+    pop {R0}
+pop {R14}
+bx lr
+wasm_entry:
+push {r0-r12,r14}
+movw R9,(wasm_mem0 and 0xFFFF)
+movt R9,(wasm_mem0 shr 16)
+bl wasm_fn1
+pop {r0-r12,r14}
+bx lr
+align 4
+wasm_mem0: rb 65536 ; WASM linear memory reservation
+TotalSize:

@@ -259,3 +259,7 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# 3rd Party assembler folders.
+3rdParty/FASMARM_win32/
+3rdParty/fasmw17325/

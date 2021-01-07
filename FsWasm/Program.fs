@@ -29,8 +29,8 @@ let main argv =
 
         let betterWasm = thisModule |> ToBetterWasm
 
-        // let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, (ForceEntryPoint "main"))
-        let config = TranslationConfiguration(WithBarriers, NoOptimisation, (ForceEntryPoint "main"))
+        let config = TranslationConfiguration(WithoutBarriers, FullyOptimised, (ForceEntryPoint "main"))
+        // let config = TranslationConfiguration(WithBarriers, NoOptimisation, (ForceEntryPoint "main"))
 
         let headingText = (sprintf "%s (%d bytes) %s" fileName (fileImage.Length) fileDate)
 

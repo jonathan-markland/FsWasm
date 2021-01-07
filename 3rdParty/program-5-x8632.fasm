@@ -1,0 +1,129 @@
+; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsWasm\bin\Debug\netcoreapp2.0\program-5.wasm (266 bytes) 26/01/2019 18:34:43
+format binary
+use32
+org 0x40000000
+db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
+db 'I','A','3','2'    ; Indicates this is for X86/32
+dq 0x40000000         ; Origin address for this fixed executable.
+dq TotalSize          ; Total size needed for this fixed flat image
+dq wasm_entry         ; Entry point address
+; Data for WASM mem wasm_mem_init_data0
+align 16
+wasm_mem_init_all_wasm_memories:
+    mov EDI,wasm_mem0
+ret
+align 16
+wasm_fn0:  ; export UncheckedPaintRectangle(loc0: int, loc1: int, loc2: int, loc3: int, loc4: int)
+push EBP
+mov EBP,ESP
+sub ESP,16  ; loc5:int, loc6:int, loc7:int, loc8:int
+    mov EBX,[EBP+16]  ; @loc2
+    mov EAX,1
+    cmp EBX,EAX
+    setl AL
+    movzx EAX,AL
+    cmp EAX,0
+    jnz wasm_l2
+    mov EAX,[EBP+20]  ; @loc1
+    add EAX,1
+    mov [EBP-4],EAX  ; @loc5
+    mov EBX,[EBP+12]  ; @loc3
+    mov EAX,1
+    mov ECX,EAX
+    shl EBX,CL
+    mov EAX,EBX
+    mov [EBP-8],EAX  ; @loc6
+    wasm_l3:
+    mov EBX,[EBP+20]  ; @loc1
+    mov EAX,1
+    cmp EBX,EAX
+    setl AL
+    movzx EAX,AL
+    cmp EAX,0
+    jnz wasm_l4
+    mov EAX,[EBP-4]  ; @loc5
+    mov [EBP-12],EAX  ; @loc7
+    mov EAX,[EBP+24]  ; @loc0
+    mov [EBP+12],EAX  ; @loc3
+    wasm_l5:
+    mov EBX,[EBP+12]  ; @loc3
+    mov EAX,[EBP+8]  ; @loc4
+    add EBX,EDI
+    mov [EBX],AX
+    mov EAX,[EBP+12]  ; @loc3
+    add EAX,2
+    mov [EBP+12],EAX  ; @loc3
+    mov EAX,[EBP-12]  ; @loc7
+    add EAX,-1
+    push EAX
+    mov [EBP-12],EAX  ; @loc7
+    mov EAX,1
+    pop EBX
+    cmp EBX,EAX
+    setg AL
+    movzx EAX,AL
+    cmp EAX,0
+    jnz wasm_l5
+    wasm_l4:
+    mov EBX,[EBP+24]  ; @loc0
+    mov EAX,[EBP-8]  ; @loc6
+    add EAX,EBX
+    mov [EBP+24],EAX  ; @loc0
+    mov EBX,[EBP+16]  ; @loc2
+    mov EAX,1
+    cmp EBX,EAX
+    setg AL
+    movzx EAX,AL
+    mov [EBP+12],EAX  ; @loc3
+    mov EAX,[EBP+16]  ; @loc2
+    add EAX,-1
+    mov [EBP+16],EAX  ; @loc2
+    mov EAX,[EBP+12]  ; @loc3
+    cmp EAX,0
+    jnz wasm_l3
+    wasm_l2:
+    wasm_l1:
+mov ESP,EBP
+pop EBP
+ret
+align 16
+wasm_fn1:  ; export main: int
+    mov EAX,16
+    push EAX
+    mov EAX,80
+    push EAX
+    mov EAX,25
+    push EAX
+    mov EAX,80
+    push EAX
+    mov EAX,8001
+    push EAX
+    call wasm_fn0
+    add ESP,20
+    mov EAX,516
+    push EAX
+    mov EAX,40
+    push EAX
+    mov EAX,5
+    push EAX
+    mov EAX,80
+    push EAX
+    mov EAX,20290
+    push EAX
+    call wasm_fn0
+    add ESP,20
+    mov EAX,0
+    push EAX
+    wasm_l6:
+    pop EAX
+ret
+align 16
+wasm_entry:
+pushad
+call wasm_mem_init_all_wasm_memories
+call wasm_fn1
+popad
+ret
+align 4
+wasm_mem0: rb 65536 ; WASM linear memory reservation
+TotalSize:
