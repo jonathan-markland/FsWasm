@@ -258,9 +258,9 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex)
         ForEachLineOfHexDumpDo "byte" "," "0x" writeIns byteArray
 
-    let writeOutWasmGlobal globalIdxNameString initValue =
+    let wasmGlobal globalIdxNameString initValue =
         // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
-        writeOutData (sprintf "data %s int %d" globalIdxNameString initValue)
+        [ sprintf "data %s int %d" globalIdxNameString initValue ]
 
     // --- Start ---
 
@@ -268,7 +268,12 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     writeOutData ""
 
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo writeOutData wasmTableHeading wasmTableRow)
-    m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
+    
+    m.Globals 
+        |> MapAllWasmGlobals wasmGlobal
+        |> List.concat
+        |> List.iter writeOutData
+
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
 
     m.Mems 

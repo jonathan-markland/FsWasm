@@ -231,16 +231,19 @@ let ForAllWasmTablesDo action tables =
 
 /// Do the action for all WASM globals, raising exception if an 
 /// imported global is seen, since these are not yet supported.
-let ForAllWasmGlobalsDo action globals =
+let MapAllWasmGlobals mapFunc globals =
 
-    globals |> Array.iteri (fun globalIndex g ->
+    globals 
+        |> Array.toList
+        |> List.mapi (fun globalIndex g ->
         match g with
             | InternalGlobal2 glo -> 
                 let initValue = StaticEvaluate glo.InitExpr
                 let globalIdx = GlobalIdx(U32(uint32 globalIndex))   // TODO: not ideal construction of temporary
                 let globalIdxNameString = (GlobalIdxNameString globalIdx)
-                action globalIdxNameString initValue
-            | ImportedGlobal2 glo -> failwith "Error:  Cannot support importing a WASM 'global'.  WASM module must be self-contained."
+                mapFunc globalIdxNameString initValue
+            | ImportedGlobal2 _ -> 
+                failwith "Error:  Cannot support importing a WASM 'global'.  WASM module must be self-contained."
         )
 
 

@@ -334,9 +334,11 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
         writeOutData (sprintf "%s%d_%d:" AsmMemoryNamePrefix memIndex dataBlockIndex)
         ForEachLineOfHexDumpDo "db" "," "0x" writeIns byteArray
 
-    let writeOutWasmGlobal globalIdxNameString initValue =
-        writeOutData (LabelCommand globalIdxNameString)
-        writeOutData (sprintf "dw %d" initValue)
+    let wasmGlobal globalIdxNameString initValue =
+        [
+            LabelCommand globalIdxNameString
+            sprintf "dw %d" initValue
+        ]
 
     // --- Start ---
 
@@ -346,7 +348,12 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
         |> List.iter writeOutData
 
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo writeOutData wasmTableHeading wasmTableRow)
-    m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
+    
+    m.Globals 
+        |> MapAllWasmGlobals wasmGlobal
+        |> List.concat
+        |> List.iter writeOutData
+
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
     
     LabelCommand "TotalSize"
