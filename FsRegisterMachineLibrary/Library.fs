@@ -52,11 +52,11 @@ let ForEachLineOfHexDumpDo (command:string) (byteSeparator:string) (hexPrefix:st
 
 
 
-let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption moduleFuncsArray entryPointConfig =
+let WasmStartCode (writeOutBranchToEntryLabel:LABELNAME -> string list) toComment startOption moduleFuncsArray entryPointConfig : string list =
 
     let useFunc func =
         let labelName = FuncLabelFor func
-        writeOutBranchToEntryLabel writeOut labelName
+        writeOutBranchToEntryLabel labelName
 
     let takesParameters intFunc =
         intFunc.FuncType.ParameterTypes.Length > 0
@@ -66,7 +66,7 @@ let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption mo
         | WasmStartEntryPointIfPresent ->
             match startOption with 
                 | Some func -> useFunc func
-                | None -> "No WASM entry point (start record) in this translation" |> toComment |> writeOut
+                | None -> [ "No WASM entry point (start record) in this translation" |> toComment ]
 
         | ForceEntryPoint exportFunctionName ->
             let entryFunctionOpt = moduleFuncsArray |> Array.tryPick (fun f ->
@@ -275,8 +275,8 @@ let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode (mems:Memory[]) =
 
 /// Output the "thunk in" sequence to load the base register with the address
 /// of the WASM memory data block.
-let WriteThunkIn writeOutIns thisFunc translate =  // TODO: unfortunate amount of parameters.
-    (translate thisFunc ThunkIn) |> List.iter writeOutIns
+let WriteThunkIn thisFunc translate : string list =  // TODO: unfortunate amount of parameters.  Is this really worth it?
+    translate thisFunc ThunkIn
 
 
 

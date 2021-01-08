@@ -202,12 +202,11 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
 
 
-let WriteOutBranchToEntryLabel mems writeOut (LabelName labelName) =
-    writeOut ("procedure " + AsmEntryPointLabel)
-    if mems |> HasAnyInitDataBlocks then
-        writeOut (sprintf "call %s" AsmInitMemoriesFuncName)
-    WriteThunkIn writeOut TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
-    writeOut (sprintf "goto %s" labelName)
+let branchToEntryLabel mems (LabelName labelName) =
+    ["procedure " + AsmEntryPointLabel]
+    @ if mems |> HasAnyInitDataBlocks then [sprintf "call %s" AsmInitMemoriesFuncName] else []
+    @ WriteThunkIn TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
+    @ [sprintf "goto %s" labelName]
 
 
 
@@ -276,4 +275,6 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         )
 
     let (TranslationConfiguration (_,_,entryPointConfig)) = config
-    WithWasmStartDo (WriteOutBranchToEntryLabel m.Mems) writeOutCode toComment m.Start m.Funcs entryPointConfig
+    
+    WasmStartCode (branchToEntryLabel m.Mems) toComment m.Start m.Funcs entryPointConfig
+        |> List.iter writeOutCode
