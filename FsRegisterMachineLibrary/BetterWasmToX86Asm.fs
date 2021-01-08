@@ -186,18 +186,22 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         writeOutCode ("    " + instructionText)
 
     let branchTableStart tableLabel =
-        writeOutTables (sprintf "align %d" StackSlotSizeU)
-        writeOutTables (LabelCommand tableLabel)
+        [
+            sprintf "align %d" StackSlotSizeU
+            LabelCommand tableLabel
+        ]
 
     let branchTableItem targetLabel =
-        writeOutTables (sprintf "    dd %s" targetLabel)
+        sprintf "    dd %s" targetLabel
 
     try
         labelAndPrologueCode f |> List.iter writeOutCode
         crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f
         epilogueCode f |> List.iter writeOutCode
         writeOutCode "ret"
-        crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
+        crmInstructions 
+            |> BranchTablesList branchTableStart branchTableItem
+            |> List.iter writeOutTables
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
 

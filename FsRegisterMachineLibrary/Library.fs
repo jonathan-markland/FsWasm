@@ -140,18 +140,23 @@ let ForTranslatedCrmInstructionsDo action translate thisFunc crmInstructions =
 
 
 /// Iterate all of the branch tables in the given function's instructions.
-let ForAllBranchTablesDo branchTableStart branchTableItem crmInstructions =
+let BranchTablesList branchTableStart branchTableItem crmInstructions : string list =
 
-    crmInstructions |> List.iter (fun instruction ->
+    crmInstructions |> List.map (fun instruction ->
 
         match instruction with
             
             | GotoIndex(LabelName tableLabel,_,_,codePointLabels) ->
-                branchTableStart tableLabel
-                codePointLabels |> Array.iter (fun (LabelName targetLabel) -> branchTableItem targetLabel)
+                let labels = 
+                    codePointLabels 
+                        |> Array.toList
+                        |> List.map (fun (LabelName targetLabel) -> branchTableItem targetLabel)
+                (branchTableStart tableLabel) @ labels
 
-            | _ -> ()
+            | _ -> []
         )
+
+        |> List.concat
 
 
 
