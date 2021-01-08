@@ -210,6 +210,25 @@ let branchToEntryLabel mems (LabelName labelName) =
 
 
 
+let JonathansAsmDataInitialisation mems =
+
+    let copyBlockCode i j ofsValue byteArrayLength =
+        [
+            sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue
+            sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j
+            sprintf "    let C=%d" byteArrayLength
+            "    cld rep movsb"
+        ]
+
+    if mems |> HasAnyInitDataBlocks then
+        [ "procedure " + AsmInitMemoriesFuncName ]
+        @ (mems |> DataInitialisationFunctionUsing copyBlockCode)
+        @ [ "ret" ]
+    else
+        []
+
+
+
 let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
@@ -239,14 +258,6 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex)
         ForEachLineOfHexDumpDo "byte" "," "0x" writeIns byteArray
 
-    let copyBlockCode i j ofsValue byteArrayLength =
-        [
-            sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue
-            sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j
-            sprintf "    let C=%d" byteArrayLength
-            "    cld rep movsb"
-        ]
-
     let writeOutWasmGlobal globalIdxNameString initValue =
         // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
         writeOutData (sprintf "data %s int %d" globalIdxNameString initValue)
@@ -260,12 +271,9 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
 
-    if m.Mems |> HasAnyInitDataBlocks then
-        writeOutCode ("procedure " + AsmInitMemoriesFuncName)
-        m.Mems
-            |> DataInitialisationFunctionUsing copyBlockCode
-            |> List.iter writeOutCode
-        writeOutCode "ret"
+    m.Mems 
+        |> JonathansAsmDataInitialisation 
+        |> List.iter writeOutCode
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
 

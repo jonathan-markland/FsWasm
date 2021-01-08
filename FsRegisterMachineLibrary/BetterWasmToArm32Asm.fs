@@ -273,6 +273,39 @@ let FilePrologue =
 
 
 
+let ArmDataInitialisation mems =
+
+    let armCopyBlockCode i j ofsValue (byteArrayLength:int) =
+        [
+            sprintf "    ldr R0,%s%d_%d" AsmMemoryNamePrefix i j
+            sprintf "    ldr R1,(%s%d+%d)" AsmMemPrefix i ofsValue
+        ]
+        @ LoadConstantInto "R2" (uint32 byteArrayLength)
+        @
+        [
+            sprintf "    bl %s" AsmArmBlockCopyLabel
+        ]
+
+    if mems |> HasAnyInitDataBlocks then
+        [
+            CodeAlign
+            LabelCommand AsmArmBlockCopyLabel
+            "    ldrb R3,[R0], #1"
+            "    strb R3,[R1], #1"
+            "    subs R2, R2, #1"
+            "    bne " + AsmArmBlockCopyLabel
+            "    bx lr"
+            CodeAlign
+            LabelCommand AsmInitMemoriesFuncName
+        ]
+        @ (mems |> DataInitialisationFunctionUsing armCopyBlockCode)
+        @ ["bx lr"]
+    else
+        []
+
+
+
+
 let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
@@ -301,17 +334,6 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
         writeOutData (sprintf "%s%d_%d:" AsmMemoryNamePrefix memIndex dataBlockIndex)
         ForEachLineOfHexDumpDo "db" "," "0x" writeIns byteArray
 
-    let armCopyBlockCode i j ofsValue (byteArrayLength:int) =
-        [
-            sprintf "    ldr R0,%s%d_%d" AsmMemoryNamePrefix i j
-            sprintf "    ldr R1,(%s%d+%d)" AsmMemPrefix i ofsValue
-        ]
-        @ LoadConstantInto "R2" (uint32 byteArrayLength)
-        @
-        [
-            sprintf "    bl %s" AsmArmBlockCopyLabel
-        ]
-
     let writeOutWasmGlobal globalIdxNameString initValue =
         writeOutData (LabelCommand globalIdxNameString)
         writeOutData (sprintf "dw %d" initValue)
@@ -326,22 +348,13 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo writeOutData wasmTableHeading wasmTableRow)
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
-    writeOutVar (LabelCommand "TotalSize")
+    
+    LabelCommand "TotalSize"
+        |> writeOutVar
 
-    if m.Mems |> HasAnyInitDataBlocks then
-        writeOutCode CodeAlign
-        writeOutCode (LabelCommand AsmArmBlockCopyLabel)
-        writeOutCode  "    ldrb R3,[R0], #1"
-        writeOutCode  "    strb R3,[R1], #1"
-        writeOutCode  "    subs R2, R2, #1"
-        writeOutCode ("    bne " + AsmArmBlockCopyLabel)
-        writeOutCode  "    bx lr"
-        writeOutCode CodeAlign
-        writeOutCode (LabelCommand AsmInitMemoriesFuncName)
-        m.Mems 
-            |> DataInitialisationFunctionUsing armCopyBlockCode 
-            |> List.iter writeOutCode
-        writeOutCode "bx lr"
+    m.Mems 
+        |> ArmDataInitialisation 
+        |> List.iter writeOutCode
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
 
