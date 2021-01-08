@@ -114,6 +114,12 @@ let TranslateInstructionsAndApplyOptimisations
     let crmInstructions, updatedTranslationState = 
         TranslateInstructions moduleFuncsArray translationState wasmToCrmTranslationConfig f.Body
 
+    let crmInstructions = 
+        match f.FuncType |> ReturnsSingleValue with
+            | true  -> 
+                crmInstructions @ [Pop A]
+            | false -> crmInstructions
+
     let optimisationPhase1 = 
         match outputConfig with
             | TranslationConfiguration(_,FullyOptimised,_) -> crmInstructions |> Optimise
@@ -132,22 +138,10 @@ let TranslateInstructionsAndApplyOptimisations
 
 /// Iterate through all of the translated versions of the function's instructions.
 let MapTranslatedCrmInstructions translate thisFunc crmInstructions : string list =
+    crmInstructions 
+        |> List.map (fun crmInstruction -> translate thisFunc crmInstruction)
+        |> List.concat
 
-    // Kick off the whole thing here:
-
-    let bodyCode =
-        crmInstructions 
-            |> List.map (fun crmInstruction -> translate thisFunc crmInstruction)
-            |> List.concat
-
-    // Handle the function's return (may need pop into A):
-
-    let returnHandlingCode = 
-        match thisFunc.FuncType |> ReturnsSingleValue with
-            | true  -> translate thisFunc (Pop A)  // TODO: not ideal construction of temporary
-            | false -> []
-
-    bodyCode @ returnHandlingCode
 
 
 

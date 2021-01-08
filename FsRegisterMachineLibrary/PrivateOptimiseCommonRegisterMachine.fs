@@ -41,6 +41,7 @@ let IsPopB    i = match i with | Pop(B)        -> true | _ -> false
 let IsBarrier i = match i with | Barrier       -> true | _ -> false
 let IsDropOne i = match i with | Drop (U32 1u) -> true | _ -> false
 
+let IsLabelDeclaration i = match i with | Label _ -> true | _ -> false
 
 let IsRegisterPreserving = function
     | StoreLoc(_)
@@ -71,6 +72,8 @@ let WherePushBarrierDrop i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a
 let WherePushBarrierPeek i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPeekA   a.[i+2]
 let WhereBarrier         i (a:CRMInstruction32[]) = IsBarrier a.[i]
 
+// TODO: Can we not just use cons-lists matching?
+
 let WherePushPopAroundPreserving i (a:CRMInstruction32[]) = 
 
     //    push A
@@ -82,6 +85,26 @@ let WherePushPopAroundPreserving i (a:CRMInstruction32[]) =
     && IsRegisterPreserving a.[i+1] 
     && IsBarrier a.[i+2] 
     && IsPopA a.[i+3]
+
+let WherePushPopAroundRegisterBarrierAndLabel i (a:CRMInstruction32[]) =
+
+    //     push A
+    //     // ~~~ register barrier ~~~
+    //     label wasm_l1
+    //     pop A
+
+    let found = 
+        IsPushA a.[i]
+        && IsBarrier a.[i+1]
+        && IsLabelDeclaration a.[i+2]
+        && IsPopA a.[i+3]
+
+    if found then
+        printf "dsfgsdfg"
+    else
+        ()
+
+    found
 
 let WherePushPopAroundPreservingRequiringRename i (a:CRMInstruction32[]) = 
 

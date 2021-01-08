@@ -1,0 +1,6 @@
+Exception: Cannot translate this instruction to simple 32-bit machine: F64Store
+  ({ Align = U32 3u
+     Offset = U32 264u }, I32Const (I32 0),
+   F64Add
+     (F64Add (GetLocal (LocalIdx (U32 1u)), F64Const (F64 123.456)),
+      F64Mul (GetLocal (LocalIdx (U32 1u)), F64Const (F64 -0.5))))

@@ -1,0 +1,46 @@
+DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-2.wasm (156 bytes) 26/01/2019 18:06:48
+DATA> format binary
+DATA> org 0x40000000
+DATA> db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
+DATA> db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit
+DATA> dd 0x40000000         ; Origin address for this fixed executable.
+DATA> dd TotalSize          ; Total size needed for this fixed flat image
+DATA> dd wasm_entry         ; Entry point address
+VAR > align 4
+VAR > wasm_mem0: rb 65536 ; WASM linear memory reservation
+VAR > TotalSize:
+CODE> 
+CODE> wasm_fn0:  ; (loc0: int): int
+CODE> push {R11}
+CODE> mov R11,R13
+CODE>     ldr R0,[R11, #+4]
+CODE>     add R0,R0,R9
+CODE>     movw R8,22136
+CODE>     movt R8,4660
+CODE>     str R8,[R0]
+CODE>     ; ~~~ register barrier ~~~
+CODE>     movw R10,52445
+CODE>     movt R10,43707
+CODE>     ldr R0,[R9, R10]
+CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
+CODE>     wasm_l1:
+CODE>     pop {R0}
+CODE> pop {R11}
+CODE> bx lr
+CODE> 
+CODE> wasm_fn1:  ; : int
+CODE> push {R14}
+CODE>     movw R0,26197
+CODE>     movt R0,34935
+CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
+CODE>     bl wasm_fn0
+CODE>     add R13,R13,#4
+CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
+CODE>     wasm_l2:
+CODE>     pop {R0}
+CODE> pop {R14}
+CODE> bx lr
+CODE> ; No WASM entry point (start record) in this translation
