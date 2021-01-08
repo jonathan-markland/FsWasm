@@ -15,6 +15,7 @@ CODE> align 16
 CODE> wasm_fn0:  ; export main: int
 CODE>     mov EAX,42
 CODE>     push EAX
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l1:
 CODE>     pop EAX
 CODE> ret

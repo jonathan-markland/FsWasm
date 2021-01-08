@@ -21,16 +21,20 @@ CODE>     mov R0,#0
 CODE>     movlt R0,#1
 CODE>     cmp R0,#0
 CODE>     bne wasm_l2
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #+16]
 CODE>     add R0,R0,#1 ; add
 CODE>     str R0,[R11, #-4]
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     mov R2,R0
 CODE>     lsl R1,R1,R2
 CODE>     mov R0,R1
 CODE>     str R0,[R11, #-8]
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l3:
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+16]
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     cmp R1,R0
@@ -38,22 +42,29 @@ CODE>     mov R0,#0
 CODE>     movlt R0,#1
 CODE>     cmp R0,#0
 CODE>     bne wasm_l4
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #-4]
 CODE>     str R0,[R11, #-12]
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #+20]
 CODE>     str R0,[R11, #+8]
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l5:
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
 CODE>     ldr R0,[R11, #+4]
 CODE>     add R1,R1,R9
 CODE>     strh R0,[R1]
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #+8]
 CODE>     add R0,R0,#2 ; add
 CODE>     str R0,[R11, #+8]
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #-12]
 CODE>     add R0,R0,#4294967295 ; Expecting add's negative-partner
 CODE>     push {R0}
 CODE>     str R0,[R11, #-12]
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     pop {R1}
 CODE>     cmp R1,R0
@@ -61,24 +72,31 @@ CODE>     mov R0,#0
 CODE>     movgt R0,#1
 CODE>     cmp R0,#0
 CODE>     bne wasm_l5
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l4:
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+20]
 CODE>     ldr R0,[R11, #-8]
 CODE>     add R0,R0,R1
 CODE>     str R0,[R11, #+20]
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+12]
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     cmp R1,R0
 CODE>     mov R0,#0
 CODE>     movgt R0,#1
 CODE>     str R0,[R11, #+8]
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #+12]
 CODE>     add R0,R0,#4294967295 ; Expecting add's negative-partner
 CODE>     str R0,[R11, #+12]
+CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #+8]
 CODE>     cmp R0,#0
 CODE>     bne wasm_l3
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l2:
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l1:
 CODE> mov R13,R11
 CODE> bx lr
@@ -87,30 +105,43 @@ CODE> wasm_fn1:  ; : int
 CODE> push {R14}
 CODE>     mov R0,#16  ; mov 16 LSL 0
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#80  ; mov 80 LSL 0
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#25  ; mov 25 LSL 0
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#80  ; mov 80 LSL 0
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     movw R0,8001
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     bl wasm_fn0
 CODE>     add R13,R13,#20
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#516  ; mov 129 LSL 2
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#40  ; mov 40 LSL 0
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#5  ; mov 5 LSL 0
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#80  ; mov 80 LSL 0
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     movw R0,20290
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     bl wasm_fn0
 CODE>     add R13,R13,#20
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#0  ; mov 0 LSL 0
 CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l6:
 CODE>     pop {R0}
 CODE> pop {R14}

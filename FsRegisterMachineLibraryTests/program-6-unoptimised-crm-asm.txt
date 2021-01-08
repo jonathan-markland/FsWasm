@@ -1,4 +1,4 @@
-﻿Exception: Cannot translate this instruction to simple 32-bit machine: F64Store
+Exception: Cannot translate this instruction to simple 32-bit machine: F64Store
   ({ Align = U32 3u
      Offset = U32 264u }, I32Const (I32 0),
    F64Add

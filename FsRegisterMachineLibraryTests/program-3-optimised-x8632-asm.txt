@@ -40,21 +40,28 @@ CODE>     mov EAX,[EDI+4]
 CODE>     sub EAX,16
 CODE>     mov [EBP-4],EAX  ; @loc0
 CODE>     mov [EDI+4],EAX
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc0
 CODE>     add EAX,EDI
 CODE>     mov dword ptr [EAX],32
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,16
 CODE>     push EAX
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc0
 CODE>     push EAX
+CODE>     ; ~~~ register barrier ~~~
 CODE>     call wasm_fnenv_printf
 CODE>     mov EDI,wasm_mem0
 CODE>     add ESP,8
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc0
 CODE>     add EAX,16
 CODE>     mov [EDI+4],EAX
+CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,100
 CODE>     push EAX
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l1:
 CODE>     pop EAX
 CODE> mov ESP,EBP

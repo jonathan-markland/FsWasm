@@ -1,4 +1,4 @@
-﻿DATA> // Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-5.wasm (266 bytes) 26/01/2019 18:34:43
+DATA> // Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-5.wasm (266 bytes) 26/01/2019 18:34:43
 DATA> 
 VAR > global
 VAR >     align ptr
@@ -12,82 +12,113 @@ CODE>     let B=int[@loc2]
 CODE>     let A=1
 CODE>     cmp B,A:set < A
 CODE>     cmp A,0:if nz goto wasm_l2
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc1]
 CODE>     add A,1
 CODE>     let int[@loc5]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let B=int[@loc3]
 CODE>     let A=1
 CODE>     let C=A
 CODE>     shl B,C
 CODE>     let A=B
 CODE>     let int[@loc6]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l3
+CODE>     // ~~~ register barrier ~~~
 CODE>     let B=int[@loc1]
 CODE>     let A=1
 CODE>     cmp B,A:set < A
 CODE>     cmp A,0:if nz goto wasm_l4
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc5]
 CODE>     let int[@loc7]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc0]
 CODE>     let int[@loc3]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l5
+CODE>     // ~~~ register barrier ~~~
 CODE>     let B=int[@loc3]
 CODE>     let A=int[@loc4]
 CODE>     add B,Y
 CODE>     let ushort[B]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc3]
 CODE>     add A,2
 CODE>     let int[@loc3]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc7]
 CODE>     add A,-1
 CODE>     push A
 CODE>     let int[@loc7]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=1
 CODE>     pop B
 CODE>     cmp B,A:set > A
 CODE>     cmp A,0:if nz goto wasm_l5
+CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l4
+CODE>     // ~~~ register barrier ~~~
 CODE>     let B=int[@loc0]
 CODE>     let A=int[@loc6]
 CODE>     add A,B
 CODE>     let int[@loc0]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let B=int[@loc2]
 CODE>     let A=1
 CODE>     cmp B,A:set > A
 CODE>     let int[@loc3]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc2]
 CODE>     add A,-1
 CODE>     let int[@loc2]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc3]
 CODE>     cmp A,0:if nz goto wasm_l3
+CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l2
+CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l1
 CODE> endproc
 CODE> procedure wasm_fn1  // : int
 CODE>     let A=16
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=80
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=25
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=80
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=8001
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     call wasm_fn0
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=516
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=40
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=5
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=80
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=20290
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     call wasm_fn0
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=0
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l6
 CODE>     pop A
 CODE> ret

@@ -1,4 +1,4 @@
-﻿DATA> // Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-3.wasm (214 bytes) 26/01/2019 18:16:47
+DATA> // Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-3.wasm (214 bytes) 26/01/2019 18:16:47
 DATA> 
 VAR > global
 VAR >     align ptr
@@ -27,20 +27,27 @@ CODE>     let A=uint[Y+4]
 CODE>     sub A,16
 CODE>     let int[@loc0]=A
 CODE>     let uint[Y+4]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc0]
 CODE>     add A,Y
 CODE>     let uint[A]=32
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=16
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc0]
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     call wasm_fnenv_printf
 CODE>     let Y=wasm_mem0
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc0]
 CODE>     add A,16
 CODE>     let uint[Y+4]=A
+CODE>     // ~~~ register barrier ~~~
 CODE>     let A=100
 CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l1
 CODE>     pop A
 CODE> endproc
