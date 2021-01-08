@@ -3,10 +3,6 @@ DATA>
 VAR > global
 VAR >     align ptr
 VAR >     wasm_mem0: 65536
-DATA> // Data for WASM mem wasm_mem_init_data0
-CODE> procedure wasm_mem_init_all_wasm_memories
-CODE>     let Y=wasm_mem0
-CODE> ret
 CODE> procedure wasm_fn0(@loc0)  // (loc0: int): int
 CODE>     let A=int[@loc0]
 CODE>     add A,Y

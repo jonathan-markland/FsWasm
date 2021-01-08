@@ -178,7 +178,7 @@ let ForWasmTableDo wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
 
 
 /// Do actions with WASM memory and any initialisation data blocks.
-let WithWasmMemDo wasmMemHeading wasmMemRow memIndex (thisMem:InternalMemoryRecord) =
+let WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow memIndex (thisMem:InternalMemoryRecord) =
 
     let WasmMemoryBlockMultiplier = 65536u
 
@@ -198,8 +198,11 @@ let WithWasmMemDo wasmMemHeading wasmMemRow memIndex (thisMem:InternalMemoryReco
                 | { LimitMin = _ ; LimitMax = Some _ }
                     -> failwith "Cannot translate module with Mem that has max size limit"
 
-    wasmMemHeading memIndex linearMemorySize
-    thisMem.InitData |> Array.iteri (fun dataBlockIndex (_, byteArray) -> wasmMemRow memIndex dataBlockIndex byteArray)
+    wasmMemVar memIndex linearMemorySize
+
+    if thisMem.InitData.Length > 0 then
+        wasmMemDataHeading memIndex
+        thisMem.InitData |> Array.iteri (fun dataBlockIndex (_, byteArray) -> wasmMemRow memIndex dataBlockIndex byteArray)
 
 
 

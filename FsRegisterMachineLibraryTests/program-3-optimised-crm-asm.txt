@@ -18,7 +18,6 @@ CODE>     let Y=wasm_mem0+32
 CODE>     let X=wasm_mem_init_data0_1
 CODE>     let C=29
 CODE>     cld rep movsb
-CODE>     let Y=wasm_mem0
 CODE> ret
 CODE> // WASM Import: env.printf
 CODE> procedure wasm_fn1  // : int

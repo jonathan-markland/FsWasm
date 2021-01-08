@@ -226,10 +226,12 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
     let wasmTableRow nameString =
         writeOutData (sprintf "    dd %s" nameString)
 
-    let wasmMemHeading memIndex linearMemorySize =
+    let wasmMemVar memIndex linearMemorySize =
         writeOutVar (sprintf "align %d" StackSlotSizeU)
         writeOutVar (sprintf "%s%d: rb %d ; WASM linear memory reservation" AsmMemPrefix memIndex linearMemorySize)
-        writeOutData (sprintf "; Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex) // TODO: If there is none, omit this.
+
+    let wasmMemDataHeading memIndex =
+        writeOutData (sprintf "; Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex)
 
     let wasmMemRow memIndex dataBlockIndex byteArray =
         let writeIns s = writeOutData ("    " + s)
@@ -263,7 +265,7 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
 
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo wasmTableHeading wasmTableRow)
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
-    m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
+    m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
     writeOutVar (LabelCommand "TotalSize")
 
     if m.Mems |> HasAnyInitDataBlocks then

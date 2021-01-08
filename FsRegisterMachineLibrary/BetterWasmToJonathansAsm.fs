@@ -213,11 +213,13 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     let wasmTableRow nameString =
         writeOutData (sprintf "    ptr %s" nameString)
 
-    let wasmMemHeading memIndex linearMemorySize =
+    let wasmMemVar memIndex linearMemorySize =
         writeOutVar "global"
         writeOutVar "    align ptr"
         writeOutVar (sprintf "    %s%d: %d" AsmMemPrefix memIndex linearMemorySize)
-        writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex) // TODO: If there is none, omit this.
+
+    let wasmMemDataHeading memIndex =
+        writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex)
 
     let wasmMemRow memIndex dataBlockIndex byteArray =
         let writeIns s = writeOutData ("    " + s)
@@ -239,7 +241,7 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
 
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo wasmTableHeading wasmTableRow)
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
-    m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
+    m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
 
     if m.Mems |> HasAnyInitDataBlocks then
         writeOutCode ("procedure " + AsmInitMemoriesFuncName)
