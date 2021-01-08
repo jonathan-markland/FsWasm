@@ -315,7 +315,10 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
     FilePrologue
         |> List.iter writeOutData
 
-    m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo writeOutData wasmTableHeading wasmTableRow)
+    m.Tables
+        |> MapAllWasmTables (MapWasmTable wasmTableHeading wasmTableRow)
+        |> List.concat
+        |> List.iter writeOutData
     
     m.Globals 
         |> MapAllWasmGlobals wasmGlobal

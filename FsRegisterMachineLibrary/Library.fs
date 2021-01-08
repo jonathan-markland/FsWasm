@@ -164,23 +164,29 @@ let BranchTablesList branchTableStart branchTableItem crmInstructions : string l
 
 
 /// Iterate wasm table heading and content.
-let ForWasmTableDo writeOutData wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
+let MapWasmTable wasmTableHeading wasmTableRow i (t:InternalTableRecord) : string list =
 
     match t.InitData.Length with
 
-        | 0 -> ()
+        | 0 -> []
 
         | 1 ->
-            wasmTableHeading i
-                |> List.iter writeOutData
+            let tableHeading : string list =
+                wasmTableHeading i
 
-            t.InitData 
-                |> Array.iter (fun elem ->
-                    let ofsExpr, funcIdxList = elem
-                    let ofsValue = StaticEvaluate ofsExpr
-                    if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
-                    funcIdxList |> Array.iter (fun funcIdx -> 
-                        writeOutData (wasmTableRow (FuncIdxNameString funcIdx))))
+            let tableBody : string list =
+                t.InitData 
+                    |> Array.toList
+                    |> List.map (fun elem ->
+                        let ofsExpr, funcIdxList = elem
+                        let ofsValue = StaticEvaluate ofsExpr
+                        if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
+                        funcIdxList 
+                            |> Array.toList
+                            |> List.map (fun funcIdx -> wasmTableRow (FuncIdxNameString funcIdx)))
+                    |> List.concat
+
+            tableHeading @ tableBody
 
         | _ -> failwith "Cannot translate module with more than one Elem in a TableSec table"
 
@@ -219,13 +225,15 @@ let WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow memIndex (thisMem:Int
 
 /// Do the action for all WASM tables, raising exception if an 
 /// imported table is seen, since these are not yet supported.
-let ForAllWasmTablesDo action tables =
+let MapAllWasmTables mapFunc tables =
 
-    tables |> Array.iteri (fun tableIndex t ->
-        match t with
-            | InternalTable2 tbl -> action tableIndex tbl
-            | ImportedTable2 tbl -> failwith "Error:  Cannot support importing a WASM 'table'.  WASM module must be self-contained."
-        )
+    tables 
+        |> Array.toList
+        |> List.mapi (fun tableIndex t ->
+            match t with
+                | InternalTable2 tbl -> mapFunc tableIndex tbl
+                | ImportedTable2 _   -> failwith "Error:  Cannot support importing a WASM 'table'.  WASM module must be self-contained."
+            )
 
 
 
