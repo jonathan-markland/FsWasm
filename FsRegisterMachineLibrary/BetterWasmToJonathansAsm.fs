@@ -144,7 +144,8 @@ let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
 
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
-    let wasmToCrmTranslationConfig = { ClearParametersAfterCall = false } 
+    let wasmToCrmTranslationConfig = 
+        { ClearParametersAfterCall = false } 
 
     let crmInstructions, updatedTranslationState = 
         TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config

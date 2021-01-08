@@ -148,7 +148,8 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
 
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
-    let wasmToCrmTranslationConfig = { ClearParametersAfterCall = true } 
+    let wasmToCrmTranslationConfig = 
+        { ClearParametersAfterCall = true } 
 
     let crmInstructions, updatedTranslationState = 
         TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
@@ -161,20 +162,25 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     let procedureCommand =
         sprintf "%s%d:  ; %s%s" AsmInternalFuncNamePrefix funcIndex functionExportNameIfPresent (FunctionSignatureAsComment f.FuncType)
 
-    let writeLabelAndPrologueCode f =
-        writeOutCode ""
-        writeOutCode CodeAlign
-        writeOutCode procedureCommand
+    let labelAndPrologueCode f =
+        ["" ; CodeAlign ; procedureCommand]
+        @
         if f |> HasParametersOrLocals then
-            writeOutCode "push EBP"
-            writeOutCode "mov EBP,ESP"
+            [ "push EBP" ;  "mov EBP,ESP" ]
+            @
             if f |> HasLocals then
-                writeOutCode (sprintf "sub ESP,%d  ; %s" ((f |> LocalsCount) * StackSlotSizeU) (f |> FunctionLocalsAsComment))
+                [sprintf "sub ESP,%d  ; %s" ((f |> LocalsCount) * StackSlotSizeU) (f |> FunctionLocalsAsComment)]
+            else
+                []
+        else
+            []
 
-    let writeEpilogueCode f =
+    let epilogueCode f =
         if f |> HasParametersOrLocals then
-            if f |> HasLocals then writeOutCode "mov ESP,EBP"
-            writeOutCode "pop EBP"
+            if f |> HasLocals then ["mov ESP,EBP"] else []
+            @ ["pop EBP"]
+        else
+            []
 
     let writeInstruction instructionText = 
         writeOutCode ("    " + instructionText)
@@ -187,9 +193,9 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         writeOutTables (sprintf "    dd %s" targetLabel)
 
     try
-        writeLabelAndPrologueCode f
+        labelAndPrologueCode f |> List.iter writeOutCode
         crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f
-        writeEpilogueCode f
+        epilogueCode f |> List.iter writeOutCode
         writeOutCode "ret"
         crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
     with

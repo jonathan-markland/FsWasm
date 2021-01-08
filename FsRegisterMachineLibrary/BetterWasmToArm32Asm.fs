@@ -169,34 +169,39 @@ let ValTypeTranslationOf = function
 
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
-    let wasmToCrmTranslationConfig = { ClearParametersAfterCall = true } 
+    let wasmToCrmTranslationConfig = 
+        { ClearParametersAfterCall = true } 
 
     let crmInstructions, updatedTranslationState = 
         TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
 
-    let thisFunctionCallsOut = crmInstructions |> CrmInstructionsListMakesCallsOut
+    let thisFunctionCallsOut = 
+        crmInstructions |> CrmInstructionsListMakesCallsOut
 
     let procedureCommand = 
         sprintf "%s%d:  ; %s" AsmInternalFuncNamePrefix funcIndex (FunctionSignatureAsComment f.FuncType)
 
-    let writeLabelAndPrologueCode f =
-        writeOutCode ""
-        writeOutCode procedureCommand
-        if thisFunctionCallsOut then
-            writeOutCode "push {R14}"
+    let labelAndPrologueCode f =
+        ["" ; procedureCommand]
+        @
+        if thisFunctionCallsOut then ["push {R14}"] else []
+        @
         if f |> HasParametersOrLocals then
-            writeOutCode "push {R11}"
-            writeOutCode "mov R11,R13"
+            ["push {R11}" ; "mov R11,R13"]
+            @
             if f |> HasLocals then
                 MathsWithConstant "sub" "R13" ((f |> LocalsCount) * StackSlotSizeU) armTempRegister    // TODO: show this as a comment?   (f |> FunctionLocalsAsComment))
-                    |> List.iter writeOutCode
+            else 
+                []
+        else
+            []
 
-    let writeEpilogueCode f =
+    let epilogueCode f =
         if f |> HasParametersOrLocals then
-            if f |> HasLocals then writeOutCode "mov R13,R11"
-            writeOutCode "pop {R11}"
-        if thisFunctionCallsOut then
-            writeOutCode "pop {R14}"
+            if f |> HasLocals then ["mov R13,R11"] else ["pop {R11}"]
+        else []
+        @
+        if thisFunctionCallsOut then ["pop {R14}"] else []
 
     let writeInstruction instructionText = 
         writeOutCode ("    " + instructionText)
@@ -212,9 +217,9 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         "bx lr"
 
     try
-        writeLabelAndPrologueCode f
+        labelAndPrologueCode f |> List.iter writeOutCode
         crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction (TranslateInstructionToAsmSequence thisFunctionCallsOut) f
-        writeEpilogueCode f
+        epilogueCode f |> List.iter writeOutCode
         writeOutCode (returnCommandFor f.FuncType f.Locals)
         crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
     with
