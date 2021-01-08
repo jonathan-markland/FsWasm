@@ -74,7 +74,7 @@ let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationC
     let expectationFile = (sprintf "program-%d-%s-%s-asm.txt" n fileSubType cpuKind)
     let expected = System.IO.File.ReadAllLines expectationFile  // TODO: More detail on failed comparison.
 
-    File.WriteAllText(expectationFile, actualFileImage) |> ignore // Can be used hackishly to update all the expectation files, in the execution folder.  You could then copy those over the source code folder and check in.
+    // Warning: Only uncomment when multi-updating test files:   File.WriteAllText(expectationFile, actualFileImage) |> ignore // Can be used hackishly to update all the expectation files, in the execution folder.  You could then copy those over the source code folder and check in.
 
     let b = (actual = expected)
     b
