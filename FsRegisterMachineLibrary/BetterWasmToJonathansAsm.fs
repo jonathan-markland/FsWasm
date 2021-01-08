@@ -181,10 +181,14 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
             | (_,_) -> "endproc"
 
     try
-        writeOutCode procedureCommand
+        procedureCommand
+            |> writeOutCode
         WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f
-        writeOutCode (returnCommandFor f.FuncType f.Locals)
+        crmInstructions 
+            |> TranslatedCrmInstructions TranslateInstructionToAsmSequence f
+            |> List.iter writeInstruction
+        returnCommandFor f.FuncType f.Locals
+            |> writeOutCode
         crmInstructions
             |> BranchTablesList branchTableStart branchTableItem
             |> List.iter writeOutTables

@@ -195,10 +195,15 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         sprintf "    dd %s" targetLabel
 
     try
-        labelAndPrologueCode f |> List.iter writeOutCode
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f
-        epilogueCode f |> List.iter writeOutCode
-        writeOutCode "ret"
+        labelAndPrologueCode f 
+            |> List.iter writeOutCode
+        crmInstructions 
+            |> TranslatedCrmInstructions TranslateInstructionToAsmSequence f
+            |> List.iter writeInstruction
+        epilogueCode f 
+            |> List.iter writeOutCode
+        "ret"
+            |> writeOutCode
         crmInstructions 
             |> BranchTablesList branchTableStart branchTableItem
             |> List.iter writeOutTables

@@ -219,10 +219,15 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         "bx lr"
 
     try
-        labelAndPrologueCode f |> List.iter writeOutCode
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction (TranslateInstructionToAsmSequence thisFunctionCallsOut) f
-        epilogueCode f |> List.iter writeOutCode
-        writeOutCode (returnCommandFor f.FuncType f.Locals)
+        labelAndPrologueCode f 
+            |> List.iter writeOutCode
+        crmInstructions 
+            |> TranslatedCrmInstructions (TranslateInstructionToAsmSequence thisFunctionCallsOut) f
+            |> List.iter writeInstruction
+        epilogueCode f 
+            |> List.iter writeOutCode
+        returnCommandFor f.FuncType f.Locals
+            |> writeOutCode
         crmInstructions 
             |> BranchTablesList branchTableStart branchTableItem
             |> List.iter writeOutTables

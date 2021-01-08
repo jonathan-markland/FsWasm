@@ -122,11 +122,14 @@ let TranslateInstructionsAndApplyOptimisations
 
 
 /// Iterate through all of the translated versions of the function's instructions.
-let ForTranslatedCrmInstructionsDo action translate thisFunc crmInstructions =
+let TranslatedCrmInstructions translate thisFunc crmInstructions : string list =
 
     // Kick off the whole thing here:
 
-    crmInstructions |> List.iter (fun crmInstruction -> translate thisFunc crmInstruction |> List.iter action)
+    let bodyCode =
+        crmInstructions 
+            |> List.map (fun crmInstruction -> translate thisFunc crmInstruction)
+            |> List.concat
 
     // Handle the function's return (may need pop into A):
 
@@ -135,7 +138,7 @@ let ForTranslatedCrmInstructionsDo action translate thisFunc crmInstructions =
             | true  -> translate thisFunc (Pop A)  // TODO: not ideal construction of temporary
             | false -> []
 
-    returnHandlingCode |> List.iter action
+    bodyCode @ returnHandlingCode
 
 
 
