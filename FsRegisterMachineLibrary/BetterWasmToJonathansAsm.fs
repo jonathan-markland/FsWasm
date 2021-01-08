@@ -249,6 +249,8 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
         writeOutData (sprintf "data %s int %d" globalIdxNameString initValue)
 
+    // --- Start ---
+
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 

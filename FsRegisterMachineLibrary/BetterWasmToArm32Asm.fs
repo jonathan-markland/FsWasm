@@ -259,6 +259,20 @@ let branchToEntryLabel mems (LabelName labelName) =
 
 
 
+let FilePrologue =
+    [
+        // TODO: temporary scaffold:
+        "format binary"
+        "org 0x40000000"
+        "db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)"
+        "db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit"
+        "dd 0x40000000         ; Origin address for this fixed executable."
+        "dd TotalSize          ; Total size needed for this fixed flat image"
+        "dd wasm_entry         ; Entry point address"  // TODO: If using WasmStartEntryPointIfPresent this will fail to resolve since the entry is optional.
+    ]
+
+
+
 let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
@@ -297,16 +311,12 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
         writeOutData (LabelCommand globalIdxNameString)
         writeOutData (sprintf "dw %d" initValue)
 
+    // --- Start ---
+
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
 
-    // TODO: temporary scaffold:
-    writeOutData "format binary"
-    writeOutData "org 0x40000000"
-    writeOutData "db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)"
-    writeOutData "db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit"
-    writeOutData "dd 0x40000000         ; Origin address for this fixed executable."
-    writeOutData "dd TotalSize          ; Total size needed for this fixed flat image"
-    writeOutData "dd wasm_entry         ; Entry point address"  // TODO: If using WasmStartEntryPointIfPresent this will fail to resolve since the entry is optional.
+    FilePrologue 
+        |> List.iter writeOutData
 
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo writeOutData wasmTableHeading wasmTableRow)
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal

@@ -233,6 +233,21 @@ let branchToEntryLabel mems (LabelName labelName) =
 
 
 
+let FilePrologue =
+    [
+        // TODO: temporary scaffold:
+        "format binary"
+        "use32"
+        "org 0x40000000"
+        "db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)"
+        "db 'I','A','3','2'    ; Indicates this is for X86/32"
+        "dq 0x40000000         ; Origin address for this fixed executable."
+        "dq TotalSize          ; Total size needed for this fixed flat image"
+        "dq wasm_entry         ; Entry point address"  // TODO: If using WasmStartEntryPointIfPresent this will fail to resolve since the entry is optional.
+    ]
+
+
+
 let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
@@ -276,15 +291,8 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
 
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
 
-    // TODO: temporary scaffold:
-    writeOutData "format binary"
-    writeOutData "use32"
-    writeOutData "org 0x40000000"
-    writeOutData "db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)"
-    writeOutData "db 'I','A','3','2'    ; Indicates this is for X86/32"
-    writeOutData "dq 0x40000000         ; Origin address for this fixed executable."
-    writeOutData "dq TotalSize          ; Total size needed for this fixed flat image"
-    writeOutData "dq wasm_entry         ; Entry point address"  // TODO: If using WasmStartEntryPointIfPresent this will fail to resolve since the entry is optional.
+    FilePrologue
+        |> List.iter writeOutData
 
     m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo writeOutData wasmTableHeading wasmTableRow)
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
