@@ -225,14 +225,14 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         labelAndPrologueCode f 
             |> List.iter writeOutCode
         crmInstructions 
-            |> TranslatedCrmInstructions (TranslateInstructionToAsmSequence thisFunctionCallsOut) f
+            |> MapTranslatedCrmInstructions (TranslateInstructionToAsmSequence thisFunctionCallsOut) f
             |> List.iter writeInstruction
         epilogueCode f 
             |> List.iter writeOutCode
         returnCommandFor f.FuncType f.Locals
             |> writeOutCode
         crmInstructions 
-            |> BranchTablesList branchTableStart branchTableItem
+            |> MapBranchTablesList branchTableStart branchTableItem
             |> List.iter writeOutTables
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
@@ -323,16 +323,17 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
         sprintf "    dw %s" nameString
 
     let wasmMemVar memIndex linearMemorySize =
-        writeOutVar (sprintf "align %d" StackSlotSizeU)
-        writeOutVar (sprintf "%s%d: rb %d ; WASM linear memory reservation" AsmMemPrefix memIndex linearMemorySize)
+        [
+            sprintf "align %d" StackSlotSizeU
+            sprintf "%s%d: rb %d ; WASM linear memory reservation" AsmMemPrefix memIndex linearMemorySize
+        ]
     
     let wasmMemDataHeading memIndex =
-        writeOutData (sprintf "; Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex)
+        [ sprintf "; Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex ]
 
     let wasmMemRow memIndex dataBlockIndex byteArray =
-        let writeIns s = writeOutData ("    " + s)
-        writeOutData (sprintf "%s%d_%d:" AsmMemoryNamePrefix memIndex dataBlockIndex)
-        ForEachLineOfHexDumpDo "db" "," "0x" writeIns byteArray
+        [ sprintf "%s%d_%d:" AsmMemoryNamePrefix memIndex dataBlockIndex ]
+        @ (HexDumpList "    db" "," "0x" byteArray)
 
     let wasmGlobal globalIdxNameString initValue =
         [
@@ -357,8 +358,16 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
         |> List.concat
         |> List.iter writeOutData
 
-    m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
-    
+    m.Mems    
+        |> MapAllWasmMems (MapWasmMem1 wasmMemVar)
+        |> List.concat
+        |> List.iter writeOutVar
+
+    m.Mems    
+        |> MapAllWasmMems (MapWasmMem2 wasmMemDataHeading wasmMemRow)
+        |> List.concat
+        |> List.iter writeOutData
+
     LabelCommand "TotalSize"
         |> writeOutVar
 

@@ -1,0 +1,21 @@
+DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-1.wasm (92 bytes) 26/01/2019 18:03:57
+DATA> format binary
+DATA> use32
+DATA> org 0x40000000
+DATA> db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
+DATA> db 'I','A','3','2'    ; Indicates this is for X86/32
+DATA> dq 0x40000000         ; Origin address for this fixed executable.
+DATA> dq TotalSize          ; Total size needed for this fixed flat image
+DATA> dq wasm_entry         ; Entry point address
+VAR > align 4
+VAR > wasm_mem0: rb 65536 ; WASM linear memory reservation
+VAR > TotalSize:
+CODE> 
+CODE> align 16
+CODE> wasm_fn0:  ; export main: int
+CODE>     mov EAX,42
+CODE>     push EAX
+CODE>     wasm_l1:
+CODE>     pop EAX
+CODE> ret
+CODE> ; No WASM entry point (start record) in this translation

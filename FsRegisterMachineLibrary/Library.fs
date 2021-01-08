@@ -13,6 +13,10 @@ open WasmInstructionsToCRMInstructions
 
 
 
+// TODO:  Array.toList  is used a lot, can we store lists primarily?
+
+
+
 /// Returns true if any WASM memory object within the array has
 /// any InitData blocks.
 let HasAnyInitDataBlocks mems =
@@ -26,7 +30,9 @@ let HasAnyInitDataBlocks mems =
 
 
 
-let ForEachLineOfHexDumpDo (command:string) (byteSeparator:string) (hexPrefix:string) writeLine (byteArray:byte[]) =
+let HexDumpList (command:string) (byteSeparator:string) (hexPrefix:string) (byteArray:byte[]) =
+
+    let mutable accumulator = []
 
     let sb = new StringBuilder(16 * (2 + byteSeparator.Length + hexPrefix.Length) + command.Length)
 
@@ -43,12 +49,15 @@ let ForEachLineOfHexDumpDo (command:string) (byteSeparator:string) (hexPrefix:st
 
         match c with
             | 15 -> 
-                writeLine (sb.ToString())
+                accumulator <- (sb.ToString())::accumulator
                 sb.Clear() |> ignore
             | _ -> ()
     )
 
-    if sb.Length > 0 then writeLine (sb.ToString())
+    if sb.Length > 0 then 
+        accumulator <- (sb.ToString())::accumulator
+
+    accumulator |> List.rev
 
 
 
@@ -122,7 +131,7 @@ let TranslateInstructionsAndApplyOptimisations
 
 
 /// Iterate through all of the translated versions of the function's instructions.
-let TranslatedCrmInstructions translate thisFunc crmInstructions : string list =
+let MapTranslatedCrmInstructions translate thisFunc crmInstructions : string list =
 
     // Kick off the whole thing here:
 
@@ -143,7 +152,7 @@ let TranslatedCrmInstructions translate thisFunc crmInstructions : string list =
 
 
 /// Iterate all of the branch tables in the given function's instructions.
-let BranchTablesList branchTableStart branchTableItem crmInstructions : string list =
+let MapBranchTablesList branchTableStart branchTableItem crmInstructions : string list =
 
     crmInstructions |> List.map (fun instruction ->
 
@@ -195,7 +204,7 @@ let MapWasmTable wasmTableHeading wasmTableRow i (t:InternalTableRecord) : strin
 
 
 /// Do actions with WASM memory and any initialisation data blocks.
-let WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow memIndex (thisMem:InternalMemoryRecord) =
+let MapWasmMem1 wasmMemVar memIndex (thisMem:InternalMemoryRecord) =  // TODO: rename
 
     let WasmMemoryBlockMultiplier = 65536u
 
@@ -217,9 +226,23 @@ let WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow memIndex (thisMem:Int
 
     wasmMemVar memIndex linearMemorySize
 
+
+
+/// Do actions with WASM memory and any initialisation data blocks.
+let MapWasmMem2 wasmMemDataHeading wasmMemRow memIndex (thisMem:InternalMemoryRecord) =  // TODO: rename
+
     if thisMem.InitData.Length > 0 then
-        wasmMemDataHeading memIndex
-        thisMem.InitData |> Array.iteri (fun dataBlockIndex (_, byteArray) -> wasmMemRow memIndex dataBlockIndex byteArray)
+        let heading =
+            wasmMemDataHeading memIndex
+        let content = 
+            thisMem.InitData 
+                |> Array.toList
+                |> List.mapi (fun dataBlockIndex (_, byteArray) -> 
+                    wasmMemRow memIndex dataBlockIndex byteArray)
+                |> List.concat
+        heading @ content
+    else
+        []
 
 
 
@@ -258,14 +281,6 @@ let MapAllWasmGlobals mapFunc globals =
 
 /// Do the action for all WASM memories, raising exception if an 
 /// imported memory is seen, since these are not yet supported.
-let ForAllWasmMemsDo action mems =
-
-    mems |> Array.iteri (fun memIndex me ->
-        match me with
-            | InternalMemory2 mem -> action memIndex mem
-            | ImportedMemory2 mem -> failwith "Error:  Cannot support importing a WASM 'memory'.  WASM module must be self-contained."
-        )
-
 let MapAllWasmMems mapFunc mems =
 
     mems 

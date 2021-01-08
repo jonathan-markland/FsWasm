@@ -188,12 +188,12 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         FunctionLocals f.FuncType f.Locals
             |> List.iter writeOutCode
         crmInstructions 
-            |> TranslatedCrmInstructions TranslateInstructionToAsmSequence f
+            |> MapTranslatedCrmInstructions TranslateInstructionToAsmSequence f
             |> List.iter writeInstruction
         returnCommandFor f.FuncType f.Locals
             |> writeOutCode
         crmInstructions
-            |> BranchTablesList branchTableStart branchTableItem
+            |> MapBranchTablesList branchTableStart branchTableItem
             |> List.iter writeOutTables
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
@@ -246,17 +246,18 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         sprintf "    ptr %s" nameString
 
     let wasmMemVar memIndex linearMemorySize =
-        writeOutVar "global"
-        writeOutVar "    align ptr"
-        writeOutVar (sprintf "    %s%d: %d" AsmMemPrefix memIndex linearMemorySize)
+        [
+            "global"
+            "    align ptr"
+            sprintf "    %s%d: %d" AsmMemPrefix memIndex linearMemorySize
+        ]
 
     let wasmMemDataHeading memIndex =
-        writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex)
+        [ sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex ]
 
-    let wasmMemRow memIndex dataBlockIndex byteArray =
-        let writeIns s = writeOutData ("    " + s)
-        writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex)
-        ForEachLineOfHexDumpDo "byte" "," "0x" writeIns byteArray
+    let wasmMemRow memIndex dataBlockIndex (byteArray:byte[]) : string list =
+        [ sprintf "data %s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex ]
+        @ (HexDumpList "    byte" "," "0x" byteArray)
 
     let wasmGlobal globalIdxNameString initValue =
         // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
@@ -277,7 +278,15 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         |> List.concat
         |> List.iter writeOutData
 
-    m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
+    m.Mems    
+        |> MapAllWasmMems (MapWasmMem1 wasmMemVar)
+        |> List.concat
+        |> List.iter writeOutVar
+
+    m.Mems    
+        |> MapAllWasmMems (MapWasmMem2 wasmMemDataHeading wasmMemRow)
+        |> List.concat
+        |> List.iter writeOutData
 
     m.Mems 
         |> JonathansAsmDataInitialisation 
