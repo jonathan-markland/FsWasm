@@ -1,0 +1,124 @@
+DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-5.wasm (266 bytes) 26/01/2019 18:34:43
+DATA> format binary
+DATA> org 0x40000000
+DATA> db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
+DATA> db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit
+DATA> dd 0x40000000         ; Origin address for this fixed executable.
+DATA> dd TotalSize          ; Total size needed for this fixed flat image
+DATA> dd wasm_entry         ; Entry point address
+VAR > align 4
+VAR > wasm_mem0: rb 65536 ; WASM linear memory reservation
+VAR > TotalSize:
+CODE> 
+CODE> wasm_fn0:  ; (loc0: int, loc1: int, loc2: int, loc3: int, loc4: int)
+CODE> push {R11}
+CODE> mov R11,R13
+CODE> sub R13,R13,#16 ; sub
+CODE>     ldr R1,[R11, #+12]
+CODE>     mov R0,#1  ; mov 1 LSL 0
+CODE>     cmp R1,R0
+CODE>     mov R0,#0
+CODE>     movlt R0,#1
+CODE>     cmp R0,#0
+CODE>     bne wasm_l2
+CODE>     ldr R0,[R11, #+16]
+CODE>     add R0,R0,#1 ; add
+CODE>     str R0,[R11, #-4]
+CODE>     ldr R1,[R11, #+8]
+CODE>     mov R0,#1  ; mov 1 LSL 0
+CODE>     mov R2,R0
+CODE>     lsl R1,R1,R2
+CODE>     mov R0,R1
+CODE>     str R0,[R11, #-8]
+CODE>     wasm_l3:
+CODE>     ldr R1,[R11, #+16]
+CODE>     mov R0,#1  ; mov 1 LSL 0
+CODE>     cmp R1,R0
+CODE>     mov R0,#0
+CODE>     movlt R0,#1
+CODE>     cmp R0,#0
+CODE>     bne wasm_l4
+CODE>     ldr R0,[R11, #-4]
+CODE>     str R0,[R11, #-12]
+CODE>     ldr R0,[R11, #+20]
+CODE>     str R0,[R11, #+8]
+CODE>     wasm_l5:
+CODE>     ldr R1,[R11, #+8]
+CODE>     ldr R0,[R11, #+4]
+CODE>     add R1,R1,R9
+CODE>     strh R0,[R1]
+CODE>     ldr R0,[R11, #+8]
+CODE>     add R0,R0,#2 ; add
+CODE>     str R0,[R11, #+8]
+CODE>     ldr R0,[R11, #-12]
+CODE>     add R0,R0,#4294967295 ; Expecting add's negative-partner
+CODE>     push {R0}
+CODE>     str R0,[R11, #-12]
+CODE>     mov R0,#1  ; mov 1 LSL 0
+CODE>     pop {R1}
+CODE>     cmp R1,R0
+CODE>     mov R0,#0
+CODE>     movgt R0,#1
+CODE>     cmp R0,#0
+CODE>     bne wasm_l5
+CODE>     wasm_l4:
+CODE>     ldr R1,[R11, #+20]
+CODE>     ldr R0,[R11, #-8]
+CODE>     add R0,R0,R1
+CODE>     str R0,[R11, #+20]
+CODE>     ldr R1,[R11, #+12]
+CODE>     mov R0,#1  ; mov 1 LSL 0
+CODE>     cmp R1,R0
+CODE>     mov R0,#0
+CODE>     movgt R0,#1
+CODE>     str R0,[R11, #+8]
+CODE>     ldr R0,[R11, #+12]
+CODE>     add R0,R0,#4294967295 ; Expecting add's negative-partner
+CODE>     str R0,[R11, #+12]
+CODE>     ldr R0,[R11, #+8]
+CODE>     cmp R0,#0
+CODE>     bne wasm_l3
+CODE>     wasm_l2:
+CODE>     wasm_l1:
+CODE> mov R13,R11
+CODE> bx lr
+CODE> 
+CODE> wasm_fn1:  ; : int
+CODE> push {R14}
+CODE>     mov R0,#16  ; mov 16 LSL 0
+CODE>     push {R0}
+CODE>     mov R0,#80  ; mov 80 LSL 0
+CODE>     push {R0}
+CODE>     mov R0,#25  ; mov 25 LSL 0
+CODE>     push {R0}
+CODE>     mov R0,#80  ; mov 80 LSL 0
+CODE>     push {R0}
+CODE>     movw R0,8001
+CODE>     push {R0}
+CODE>     bl wasm_fn0
+CODE>     add R13,R13,#20
+CODE>     mov R0,#516  ; mov 129 LSL 2
+CODE>     push {R0}
+CODE>     mov R0,#40  ; mov 40 LSL 0
+CODE>     push {R0}
+CODE>     mov R0,#5  ; mov 5 LSL 0
+CODE>     push {R0}
+CODE>     mov R0,#80  ; mov 80 LSL 0
+CODE>     push {R0}
+CODE>     movw R0,20290
+CODE>     push {R0}
+CODE>     bl wasm_fn0
+CODE>     add R13,R13,#20
+CODE>     mov R0,#0  ; mov 0 LSL 0
+CODE>     push {R0}
+CODE>     wasm_l6:
+CODE>     pop {R0}
+CODE> pop {R14}
+CODE> bx lr
+CODE> wasm_entry:
+CODE> push {r0-r12,r14}
+CODE> movw R9,(wasm_mem0 and 0xFFFF)
+CODE> movt R9,(wasm_mem0 shr 16)
+CODE> bl wasm_fn1
+CODE> pop {r0-r12,r14}
+CODE> bx lr

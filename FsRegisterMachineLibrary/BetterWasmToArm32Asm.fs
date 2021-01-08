@@ -155,7 +155,10 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
             // The translated code requires the Y register to
             // point to the base of the linear memory region.
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
-            [ sprintf "mov R9,%s%d" AsmMemPrefix 0 ]
+            [ 
+                sprintf "movw R9,(%s%d and 0xFFFF)"  AsmMemPrefix 0 
+                sprintf "movt R9,(%s%d shr 16)"      AsmMemPrefix 0 
+            ]
 
 
 

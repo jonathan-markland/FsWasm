@@ -1,0 +1,126 @@
+DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-5.wasm (266 bytes) 26/01/2019 18:34:43
+DATA> format binary
+DATA> use32
+DATA> org 0x40000000
+DATA> db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
+DATA> db 'I','A','3','2'    ; Indicates this is for X86/32
+DATA> dq 0x40000000         ; Origin address for this fixed executable.
+DATA> dq TotalSize          ; Total size needed for this fixed flat image
+DATA> dq wasm_entry         ; Entry point address
+VAR > align 4
+VAR > wasm_mem0: rb 65536 ; WASM linear memory reservation
+VAR > TotalSize:
+CODE> 
+CODE> align 16
+CODE> wasm_fn0:  ; export UncheckedPaintRectangle(loc0: int, loc1: int, loc2: int, loc3: int, loc4: int)
+CODE> push EBP
+CODE> mov EBP,ESP
+CODE> sub ESP,16  ; loc5:int, loc6:int, loc7:int, loc8:int
+CODE>     mov EBX,[EBP+16]  ; @loc2
+CODE>     mov EAX,1
+CODE>     cmp EBX,EAX
+CODE>     setl AL
+CODE>     movzx EAX,AL
+CODE>     cmp EAX,0
+CODE>     jnz wasm_l2
+CODE>     mov EAX,[EBP+20]  ; @loc1
+CODE>     add EAX,1
+CODE>     mov [EBP-4],EAX  ; @loc5
+CODE>     mov EBX,[EBP+12]  ; @loc3
+CODE>     mov EAX,1
+CODE>     mov ECX,EAX
+CODE>     shl EBX,CL
+CODE>     mov EAX,EBX
+CODE>     mov [EBP-8],EAX  ; @loc6
+CODE>     wasm_l3:
+CODE>     mov EBX,[EBP+20]  ; @loc1
+CODE>     mov EAX,1
+CODE>     cmp EBX,EAX
+CODE>     setl AL
+CODE>     movzx EAX,AL
+CODE>     cmp EAX,0
+CODE>     jnz wasm_l4
+CODE>     mov EAX,[EBP-4]  ; @loc5
+CODE>     mov [EBP-12],EAX  ; @loc7
+CODE>     mov EAX,[EBP+24]  ; @loc0
+CODE>     mov [EBP+12],EAX  ; @loc3
+CODE>     wasm_l5:
+CODE>     mov EBX,[EBP+12]  ; @loc3
+CODE>     mov EAX,[EBP+8]  ; @loc4
+CODE>     add EBX,EDI
+CODE>     mov [EBX],AX
+CODE>     mov EAX,[EBP+12]  ; @loc3
+CODE>     add EAX,2
+CODE>     mov [EBP+12],EAX  ; @loc3
+CODE>     mov EAX,[EBP-12]  ; @loc7
+CODE>     add EAX,-1
+CODE>     push EAX
+CODE>     mov [EBP-12],EAX  ; @loc7
+CODE>     mov EAX,1
+CODE>     pop EBX
+CODE>     cmp EBX,EAX
+CODE>     setg AL
+CODE>     movzx EAX,AL
+CODE>     cmp EAX,0
+CODE>     jnz wasm_l5
+CODE>     wasm_l4:
+CODE>     mov EBX,[EBP+24]  ; @loc0
+CODE>     mov EAX,[EBP-8]  ; @loc6
+CODE>     add EAX,EBX
+CODE>     mov [EBP+24],EAX  ; @loc0
+CODE>     mov EBX,[EBP+16]  ; @loc2
+CODE>     mov EAX,1
+CODE>     cmp EBX,EAX
+CODE>     setg AL
+CODE>     movzx EAX,AL
+CODE>     mov [EBP+12],EAX  ; @loc3
+CODE>     mov EAX,[EBP+16]  ; @loc2
+CODE>     add EAX,-1
+CODE>     mov [EBP+16],EAX  ; @loc2
+CODE>     mov EAX,[EBP+12]  ; @loc3
+CODE>     cmp EAX,0
+CODE>     jnz wasm_l3
+CODE>     wasm_l2:
+CODE>     wasm_l1:
+CODE> mov ESP,EBP
+CODE> pop EBP
+CODE> ret
+CODE> 
+CODE> align 16
+CODE> wasm_fn1:  ; export main: int
+CODE>     mov EAX,16
+CODE>     push EAX
+CODE>     mov EAX,80
+CODE>     push EAX
+CODE>     mov EAX,25
+CODE>     push EAX
+CODE>     mov EAX,80
+CODE>     push EAX
+CODE>     mov EAX,8001
+CODE>     push EAX
+CODE>     call wasm_fn0
+CODE>     add ESP,20
+CODE>     mov EAX,516
+CODE>     push EAX
+CODE>     mov EAX,40
+CODE>     push EAX
+CODE>     mov EAX,5
+CODE>     push EAX
+CODE>     mov EAX,80
+CODE>     push EAX
+CODE>     mov EAX,20290
+CODE>     push EAX
+CODE>     call wasm_fn0
+CODE>     add ESP,20
+CODE>     mov EAX,0
+CODE>     push EAX
+CODE>     wasm_l6:
+CODE>     pop EAX
+CODE> ret
+CODE> align 16
+CODE> wasm_entry:
+CODE> pushad
+CODE> mov EDI,wasm_mem0
+CODE> call wasm_fn1
+CODE> popad
+CODE> ret
