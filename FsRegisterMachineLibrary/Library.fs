@@ -156,7 +156,7 @@ let ForAllBranchTablesDo branchTableStart branchTableItem crmInstructions =
 
 
 /// Iterate wasm table heading and content.
-let ForWasmTableDo wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
+let ForWasmTableDo writeOutData wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
 
     match t.InitData.Length with
 
@@ -164,12 +164,15 @@ let ForWasmTableDo wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
 
         | 1 ->
             wasmTableHeading i
-            t.InitData |> Array.iter (fun elem ->
+                |> List.iter writeOutData
+
+            t.InitData 
+                |> Array.iter (fun elem ->
                     let ofsExpr, funcIdxList = elem
                     let ofsValue = StaticEvaluate ofsExpr
                     if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
-                    funcIdxList |> Array.iter (fun funcIdx -> wasmTableRow (FuncIdxNameString funcIdx))
-                )
+                    funcIdxList |> Array.iter (fun funcIdx -> 
+                        writeOutData (wasmTableRow (FuncIdxNameString funcIdx))))
 
         | _ -> failwith "Cannot translate module with more than one Elem in a TableSec table"
 

@@ -244,11 +244,13 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
         ("; " + commentText)
 
     let wasmTableHeading tableIndex =
-        writeOutData "align 4"
-        writeOutData (sprintf "data %s%d" AsmTableNamePrefix tableIndex)
+        [
+            "align 4"
+            sprintf "data %s%d" AsmTableNamePrefix tableIndex
+        ]
 
     let wasmTableRow nameString =
-        writeOutData (sprintf "    dw %s" nameString)
+        sprintf "    dw %s" nameString
 
     let wasmMemHeading memIndex linearMemorySize =
         writeOutVar (sprintf "align %d" StackSlotSizeU)
@@ -281,7 +283,7 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
     writeOutData "dd TotalSize          ; Total size needed for this fixed flat image"
     writeOutData "dd wasm_entry         ; Entry point address"  // TODO: If using WasmStartEntryPointIfPresent this will fail to resolve since the entry is optional.
 
-    m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo wasmTableHeading wasmTableRow)
+    m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo writeOutData wasmTableHeading wasmTableRow)
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemHeading wasmMemRow)
     writeOutVar (LabelCommand "TotalSize")
