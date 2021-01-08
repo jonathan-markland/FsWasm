@@ -207,11 +207,13 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         ("// " + commentText)
 
     let wasmTableHeading tableIndex =
-        writeOutData "align ptr"
-        writeOutData (sprintf "data %s%d" AsmTableNamePrefix tableIndex)
+        [
+            "align ptr"
+            sprintf "data %s%d" AsmTableNamePrefix tableIndex
+        ]
 
     let wasmTableRow nameString =
-        writeOutData (sprintf "    ptr %s" nameString)
+        sprintf "    ptr %s" nameString
 
     let wasmMemVar memIndex linearMemorySize =
         writeOutVar "global"
@@ -239,7 +241,7 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 
-    m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo wasmTableHeading wasmTableRow)
+    m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo writeOutData wasmTableHeading wasmTableRow)
     m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
     m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
 
