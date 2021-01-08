@@ -128,17 +128,19 @@ let ValTypeTranslationOf = function
     | F64Type -> failwith "Cannot translate F64 type with this simple translator"
 
 
-let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
+let FunctionLocals (funcType:FuncType) funcLocals : string list =
 
     let indexOfFirstLocal = funcType.ParameterTypes.Length
 
-    funcLocals |> Array.iteri (fun arrayIndex v ->
-        let indexOfVariable = indexOfFirstLocal + arrayIndex
-        let prefixStr = 
-            match arrayIndex with 
-                | 0 -> "var "
-                | _ -> "  , "
-        writeOut (sprintf "%s@%s%d:%s" prefixStr AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v)))
+    funcLocals 
+        |> Array.toList
+        |> List.mapi (fun arrayIndex v ->
+            let indexOfVariable = indexOfFirstLocal + arrayIndex
+            let prefixStr = 
+                match arrayIndex with 
+                    | 0 -> "var "
+                    | _ -> "  , "
+            sprintf "%s@%s%d:%s" prefixStr AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v))
 
 
 
@@ -183,7 +185,8 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     try
         procedureCommand
             |> writeOutCode
-        WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
+        FunctionLocals f.FuncType f.Locals
+            |> List.iter writeOutCode
         crmInstructions 
             |> TranslatedCrmInstructions TranslateInstructionToAsmSequence f
             |> List.iter writeInstruction
