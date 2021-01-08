@@ -276,12 +276,14 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
         writeOutData (LabelCommand (sprintf "%s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex))
         ForEachLineOfHexDumpDo "db" "," "0x" writeIns byteArray
 
-    let writeOutCopyBlockCode i j ofsValue byteArrayLength =
-        writeOutCode (sprintf "    mov EDI,(%s%d+%d)" AsmMemPrefix i ofsValue)
-        writeOutCode (sprintf "    mov ESI,%s%d_%d" AsmMemoryNamePrefix i j)
-        writeOutCode (sprintf "    mov ECX,%d" byteArrayLength)
-        writeOutCode          "    cld"
-        writeOutCode          "    rep movsb"
+    let x8632CopyBlockCode i j ofsValue byteArrayLength =
+        [
+            sprintf "    mov EDI,(%s%d+%d)" AsmMemPrefix i ofsValue
+            sprintf "    mov ESI,%s%d_%d" AsmMemoryNamePrefix i j
+            sprintf "    mov ECX,%d" byteArrayLength
+            "    cld"
+            "    rep movsb"
+        ]
 
     let writeOutWasmGlobal globalIdxNameString initValue =
         writeOutData (LabelCommand globalIdxNameString)
@@ -302,7 +304,9 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
     if m.Mems |> HasAnyInitDataBlocks then
         writeOutCode CodeAlign
         writeOutCode (LabelCommand AsmInitMemoriesFuncName)
-        m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode
+        m.Mems
+            |> DataInitialisationFunctionUsing x8632CopyBlockCode
+            |> List.iter writeOutCode
         writeOutCode "ret"
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally

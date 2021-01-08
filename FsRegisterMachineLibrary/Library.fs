@@ -255,21 +255,35 @@ let ForAllWasmMemsDo action mems =
             | ImportedMemory2 mem -> failwith "Error:  Cannot support importing a WASM 'memory'.  WASM module must be self-contained."
         )
 
+let MapAllWasmMems mapFunc mems =
+
+    mems 
+        |> Array.toList
+        |> List.mapi (fun memIndex me ->
+        match me with
+            | InternalMemory2 mem -> mapFunc memIndex mem
+            | ImportedMemory2 _   -> failwith "Error:  Cannot support importing a WASM 'memory'.  WASM module must be self-contained."
+        )
 
 
 /// Generate the initialisation function that arranges the statically-initialised
 /// data blocks in the memory space.
-let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode (mems:Memory[]) =
+let DataInitialisationFunctionUsing copyBlockCode (mems:Memory[]) : string list =
 
-    let writeOutDataCopyCommand i (thisMem:InternalMemoryRecord) =
+    let dataCopyCode i (thisMem:InternalMemoryRecord) =
         if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
-        thisMem.InitData |> Array.iteri (fun j elem ->
+        thisMem.InitData 
+            |> Array.toList
+            |> List.mapi (fun j elem ->
                 let ofsExpr, byteArray = elem
                 let ofsValue = StaticEvaluate ofsExpr
-                writeOutCopyBlockCode i j ofsValue byteArray.Length
+                copyBlockCode i j ofsValue byteArray.Length
             )
+            |> List.concat
 
-    mems |> ForAllWasmMemsDo writeOutDataCopyCommand
+    mems 
+        |> MapAllWasmMems dataCopyCode
+        |> List.concat
 
 
 

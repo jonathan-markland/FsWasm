@@ -239,11 +239,13 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex)
         ForEachLineOfHexDumpDo "byte" "," "0x" writeIns byteArray
 
-    let writeOutCopyBlockCode i j ofsValue byteArrayLength =
-        writeOutCode (sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue)
-        writeOutCode (sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j)
-        writeOutCode (sprintf "    let C=%d" byteArrayLength)
-        writeOutCode          "    cld rep movsb"
+    let copyBlockCode i j ofsValue byteArrayLength =
+        [
+            sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue
+            sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j
+            sprintf "    let C=%d" byteArrayLength
+            "    cld rep movsb"
+        ]
 
     let writeOutWasmGlobal globalIdxNameString initValue =
         // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
@@ -260,7 +262,9 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
 
     if m.Mems |> HasAnyInitDataBlocks then
         writeOutCode ("procedure " + AsmInitMemoriesFuncName)
-        m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode
+        m.Mems
+            |> DataInitialisationFunctionUsing copyBlockCode
+            |> List.iter writeOutCode
         writeOutCode "ret"
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally

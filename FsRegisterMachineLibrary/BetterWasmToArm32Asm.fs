@@ -301,11 +301,16 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
         writeOutData (sprintf "%s%d_%d:" AsmMemoryNamePrefix memIndex dataBlockIndex)
         ForEachLineOfHexDumpDo "db" "," "0x" writeIns byteArray
 
-    let writeOutCopyBlockCode i j ofsValue (byteArrayLength:int) =
-        writeOutCode (sprintf "    ldr R0,%s%d_%d" AsmMemoryNamePrefix i j)
-        writeOutCode (sprintf "    ldr R1,(%s%d+%d)" AsmMemPrefix i ofsValue)
-        (LoadConstantInto "R2" (uint32 byteArrayLength)) |> List.iter writeOutCode
-        writeOutCode (sprintf "    bl %s" AsmArmBlockCopyLabel)
+    let armCopyBlockCode i j ofsValue (byteArrayLength:int) =
+        [
+            sprintf "    ldr R0,%s%d_%d" AsmMemoryNamePrefix i j
+            sprintf "    ldr R1,(%s%d+%d)" AsmMemPrefix i ofsValue
+        ]
+        @ LoadConstantInto "R2" (uint32 byteArrayLength)
+        @
+        [
+            sprintf "    bl %s" AsmArmBlockCopyLabel
+        ]
 
     let writeOutWasmGlobal globalIdxNameString initValue =
         writeOutData (LabelCommand globalIdxNameString)
@@ -333,7 +338,9 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
         writeOutCode  "    bx lr"
         writeOutCode CodeAlign
         writeOutCode (LabelCommand AsmInitMemoriesFuncName)
-        m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode
+        m.Mems 
+            |> DataInitialisationFunctionUsing armCopyBlockCode 
+            |> List.iter writeOutCode
         writeOutCode "bx lr"
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
