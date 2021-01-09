@@ -24,6 +24,9 @@
     <Content Include="program-6-serialised.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="program-7-serialised.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="WasmToSerialised.fs" />
     <Compile Include="ReadWasmModuleTests.fs" />
     <Compile Include="Program.fs" />

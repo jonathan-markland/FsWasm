@@ -223,7 +223,8 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
     let epilogueCode f =
         if f |> HasParametersOrLocals then
-            if f |> HasLocals then ["mov R13,R11"] else ["pop {R11}"]
+            if f |> HasLocals then ["mov R13,R11"] else []
+            @ ["pop {R11}"]
         else []
         @
         if thisFunctionCallsOut then ["pop {R14}"] else []

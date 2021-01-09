@@ -51,3 +51,7 @@ let ``program (5) loads and serialises to the expected text`` () =
 [<Fact>]
 let ``program (6) loads and serialises to the expected text`` () =
     Assert.True (filePassesTest 6)
+
+[<Fact>]
+let ``program (7) loads and serialises to the expected text`` () =
+    Assert.True (filePassesTest 7)

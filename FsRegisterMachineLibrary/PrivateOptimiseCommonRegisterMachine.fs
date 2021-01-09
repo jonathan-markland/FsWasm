@@ -134,18 +134,6 @@ let WherePushPopAroundPreserving i (a:CRMInstruction32[]) =
     && IsBarrier a.[i+2] 
     && IsPopA a.[i+3]
 
-let WherePushPopAroundRegisterBarrierAndLabel i (a:CRMInstruction32[]) =
-
-    //     push A
-    //     // ~~~ register barrier ~~~
-    //     label wasm_l1
-    //     pop A
-
-    IsPushA a.[i]
-    && IsBarrier a.[i+1]
-    && IsLabelDeclaration a.[i+2]
-    && IsPopA a.[i+3]
-
 let WherePushPopAroundPreservingRequiringRename i (a:CRMInstruction32[]) = 
 
     //    let A=int[@loc4]

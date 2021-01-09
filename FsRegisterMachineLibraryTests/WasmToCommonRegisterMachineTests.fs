@@ -75,7 +75,7 @@ let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationC
     let expected = System.IO.File.ReadAllLines expectationFile  // TODO: More detail on failed comparison.
 
     // Warning: Only uncomment when multi-updating test files:   
-    // File.WriteAllText(expectationFile, actualFileImage) |> ignore // Can be used hackishly to update all the expectation files, in the execution folder.  You could then copy those over the source code folder and check in.
+    File.WriteAllText(expectationFile, actualFileImage) |> ignore // Can be used hackishly to update all the expectation files, in the execution folder.  You could then copy those over the source code folder and check in.
 
     let b = (actual = expected)
     b
@@ -129,6 +129,8 @@ let ``Program 4 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 
 let ``Program 5 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 5 Optimised (ForceEntryPoint "main"))
 [<Fact>] 
 let ``Program 6 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 6 Optimised WasmStartEntryPointIfPresent)
+[<Fact>] 
+let ``Program 7 to CRM optimised to X86 32`` () = Assert.True(FilePassesTestX86 7 Optimised (ForceEntryPoint "main"))
 
 
 
@@ -148,6 +150,8 @@ let ``Program 4 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 
 let ``Program 5 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 5 Optimised (ForceEntryPoint "main"))
 [<Fact>] 
 let ``Program 6 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 6 Optimised WasmStartEntryPointIfPresent)
+[<Fact>] 
+let ``Program 7 to CRM optimised to ARM 32`` () = Assert.True(FilePassesTestARM 7 Optimised (ForceEntryPoint "main"))
 
 
 
