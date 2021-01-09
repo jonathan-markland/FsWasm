@@ -30,7 +30,11 @@ type X8632SpecificCrmInstruction =
     /// The X86 push constant instruction supporting up to a full 32-bits.
     | X8632PushConstant of CONST32
 
+    /// Intended for:  mov [EDI+EBX+ofs],(AL | AX | EAX)
     | X8632StoreAatEBXplusEDIplusOffset of offset:U32 * sourceRegName:string
+
+    /// (add | sub | etc) dword ptr [EBP+n],value  // Locals are always a full stack slot
+    | X8632OperateOnLocal32 of opcode:string * LocalIdx * I32
 
 
 

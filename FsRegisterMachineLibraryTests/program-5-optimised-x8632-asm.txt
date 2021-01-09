@@ -57,9 +57,7 @@ CODE>     mov EBX,[EBP+12]  ; @loc3
 CODE>     mov EAX,[EBP+8]  ; @loc4
 CODE>     mov [EDI+EBX],AX
 CODE>     ; ~~~ register barrier ~~~
-CODE>     mov EAX,[EBP+12]  ; @loc3
-CODE>     add EAX,2
-CODE>     mov [EBP+12],EAX  ; @loc3
+CODE>     add dword ptr [EBP+12],2  ; @loc3
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-12]  ; @loc7
 CODE>     add EAX,-1
@@ -88,9 +86,7 @@ CODE>     setg AL
 CODE>     movzx EAX,AL
 CODE>     mov [EBP+12],EAX  ; @loc3
 CODE>     ; ~~~ register barrier ~~~
-CODE>     mov EAX,[EBP+16]  ; @loc2
-CODE>     add EAX,-1
-CODE>     mov [EBP+16],EAX  ; @loc2
+CODE>     add dword ptr [EBP+16],-1  ; @loc2
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP+12]  ; @loc3
 CODE>     cmp EAX,0

@@ -147,12 +147,14 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | X8632Specific instruction ->
             match instruction with
                 
-                | X8632PushConstant (Const32 value) 
-                    -> [ sprintf "push %d" value ] 
+                | X8632PushConstant (Const32 value) ->
+                    [ sprintf "push %d" value ] 
 
-                | X8632StoreAatEBXplusEDIplusOffset (ofs, regName) 
-                    -> translateREGU32 "mov [EDI+" B ofs ("]," + regName)
+                | X8632StoreAatEBXplusEDIplusOffset (ofs, regName) ->
+                    translateREGU32 "mov [EDI+" B ofs ("]," + regName)
 
+                | X8632OperateOnLocal32 (opcode, locIdx, I32 value) ->
+                    [ sprintf "%s dword ptr [EBP%s],%d  ; @%s" opcode (frameOffsetForLoc locIdx) value (LocalIdxNameString locIdx) ] 
 
 
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions

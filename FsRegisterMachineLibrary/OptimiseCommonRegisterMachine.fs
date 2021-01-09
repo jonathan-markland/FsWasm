@@ -2,7 +2,7 @@
 
 open CommonRegisterMachineTypes
 open PrivateOptimiseCommonRegisterMachine
-
+open WasmFileTypes
 
 
 let WithEmptyList _ _ = [||]
@@ -62,9 +62,32 @@ let OptimiseX8632 (originalList:CRMInstruction32 list) =
             Barrier
         |]
 
+    let withX8632OperateOnLocal32 (a:CRMInstruction32[]) i =
+
+        let localIndex =
+            match a.[i] with
+                | FetchLoc (A, locIdx) -> locIdx
+                | _ -> failwith "Unexpected failure of pattern match" // should never happen
+
+        let opcode, value =
+            match a.[i+1] with
+                | AddAN value -> "add", value
+                | SubAN value -> "sub", value
+                | AndAN value -> "and", value
+                | OrAN  value -> "or",  value
+                | XorAN value -> "xor", value
+                | _ -> failwith "Unexpected failure of pattern match" // should never happen
+
+        [|
+            X8632Specific (X8632OperateOnLocal32 (opcode, localIndex, value))
+            Barrier
+        |]
+        
+
     originalArray
         |> ReplaceAll 3 WhereX8632LoadConstPushBarrier  withX8632PushConstant
         |> ReplaceAll 3 WhereX8632StoreIntoLinearMemory withX8632TwoRegisterEffectiveAddress
+        |> ReplaceAll 4 WhereX8632OperateOnLocal32      withX8632OperateOnLocal32
         |> Array.toList
 
 

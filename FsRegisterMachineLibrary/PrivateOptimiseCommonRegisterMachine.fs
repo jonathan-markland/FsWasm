@@ -79,12 +79,27 @@ let IsStoreOfAnySizeInAToB = function
     | Store32A(B,_) -> true
     | _ -> false
 
+let IsFetchAndStoreUsingSameLocal i1 i2 =
+    match i1, i2 with
+        | (FetchLoc (A,floc)) , (StoreLoc (A,sloc)) when floc = sloc -> true
+        | _ -> false
+
+let IsAddSubAndOrXorAN = function
+    | AddAN _ -> true
+    | SubAN _ -> true
+    | AndAN _ -> true
+    | OrAN  _ -> true
+    | XorAN _ -> true
+    | _ -> false
+
+
 
 let WherePushBarrierPop  i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPopA    a.[i+2]
 let WherePushBarrierDrop i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsDropOne a.[i+2]
 let WherePushBarrierPeek i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPeekA   a.[i+2]
 let WhereBarrier         i (a:CRMInstruction32[]) = IsBarrier a.[i]
 
+// TODO: The CRMInstruction32's should be shown as F# DU cases, not in these target languages!
 // TODO: Can we not just use cons-lists matching?
 
 let WherePushPopAroundPreserving i (a:CRMInstruction32[]) = 
@@ -144,3 +159,15 @@ let WhereX8632StoreIntoLinearMemory i (a:CRMInstruction32[]) =
     IsAddBY a.[i]
     && IsStoreOfAnySizeInAToB a.[i+1]
     && IsBarrier a.[i+2] 
+
+let WhereX8632OperateOnLocal32  i (a:CRMInstruction32[]) = 
+
+    //     mov EAX,[EBP+12]  ; @loc3
+    //     add EAX,2  // alternatives:   sub and or xor
+    //     mov [EBP+12],EAX  ; @loc3
+    //     ; ~~~ register barrier ~~~
+
+    IsFetchAndStoreUsingSameLocal a.[i] a.[i+2]
+    && IsAddSubAndOrXorAN a.[i+1]
+    && IsBarrier a.[i+3]
+
