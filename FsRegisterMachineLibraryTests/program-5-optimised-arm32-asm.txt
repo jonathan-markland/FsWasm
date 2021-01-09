@@ -140,10 +140,7 @@ CODE>     bl wasm_fn0
 CODE>     add R13,R13,#20
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#0  ; mov 0 LSL 0
-CODE>     push {R0}
-CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l6:
-CODE>     pop {R0}
 CODE> pop {R14}
 CODE> bx lr
 CODE> wasm_entry:

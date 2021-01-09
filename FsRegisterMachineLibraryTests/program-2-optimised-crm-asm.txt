@@ -9,19 +9,13 @@ CODE>     add A,Y
 CODE>     let uint[A]=305419896
 CODE>     // ~~~ register barrier ~~~
 CODE>     let A=uint[Y+2864434397]
-CODE>     push A
-CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l1
-CODE>     pop A
 CODE> endproc
 CODE> procedure wasm_fn1  // : int
 CODE>     let A=-2005440939
 CODE>     push A
 CODE>     // ~~~ register barrier ~~~
 CODE>     call wasm_fn0
-CODE>     push A
-CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l2
-CODE>     pop A
 CODE> ret
 CODE> // No WASM entry point (start record) in this translation

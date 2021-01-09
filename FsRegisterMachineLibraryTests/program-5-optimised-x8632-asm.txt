@@ -143,10 +143,7 @@ CODE>     call wasm_fn0
 CODE>     add ESP,20
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,0
-CODE>     push EAX
-CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l6:
-CODE>     pop EAX
 CODE> ret
 CODE> align 16
 CODE> wasm_entry:

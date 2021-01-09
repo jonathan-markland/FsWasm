@@ -116,8 +116,7 @@ let TranslateInstructionsAndApplyOptimisations
 
     let crmInstructions = 
         match f.FuncType |> ReturnsSingleValue with
-            | true  -> 
-                crmInstructions @ [Pop A]
+            | true  -> crmInstructions @ [Pop A]
             | false -> crmInstructions
 
     let optimisationPhase1 = 

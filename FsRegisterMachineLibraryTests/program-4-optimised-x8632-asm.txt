@@ -83,10 +83,7 @@ CODE>     add EAX,16
 CODE>     mov [EDI+4],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,0
-CODE>     push EAX
-CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l1:
-CODE>     pop EAX
 CODE> mov ESP,EBP
 CODE> pop EBP
 CODE> ret

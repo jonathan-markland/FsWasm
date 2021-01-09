@@ -16,7 +16,7 @@ let ReplaceAll patternLength patternMatcher getReplacementRegarding (sourceArray
         let result = new ResizeArray<CRMInstruction32> ()
         let mutable i = 0
 
-        while i < (sourceLength - patternLength) do
+        while i <= (sourceLength - patternLength) do
             if patternMatcher i sourceArray
             then 
                 result.AddRange(getReplacementRegarding sourceArray i)
@@ -93,18 +93,10 @@ let WherePushPopAroundRegisterBarrierAndLabel i (a:CRMInstruction32[]) =
     //     label wasm_l1
     //     pop A
 
-    let found = 
-        IsPushA a.[i]
-        && IsBarrier a.[i+1]
-        && IsLabelDeclaration a.[i+2]
-        && IsPopA a.[i+3]
-
-    if found then
-        printf "dsfgsdfg"
-    else
-        ()
-
-    found
+    IsPushA a.[i]
+    && IsBarrier a.[i+1]
+    && IsLabelDeclaration a.[i+2]
+    && IsPopA a.[i+3]
 
 let WherePushPopAroundPreservingRequiringRename i (a:CRMInstruction32[]) = 
 

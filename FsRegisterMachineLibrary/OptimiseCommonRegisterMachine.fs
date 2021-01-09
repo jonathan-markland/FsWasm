@@ -25,14 +25,10 @@ let Optimise (originalList:CRMInstruction32 list) =
     originalArray
         |> ReplaceAll 3 WherePushBarrierPop  WithEmptyList
         |> ReplaceAll 3 WherePushBarrierDrop WithEmptyList
-        |> ReplaceAll 3 WherePushBarrierPeek (fun _ _ -> 
-            [| Push(A) |])
-        |> ReplaceAll 4 WherePushPopAroundPreserving (fun a i -> 
-            [| a.[i+1] |])
-        |> ReplaceAll 5 WherePushPopAroundPreservingRequiringRename (fun a i -> 
-            [| (a.[i] |> AssigningInsteadTo B) ; a.[i+3] |])
-        |> ReplaceAll 4 WherePushPopAroundRegisterBarrierAndLabel (fun a i -> 
-            [| a.[i+2] |])
+        |> ReplaceAll 3 WherePushBarrierPeek (fun _ _ -> [| Push(A) |])
+        |> ReplaceAll 4 WherePushPopAroundPreserving (fun a i -> [| a.[i+1] |])
+        |> ReplaceAll 5 WherePushPopAroundPreservingRequiringRename (fun a i -> [| (a.[i] |> AssigningInsteadTo B) ; a.[i+3] |])
+        |> ReplaceAll 4 WherePushPopAroundRegisterBarrierAndLabel (fun a i -> [| a.[i+2] |])
         |> Array.toList
 
 
