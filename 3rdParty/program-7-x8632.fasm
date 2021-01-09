@@ -1,0 +1,1240 @@
+; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsWasm\bin\Debug\netcoreapp2.0\program-7.wasm (1862 bytes) 09/01/2021 18:38:16
+format binary
+use32
+org 0x40000000
+db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
+db 'I','A','3','2'    ; Indicates this is for X86/32
+dq 0x40000000         ; Origin address for this fixed executable.
+dq TotalSize          ; Total size needed for this fixed flat image
+dq wasm_entry         ; Entry point address
+
+align 16
+wasm_fn0:  ; export _Z6CircleP7Surfaceiiic(loc0: int, loc1: int, loc2: int, loc3: int, loc4: int)
+push EBP
+mov EBP,ESP
+sub ESP,8  ; loc5:int, loc6:int
+    mov EAX,[EDI+4]
+    sub EAX,48
+    mov [EBP-4],EAX  ; @loc5
+    mov [EDI+4],EAX
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+24]  ; @loc0
+    mov [EDI+EBX+44],EAX
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+20]  ; @loc1
+    mov [EDI+EBX+40],EAX
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+16]  ; @loc2
+    mov [EDI+EBX+36],EAX
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+12]  ; @loc3
+    mov [EDI+EBX+32],EAX
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+8]  ; @loc4
+    mov [EDI+EBX+31],AL
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,8
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+44]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    movsx EAX, byte [EAX+31]
+    push EAX
+    call wasm_fn1
+    add ESP,12
+    mov [EBP+12],EAX  ; @loc3
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+40]
+    push EAX
+    mov [EBP+16],EAX  ; @loc2
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+32]
+    mov [EBP+8],EAX  ; @loc4
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+36]
+    push EAX
+    mov [EBP+20],EAX  ; @loc1
+    mov EAX,[EBP+8]  ; @loc4
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    mov EBX,[EBP+16]  ; @loc2
+    mov EAX,[EBP+8]  ; @loc4
+    add EAX,EBX
+    push EAX
+    mov EBX,[EBP+20]  ; @loc1
+    mov EAX,[EBP+8]  ; @loc4
+    add EAX,EBX
+    push EAX
+    mov EAX,[EBP+12]  ; @loc3
+    push EAX
+    call wasm_fn2
+    add ESP,20
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,48
+    mov [EDI+4],EAX
+    wasm_l1:
+mov ESP,EBP
+pop EBP
+ret
+
+align 16
+wasm_fn1:  ; ~no export name~(loc0: int, loc1: int, loc2: int): int
+push EBP
+mov EBP,ESP
+sub ESP,8  ; loc3:int, loc4:int
+    mov EAX,[EDI+4]
+    sub EAX,16
+    push EAX
+    mov [EBP-4],EAX  ; @loc3
+    mov EAX,[EBP+16]  ; @loc0
+    pop EBX
+    mov [EDI+EBX+12],EAX
+    mov EBX,[EBP-4]  ; @loc3
+    mov EAX,[EBP+12]  ; @loc1
+    mov [EDI+EBX+8],EAX
+    mov EBX,[EBP-4]  ; @loc3
+    mov EAX,[EBP+8]  ; @loc2
+    mov [EDI+EBX+7],AL
+    mov EAX,[EBP-4]  ; @loc3
+    add EAX,EDI
+    mov EAX,[EAX+12]
+    push EAX
+    mov [EBP+12],EAX  ; @loc1
+    mov EAX,[EBP+8]  ; @loc2
+    pop EBX
+    mov [EDI+EBX],AL
+    mov EAX,[EBP+12]  ; @loc1
+    push EAX
+    mov EAX,[EBP-4]  ; @loc3
+    add EAX,EDI
+    mov EAX,[EAX+8]
+    mov [EBP+8],EAX  ; @loc2
+    pop EBX
+    mov [EDI+EBX+4],EAX
+    mov EAX,[EBP+12]  ; @loc1
+    push EAX
+    mov EAX,[EBP+8]  ; @loc2
+    add EAX,EDI
+    mov EAX,[EAX+8]
+    pop EBX
+    mov [EDI+EBX+8],EAX
+    mov EAX,[EBP+12]  ; @loc1
+    push EAX
+    mov EAX,[EBP-4]  ; @loc3
+    add EAX,EDI
+    mov EAX,[EAX+8]
+    add EAX,EDI
+    mov EAX,[EAX+12]
+    pop EBX
+    mov [EDI+EBX+12],EAX
+    mov EAX,[EBP+12]  ; @loc1
+    push EAX
+    wasm_l2:
+    pop EAX
+mov ESP,EBP
+pop EBP
+ret
+
+align 16
+wasm_fn2:  ; ~no export name~(loc0: int, loc1: int, loc2: int, loc3: int, loc4: int)
+push EBP
+mov EBP,ESP
+sub ESP,8  ; loc5:int, loc6:int
+    mov EAX,[EDI+4]
+    sub EAX,80
+    mov [EBP-4],EAX  ; @loc5
+    mov [EDI+4],EAX
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+24]  ; @loc0
+    mov [EDI+EBX+76],EAX
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+20]  ; @loc1
+    mov [EDI+EBX+72],EAX
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+16]  ; @loc2
+    mov [EDI+EBX+68],EAX
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+12]  ; @loc3
+    mov [EDI+EBX+64],EAX
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+8]  ; @loc4
+    mov [EDI+EBX+60],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+76]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+68]
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+72]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+64]
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+76]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+60]
+    add EAX,EDI
+    mov EAX,[EAX+8]
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+68]
+    push EAX
+    mov EAX,1
+    pop EBX
+    cmp EBX,EAX
+    jl  wasm_l4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+72]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+60]
+    add EAX,EDI
+    mov EAX,[EAX+12]
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+64]
+    push EAX
+    mov EAX,1
+    pop EBX
+    cmp EBX,EAX
+    jl  wasm_l4
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+76]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+68]
+    pop EBX
+    add EAX,EBX
+    push EAX
+    mov EAX,1
+    pop EBX
+    mov ECX,EAX
+    sar EBX,CL
+    mov EAX,EBX
+    pop EBX
+    mov [EDI+EBX+56],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+72]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+64]
+    pop EBX
+    add EAX,EBX
+    push EAX
+    mov EAX,1
+    pop EBX
+    mov ECX,EAX
+    sar EBX,CL
+    mov EAX,EBX
+    pop EBX
+    mov [EDI+EBX+52],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+76]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+68]
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l6
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+68]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+56]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    mov [EBP+8],EAX  ; @loc4
+    jmp wasm_l5
+    align 16
+    wasm_l6:
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+76]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+56]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    mov [EBP+8],EAX  ; @loc4
+    wasm_l5:
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+8]  ; @loc4
+    mov [EDI+EBX+48],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+72]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+64]
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l8
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+64]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+52]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    mov [EBP+8],EAX  ; @loc4
+    jmp wasm_l7
+    align 16
+    wasm_l8:
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+72]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+52]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    mov [EBP+8],EAX  ; @loc4
+    wasm_l7:
+    mov EBX,[EBP-4]  ; @loc5
+    mov EAX,[EBP+8]  ; @loc4
+    mov [EDI+EBX+44],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov byte [EAX+43],1
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+44]
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l9
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    pop EBX
+    mov [EDI+EBX+36],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+44]
+    pop EBX
+    mov [EDI+EBX+48],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+36]
+    pop EBX
+    mov [EDI+EBX+44],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov byte [EAX+43],0
+    wasm_l9:
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    push 3
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    push EAX
+    mov EAX,1
+    pop EBX
+    mov ECX,EAX
+    shl EBX,CL
+    mov EAX,EBX
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    pop EBX
+    mov [EDI+EBX+32],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov dword [EAX+28],0
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    pop EBX
+    mov [EDI+EBX+24],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+44]
+    pop EBX
+    mov [EDI+EBX+20],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov dword [EAX+16],0
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    push EAX
+    mov EAX,1
+    pop EBX
+    mov ECX,EAX
+    sar EBX,CL
+    mov EAX,EBX
+    pop EBX
+    mov [EDI+EBX+12],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    push EAX
+    mov EAX,1
+    pop EBX
+    mov ECX,EAX
+    sar EBX,CL
+    mov EAX,EBX
+    pop EBX
+    mov [EDI+EBX+8],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov dword [EAX+4],6
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    push 10
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    push EAX
+    mov EAX,2
+    pop EBX
+    mov ECX,EAX
+    shl EBX,CL
+    mov EAX,EBX
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    pop EBX
+    mov [EDI+EBX],EAX
+    wasm_l10:
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+28]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    pop EBX
+    cmp EBX,EAX
+    jg  wasm_l4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    movzx EAX, byte [EAX+43]
+    and EAX,1
+    cmp EAX,0
+    setz AL
+    movzx EAX,AL
+    cmp EAX,0
+    jnz wasm_l12
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+60]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+56]
+    push EAX
+    mov [EBP+8],EAX  ; @loc4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+28]
+    mov [EBP+12],EAX  ; @loc3
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    mov EBX,[EBP+8]  ; @loc4
+    mov EAX,[EBP+12]  ; @loc3
+    add EAX,EBX
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+52]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+20]
+    pop EBX
+    add EAX,EBX
+    push EAX
+    call wasm_fn5
+    add ESP,16
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+60]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+56]
+    push EAX
+    mov [EBP+8],EAX  ; @loc4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    mov [EBP+12],EAX  ; @loc3
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    mov EBX,[EBP+8]  ; @loc4
+    mov EAX,[EBP+12]  ; @loc3
+    add EAX,EBX
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+52]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+16]
+    pop EBX
+    add EAX,EBX
+    push EAX
+    call wasm_fn5
+    add ESP,16
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+60]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+56]
+    push EAX
+    mov [EBP+8],EAX  ; @loc4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+28]
+    mov [EBP+12],EAX  ; @loc3
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    mov EBX,[EBP+8]  ; @loc4
+    mov EAX,[EBP+12]  ; @loc3
+    add EAX,EBX
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+52]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+20]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    call wasm_fn5
+    add ESP,16
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+60]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+56]
+    push EAX
+    mov [EBP+8],EAX  ; @loc4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    mov [EBP+12],EAX  ; @loc3
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    mov EBX,[EBP+8]  ; @loc4
+    mov EAX,[EBP+12]  ; @loc3
+    add EAX,EBX
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+52]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+16]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    call wasm_fn5
+    add ESP,16
+    jmp wasm_l11
+    align 16
+    wasm_l12:
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+60]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+56]
+    push EAX
+    mov [EBP+8],EAX  ; @loc4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+20]
+    mov [EBP+12],EAX  ; @loc3
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    mov EBX,[EBP+8]  ; @loc4
+    mov EAX,[EBP+12]  ; @loc3
+    add EAX,EBX
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+52]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+28]
+    pop EBX
+    add EAX,EBX
+    push EAX
+    call wasm_fn5
+    add ESP,16
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+60]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+56]
+    push EAX
+    mov [EBP+8],EAX  ; @loc4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+16]
+    mov [EBP+12],EAX  ; @loc3
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    mov EBX,[EBP+8]  ; @loc4
+    mov EAX,[EBP+12]  ; @loc3
+    add EAX,EBX
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+52]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    pop EBX
+    add EAX,EBX
+    push EAX
+    call wasm_fn5
+    add ESP,16
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+60]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+56]
+    push EAX
+    mov [EBP+8],EAX  ; @loc4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+20]
+    mov [EBP+12],EAX  ; @loc3
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    mov EBX,[EBP+8]  ; @loc4
+    mov EAX,[EBP+12]  ; @loc3
+    add EAX,EBX
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+52]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+28]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    call wasm_fn5
+    add ESP,16
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+60]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+56]
+    push EAX
+    mov [EBP+8],EAX  ; @loc4
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+16]
+    mov [EBP+12],EAX  ; @loc3
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    mov EBX,[EBP+8]  ; @loc4
+    mov EAX,[EBP+12]  ; @loc3
+    add EAX,EBX
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+52]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    push EAX
+    call wasm_fn5
+    add ESP,16
+    wasm_l11:
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+8]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+44]
+    pop EBX
+    add EAX,EBX
+    mov [EBP+8],EAX  ; @loc4
+    pop EBX
+    mov [EDI+EBX+8],EAX
+    mov EAX,[EBP+8]  ; @loc4
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    pop EBX
+    cmp EBX,EAX
+    jle wasm_l13
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+16]
+    add EAX,1
+    pop EBX
+    mov [EDI+EBX+16],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+8]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    pop EBX
+    mov [EDI+EBX+8],EAX
+    wasm_l13:
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+32]
+    push EAX
+    mov EAX,0
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l14
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+32]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+4]
+    pop EBX
+    add EAX,EBX
+    pop EBX
+    mov [EDI+EBX+32],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+4]
+    add EAX,4
+    pop EBX
+    mov [EDI+EBX+4],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX]
+    add EAX,4
+    pop EBX
+    mov [EDI+EBX],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+28]
+    add EAX,1
+    pop EBX
+    mov [EDI+EBX+28],EAX
+    jmp wasm_l10
+    align 16
+    wasm_l14:
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+32]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX]
+    pop EBX
+    add EAX,EBX
+    pop EBX
+    mov [EDI+EBX+32],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+4]
+    add EAX,4
+    pop EBX
+    mov [EDI+EBX+4],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX]
+    add EAX,8
+    pop EBX
+    mov [EDI+EBX],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+28]
+    add EAX,1
+    pop EBX
+    mov [EDI+EBX+28],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    add EAX,-1
+    pop EBX
+    mov [EDI+EBX+24],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+12]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+44]
+    pop EBX
+    add EAX,EBX
+    mov [EBP+8],EAX  ; @loc4
+    pop EBX
+    mov [EDI+EBX+12],EAX
+    mov EAX,[EBP+8]  ; @loc4
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    pop EBX
+    cmp EBX,EAX
+    jle wasm_l10
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+20]
+    add EAX,-1
+    pop EBX
+    mov [EDI+EBX+20],EAX
+    mov EAX,[EBP-4]  ; @loc5
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+12]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,EDI
+    mov EAX,[EAX+48]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    pop EBX
+    mov [EDI+EBX+12],EAX
+    jmp wasm_l10
+    align 16
+    wasm_l4:
+    mov EAX,[EBP-4]  ; @loc5
+    add EAX,80
+    mov [EDI+4],EAX
+    wasm_l3:
+mov ESP,EBP
+pop EBP
+ret
+
+align 16
+wasm_fn3:  ; export _Z4Demov
+push EBP
+mov EBP,ESP
+sub ESP,12  ; loc0:int, loc1:int, loc2:int
+    mov EAX,[EDI+4]
+    sub EAX,32
+    mov [EBP-8],EAX  ; @loc1
+    mov [EDI+4],EAX
+    mov EAX,[EBP-8]  ; @loc1
+    add EAX,EDI
+    mov dword [EAX+28],16
+    wasm_l17:
+    mov EAX,[EBP-8]  ; @loc1
+    add EAX,EDI
+    mov EAX,[EAX+28]
+    push EAX
+    mov EAX,81936
+    pop EBX
+    cmp EBX,EAX
+    jae wasm_l16
+    mov EAX,[EBP-8]  ; @loc1
+    add EAX,EDI
+    mov EAX,[EAX+28]
+    mov [EBP-4],EAX  ; @loc0
+    add EAX,EDI
+    mov byte [EAX],0
+    mov EAX,[EBP-8]  ; @loc1
+    push EAX
+    mov EAX,[EBP-4]  ; @loc0
+    add EAX,1
+    pop EBX
+    mov [EDI+EBX+28],EAX
+    jmp wasm_l17
+    align 16
+    wasm_l16:
+    mov EAX,[EBP-8]  ; @loc1
+    add EAX,EDI
+    mov dword [EAX+12],320
+    mov EAX,[EBP-8]  ; @loc1
+    add EAX,EDI
+    mov dword [EAX+8],16
+    mov EAX,[EBP-8]  ; @loc1
+    add EAX,EDI
+    mov dword [EAX+16],320
+    mov EAX,[EBP-8]  ; @loc1
+    add EAX,EDI
+    mov dword [EAX+20],256
+    mov EAX,[EBP-8]  ; @loc1
+    add EAX,8
+    push EAX
+    push 160
+    push 100
+    push 80
+    push -1
+    call wasm_fn0
+    add ESP,20
+    mov EAX,[EBP-8]  ; @loc1
+    add EAX,8
+    push EAX
+    push 160
+    push 100
+    push 40
+    push -64
+    call wasm_fn0
+    add ESP,20
+    mov EAX,[EBP-8]  ; @loc1
+    add EAX,32
+    mov [EDI+4],EAX
+    wasm_l15:
+mov ESP,EBP
+pop EBP
+ret
+
+align 16
+wasm_fn4:  ; export main: int
+push EBP
+mov EBP,ESP
+sub ESP,8  ; loc0:int, loc1:int
+    mov EAX,[EDI+4]
+    sub EAX,16
+    mov [EBP-4],EAX  ; @loc0
+    mov [EDI+4],EAX
+    mov EAX,[EBP-4]  ; @loc0
+    add EAX,EDI
+    mov dword [EAX+12],0
+    call wasm_fn3
+    add ESP,0
+    mov EAX,[EBP-4]  ; @loc0
+    add EAX,16
+    mov [EDI+4],EAX
+    push 0
+    wasm_l18:
+    pop EAX
+mov ESP,EBP
+pop EBP
+ret
+
+align 16
+wasm_fn5:  ; ~no export name~(loc0: int, loc1: int, loc2: int, loc3: int)
+push EBP
+mov EBP,ESP
+sub ESP,8  ; loc4:int, loc5:int
+    mov EAX,[EDI+4]
+    sub EAX,32
+    push EAX
+    mov [EBP-4],EAX  ; @loc4
+    mov EAX,[EBP+20]  ; @loc0
+    pop EBX
+    mov [EDI+EBX+28],EAX
+    mov EBX,[EBP-4]  ; @loc4
+    mov EAX,[EBP+16]  ; @loc1
+    mov [EDI+EBX+24],EAX
+    mov EBX,[EBP-4]  ; @loc4
+    mov EAX,[EBP+12]  ; @loc2
+    mov [EDI+EBX+20],EAX
+    mov EBX,[EBP-4]  ; @loc4
+    mov EAX,[EBP+8]  ; @loc3
+    mov [EDI+EBX+16],EAX
+    mov EBX,[EBP+8]  ; @loc3
+    mov EAX,0
+    cmp EBX,EAX
+    jl  wasm_l20
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+16]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+28]
+    mov [EBP+12],EAX  ; @loc2
+    add EAX,EDI
+    mov EAX,[EAX+12]
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l20
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+20]
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l20
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    push EAX
+    mov EAX,[EBP+12]  ; @loc2
+    add EAX,EDI
+    mov EAX,[EAX+8]
+    pop EBX
+    cmp EBX,EAX
+    jge wasm_l20
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+20]
+    push EAX
+    mov EAX,1
+    pop EBX
+    cmp EBX,EAX
+    jl  wasm_l20
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    push EAX
+    mov EAX,-1
+    pop EBX
+    cmp EBX,EAX
+    jg  wasm_l21
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov dword [EAX+24],0
+    wasm_l21:
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+20]
+    push EAX
+    mov EAX,[EBP+12]  ; @loc2
+    add EAX,EDI
+    mov EAX,[EAX+8]
+    pop EBX
+    cmp EBX,EAX
+    jle wasm_l22
+    mov EAX,[EBP-4]  ; @loc4
+    push EAX
+    mov EAX,[EBP+12]  ; @loc2
+    add EAX,EDI
+    mov EAX,[EAX+8]
+    pop EBX
+    mov [EDI+EBX+20],EAX
+    wasm_l22:
+    mov EAX,[EBP-4]  ; @loc4
+    push EAX
+    mov EAX,[EBP+12]  ; @loc2
+    add EAX,EDI
+    mov EAX,[EAX+4]
+    mov [EBP+8],EAX  ; @loc3
+    add EAX,EDI
+    mov EAX,[EAX]
+    push EAX
+    mov EAX,[EBP+8]  ; @loc3
+    add EAX,EDI
+    mov EAX,[EAX+4]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+16]
+    pop EBX
+    imul EAX,EBX
+    pop EBX
+    add EAX,EBX
+    push EAX
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    pop EBX
+    add EAX,EBX
+    mov [EBP+8],EAX  ; @loc3
+    pop EBX
+    mov [EDI+EBX+12],EAX
+    mov EAX,[EBP-4]  ; @loc4
+    push EAX
+    mov EAX,[EBP+8]  ; @loc3
+    push EAX
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+20]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+24]
+    pop EBX
+    sub EBX,EAX
+    mov EAX,EBX
+    pop EBX
+    add EAX,EBX
+    pop EBX
+    mov [EDI+EBX+8],EAX
+    wasm_l23:
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+12]
+    push EAX
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+8]
+    pop EBX
+    cmp EBX,EAX
+    jae wasm_l20
+    mov EAX,[EBP-4]  ; @loc4
+    add EAX,EDI
+    mov EAX,[EAX+12]
+    push EAX
+    mov [EBP+8],EAX  ; @loc3
+    mov EAX,[EBP+12]  ; @loc2
+    add EAX,EDI
+    movzx EAX, byte [EAX]
+    pop EBX
+    mov [EDI+EBX],AL
+    mov EAX,[EBP-4]  ; @loc4
+    push EAX
+    mov EAX,[EBP+8]  ; @loc3
+    add EAX,1
+    pop EBX
+    mov [EDI+EBX+12],EAX
+    jmp wasm_l23
+    align 16
+    wasm_l20:
+    wasm_l19:
+mov ESP,EBP
+pop EBP
+ret
+align 16
+wasm_entry:
+pushad
+mov EDI,wasm_mem0
+call wasm_fn4
+popad
+ret
+align 4
+wasm_mem0: rb 131072 ; WASM linear memory reservation
+TotalSize:

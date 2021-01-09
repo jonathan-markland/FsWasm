@@ -10,8 +10,7 @@ CODE>   , @loc7:int
 CODE>   , @loc8:int
 CODE>     let B=int[@loc2]
 CODE>     let A=1
-CODE>     cmp B,A:set < A
-CODE>     cmp A,0:if nz goto wasm_l2
+CODE>     cmp B,A:if < goto wasm_l2
 CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc1]
 CODE>     add A,1
@@ -28,8 +27,7 @@ CODE>     label wasm_l3
 CODE>     // ~~~ register barrier ~~~
 CODE>     let B=int[@loc1]
 CODE>     let A=1
-CODE>     cmp B,A:set < A
-CODE>     cmp A,0:if nz goto wasm_l4
+CODE>     cmp B,A:if < goto wasm_l4
 CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc5]
 CODE>     let int[@loc7]=A
@@ -55,8 +53,7 @@ CODE>     let int[@loc7]=A
 CODE>     // ~~~ register barrier ~~~
 CODE>     let A=1
 CODE>     pop B
-CODE>     cmp B,A:set > A
-CODE>     cmp A,0:if nz goto wasm_l5
+CODE>     cmp B,A:if > goto wasm_l5
 CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l4
 CODE>     // ~~~ register barrier ~~~

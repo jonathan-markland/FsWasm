@@ -7,7 +7,14 @@
 #define BASE_ADDRESS 0x40000000
 #define REGION_SIZE  0x100000
 
-std::string GuestProgramPath = "C:\\Users\\Jonathan\\Documents\\Work\\FsWasm\\3rdParty\\program-5.bin";
+std::string GuestProgramPath = "C:\\Users\\Jonathan\\Documents\\Work\\FsWasm\\3rdParty\\program-7-x8632.bin";
+
+void SaveMemoryToFile(const void* baseAddress, uint32_t size, const char* filename)
+{
+    std::ofstream file(filename, std::ios::binary);
+    file.write((char*)baseAddress, size);
+    file.close();
+}
 
 std::vector<uint8_t> LoadFileIntoVector(const char* filename)
 {
@@ -137,7 +144,16 @@ int main()
 
     void(*f)() = (void(*)()) entryAddress;
 
+    // Completely hack the shadow stack pointer, AND rely on non-validation of the WASM Linear Memory limit(!):
+    // auto p = (uint32_t *) BASE
+
+    uint32_t stackPointerInitialAddress = REGION_SIZE - 0xBF0;
+    auto wasmLinearMemory = (uint32_t*)0x40000BF0; // TODO! HACK for program-7 only!
+    wasmLinearMemory[1] = stackPointerInitialAddress; // HACK for program-7 only!
+
     f();
+
+    SaveMemoryToFile(wasmLinearMemory, 320 * 256, "X8632WasmCircleDrawing.bin");
 
     return 0;
 }

@@ -7,9 +7,9 @@ open CommonRegisterMachineTypes
 open AsmPrefixes
 open WasmInstructionsToCRMInstructions
 open Library
-open TextFormatting
 open ArmSupportLibrary
 open BWToCRMConfigurationTypes
+open OptimiseCommonRegisterMachine
 
 
 
@@ -93,6 +93,23 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
             "-" + ((locNumber - paramCount) * StackSlotSizeU + StackSlotSizeU).ToString()
 
 
+    let translateSecondaryCmpBranch condInstruction (LabelName targetLabel) =
+        let branchInstruction =
+            match condInstruction with
+            | CmpEqBA           -> "beq "
+            | CmpNeBA           -> "bne "
+            | CmpLtsBA          -> "blt "
+            | CmpLtuBA          -> "blo "
+            | CmpGtsBA          -> "bgt "
+            | CmpGtuBA          -> "bhi "
+            | CmpLesBA          -> "ble "
+            | CmpLeuBA          -> "bls "
+            | CmpGesBA          -> "bge "
+            | CmpGeuBA          -> "bhs "
+            | _ -> failwith "Expected a compare instruction for compare-and-branch."
+        [ "cmp R1,R0" ; (branchInstruction + targetLabel) ]
+
+
     match instruction with
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
         | Breakpoint            -> [ "bkpt #0" ]
@@ -160,6 +177,10 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
                 sprintf "movt R9,(%s%d shr 16)"      AsmMemPrefix 0 
             ]
 
+        | SecondaryCmpBranch (condInstruction, targetLabel) -> 
+            translateSecondaryCmpBranch condInstruction targetLabel
+
+        | X8632Specific _ -> failwith "Unexpected usage of X86/32 optimisation!"
 
 
 let ValTypeTranslationOf = function
@@ -176,7 +197,8 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         { ClearParametersAfterCall = true } 
 
     let crmInstructions, updatedTranslationState = 
-        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
+        TranslateInstructionsAndApplyOptimisations 
+            f m.Funcs translationState wasmToCrmTranslationConfig config id
 
     let thisFunctionCallsOut = 
         crmInstructions |> CrmInstructionsListMakesCallsOut
@@ -201,7 +223,8 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
     let epilogueCode f =
         if f |> HasParametersOrLocals then
-            if f |> HasLocals then ["mov R13,R11"] else ["pop {R11}"]
+            if f |> HasLocals then ["mov R13,R11"] else []
+            @ ["pop {R11}"]
         else []
         @
         if thisFunctionCallsOut then ["pop {R14}"] else []

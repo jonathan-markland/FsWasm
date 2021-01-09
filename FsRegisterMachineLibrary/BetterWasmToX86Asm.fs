@@ -7,8 +7,8 @@ open CommonRegisterMachineTypes
 open AsmPrefixes
 open WasmInstructionsToCRMInstructions
 open Library
-open TextFormatting
 open BWToCRMConfigurationTypes
+open OptimiseCommonRegisterMachine
 
 
 
@@ -79,6 +79,22 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         else
             "-" + ((locNumber - paramCount) * StackSlotSizeU + StackSlotSizeU).ToString()
 
+    let translateSecondaryCmpBranch condInstruction (LabelName targetLabel) =
+        let branchInstruction =
+            match condInstruction with
+            | CmpEqBA           -> "jz  "
+            | CmpNeBA           -> "jnz "
+            | CmpLtsBA          -> "jl  "
+            | CmpLtuBA          -> "jb  "
+            | CmpGtsBA          -> "jg  "
+            | CmpGtuBA          -> "ja  "
+            | CmpLesBA          -> "jle "
+            | CmpLeuBA          -> "jbe "
+            | CmpGesBA          -> "jge "
+            | CmpGeuBA          -> "jae "
+            | _ -> failwith "Expected a compare instruction for compare-and-branch."
+        [ "cmp EBX,EAX" ; (branchInstruction + targetLabel) ]
+
 
     match instruction with
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
@@ -103,7 +119,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | XorAN(I32(n))         -> [ sprintf "xor EAX,%d" n ]
         | Add(r1,r2)            -> [ sprintf "add %s,%s" (regNameOf r1) (regNameOf r2) ]  // commutative
         | SubBA                 -> [ "sub EBX,EAX" ]
-        | MulAB                 -> [ "mul EAX,EBX" ]  // commutative
+        | MulAB                 -> [ "imul EAX,EBX" ]  // commutative
         | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have division or remainder instructions"
         | AndAB                 -> [ "and EAX,EBX" ]  // commutative
         | OrAB                  -> [ "or EAX,EBX" ]   // commutative
@@ -127,16 +143,16 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | StoreLoc(r,i)         -> [ sprintf "mov [EBP%s],%s  ; @%s" (frameOffsetForLoc i) (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
         | FetchGlo(r,i)         -> [ sprintf "mov %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
         | StoreGlo(r,i)         -> [ sprintf "mov [%s],%s" (GlobalIdxNameString i) (regNameOf r) ]  // TODO: Eventually use the type rather than "int"
-        | StoreConst8(r,ofs,I32(v))   -> translateREGU32I32 "mov byte ptr [" r ofs "]," v
-        | StoreConst16(r,ofs,I32(v))  -> translateREGU32I32 "mov word ptr [" r ofs "]," v
-        | StoreConst32(r,ofs,I32(v))  -> translateREGU32I32 "mov dword ptr [" r ofs "]," v  
+        | StoreConst8(r,ofs,I32(v))   -> translateREGU32I32 "mov byte [" r ofs "]," v
+        | StoreConst16(r,ofs,I32(v))  -> translateREGU32I32 "mov word [" r ofs "]," v
+        | StoreConst32(r,ofs,I32(v))  -> translateREGU32I32 "mov dword [" r ofs "]," v  
         | Store8A(r,ofs)       -> translateREGU32 "mov [" r ofs "],AL"  
         | Store16A(r,ofs)      -> translateREGU32 "mov [" r ofs "],AX"
         | Store32A(r,ofs)      -> translateREGU32 "mov [" r ofs "],EAX"  
-        | Fetch8s(r,ofs)       -> translateREGU32 "movsx EAX, byte ptr [" r ofs "]" 
-        | Fetch8u(r,ofs)       -> translateREGU32 "movzx EAX, byte ptr [" r ofs "]"  
-        | Fetch16s(r,ofs)      -> translateREGU32 "movsx EAX, word ptr [" r ofs "]" 
-        | Fetch16u(r,ofs)      -> translateREGU32 "movzx EAX, word ptr [" r ofs "]"
+        | Fetch8s(r,ofs)       -> translateREGU32 "movsx EAX, byte [" r ofs "]" 
+        | Fetch8u(r,ofs)       -> translateREGU32 "movzx EAX, byte [" r ofs "]"  
+        | Fetch16s(r,ofs)      -> translateREGU32 "movsx EAX, word [" r ofs "]" 
+        | Fetch16u(r,ofs)      -> translateREGU32 "movzx EAX, word [" r ofs "]"
         | Fetch32(r,ofs)       -> translateREGU32 "mov EAX,[" r ofs "]"  
         | ThunkIn              -> 
             // The translated code requires the Y register to
@@ -144,6 +160,20 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
             [ sprintf "mov EDI,%s%d" AsmMemPrefix 0 ]
 
+        | SecondaryCmpBranch (condInstruction, targetLabel) -> 
+            translateSecondaryCmpBranch condInstruction targetLabel
+
+        | X8632Specific instruction ->
+            match instruction with
+                
+                | X8632PushConstant (Const32 value) ->
+                    [ sprintf "push %d" value ] 
+
+                | X8632StoreAatEBXplusEDIplusOffset (ofs, regName) ->
+                    translateREGU32 "mov [EDI+" B ofs ("]," + regName)
+
+                | X8632OperateOnLocal32 (opcode, locIdx, I32 value) ->
+                    [ sprintf "%s dword [EBP%s],%d  ; @%s" opcode (frameOffsetForLoc locIdx) value (LocalIdxNameString locIdx) ] 
 
 
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
@@ -152,7 +182,8 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         { ClearParametersAfterCall = true } 
 
     let crmInstructions, updatedTranslationState = 
-        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
+        TranslateInstructionsAndApplyOptimisations
+            f m.Funcs translationState wasmToCrmTranslationConfig config OptimiseX8632
 
     let functionExportNameIfPresent = 
         match f.Export with

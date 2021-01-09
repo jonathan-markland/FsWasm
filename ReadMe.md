@@ -123,3 +123,42 @@ Development Ingredients
 - Unzip FASM into FsWasm\3rdParty\fasmw17325\
 - Unzip FASMARM into FsWasm\3rdParty\FASMARM_win32\
 
+09/02/2021 - Progress Milestone
+===============================
+
+I added a CIRCLES drawing program, compiled through WASM Fiddle website.
+This is completely self-contained, and draws onto a 320 x 256 byte-based
+bitmap array.
+
+Again, I needed to fiddle with WASM Fiddle(!) in order to stop it:
+
+- Generating a call to external memset
+- Using div_s to divide by 2 (I don't translate division yet).
+- Using a 64-bit store-constant sequence, to a 32-bit address. (I don't
+  support 64-bit data types).
+
+I fixed an ARM generation bug where I forgot to pop the frame pointer.
+
+I needed to observe a protocol that the "C" compiler used:  It stores
+the Shadow Stack Pointer at address offset 4 in the WASM Linear Memory,
+and I needed to initialise this because it seems Wasm Fiddle doesn't
+provide the initialisation framework for that (The WASM "Start" record
+is absent!).
+
+I ran the circle drawing program in regular Visual Studio on my X86 Laptop, 
+to obtain the "reference" screenshot.  This was loaded as a RAW import into
+Paint Shop Pro (Left image).
+
+The X86/32 was run on my laptop natively, and I obtained this image from the
+WASM linear memory.  The circles are slightly offset because I don't know 
+what WASM Linear Memory offset the C compiler is using for the bitmap array, 
+so there's some preamble data captured, shoving the circles to the right a 
+bit (right image):
+
+![Game screenshot](/ReadmeImages/CirclesX86.png)
+
+And now for the ARM running my optimised translation of the WASM circle
+drawing program (right image):
+
+![Game screenshot](/ReadmeImages/CirclesARM.png)
+

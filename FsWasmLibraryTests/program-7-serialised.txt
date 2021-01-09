@@ -1,0 +1,873 @@
+
+
+--- Unit test serialisation for: 'program-7.wasm'. ---
+
+
+
+--- Types section ---
+
+TypeSec[0] = I32 I32 I32 I32 I32 -> 
+TypeSec[1] = I32 I32 I32 -> I32 
+TypeSec[2] = -> 
+TypeSec[3] = -> I32 
+TypeSec[4] = I32 I32 I32 I32 -> 
+
+
+--- Imports section ---
+
+
+
+--- Funcs section ---
+
+FuncSec[0] => I32 I32 I32 I32 I32 -> 
+FuncSec[1] => I32 I32 I32 -> I32 
+FuncSec[2] => I32 I32 I32 I32 I32 -> 
+FuncSec[3] => -> 
+FuncSec[4] => -> I32 
+FuncSec[5] => I32 I32 I32 I32 -> 
+
+
+--- Tables section ---
+
+TableSec[0] => AnyFuncType [|0|]
+
+
+--- Mems section ---
+
+MemSec[0] => [|2|] x 64KB
+
+
+--- Globals section ---
+
+
+
+--- Exports section ---
+
+ExportSec[0] => memory == MemSec[0] => [|2|] x 64KB
+ExportSec[1] => _Z6CircleP7Surfaceiiic == FuncSec[0] => I32 I32 I32 I32 I32 -> 
+ExportSec[2] => _Z4Demov == FuncSec[3] => -> 
+ExportSec[3] => main == FuncSec[4] => -> I32 
+
+
+--- Start section ---
+
+
+
+--- Elems section ---
+
+
+
+--- Code section ---
+
+
+
+CodeSec[0]  (122 bytes)  I32 I32 I32 I32 I32 -> 
+
+        Param[0] I32
+        Param[1] I32
+        Param[2] I32
+        Param[3] I32
+        Param[4] I32
+        Local[5] I32
+
+    0 | I32Store +4 
+    1 |   Const I32 0
+    2 |   Tee Local[5]
+    3 |     I32Sub
+    4 |       I32Load +4 
+    5 |         Const I32 0
+    6 |       Const I32 48
+    7 | I32Store +44 
+    8 |   Get Local[5]
+    9 |   Get Param[0]
+   10 | I32Store +40 
+   11 |   Get Local[5]
+   12 |   Get Param[1]
+   13 | I32Store +36 
+   14 |   Get Local[5]
+   15 |   Get Param[2]
+   16 | I32Store +32 
+   17 |   Get Local[5]
+   18 |   Get Param[3]
+   19 | I32Store8 +31 
+   20 |   Get Local[5]
+   21 |   Get Param[4]
+   22 | Set Param[3]
+   23 |   Call FuncIdx[1] I32 I32 I32 -> I32 
+   24 |     I32Add
+   25 |       Get Local[5]
+   26 |       Const I32 8
+   27 |     I32Load +44 
+   28 |       Get Local[5]
+   29 |     I32Load8s +31 
+   30 |       Get Local[5]
+   31 | Call FuncIdx[2] I32 I32 I32 I32 I32 -> 
+   32 |   I32Sub
+   33 |     Tee Param[2]
+   34 |       I32Load +40 
+   35 |         Get Local[5]
+   36 |     Tee Param[4]
+   37 |       I32Load +32 
+   38 |         Get Local[5]
+   39 |   I32Sub
+   40 |     Tee Param[1]
+   41 |       I32Load +36 
+   42 |         Get Local[5]
+   43 |     Get Param[4]
+   44 |   I32Add
+   45 |     Get Param[2]
+   46 |     Get Param[4]
+   47 |   I32Add
+   48 |     Get Param[1]
+   49 |     Get Param[4]
+   50 |   Get Param[3]
+   51 | I32Store +4 
+   52 |   Const I32 0
+   53 |   I32Add
+   54 |     Get Local[5]
+   55 |     Const I32 48
+
+
+CodeSec[1]  (82 bytes)  I32 I32 I32 -> I32 
+
+        Param[0] I32
+        Param[1] I32
+        Param[2] I32
+        Local[3] I32
+
+    0 | I32Store +12 
+    1 |   Tee Local[3]
+    2 |     I32Sub
+    3 |       I32Load +4 
+    4 |         Const I32 0
+    5 |       Const I32 16
+    6 |   Get Param[0]
+    7 | I32Store +8 
+    8 |   Get Local[3]
+    9 |   Get Param[1]
+   10 | I32Store8 +7 
+   11 |   Get Local[3]
+   12 |   Get Param[2]
+   13 | I32Store8  
+   14 |   Tee Param[1]
+   15 |     I32Load +12 
+   16 |       Get Local[3]
+   17 |   Get Param[2]
+   18 | I32Store +4 
+   19 |   Get Param[1]
+   20 |   Tee Param[2]
+   21 |     I32Load +8 
+   22 |       Get Local[3]
+   23 | I32Store +8 
+   24 |   Get Param[1]
+   25 |   I32Load +8 
+   26 |     Get Param[2]
+   27 | I32Store +12 
+   28 |   Get Param[1]
+   29 |   I32Load +12 
+   30 |     I32Load +8 
+   31 |       Get Local[3]
+   32 | Get Param[1]
+
+
+CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 -> 
+
+        Param[0] I32
+        Param[1] I32
+        Param[2] I32
+        Param[3] I32
+        Param[4] I32
+        Local[5] I32
+
+    0 | I32Store +4 
+    1 |   Const I32 0
+    2 |   Tee Local[5]
+    3 |     I32Sub
+    4 |       I32Load +4 
+    5 |         Const I32 0
+    6 |       Const I32 80
+    7 | I32Store +76 
+    8 |   Get Local[5]
+    9 |   Get Param[0]
+   10 | I32Store +72 
+   11 |   Get Local[5]
+   12 |   Get Param[1]
+   13 | I32Store +68 
+   14 |   Get Local[5]
+   15 |   Get Param[2]
+   16 | I32Store +64 
+   17 |   Get Local[5]
+   18 |   Get Param[3]
+   19 | I32Store +60 
+   20 |   Get Local[5]
+   21 |   Get Param[4]
+   22 | Block 
+   23 |   BrIf[0]
+   24 |     I32Ges
+   25 |       I32Load +76 
+   26 |         Get Local[5]
+   27 |       I32Load +68 
+   28 |         Get Local[5]
+   29 |   BrIf[0]
+   30 |     I32Ges
+   31 |       I32Load +72 
+   32 |         Get Local[5]
+   33 |       I32Load +64 
+   34 |         Get Local[5]
+   35 |   BrIf[0]
+   36 |     I32Ges
+   37 |       I32Load +76 
+   38 |         Get Local[5]
+   39 |       I32Load +8 
+   40 |         I32Load +60 
+   41 |           Get Local[5]
+   42 |   BrIf[0]
+   43 |     I32Lts
+   44 |       I32Load +68 
+   45 |         Get Local[5]
+   46 |       Const I32 1
+   47 |   BrIf[0]
+   48 |     I32Ges
+   49 |       I32Load +72 
+   50 |         Get Local[5]
+   51 |       I32Load +12 
+   52 |         I32Load +60 
+   53 |           Get Local[5]
+   54 |   BrIf[0]
+   55 |     I32Lts
+   56 |       I32Load +64 
+   57 |         Get Local[5]
+   58 |       Const I32 1
+   59 |   I32Store +56 
+   60 |     Get Local[5]
+   61 |     I32Shrs
+   62 |       I32Add
+   63 |         I32Load +76 
+   64 |           Get Local[5]
+   65 |         I32Load +68 
+   66 |           Get Local[5]
+   67 |       Const I32 1
+   68 |   I32Store +52 
+   69 |     Get Local[5]
+   70 |     I32Shrs
+   71 |       I32Add
+   72 |         I32Load +72 
+   73 |           Get Local[5]
+   74 |         I32Load +64 
+   75 |           Get Local[5]
+   76 |       Const I32 1
+   77 |   Block 
+   78 |     Block 
+   79 |       BrIf[0]
+   80 |         I32Ges
+   81 |           I32Load +76 
+   82 |             Get Local[5]
+   83 |           I32Load +68 
+   84 |             Get Local[5]
+   85 |       Set Param[4]
+   86 |         I32Sub
+   87 |           I32Load +68 
+   88 |             Get Local[5]
+   89 |           I32Load +56 
+   90 |             Get Local[5]
+   91 |       Br[1]
+   92 |     Set Param[4]
+   93 |       I32Sub
+   94 |         I32Load +76 
+   95 |           Get Local[5]
+   96 |         I32Load +56 
+   97 |           Get Local[5]
+   98 |   I32Store +48 
+   99 |     Get Local[5]
+  100 |     Get Param[4]
+  101 |   Block 
+  102 |     Block 
+  103 |       BrIf[0]
+  104 |         I32Ges
+  105 |           I32Load +72 
+  106 |             Get Local[5]
+  107 |           I32Load +64 
+  108 |             Get Local[5]
+  109 |       Set Param[4]
+  110 |         I32Sub
+  111 |           I32Load +64 
+  112 |             Get Local[5]
+  113 |           I32Load +52 
+  114 |             Get Local[5]
+  115 |       Br[1]
+  116 |     Set Param[4]
+  117 |       I32Sub
+  118 |         I32Load +72 
+  119 |           Get Local[5]
+  120 |         I32Load +52 
+  121 |           Get Local[5]
+  122 |   I32Store +44 
+  123 |     Get Local[5]
+  124 |     Get Param[4]
+  125 |   I32Store8 +43 
+  126 |     Get Local[5]
+  127 |     Const I32 1
+  128 |   Block 
+  129 |     BrIf[0]
+  130 |       I32Ges
+  131 |         I32Load +48 
+  132 |           Get Local[5]
+  133 |         I32Load +44 
+  134 |           Get Local[5]
+  135 |     I32Store +36 
+  136 |       Get Local[5]
+  137 |       I32Load +48 
+  138 |         Get Local[5]
+  139 |     I32Store +48 
+  140 |       Get Local[5]
+  141 |       I32Load +44 
+  142 |         Get Local[5]
+  143 |     I32Store +44 
+  144 |       Get Local[5]
+  145 |       I32Load +36 
+  146 |         Get Local[5]
+  147 |     I32Store8 +43 
+  148 |       Get Local[5]
+  149 |       Const I32 0
+  150 |   I32Store +32 
+  151 |     Get Local[5]
+  152 |     I32Sub
+  153 |       Const I32 3
+  154 |       I32Shl
+  155 |         I32Load +48 
+  156 |           Get Local[5]
+  157 |         Const I32 1
+  158 |   I32Store +28 
+  159 |     Get Local[5]
+  160 |     Const I32 0
+  161 |   I32Store +24 
+  162 |     Get Local[5]
+  163 |     I32Load +48 
+  164 |       Get Local[5]
+  165 |   I32Store +20 
+  166 |     Get Local[5]
+  167 |     I32Load +44 
+  168 |       Get Local[5]
+  169 |   I32Store +16 
+  170 |     Get Local[5]
+  171 |     Const I32 0
+  172 |   I32Store +12 
+  173 |     Get Local[5]
+  174 |     I32Shrs
+  175 |       I32Load +48 
+  176 |         Get Local[5]
+  177 |       Const I32 1
+  178 |   I32Store +8 
+  179 |     Get Local[5]
+  180 |     I32Shrs
+  181 |       I32Load +48 
+  182 |         Get Local[5]
+  183 |       Const I32 1
+  184 |   I32Store +4 
+  185 |     Get Local[5]
+  186 |     Const I32 6
+  187 |   I32Store  
+  188 |     Get Local[5]
+  189 |     I32Sub
+  190 |       Const I32 10
+  191 |       I32Shl
+  192 |         I32Load +48 
+  193 |           Get Local[5]
+  194 |         Const I32 2
+  195 |   Loop 
+  196 |     BrIf[1]
+  197 |       I32Gts
+  198 |         I32Load +28 
+  199 |           Get Local[5]
+  200 |         I32Load +24 
+  201 |           Get Local[5]
+  202 |     Block 
+  203 |       Block 
+  204 |         BrIf[0]
+  205 |           I32Eqz
+  206 |             I32And
+  207 |               I32Load8u +43 
+  208 |                 Get Local[5]
+  209 |               Const I32 1
+  210 |         Call FuncIdx[5] I32 I32 I32 I32 -> 
+  211 |           I32Load +60 
+  212 |             Get Local[5]
+  213 |           I32Sub
+  214 |             Tee Param[4]
+  215 |               I32Load +56 
+  216 |                 Get Local[5]
+  217 |             Tee Param[3]
+  218 |               I32Load +28 
+  219 |                 Get Local[5]
+  220 |           I32Add
+  221 |             Get Param[4]
+  222 |             Get Param[3]
+  223 |           I32Add
+  224 |             I32Load +52 
+  225 |               Get Local[5]
+  226 |             I32Load +20 
+  227 |               Get Local[5]
+  228 |         Call FuncIdx[5] I32 I32 I32 I32 -> 
+  229 |           I32Load +60 
+  230 |             Get Local[5]
+  231 |           I32Sub
+  232 |             Tee Param[4]
+  233 |               I32Load +56 
+  234 |                 Get Local[5]
+  235 |             Tee Param[3]
+  236 |               I32Load +24 
+  237 |                 Get Local[5]
+  238 |           I32Add
+  239 |             Get Param[4]
+  240 |             Get Param[3]
+  241 |           I32Add
+  242 |             I32Load +52 
+  243 |               Get Local[5]
+  244 |             I32Load +16 
+  245 |               Get Local[5]
+  246 |         Call FuncIdx[5] I32 I32 I32 I32 -> 
+  247 |           I32Load +60 
+  248 |             Get Local[5]
+  249 |           I32Sub
+  250 |             Tee Param[4]
+  251 |               I32Load +56 
+  252 |                 Get Local[5]
+  253 |             Tee Param[3]
+  254 |               I32Load +28 
+  255 |                 Get Local[5]
+  256 |           I32Add
+  257 |             Get Param[4]
+  258 |             Get Param[3]
+  259 |           I32Sub
+  260 |             I32Load +52 
+  261 |               Get Local[5]
+  262 |             I32Load +20 
+  263 |               Get Local[5]
+  264 |         Call FuncIdx[5] I32 I32 I32 I32 -> 
+  265 |           I32Load +60 
+  266 |             Get Local[5]
+  267 |           I32Sub
+  268 |             Tee Param[4]
+  269 |               I32Load +56 
+  270 |                 Get Local[5]
+  271 |             Tee Param[3]
+  272 |               I32Load +24 
+  273 |                 Get Local[5]
+  274 |           I32Add
+  275 |             Get Param[4]
+  276 |             Get Param[3]
+  277 |           I32Sub
+  278 |             I32Load +52 
+  279 |               Get Local[5]
+  280 |             I32Load +16 
+  281 |               Get Local[5]
+  282 |         Br[1]
+  283 |       Call FuncIdx[5] I32 I32 I32 I32 -> 
+  284 |         I32Load +60 
+  285 |           Get Local[5]
+  286 |         I32Sub
+  287 |           Tee Param[4]
+  288 |             I32Load +56 
+  289 |               Get Local[5]
+  290 |           Tee Param[3]
+  291 |             I32Load +20 
+  292 |               Get Local[5]
+  293 |         I32Add
+  294 |           Get Param[4]
+  295 |           Get Param[3]
+  296 |         I32Add
+  297 |           I32Load +52 
+  298 |             Get Local[5]
+  299 |           I32Load +28 
+  300 |             Get Local[5]
+  301 |       Call FuncIdx[5] I32 I32 I32 I32 -> 
+  302 |         I32Load +60 
+  303 |           Get Local[5]
+  304 |         I32Sub
+  305 |           Tee Param[4]
+  306 |             I32Load +56 
+  307 |               Get Local[5]
+  308 |           Tee Param[3]
+  309 |             I32Load +16 
+  310 |               Get Local[5]
+  311 |         I32Add
+  312 |           Get Param[4]
+  313 |           Get Param[3]
+  314 |         I32Add
+  315 |           I32Load +52 
+  316 |             Get Local[5]
+  317 |           I32Load +24 
+  318 |             Get Local[5]
+  319 |       Call FuncIdx[5] I32 I32 I32 I32 -> 
+  320 |         I32Load +60 
+  321 |           Get Local[5]
+  322 |         I32Sub
+  323 |           Tee Param[4]
+  324 |             I32Load +56 
+  325 |               Get Local[5]
+  326 |           Tee Param[3]
+  327 |             I32Load +20 
+  328 |               Get Local[5]
+  329 |         I32Add
+  330 |           Get Param[4]
+  331 |           Get Param[3]
+  332 |         I32Sub
+  333 |           I32Load +52 
+  334 |             Get Local[5]
+  335 |           I32Load +28 
+  336 |             Get Local[5]
+  337 |       Call FuncIdx[5] I32 I32 I32 I32 -> 
+  338 |         I32Load +60 
+  339 |           Get Local[5]
+  340 |         I32Sub
+  341 |           Tee Param[4]
+  342 |             I32Load +56 
+  343 |               Get Local[5]
+  344 |           Tee Param[3]
+  345 |             I32Load +16 
+  346 |               Get Local[5]
+  347 |         I32Add
+  348 |           Get Param[4]
+  349 |           Get Param[3]
+  350 |         I32Sub
+  351 |           I32Load +52 
+  352 |             Get Local[5]
+  353 |           I32Load +24 
+  354 |             Get Local[5]
+  355 |     I32Store +8 
+  356 |       Get Local[5]
+  357 |       Tee Param[4]
+  358 |         I32Add
+  359 |           I32Load +8 
+  360 |             Get Local[5]
+  361 |           I32Load +44 
+  362 |             Get Local[5]
+  363 |     Block 
+  364 |       BrIf[0]
+  365 |         I32Les
+  366 |           Get Param[4]
+  367 |           I32Load +48 
+  368 |             Get Local[5]
+  369 |       I32Store +16 
+  370 |         Get Local[5]
+  371 |         I32Add
+  372 |           I32Load +16 
+  373 |             Get Local[5]
+  374 |           Const I32 1
+  375 |       I32Store +8 
+  376 |         Get Local[5]
+  377 |         I32Sub
+  378 |           I32Load +8 
+  379 |             Get Local[5]
+  380 |           I32Load +48 
+  381 |             Get Local[5]
+  382 |     Block 
+  383 |       BrIf[0]
+  384 |         I32Ges
+  385 |           I32Load +32 
+  386 |             Get Local[5]
+  387 |           Const I32 0
+  388 |       I32Store +32 
+  389 |         Get Local[5]
+  390 |         I32Add
+  391 |           I32Load +32 
+  392 |             Get Local[5]
+  393 |           I32Load +4 
+  394 |             Get Local[5]
+  395 |       I32Store +4 
+  396 |         Get Local[5]
+  397 |         I32Add
+  398 |           I32Load +4 
+  399 |             Get Local[5]
+  400 |           Const I32 4
+  401 |       I32Store  
+  402 |         Get Local[5]
+  403 |         I32Add
+  404 |           I32Load  
+  405 |             Get Local[5]
+  406 |           Const I32 4
+  407 |       I32Store +28 
+  408 |         Get Local[5]
+  409 |         I32Add
+  410 |           I32Load +28 
+  411 |             Get Local[5]
+  412 |           Const I32 1
+  413 |       Br[1]
+  414 |     I32Store +32 
+  415 |       Get Local[5]
+  416 |       I32Add
+  417 |         I32Load +32 
+  418 |           Get Local[5]
+  419 |         I32Load  
+  420 |           Get Local[5]
+  421 |     I32Store +4 
+  422 |       Get Local[5]
+  423 |       I32Add
+  424 |         I32Load +4 
+  425 |           Get Local[5]
+  426 |         Const I32 4
+  427 |     I32Store  
+  428 |       Get Local[5]
+  429 |       I32Add
+  430 |         I32Load  
+  431 |           Get Local[5]
+  432 |         Const I32 8
+  433 |     I32Store +28 
+  434 |       Get Local[5]
+  435 |       I32Add
+  436 |         I32Load +28 
+  437 |           Get Local[5]
+  438 |         Const I32 1
+  439 |     I32Store +24 
+  440 |       Get Local[5]
+  441 |       I32Add
+  442 |         I32Load +24 
+  443 |           Get Local[5]
+  444 |         Const I32 -1
+  445 |     I32Store +12 
+  446 |       Get Local[5]
+  447 |       Tee Param[4]
+  448 |         I32Add
+  449 |           I32Load +12 
+  450 |             Get Local[5]
+  451 |           I32Load +44 
+  452 |             Get Local[5]
+  453 |     BrIf[0]
+  454 |       I32Les
+  455 |         Get Param[4]
+  456 |         I32Load +48 
+  457 |           Get Local[5]
+  458 |     I32Store +20 
+  459 |       Get Local[5]
+  460 |       I32Add
+  461 |         I32Load +20 
+  462 |           Get Local[5]
+  463 |         Const I32 -1
+  464 |     I32Store +12 
+  465 |       Get Local[5]
+  466 |       I32Sub
+  467 |         I32Load +12 
+  468 |           Get Local[5]
+  469 |         I32Load +48 
+  470 |           Get Local[5]
+  471 |     Br[0]
+  472 | I32Store +4 
+  473 |   Const I32 0
+  474 |   I32Add
+  475 |     Get Local[5]
+  476 |     Const I32 80
+
+
+CodeSec[3]  (144 bytes)  -> 
+
+        Local[0] I32
+        Local[1] I32
+
+    0 | I32Store +4 
+    1 |   Const I32 0
+    2 |   Tee Local[1]
+    3 |     I32Sub
+    4 |       I32Load +4 
+    5 |         Const I32 0
+    6 |       Const I32 32
+    7 | I32Store +28 
+    8 |   Get Local[1]
+    9 |   Const I32 16
+   10 | Block 
+   11 |   Loop 
+   12 |     BrIf[1]
+   13 |       I32Geu
+   14 |         I32Load +28 
+   15 |           Get Local[1]
+   16 |         Const I32 81936
+   17 |     I32Store8  
+   18 |       Tee Local[0]
+   19 |         I32Load +28 
+   20 |           Get Local[1]
+   21 |       Const I32 0
+   22 |     I32Store +28 
+   23 |       Get Local[1]
+   24 |       I32Add
+   25 |         Get Local[0]
+   26 |         Const I32 1
+   27 |     Br[0]
+   28 | I32Store +12 
+   29 |   Get Local[1]
+   30 |   Const I32 320
+   31 | I32Store +8 
+   32 |   Get Local[1]
+   33 |   Const I32 16
+   34 | I32Store +16 
+   35 |   Get Local[1]
+   36 |   Const I32 320
+   37 | I32Store +20 
+   38 |   Get Local[1]
+   39 |   Const I32 256
+   40 | Call FuncIdx[0] I32 I32 I32 I32 I32 -> 
+   41 |   I32Add
+   42 |     Get Local[1]
+   43 |     Const I32 8
+   44 |   Const I32 160
+   45 |   Const I32 100
+   46 |   Const I32 80
+   47 |   Const I32 -1
+   48 | Call FuncIdx[0] I32 I32 I32 I32 I32 -> 
+   49 |   I32Add
+   50 |     Get Local[1]
+   51 |     Const I32 8
+   52 |   Const I32 160
+   53 |   Const I32 100
+   54 |   Const I32 40
+   55 |   Const I32 -64
+   56 | I32Store +4 
+   57 |   Const I32 0
+   58 |   I32Add
+   59 |     Get Local[1]
+   60 |     Const I32 32
+
+
+CodeSec[4]  (40 bytes)  -> I32 
+
+        Local[0] I32
+
+    0 | I32Store +4 
+    1 |   Const I32 0
+    2 |   Tee Local[0]
+    3 |     I32Sub
+    4 |       I32Load +4 
+    5 |         Const I32 0
+    6 |       Const I32 16
+    7 | I32Store +12 
+    8 |   Get Local[0]
+    9 |   Const I32 0
+   10 | Call FuncIdx[3] -> 
+   11 | I32Store +4 
+   12 |   Const I32 0
+   13 |   I32Add
+   14 |     Get Local[0]
+   15 |     Const I32 16
+   16 | Const I32 0
+
+
+CodeSec[5]  (247 bytes)  I32 I32 I32 I32 -> 
+
+        Param[0] I32
+        Param[1] I32
+        Param[2] I32
+        Param[3] I32
+        Local[4] I32
+
+    0 | I32Store +28 
+    1 |   Tee Local[4]
+    2 |     I32Sub
+    3 |       I32Load +4 
+    4 |         Const I32 0
+    5 |       Const I32 32
+    6 |   Get Param[0]
+    7 | I32Store +24 
+    8 |   Get Local[4]
+    9 |   Get Param[1]
+   10 | I32Store +20 
+   11 |   Get Local[4]
+   12 |   Get Param[2]
+   13 | I32Store +16 
+   14 |   Get Local[4]
+   15 |   Get Param[3]
+   16 | Block 
+   17 |   BrIf[0]
+   18 |     I32Lts
+   19 |       Get Param[3]
+   20 |       Const I32 0
+   21 |   BrIf[0]
+   22 |     I32Ges
+   23 |       I32Load +16 
+   24 |         Get Local[4]
+   25 |       I32Load +12 
+   26 |         Tee Param[2]
+   27 |           I32Load +28 
+   28 |             Get Local[4]
+   29 |   BrIf[0]
+   30 |     I32Ges
+   31 |       I32Load +24 
+   32 |         Get Local[4]
+   33 |       I32Load +20 
+   34 |         Get Local[4]
+   35 |   BrIf[0]
+   36 |     I32Ges
+   37 |       I32Load +24 
+   38 |         Get Local[4]
+   39 |       I32Load +8 
+   40 |         Get Param[2]
+   41 |   BrIf[0]
+   42 |     I32Lts
+   43 |       I32Load +20 
+   44 |         Get Local[4]
+   45 |       Const I32 1
+   46 |   Block 
+   47 |     BrIf[0]
+   48 |       I32Gts
+   49 |         I32Load +24 
+   50 |           Get Local[4]
+   51 |         Const I32 -1
+   52 |     I32Store +24 
+   53 |       Get Local[4]
+   54 |       Const I32 0
+   55 |   Block 
+   56 |     BrIf[0]
+   57 |       I32Les
+   58 |         I32Load +20 
+   59 |           Get Local[4]
+   60 |         I32Load +8 
+   61 |           Get Param[2]
+   62 |     I32Store +20 
+   63 |       Get Local[4]
+   64 |       I32Load +8 
+   65 |         Get Param[2]
+   66 |   I32Store +12 
+   67 |     Get Local[4]
+   68 |     Tee Param[3]
+   69 |       I32Add
+   70 |         I32Add
+   71 |           I32Load  
+   72 |             Tee Param[3]
+   73 |               I32Load +4 
+   74 |                 Get Param[2]
+   75 |           I32Mul
+   76 |             I32Load +4 
+   77 |               Get Param[3]
+   78 |             I32Load +16 
+   79 |               Get Local[4]
+   80 |         I32Load +24 
+   81 |           Get Local[4]
+   82 |   I32Store +8 
+   83 |     Get Local[4]
+   84 |     I32Add
+   85 |       Get Param[3]
+   86 |       I32Sub
+   87 |         I32Load +20 
+   88 |           Get Local[4]
+   89 |         I32Load +24 
+   90 |           Get Local[4]
+   91 |   Loop 
+   92 |     BrIf[1]
+   93 |       I32Geu
+   94 |         I32Load +12 
+   95 |           Get Local[4]
+   96 |         I32Load +8 
+   97 |           Get Local[4]
+   98 |     I32Store8  
+   99 |       Tee Param[3]
+  100 |         I32Load +12 
+  101 |           Get Local[4]
+  102 |       I32Load8u  
+  103 |         Get Param[2]
+  104 |     I32Store +12 
+  105 |       Get Local[4]
+  106 |       I32Add
+  107 |         Get Param[3]
+  108 |         Const I32 1
+  109 |     Br[0]
+
+
+--- Data section ---
+

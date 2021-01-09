@@ -2,7 +2,6 @@
 
 open WasmFileTypes
 
-
 /// A register of the 32-bit machine
 type REG32 = Reg32 of int
 
@@ -14,6 +13,31 @@ type LABELNAME = LabelName of string
 
 /// One of the general registers
 type REG = A | B | C | Y
+
+
+
+// TODO: open Arm32SpecificCrmOptimisationTypes
+
+/// These are for optimising CRM code when the target is the Arm32.
+// type Arm32SpecificCrmInstruction =
+
+
+// TODO: open X8632SpecificCrmOptimisationTypes
+
+/// These are for optimising CRM code when the target is the X86/32.
+type X8632SpecificCrmInstruction =
+
+    /// The X86 push constant instruction supporting up to a full 32-bits.
+    | X8632PushConstant of CONST32
+
+    /// Intended for:  mov [EDI+EBX+ofs],(AL | AX | EAX)
+    | X8632StoreAatEBXplusEDIplusOffset of offset:U32 * sourceRegName:string
+
+    /// (add | sub | etc) dword ptr [EBP+n],value  // Locals are always a full stack slot
+    | X8632OperateOnLocal32 of opcode:string * LocalIdx * I32
+
+
+
 
 
 
@@ -216,6 +240,18 @@ type CRMInstruction32 =
     /// Fetch 32-bits from WASM linear memory, address REG+U32, into A
     | Fetch32  of REG * U32         
 
+    // ==================================================================================
 
+    /// Not part of primary generation.  Used to optimise.
+    /// The operands are in B and A for left/right respectively.
+    /// cmpBAInstruction gives the condition.
+    | SecondaryCmpBranch of cmpBAInstruction:CRMInstruction32 * LABELNAME
 
+    // ==================================================================================
+
+    /// An x86/32-specific optimisation instruction.
+    | X8632Specific of X8632SpecificCrmInstruction
+
+    /// An Arm/32-specific optimisation instruction.
+    // TODO: | Arm32Specific of Arm32SpecificCrmInstruction
 

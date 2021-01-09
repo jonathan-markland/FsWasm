@@ -26,8 +26,7 @@ CODE> ret
 CODE> 
 CODE> align 16
 CODE> wasm_fn1:  ; export main: int
-CODE>     mov EAX,-2005440939
-CODE>     push EAX
+CODE>     push -2005440939
 CODE>     ; ~~~ register barrier ~~~
 CODE>     call wasm_fn0
 CODE>     add ESP,4
