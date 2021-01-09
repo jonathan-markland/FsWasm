@@ -65,6 +65,19 @@ let IsAssignToA = function
         -> true
     | _ -> false
 
+let IsLoadConstantToA = function
+    | Const(A,_) -> true
+    | _ -> false
+
+let IsAddBY = function
+    | Add(B,Y) -> true
+    | _ -> false
+
+let IsStoreOfAnySizeInAToB = function
+    | Store8A(B,_) -> true
+    | Store16A(B,_) -> true
+    | Store32A(B,_) -> true
+    | _ -> false
 
 
 let WherePushBarrierPop  i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPopA    a.[i+2]
@@ -111,3 +124,23 @@ let WherePushPopAroundPreservingRequiringRename i (a:CRMInstruction32[]) =
     && IsBarrier a.[i+2] 
     && IsAssignToA a.[i+3]
     && IsPopB a.[i+4]
+
+let WhereX8632LoadConstPushBarrier i (a:CRMInstruction32[]) = 
+
+    //    mov EAX,16
+    //    push EAX
+    //    ; ~~~ register barrier ~~~
+
+    IsLoadConstantToA a.[i]
+    && IsPushA a.[i+1]
+    && IsBarrier a.[i+2] 
+    
+let WhereX8632StoreIntoLinearMemory i (a:CRMInstruction32[]) = 
+
+    //     add EBX,EDI
+    //     mov [EBX],AX  // NB: EBX possibly plus an offset
+    //     ; ~~~ register barrier ~~~
+
+    IsAddBY a.[i]
+    && IsStoreOfAnySizeInAToB a.[i+1]
+    && IsBarrier a.[i+2] 

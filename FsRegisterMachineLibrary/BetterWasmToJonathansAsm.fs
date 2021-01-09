@@ -1,6 +1,5 @@
 ﻿module BetterWasmToJonathansAsm
 
-open System.Text
 open WasmFileTypes
 open WasmBetterTypes
 open CommonRegisterMachineTypes
@@ -9,6 +8,7 @@ open WasmInstructionsToCRMInstructions
 open Library
 open TextFormatting
 open BWToCRMConfigurationTypes
+open OptimiseCommonRegisterMachine
 
 
 
@@ -118,6 +118,8 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
             // point to the base of the linear memory region.
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
             [ sprintf "let Y=%s%d" AsmMemPrefix 0 ]
+        
+        | X8632Specific _ -> failwith "Unexpected usage of X86/32 optimisation!"
 
 
 
@@ -150,7 +152,8 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         { ClearParametersAfterCall = false } 
 
     let crmInstructions, updatedTranslationState = 
-        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
+        TranslateInstructionsAndApplyOptimisations
+            f m.Funcs translationState wasmToCrmTranslationConfig config id
 
     let asmSignatureOf (funcType:FuncType) =
 

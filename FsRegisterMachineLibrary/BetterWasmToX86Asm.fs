@@ -7,8 +7,8 @@ open CommonRegisterMachineTypes
 open AsmPrefixes
 open WasmInstructionsToCRMInstructions
 open Library
-open TextFormatting
 open BWToCRMConfigurationTypes
+open OptimiseCommonRegisterMachine
 
 
 
@@ -144,6 +144,15 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
             [ sprintf "mov EDI,%s%d" AsmMemPrefix 0 ]
 
+        | X8632Specific instruction ->
+            match instruction with
+                
+                | X8632PushConstant (Const32 value) 
+                    -> [ sprintf "push %d" value ] 
+
+                | X8632StoreAatEBXplusEDIplusOffset (ofs, regName) 
+                    -> translateREGU32 "mov [EDI+" B ofs ("]," + regName)
+
 
 
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
@@ -152,7 +161,8 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         { ClearParametersAfterCall = true } 
 
     let crmInstructions, updatedTranslationState = 
-        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
+        TranslateInstructionsAndApplyOptimisations
+            f m.Funcs translationState wasmToCrmTranslationConfig config OptimiseX8632
 
     let functionExportNameIfPresent = 
         match f.Export with

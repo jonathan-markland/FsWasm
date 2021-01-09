@@ -2,7 +2,6 @@
 
 open WasmFileTypes
 
-
 /// A register of the 32-bit machine
 type REG32 = Reg32 of int
 
@@ -14,6 +13,27 @@ type LABELNAME = LabelName of string
 
 /// One of the general registers
 type REG = A | B | C | Y
+
+
+
+// TODO: open Arm32SpecificCrmOptimisationTypes
+
+/// These are for optimising CRM code when the target is the Arm32.
+// type Arm32SpecificCrmInstruction =
+
+
+// TODO: open X8632SpecificCrmOptimisationTypes
+
+/// These are for optimising CRM code when the target is the X86/32.
+type X8632SpecificCrmInstruction =
+
+    /// The X86 push constant instruction supporting up to a full 32-bits.
+    | X8632PushConstant of CONST32
+
+    | X8632StoreAatEBXplusEDIplusOffset of offset:U32 * sourceRegName:string
+
+
+
 
 
 
@@ -216,6 +236,11 @@ type CRMInstruction32 =
     /// Fetch 32-bits from WASM linear memory, address REG+U32, into A
     | Fetch32  of REG * U32         
 
+    // ==================================================================================
 
+    /// An x86/32-specific optimisation instruction.
+    | X8632Specific of X8632SpecificCrmInstruction
 
+    /// An Arm/32-specific optimisation instruction.
+    // TODO: | Arm32Specific of Arm32SpecificCrmInstruction
 

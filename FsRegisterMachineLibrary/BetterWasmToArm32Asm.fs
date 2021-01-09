@@ -7,9 +7,9 @@ open CommonRegisterMachineTypes
 open AsmPrefixes
 open WasmInstructionsToCRMInstructions
 open Library
-open TextFormatting
 open ArmSupportLibrary
 open BWToCRMConfigurationTypes
+open OptimiseCommonRegisterMachine
 
 
 
@@ -160,6 +160,7 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
                 sprintf "movt R9,(%s%d shr 16)"      AsmMemPrefix 0 
             ]
 
+        | X8632Specific _ -> failwith "Unexpected usage of X86/32 optimisation!"
 
 
 let ValTypeTranslationOf = function
@@ -176,7 +177,8 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         { ClearParametersAfterCall = true } 
 
     let crmInstructions, updatedTranslationState = 
-        TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
+        TranslateInstructionsAndApplyOptimisations 
+            f m.Funcs translationState wasmToCrmTranslationConfig config id
 
     let thisFunctionCallsOut = 
         crmInstructions |> CrmInstructionsListMakesCallsOut
