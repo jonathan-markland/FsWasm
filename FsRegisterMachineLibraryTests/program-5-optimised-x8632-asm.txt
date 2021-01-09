@@ -19,10 +19,7 @@ CODE> sub ESP,16  ; loc5:int, loc6:int, loc7:int, loc8:int
 CODE>     mov EBX,[EBP+16]  ; @loc2
 CODE>     mov EAX,1
 CODE>     cmp EBX,EAX
-CODE>     setl AL
-CODE>     movzx EAX,AL
-CODE>     cmp EAX,0
-CODE>     jnz wasm_l2
+CODE>     jl  wasm_l2
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP+20]  ; @loc1
 CODE>     add EAX,1
@@ -40,10 +37,7 @@ CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EBX,[EBP+20]  ; @loc1
 CODE>     mov EAX,1
 CODE>     cmp EBX,EAX
-CODE>     setl AL
-CODE>     movzx EAX,AL
-CODE>     cmp EAX,0
-CODE>     jnz wasm_l4
+CODE>     jl  wasm_l4
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     mov [EBP-12],EAX  ; @loc7
@@ -67,10 +61,7 @@ CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,1
 CODE>     pop EBX
 CODE>     cmp EBX,EAX
-CODE>     setg AL
-CODE>     movzx EAX,AL
-CODE>     cmp EAX,0
-CODE>     jnz wasm_l5
+CODE>     jg  wasm_l5
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l4:
 CODE>     ; ~~~ register barrier ~~~

@@ -54,6 +54,22 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
             sprintf "goto [A+%s0]" AsmTableNamePrefix  // WASM 1.0 always looks in table #0
         ]
 
+    let translateSecondaryCmpBranch condInstruction (LabelName targetLabel) =
+        let compareInstruction =
+            match condInstruction with
+            | CmpEqBA           -> "cmp B,A:if z goto "
+            | CmpNeBA           -> "cmp B,A:if nz goto "
+            | CmpLtsBA          -> "cmp B,A:if < goto "
+            | CmpLtuBA          -> "cmp B,A:if << goto "
+            | CmpGtsBA          -> "cmp B,A:if > goto "
+            | CmpGtuBA          -> "cmp B,A:if >> goto "
+            | CmpLesBA          -> "cmp B,A:if <= goto "
+            | CmpLeuBA          -> "cmp B,A:if <<= goto "
+            | CmpGesBA          -> "cmp B,A:if >= goto "
+            | CmpGeuBA          -> "cmp B,A:if >>= goto "
+            | _ -> failwith "Expected a compare instruction for compare-and-branch."
+        [ compareInstruction + targetLabel ]
+
 
     match instruction with
         | Barrier               -> [ "// ~~~ register barrier ~~~" ]
@@ -118,6 +134,9 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
             // point to the base of the linear memory region.
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
             [ sprintf "let Y=%s%d" AsmMemPrefix 0 ]
+
+        | SecondaryCmpBranch (condInstruction, targetLabel) -> 
+            translateSecondaryCmpBranch condInstruction targetLabel
         
         | X8632Specific _ -> failwith "Unexpected usage of X86/32 optimisation!"
 

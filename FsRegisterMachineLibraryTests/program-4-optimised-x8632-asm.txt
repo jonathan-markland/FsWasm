@@ -71,9 +71,6 @@ CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,10
 CODE>     pop EBX
 CODE>     cmp EBX,EAX
-CODE>     setnz AL
-CODE>     movzx EAX,AL
-CODE>     cmp EAX,0
 CODE>     jnz wasm_l2
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-8]  ; @loc1

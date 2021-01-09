@@ -79,6 +79,22 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         else
             "-" + ((locNumber - paramCount) * StackSlotSizeU + StackSlotSizeU).ToString()
 
+    let translateSecondaryCmpBranch condInstruction (LabelName targetLabel) =
+        let branchInstruction =
+            match condInstruction with
+            | CmpEqBA           -> "jz  "
+            | CmpNeBA           -> "jnz "
+            | CmpLtsBA          -> "jl  "
+            | CmpLtuBA          -> "jb  "
+            | CmpGtsBA          -> "jg  "
+            | CmpGtuBA          -> "ja  "
+            | CmpLesBA          -> "jle "
+            | CmpLeuBA          -> "jbe "
+            | CmpGesBA          -> "jge "
+            | CmpGeuBA          -> "jae "
+            | _ -> failwith "Expected a compare instruction for compare-and-branch."
+        [ "cmp EBX,EAX" ; (branchInstruction + targetLabel) ]
+
 
     match instruction with
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
@@ -143,6 +159,9 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
             // point to the base of the linear memory region.
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
             [ sprintf "mov EDI,%s%d" AsmMemPrefix 0 ]
+
+        | SecondaryCmpBranch (condInstruction, targetLabel) -> 
+            translateSecondaryCmpBranch condInstruction targetLabel
 
         | X8632Specific instruction ->
             match instruction with

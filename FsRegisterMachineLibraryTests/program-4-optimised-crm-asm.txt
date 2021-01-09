@@ -59,8 +59,7 @@ CODE>     let int[@loc0]=A
 CODE>     // ~~~ register barrier ~~~
 CODE>     let A=10
 CODE>     pop B
-CODE>     cmp B,A:set nz A
-CODE>     cmp A,0:if nz goto wasm_l2
+CODE>     cmp B,A:if nz goto wasm_l2
 CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc1]
 CODE>     add A,16

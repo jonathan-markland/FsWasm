@@ -93,6 +93,23 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
             "-" + ((locNumber - paramCount) * StackSlotSizeU + StackSlotSizeU).ToString()
 
 
+    let translateSecondaryCmpBranch condInstruction (LabelName targetLabel) =
+        let branchInstruction =
+            match condInstruction with
+            | CmpEqBA           -> "beq "
+            | CmpNeBA           -> "bne "
+            | CmpLtsBA          -> "blt "
+            | CmpLtuBA          -> "blo "
+            | CmpGtsBA          -> "bgt "
+            | CmpGtuBA          -> "bhi "
+            | CmpLesBA          -> "ble "
+            | CmpLeuBA          -> "bls "
+            | CmpGesBA          -> "bge "
+            | CmpGeuBA          -> "bhs "
+            | _ -> failwith "Expected a compare instruction for compare-and-branch."
+        [ "cmp R1,R0" ; (branchInstruction + targetLabel) ]
+
+
     match instruction with
         | Barrier               -> [ "; ~~~ register barrier ~~~" ]
         | Breakpoint            -> [ "bkpt #0" ]
@@ -159,6 +176,9 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
                 sprintf "movw R9,(%s%d and 0xFFFF)"  AsmMemPrefix 0 
                 sprintf "movt R9,(%s%d shr 16)"      AsmMemPrefix 0 
             ]
+
+        | SecondaryCmpBranch (condInstruction, targetLabel) -> 
+            translateSecondaryCmpBranch condInstruction targetLabel
 
         | X8632Specific _ -> failwith "Unexpected usage of X86/32 optimisation!"
 

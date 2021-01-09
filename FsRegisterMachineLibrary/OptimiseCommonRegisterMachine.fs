@@ -30,6 +30,32 @@ let Optimise (originalList:CRMInstruction32 list) =
     // TODO: We have no traceability of what triggered.
     // TODO: Would we materially benefit from describing dependencies between optimisations?
 
+    let withCompareAndBranch branchingIfTrue (a:CRMInstruction32[]) i =
+
+        let oppositeOf = function
+            | CmpLtsBA -> CmpGesBA   | CmpGesBA -> CmpLtsBA
+            | CmpGtsBA -> CmpLesBA   | CmpLesBA -> CmpGtsBA
+            | CmpLtuBA -> CmpGeuBA   | CmpGeuBA -> CmpLtuBA
+            | CmpGtuBA -> CmpLeuBA   | CmpLeuBA -> CmpGtuBA
+            | CmpEqBA  -> CmpNeBA    | CmpNeBA  -> CmpEqBA
+            | _ -> failwith "Unexpected failure of pattern match" // should never happen
+
+        let branchToUse =
+            if branchingIfTrue then a.[i] else oppositeOf a.[i]
+
+        let targetLabel =
+            match a.[i+1] with
+                | BranchANZ labelIdx
+                | BranchAZ  labelIdx -> labelIdx
+                | _ -> failwith "Unexpected failure of pattern match" // should never happen
+
+        [|
+            SecondaryCmpBranch (branchToUse , targetLabel)
+            Barrier
+        |]
+
+                
+
     originalArray
         |> ReplaceAll 3 WherePushBarrierPop  WithEmptyList
         |> ReplaceAll 3 WherePushBarrierDrop WithEmptyList
@@ -37,6 +63,8 @@ let Optimise (originalList:CRMInstruction32 list) =
         |> ReplaceAll 4 WherePushPopAroundPreserving (fun a i -> [| a.[i+1] |])
         |> ReplaceAll 4 WherePushPopAroundRegisterBarrierAndLabel (fun a i -> [| a.[i+2] |])
         |> ReplaceAll 5 WherePushPopAroundPreservingRequiringRename (fun a i -> [| (a.[i] |> AssigningInsteadTo B) ; a.[i+3] |])
+        |> ReplaceAll 3 WhereCmpBAthenBranchANZ (withCompareAndBranch true)
+        |> ReplaceAll 3 WhereCmpBAthenBranchAZ  (withCompareAndBranch false)
         |> Array.toList
 
 

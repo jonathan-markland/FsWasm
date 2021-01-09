@@ -17,10 +17,7 @@ CODE> sub R13,R13,#16 ; sub
 CODE>     ldr R1,[R11, #+12]
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     cmp R1,R0
-CODE>     mov R0,#0
-CODE>     movlt R0,#1
-CODE>     cmp R0,#0
-CODE>     bne wasm_l2
+CODE>     blt wasm_l2
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #+16]
 CODE>     add R0,R0,#1 ; add
@@ -38,10 +35,7 @@ CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+16]
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     cmp R1,R0
-CODE>     mov R0,#0
-CODE>     movlt R0,#1
-CODE>     cmp R0,#0
-CODE>     bne wasm_l4
+CODE>     blt wasm_l4
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #-4]
 CODE>     str R0,[R11, #-12]
@@ -68,10 +62,7 @@ CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     pop {R1}
 CODE>     cmp R1,R0
-CODE>     mov R0,#0
-CODE>     movgt R0,#1
-CODE>     cmp R0,#0
-CODE>     bne wasm_l5
+CODE>     bgt wasm_l5
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l4:
 CODE>     ; ~~~ register barrier ~~~

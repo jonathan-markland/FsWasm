@@ -242,6 +242,13 @@ type CRMInstruction32 =
 
     // ==================================================================================
 
+    /// Not part of primary generation.  Used to optimise.
+    /// The operands are in B and A for left/right respectively.
+    /// cmpBAInstruction gives the condition.
+    | SecondaryCmpBranch of cmpBAInstruction:CRMInstruction32 * LABELNAME
+
+    // ==================================================================================
+
     /// An x86/32-specific optimisation instruction.
     | X8632Specific of X8632SpecificCrmInstruction
 

@@ -92,6 +92,26 @@ let IsAddSubAndOrXorAN = function
     | XorAN _ -> true
     | _ -> false
 
+let IsCmpBAGroup = function
+    | CmpEqBA     
+    | CmpNeBA     
+    | CmpLtsBA    
+    | CmpLtuBA    
+    | CmpGtsBA    
+    | CmpGtuBA    
+    | CmpLesBA    
+    | CmpLeuBA    
+    | CmpGesBA    
+    | CmpGeuBA    -> true
+    | _ -> false
+
+let IsBranchANZ = function
+    | BranchANZ _ -> true
+    | _ -> false
+
+let IsBranchAZ = function
+    | BranchAZ _ -> true
+    | _ -> false
 
 
 let WherePushBarrierPop  i (a:CRMInstruction32[]) = IsPushA a.[i] && IsBarrier a.[i+1] && IsPopA    a.[i+2]
@@ -139,6 +159,26 @@ let WherePushPopAroundPreservingRequiringRename i (a:CRMInstruction32[]) =
     && IsBarrier a.[i+2] 
     && IsAssignToA a.[i+3]
     && IsPopB a.[i+4]
+
+let WhereCmpBAthenBranchANZ i (a:CRMInstruction32[]) = 
+
+    // CmpLtsBA  (etc)
+    // BranchANZ (LabelName "wasm_l4")
+    // Barrier   // Important: This barrier implies the target at wasm_l4 also does not receive registers.
+
+    IsCmpBAGroup a.[i]
+    && IsBranchANZ a.[i+1]
+    && IsBarrier a.[i+2]
+
+let WhereCmpBAthenBranchAZ i (a:CRMInstruction32[]) = 
+
+    // CmpLtsBA  (etc)
+    // BranchAZ  (LabelName "wasm_l4")
+    // Barrier   // Important: This barrier implies the target at wasm_l4 also does not receive registers.
+
+    IsCmpBAGroup a.[i]
+    && IsBranchAZ a.[i+1]
+    && IsBarrier a.[i+2]
 
 let WhereX8632LoadConstPushBarrier i (a:CRMInstruction32[]) = 
 
