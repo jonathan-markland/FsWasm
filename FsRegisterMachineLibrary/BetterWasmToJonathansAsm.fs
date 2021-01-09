@@ -128,23 +128,26 @@ let ValTypeTranslationOf = function
     | F64Type -> failwith "Cannot translate F64 type with this simple translator"
 
 
-let WriteOutFunctionLocals writeOut (funcType:FuncType) funcLocals =
+let FunctionLocals (funcType:FuncType) funcLocals : string list =
 
     let indexOfFirstLocal = funcType.ParameterTypes.Length
 
-    funcLocals |> Array.iteri (fun arrayIndex v ->
-        let indexOfVariable = indexOfFirstLocal + arrayIndex
-        let prefixStr = 
-            match arrayIndex with 
-                | 0 -> "var "
-                | _ -> "  , "
-        writeOut (sprintf "%s@%s%d:%s" prefixStr AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v)))
+    funcLocals 
+        |> Array.toList
+        |> List.mapi (fun arrayIndex v ->
+            let indexOfVariable = indexOfFirstLocal + arrayIndex
+            let prefixStr = 
+                match arrayIndex with 
+                    | 0 -> "var "
+                    | _ -> "  , "
+            sprintf "%s@%s%d:%s" prefixStr AsmLocalNamePrefix indexOfVariable (ValTypeTranslationOf v))
 
 
 
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
-    let wasmToCrmTranslationConfig = { ClearParametersAfterCall = false } 
+    let wasmToCrmTranslationConfig = 
+        { ClearParametersAfterCall = false } 
 
     let crmInstructions, updatedTranslationState = 
         TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
@@ -166,11 +169,13 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         writeOutCode ("    " + instructionText)
 
     let branchTableStart tableLabel =
-        writeOutTables "align ptr"
-        writeOutTables (sprintf "data %s" tableLabel)
+        [
+            "align ptr"
+            sprintf "data %s" tableLabel
+        ]
 
     let branchTableItem targetLabel =
-        writeOutTables (sprintf "    ptr %s" targetLabel)
+        sprintf "    ptr %s" targetLabel
 
     let returnCommandFor (funcType:FuncType) (funcLocals:ValType[]) =
         match (funcType.ParameterTypes.Length, funcLocals.Length) with
@@ -178,11 +183,18 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
             | (_,_) -> "endproc"
 
     try
-        writeOutCode procedureCommand
-        WriteOutFunctionLocals writeOutCode f.FuncType f.Locals
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f
-        writeOutCode (returnCommandFor f.FuncType f.Locals)
-        crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
+        procedureCommand
+            |> writeOutCode
+        FunctionLocals f.FuncType f.Locals
+            |> List.iter writeOutCode
+        crmInstructions 
+            |> MapTranslatedCrmInstructions TranslateInstructionToAsmSequence f
+            |> List.iter writeInstruction
+        returnCommandFor f.FuncType f.Locals
+            |> writeOutCode
+        crmInstructions
+            |> MapBranchTablesList branchTableStart branchTableItem
+            |> List.iter writeOutTables
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
 
@@ -190,12 +202,30 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
 
 
-let WriteOutBranchToEntryLabel mems writeOut (LabelName labelName) =
-    writeOut ("procedure " + AsmEntryPointLabel)
+let branchToEntryLabel mems (LabelName labelName) =
+    ["procedure " + AsmEntryPointLabel]
+    @ if mems |> HasAnyInitDataBlocks then [sprintf "call %s" AsmInitMemoriesFuncName] else []
+    @ WriteThunkIn TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
+    @ [sprintf "goto %s" labelName]
+
+
+
+let JonathansAsmDataInitialisation mems =
+
+    let copyBlockCode i j ofsValue byteArrayLength =
+        [
+            sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue
+            sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j
+            sprintf "    let C=%d" byteArrayLength
+            "    cld rep movsb"
+        ]
+
     if mems |> HasAnyInitDataBlocks then
-        writeOut (sprintf "call %s" AsmInitMemoriesFuncName)
-    WriteThunkIn writeOut TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
-    writeOut (sprintf "goto %s" labelName)
+        [ "procedure " + AsmInitMemoriesFuncName ]
+        @ (mems |> DataInitialisationFunctionUsing copyBlockCode)
+        @ [ "ret" ]
+    else
+        []
 
 
 
@@ -216,39 +246,51 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         sprintf "    ptr %s" nameString
 
     let wasmMemVar memIndex linearMemorySize =
-        writeOutVar "global"
-        writeOutVar "    align ptr"
-        writeOutVar (sprintf "    %s%d: %d" AsmMemPrefix memIndex linearMemorySize)
+        [
+            "global"
+            "    align ptr"
+            sprintf "    %s%d: %d" AsmMemPrefix memIndex linearMemorySize
+        ]
 
     let wasmMemDataHeading memIndex =
-        writeOutData (sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex)
+        [ sprintf "// Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex ]
 
-    let wasmMemRow memIndex dataBlockIndex byteArray =
-        let writeIns s = writeOutData ("    " + s)
-        writeOutData (sprintf "data %s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex)
-        ForEachLineOfHexDumpDo "byte" "," "0x" writeIns byteArray
+    let wasmMemRow memIndex dataBlockIndex (byteArray:byte[]) : string list =
+        [ sprintf "data %s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex ]
+        @ (HexDumpList "    byte" "," "0x" byteArray)
 
-    let writeOutCopyBlockCode i j ofsValue byteArrayLength =
-        writeOutCode (sprintf "    let Y=%s%d+%d" AsmMemPrefix i ofsValue)
-        writeOutCode (sprintf "    let X=%s%d_%d" AsmMemoryNamePrefix i j)
-        writeOutCode (sprintf "    let C=%d" byteArrayLength)
-        writeOutCode          "    cld rep movsb"
-
-    let writeOutWasmGlobal globalIdxNameString initValue =
+    let wasmGlobal globalIdxNameString initValue =
         // TODO: We do nothing with the immutability information.  Could we avoid a store and hoist the constant into the code?
-        writeOutData (sprintf "data %s int %d" globalIdxNameString initValue)
+        [ sprintf "data %s int %d" globalIdxNameString initValue ]
+
+    // --- Start ---
 
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
     writeOutData ""
 
-    m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo writeOutData wasmTableHeading wasmTableRow)
-    m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
-    m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
+    m.Tables
+        |> MapAllWasmTables (MapWasmTable wasmTableHeading wasmTableRow)
+        |> List.concat
+        |> List.iter writeOutData
+    
+    m.Globals 
+        |> MapAllWasmGlobals wasmGlobal
+        |> List.concat
+        |> List.iter writeOutData
 
-    if m.Mems |> HasAnyInitDataBlocks then
-        writeOutCode ("procedure " + AsmInitMemoriesFuncName)
-        m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode
-        writeOutCode "ret"
+    m.Mems    
+        |> MapAllWasmMems (MapWasmMem1 wasmMemVar)
+        |> List.concat
+        |> List.iter writeOutVar
+
+    m.Mems    
+        |> MapAllWasmMems (MapWasmMem2 wasmMemDataHeading wasmMemRow)
+        |> List.concat
+        |> List.iter writeOutData
+
+    m.Mems 
+        |> JonathansAsmDataInitialisation 
+        |> List.iter writeOutCode
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
 
@@ -264,4 +306,6 @@ let WriteOutWasm2AsJonathansAssemblerText config headingText writeOutData writeO
         )
 
     let (TranslationConfiguration (_,_,entryPointConfig)) = config
-    WithWasmStartDo (WriteOutBranchToEntryLabel m.Mems) writeOutCode toComment m.Start m.Funcs entryPointConfig
+    
+    WasmStartCode (branchToEntryLabel m.Mems) toComment m.Start m.Funcs entryPointConfig
+        |> List.iter writeOutCode

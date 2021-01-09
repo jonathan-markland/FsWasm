@@ -1,0 +1,97 @@
+DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-4.wasm (230 bytes) 26/01/2019 18:29:18
+DATA> format binary
+DATA> use32
+DATA> org 0x40000000
+DATA> db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
+DATA> db 'I','A','3','2'    ; Indicates this is for X86/32
+DATA> dq 0x40000000         ; Origin address for this fixed executable.
+DATA> dq TotalSize          ; Total size needed for this fixed flat image
+DATA> dq wasm_entry         ; Entry point address
+VAR > align 4
+VAR > wasm_mem0: rb 65536 ; WASM linear memory reservation
+DATA> ; Data for WASM mem wasm_mem_init_data0
+DATA> wasm_mem_init_data0_0:
+DATA>     db 0x25,0x73,0x20,0x25,0x64,0x00
+DATA> wasm_mem_init_data0_1:
+DATA>     db 0x4C,0x6F,0x6F,0x70,0x20,0x69,0x74,0x65,0x72,0x61,0x74,0x69,0x6F,0x6E,0x3A,0x20
+DATA>     db 0x00
+VAR > TotalSize:
+CODE> align 16
+CODE> wasm_mem_init_all_wasm_memories:
+CODE>     mov EDI,(wasm_mem0+16)
+CODE>     mov ESI,wasm_mem_init_data0_0
+CODE>     mov ECX,6
+CODE>     cld
+CODE>     rep movsb
+CODE>     mov EDI,(wasm_mem0+32)
+CODE>     mov ESI,wasm_mem_init_data0_1
+CODE>     mov ECX,17
+CODE>     cld
+CODE>     rep movsb
+CODE> ret
+CODE> ; WASM Import: env.printf
+CODE> 
+CODE> align 16
+CODE> wasm_fn1:  ; export main: int
+CODE> push EBP
+CODE> mov EBP,ESP
+CODE> sub ESP,12  ; loc0:int, loc1:int, loc2:int
+CODE>     mov EAX,[EDI+4]
+CODE>     sub EAX,16
+CODE>     mov [EBP-8],EAX  ; @loc1
+CODE>     mov [EDI+4],EAX
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov EAX,0
+CODE>     mov [EBP-4],EAX  ; @loc0
+CODE>     ; ~~~ register barrier ~~~
+CODE>     wasm_l2:
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov EAX,[EBP-8]  ; @loc1
+CODE>     add EAX,EDI
+CODE>     mov dword ptr [EAX],32
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov EBX,[EBP-8]  ; @loc1
+CODE>     mov EAX,[EBP-4]  ; @loc0
+CODE>     add EBX,EDI
+CODE>     mov [EBX+4],EAX
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov EAX,16
+CODE>     push EAX
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov EAX,[EBP-8]  ; @loc1
+CODE>     push EAX
+CODE>     ; ~~~ register barrier ~~~
+CODE>     call wasm_fnenv_printf
+CODE>     mov EDI,wasm_mem0
+CODE>     add ESP,8
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov EAX,[EBP-4]  ; @loc0
+CODE>     add EAX,1
+CODE>     push EAX
+CODE>     mov [EBP-4],EAX  ; @loc0
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov EAX,10
+CODE>     pop EBX
+CODE>     cmp EBX,EAX
+CODE>     setnz AL
+CODE>     movzx EAX,AL
+CODE>     cmp EAX,0
+CODE>     jnz wasm_l2
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov EAX,[EBP-8]  ; @loc1
+CODE>     add EAX,16
+CODE>     mov [EDI+4],EAX
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov EAX,0
+CODE>     wasm_l1:
+CODE> mov ESP,EBP
+CODE> pop EBP
+CODE> ret
+CODE> align 16
+CODE> wasm_entry:
+CODE> pushad
+CODE> call wasm_mem_init_all_wasm_memories
+CODE> mov EDI,wasm_mem0
+CODE> call wasm_fn1
+CODE> popad
+CODE> ret

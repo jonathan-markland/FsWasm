@@ -1,4 +1,4 @@
-﻿DATA> // Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-3.wasm (214 bytes) 26/01/2019 18:16:47
+DATA> // Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-3.wasm (214 bytes) 26/01/2019 18:16:47
 DATA> 
 VAR > global
 VAR >     align ptr

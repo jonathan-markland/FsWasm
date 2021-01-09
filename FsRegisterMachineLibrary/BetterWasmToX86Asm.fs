@@ -148,7 +148,8 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
 
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
-    let wasmToCrmTranslationConfig = { ClearParametersAfterCall = true } 
+    let wasmToCrmTranslationConfig = 
+        { ClearParametersAfterCall = true } 
 
     let crmInstructions, updatedTranslationState = 
         TranslateInstructionsAndApplyOptimisations f m.Funcs translationState wasmToCrmTranslationConfig config
@@ -161,37 +162,51 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     let procedureCommand =
         sprintf "%s%d:  ; %s%s" AsmInternalFuncNamePrefix funcIndex functionExportNameIfPresent (FunctionSignatureAsComment f.FuncType)
 
-    let writeLabelAndPrologueCode f =
-        writeOutCode ""
-        writeOutCode CodeAlign
-        writeOutCode procedureCommand
+    let labelAndPrologueCode f =
+        ["" ; CodeAlign ; procedureCommand]
+        @
         if f |> HasParametersOrLocals then
-            writeOutCode "push EBP"
-            writeOutCode "mov EBP,ESP"
+            [ "push EBP" ;  "mov EBP,ESP" ]
+            @
             if f |> HasLocals then
-                writeOutCode (sprintf "sub ESP,%d  ; %s" ((f |> LocalsCount) * StackSlotSizeU) (f |> FunctionLocalsAsComment))
+                [sprintf "sub ESP,%d  ; %s" ((f |> LocalsCount) * StackSlotSizeU) (f |> FunctionLocalsAsComment)]
+            else
+                []
+        else
+            []
 
-    let writeEpilogueCode f =
+    let epilogueCode f =
         if f |> HasParametersOrLocals then
-            if f |> HasLocals then writeOutCode "mov ESP,EBP"
-            writeOutCode "pop EBP"
+            if f |> HasLocals then ["mov ESP,EBP"] else []
+            @ ["pop EBP"]
+        else
+            []
 
     let writeInstruction instructionText = 
         writeOutCode ("    " + instructionText)
 
     let branchTableStart tableLabel =
-        writeOutTables (sprintf "align %d" StackSlotSizeU)
-        writeOutTables (LabelCommand tableLabel)
+        [
+            sprintf "align %d" StackSlotSizeU
+            LabelCommand tableLabel
+        ]
 
     let branchTableItem targetLabel =
-        writeOutTables (sprintf "    dd %s" targetLabel)
+        sprintf "    dd %s" targetLabel
 
     try
-        writeLabelAndPrologueCode f
-        crmInstructions |> ForTranslatedCrmInstructionsDo writeInstruction TranslateInstructionToAsmSequence f
-        writeEpilogueCode f
-        writeOutCode "ret"
-        crmInstructions |> ForAllBranchTablesDo branchTableStart branchTableItem
+        labelAndPrologueCode f 
+            |> List.iter writeOutCode
+        crmInstructions 
+            |> MapTranslatedCrmInstructions TranslateInstructionToAsmSequence f
+            |> List.iter writeInstruction
+        epilogueCode f 
+            |> List.iter writeOutCode
+        "ret"
+            |> writeOutCode
+        crmInstructions 
+            |> MapBranchTablesList branchTableStart branchTableItem
+            |> List.iter writeOutTables
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
 
@@ -199,16 +214,63 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
 
 
 
-let WriteOutBranchToEntryLabel mems writeOut (LabelName labelName) =
-    writeOut CodeAlign
-    writeOut (LabelCommand AsmEntryPointLabel)
-    writeOut "pushad"// TODO: In lieu of finding out about the caller's convention.
+let branchToEntryLabel mems (LabelName labelName) =
+    [
+        CodeAlign
+        LabelCommand AsmEntryPointLabel
+        "pushad"// TODO: In lieu of finding out about the caller's convention.
+    ]
+    @
+    if mems |> HasAnyInitDataBlocks then [sprintf "call %s" AsmInitMemoriesFuncName] else []
+    @
+    WriteThunkIn TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
+    @
+    [
+        sprintf "call %s" labelName
+        "popad"
+        "ret"
+    ]
+
+
+
+let FilePrologue =
+    [
+        // TODO: temporary scaffold:
+        "format binary"
+        "use32"
+        "org 0x40000000"
+        "db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)"
+        "db 'I','A','3','2'    ; Indicates this is for X86/32"
+        "dq 0x40000000         ; Origin address for this fixed executable."
+        "dq TotalSize          ; Total size needed for this fixed flat image"
+        "dq wasm_entry         ; Entry point address"  // TODO: If using WasmStartEntryPointIfPresent this will fail to resolve since the entry is optional.
+    ]
+
+
+
+let X86DataInitialisation mems =
+
+    let x8632CopyBlockCode i j ofsValue byteArrayLength =
+        [
+            sprintf "    mov EDI,(%s%d+%d)" AsmMemPrefix i ofsValue
+            sprintf "    mov ESI,%s%d_%d" AsmMemoryNamePrefix i j
+            sprintf "    mov ECX,%d" byteArrayLength
+            "    cld"
+            "    rep movsb"
+        ]
+
     if mems |> HasAnyInitDataBlocks then
-        writeOut (sprintf "call %s" AsmInitMemoriesFuncName)
-    WriteThunkIn writeOut TheInitialisationFunctionMetadata TranslateInstructionToAsmSequence
-    writeOut (sprintf "call %s" labelName)
-    writeOut "popad"
-    writeOut "ret"
+        [
+            CodeAlign
+            LabelCommand AsmInitMemoriesFuncName
+        ]
+        @ (mems |> DataInitialisationFunctionUsing x8632CopyBlockCode)
+        @ 
+        [ 
+            "ret" 
+        ]
+    else
+        []
 
 
 
@@ -229,52 +291,57 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
         sprintf "    dd %s" nameString
 
     let wasmMemVar memIndex linearMemorySize =
-        writeOutVar (sprintf "align %d" StackSlotSizeU)
-        writeOutVar (sprintf "%s%d: rb %d ; WASM linear memory reservation" AsmMemPrefix memIndex linearMemorySize)
+        [
+            sprintf "align %d" StackSlotSizeU
+            sprintf "%s%d: rb %d ; WASM linear memory reservation" AsmMemPrefix memIndex linearMemorySize
+        ]
 
     let wasmMemDataHeading memIndex =
-        writeOutData (sprintf "; Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex)
+        [ sprintf "; Data for WASM mem %s%d" AsmMemoryNamePrefix memIndex ]
 
     let wasmMemRow memIndex dataBlockIndex byteArray =
-        let writeIns s = writeOutData ("    " + s)
-        writeOutData (LabelCommand (sprintf "%s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex))
-        ForEachLineOfHexDumpDo "db" "," "0x" writeIns byteArray
+        [ LabelCommand (sprintf "%s%d_%d" AsmMemoryNamePrefix memIndex dataBlockIndex) ]
+        @ (HexDumpList "    db" "," "0x" byteArray)
 
-    let writeOutCopyBlockCode i j ofsValue byteArrayLength =
-        writeOutCode (sprintf "    mov EDI,(%s%d+%d)" AsmMemPrefix i ofsValue)
-        writeOutCode (sprintf "    mov ESI,%s%d_%d" AsmMemoryNamePrefix i j)
-        writeOutCode (sprintf "    mov ECX,%d" byteArrayLength)
-        writeOutCode          "    cld"
-        writeOutCode          "    rep movsb"
-
-    let writeOutWasmGlobal globalIdxNameString initValue =
-        writeOutData (LabelCommand globalIdxNameString)
-        writeOutData (sprintf "dd %d" initValue)
+    let wasmGlobal globalIdxNameString initValue =
+        [
+            LabelCommand globalIdxNameString
+            sprintf "dd %d" initValue
+        ]
 
     // --- Start ---
 
     ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
 
-    // TODO: temporary scaffold:
-    writeOutData "format binary"
-    writeOutData "use32"
-    writeOutData "org 0x40000000"
-    writeOutData "db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)"
-    writeOutData "db 'I','A','3','2'    ; Indicates this is for X86/32"
-    writeOutData "dq 0x40000000         ; Origin address for this fixed executable."
-    writeOutData "dq TotalSize          ; Total size needed for this fixed flat image"
-    writeOutData "dq wasm_entry         ; Entry point address"  // TODO: If using WasmStartEntryPointIfPresent this will fail to resolve since the entry is optional.
+    FilePrologue
+        |> List.iter writeOutData
 
-    m.Tables  |> ForAllWasmTablesDo  (ForWasmTableDo writeOutData wasmTableHeading wasmTableRow)
-    m.Globals |> ForAllWasmGlobalsDo writeOutWasmGlobal
-    m.Mems    |> ForAllWasmMemsDo    (WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow)
-    writeOutVar (LabelCommand "TotalSize")
+    m.Tables
+        |> MapAllWasmTables (MapWasmTable wasmTableHeading wasmTableRow)
+        |> List.concat
+        |> List.iter writeOutData
+    
+    m.Globals 
+        |> MapAllWasmGlobals wasmGlobal
+        |> List.concat
+        |> List.iter writeOutData
 
-    if m.Mems |> HasAnyInitDataBlocks then
-        writeOutCode CodeAlign
-        writeOutCode (LabelCommand AsmInitMemoriesFuncName)
-        m.Mems |> ForTheDataInitialisationFunctionDo writeOutCopyBlockCode
-        writeOutCode "ret"
+    m.Mems    
+        |> MapAllWasmMems (MapWasmMem1 wasmMemVar)
+        |> List.concat
+        |> List.iter writeOutVar
+
+    m.Mems    
+        |> MapAllWasmMems (MapWasmMem2 wasmMemDataHeading wasmMemRow)
+        |> List.concat
+        |> List.iter writeOutData
+    
+    LabelCommand "TotalSize"
+        |> writeOutVar
+
+    m.Mems 
+        |> X86DataInitialisation 
+        |> List.iter writeOutCode
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
 
@@ -290,7 +357,9 @@ let WriteOutWasm2AsX86AssemblerText config headingText writeOutData writeOutCode
         )
 
     let (TranslationConfiguration (_,_,entryPointConfig)) = config
-    WithWasmStartDo (WriteOutBranchToEntryLabel m.Mems) writeOutCode toComment m.Start m.Funcs entryPointConfig
+    
+    WasmStartCode (branchToEntryLabel m.Mems) toComment m.Start m.Funcs entryPointConfig
+        |> List.iter writeOutCode
 
 
 

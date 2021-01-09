@@ -1,0 +1,73 @@
+DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-3.wasm (214 bytes) 26/01/2019 18:16:47
+DATA> format binary
+DATA> org 0x40000000
+DATA> db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
+DATA> db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit
+DATA> dd 0x40000000         ; Origin address for this fixed executable.
+DATA> dd TotalSize          ; Total size needed for this fixed flat image
+DATA> dd wasm_entry         ; Entry point address
+VAR > align 4
+VAR > wasm_mem0: rb 65536 ; WASM linear memory reservation
+DATA> ; Data for WASM mem wasm_mem_init_data0
+DATA> wasm_mem_init_data0_0:
+DATA>     db 0x25,0x73,0x00
+DATA> wasm_mem_init_data0_1:
+DATA>     db 0x48,0x65,0x6C,0x6C,0x6F,0x20,0x74,0x68,0x65,0x72,0x65,0x2C,0x20,0x74,0x68,0x69
+DATA>     db 0x73,0x20,0x69,0x73,0x20,0x61,0x20,0x74,0x65,0x73,0x74,0x21,0x00
+VAR > TotalSize:
+CODE> align 4
+CODE> wasm_arm_block_copy:
+CODE>     ldrb R3,[R0], #1
+CODE>     strb R3,[R1], #1
+CODE>     subs R2, R2, #1
+CODE>     bne wasm_arm_block_copy
+CODE>     bx lr
+CODE> align 4
+CODE> wasm_mem_init_all_wasm_memories:
+CODE>     ldr R0,wasm_mem_init_data0_0
+CODE>     ldr R1,(wasm_mem0+16)
+CODE> mov R2,#3  ; mov 3 LSL 0
+CODE>     bl wasm_arm_block_copy
+CODE>     ldr R0,wasm_mem_init_data0_1
+CODE>     ldr R1,(wasm_mem0+32)
+CODE> mov R2,#29  ; mov 29 LSL 0
+CODE>     bl wasm_arm_block_copy
+CODE> bx lr
+CODE> ; WASM Import: env.printf
+CODE> 
+CODE> wasm_fn1:  ; : int
+CODE> push {R14}
+CODE> push {R11}
+CODE> mov R11,R13
+CODE> sub R13,R13,#8 ; sub
+CODE>     ldr R0,[R9, #4]
+CODE>     sub R0,R0,#16 ; sub
+CODE>     str R0,[R11, #-4]
+CODE>     str R0,[R9, #4]
+CODE>     ; ~~~ register barrier ~~~
+CODE>     ldr R0,[R11, #-4]
+CODE>     add R0,R0,R9
+CODE>     mov R8,#32  ; mov 32 LSL 0
+CODE>     str R8,[R0]
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov R0,#16  ; mov 16 LSL 0
+CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
+CODE>     ldr R0,[R11, #-4]
+CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
+CODE>     bl wasm_fnenv_printf
+CODE>     movw R9,(wasm_mem0 and 0xFFFF)
+CODE>     movt R9,(wasm_mem0 shr 16)
+CODE>     add R13,R13,#8
+CODE>     ; ~~~ register barrier ~~~
+CODE>     ldr R0,[R11, #-4]
+CODE>     add R0,R0,#16 ; add
+CODE>     str R0,[R9, #4]
+CODE>     ; ~~~ register barrier ~~~
+CODE>     mov R0,#100  ; mov 100 LSL 0
+CODE>     wasm_l1:
+CODE> mov R13,R11
+CODE> pop {R14}
+CODE> bx lr
+CODE> ; No WASM entry point (start record) in this translation

@@ -13,6 +13,10 @@ open WasmInstructionsToCRMInstructions
 
 
 
+// TODO:  Array.toList  is used a lot, can we store lists primarily?
+
+
+
 /// Returns true if any WASM memory object within the array has
 /// any InitData blocks.
 let HasAnyInitDataBlocks mems =
@@ -26,7 +30,9 @@ let HasAnyInitDataBlocks mems =
 
 
 
-let ForEachLineOfHexDumpDo (command:string) (byteSeparator:string) (hexPrefix:string) writeLine (byteArray:byte[]) =
+let HexDumpList (command:string) (byteSeparator:string) (hexPrefix:string) (byteArray:byte[]) =
+
+    let mutable accumulator = []
 
     let sb = new StringBuilder(16 * (2 + byteSeparator.Length + hexPrefix.Length) + command.Length)
 
@@ -43,20 +49,23 @@ let ForEachLineOfHexDumpDo (command:string) (byteSeparator:string) (hexPrefix:st
 
         match c with
             | 15 -> 
-                writeLine (sb.ToString())
+                accumulator <- (sb.ToString())::accumulator
                 sb.Clear() |> ignore
             | _ -> ()
     )
 
-    if sb.Length > 0 then writeLine (sb.ToString())
+    if sb.Length > 0 then 
+        accumulator <- (sb.ToString())::accumulator
+
+    accumulator |> List.rev
 
 
 
-let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption moduleFuncsArray entryPointConfig =
+let WasmStartCode (writeOutBranchToEntryLabel:LABELNAME -> string list) toComment startOption moduleFuncsArray entryPointConfig : string list =
 
     let useFunc func =
         let labelName = FuncLabelFor func
-        writeOutBranchToEntryLabel writeOut labelName
+        writeOutBranchToEntryLabel labelName
 
     let takesParameters intFunc =
         intFunc.FuncType.ParameterTypes.Length > 0
@@ -66,7 +75,7 @@ let WithWasmStartDo writeOutBranchToEntryLabel writeOut toComment startOption mo
         | WasmStartEntryPointIfPresent ->
             match startOption with 
                 | Some func -> useFunc func
-                | None -> "No WASM entry point (start record) in this translation" |> toComment |> writeOut
+                | None -> [ "No WASM entry point (start record) in this translation" |> toComment ]
 
         | ForceEntryPoint exportFunctionName ->
             let entryFunctionOpt = moduleFuncsArray |> Array.tryPick (fun f ->
@@ -105,6 +114,11 @@ let TranslateInstructionsAndApplyOptimisations
     let crmInstructions, updatedTranslationState = 
         TranslateInstructions moduleFuncsArray translationState wasmToCrmTranslationConfig f.Body
 
+    let crmInstructions = 
+        match f.FuncType |> ReturnsSingleValue with
+            | true  -> crmInstructions @ [Pop A]
+            | false -> crmInstructions
+
     let optimisationPhase1 = 
         match outputConfig with
             | TranslationConfiguration(_,FullyOptimised,_) -> crmInstructions |> Optimise
@@ -122,57 +136,59 @@ let TranslateInstructionsAndApplyOptimisations
 
 
 /// Iterate through all of the translated versions of the function's instructions.
-let ForTranslatedCrmInstructionsDo action translate thisFunc crmInstructions =
+let MapTranslatedCrmInstructions translate thisFunc crmInstructions : string list =
+    crmInstructions 
+        |> List.map (fun crmInstruction -> translate thisFunc crmInstruction)
+        |> List.concat
 
-    // Kick off the whole thing here:
-
-    crmInstructions |> List.iter (fun crmInstruction -> translate thisFunc crmInstruction |> List.iter action)
-
-    // Handle the function's return (may need pop into A):
-
-    let returnHandlingCode = 
-        match thisFunc.FuncType |> ReturnsSingleValue with
-            | true  -> translate thisFunc (Pop A)  // TODO: not ideal construction of temporary
-            | false -> []
-
-    returnHandlingCode |> List.iter action
 
 
 
 /// Iterate all of the branch tables in the given function's instructions.
-let ForAllBranchTablesDo branchTableStart branchTableItem crmInstructions =
+let MapBranchTablesList branchTableStart branchTableItem crmInstructions : string list =
 
-    crmInstructions |> List.iter (fun instruction ->
+    crmInstructions |> List.map (fun instruction ->
 
         match instruction with
             
             | GotoIndex(LabelName tableLabel,_,_,codePointLabels) ->
-                branchTableStart tableLabel
-                codePointLabels |> Array.iter (fun (LabelName targetLabel) -> branchTableItem targetLabel)
+                let labels = 
+                    codePointLabels 
+                        |> Array.toList
+                        |> List.map (fun (LabelName targetLabel) -> branchTableItem targetLabel)
+                (branchTableStart tableLabel) @ labels
 
-            | _ -> ()
+            | _ -> []
         )
+
+        |> List.concat
 
 
 
 /// Iterate wasm table heading and content.
-let ForWasmTableDo writeOutData wasmTableHeading wasmTableRow i (t:InternalTableRecord) =
+let MapWasmTable wasmTableHeading wasmTableRow i (t:InternalTableRecord) : string list =
 
     match t.InitData.Length with
 
-        | 0 -> ()
+        | 0 -> []
 
         | 1 ->
-            wasmTableHeading i
-                |> List.iter writeOutData
+            let tableHeading : string list =
+                wasmTableHeading i
 
-            t.InitData 
-                |> Array.iter (fun elem ->
-                    let ofsExpr, funcIdxList = elem
-                    let ofsValue = StaticEvaluate ofsExpr
-                    if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
-                    funcIdxList |> Array.iter (fun funcIdx -> 
-                        writeOutData (wasmTableRow (FuncIdxNameString funcIdx))))
+            let tableBody : string list =
+                t.InitData 
+                    |> Array.toList
+                    |> List.map (fun elem ->
+                        let ofsExpr, funcIdxList = elem
+                        let ofsValue = StaticEvaluate ofsExpr
+                        if ofsValue <> 0 then failwith "Cannot translate module with TableSec table that has Elem with non-zero data initialisation offset"
+                        funcIdxList 
+                            |> Array.toList
+                            |> List.map (fun funcIdx -> wasmTableRow (FuncIdxNameString funcIdx)))
+                    |> List.concat
+
+            tableHeading @ tableBody
 
         | _ -> failwith "Cannot translate module with more than one Elem in a TableSec table"
 
@@ -181,7 +197,7 @@ let ForWasmTableDo writeOutData wasmTableHeading wasmTableRow i (t:InternalTable
 
 
 /// Do actions with WASM memory and any initialisation data blocks.
-let WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow memIndex (thisMem:InternalMemoryRecord) =
+let MapWasmMem1 wasmMemVar memIndex (thisMem:InternalMemoryRecord) =  // TODO: rename
 
     let WasmMemoryBlockMultiplier = 65536u
 
@@ -203,72 +219,97 @@ let WithWasmMemDo wasmMemVar wasmMemDataHeading wasmMemRow memIndex (thisMem:Int
 
     wasmMemVar memIndex linearMemorySize
 
+
+
+/// Do actions with WASM memory and any initialisation data blocks.
+let MapWasmMem2 wasmMemDataHeading wasmMemRow memIndex (thisMem:InternalMemoryRecord) =  // TODO: rename
+
     if thisMem.InitData.Length > 0 then
-        wasmMemDataHeading memIndex
-        thisMem.InitData |> Array.iteri (fun dataBlockIndex (_, byteArray) -> wasmMemRow memIndex dataBlockIndex byteArray)
+        let heading =
+            wasmMemDataHeading memIndex
+        let content = 
+            thisMem.InitData 
+                |> Array.toList
+                |> List.mapi (fun dataBlockIndex (_, byteArray) -> 
+                    wasmMemRow memIndex dataBlockIndex byteArray)
+                |> List.concat
+        heading @ content
+    else
+        []
 
 
 
 /// Do the action for all WASM tables, raising exception if an 
 /// imported table is seen, since these are not yet supported.
-let ForAllWasmTablesDo action tables =
+let MapAllWasmTables mapFunc tables =
 
-    tables |> Array.iteri (fun tableIndex t ->
-        match t with
-            | InternalTable2 tbl -> action tableIndex tbl
-            | ImportedTable2 tbl -> failwith "Error:  Cannot support importing a WASM 'table'.  WASM module must be self-contained."
-        )
+    tables 
+        |> Array.toList
+        |> List.mapi (fun tableIndex t ->
+            match t with
+                | InternalTable2 tbl -> mapFunc tableIndex tbl
+                | ImportedTable2 _   -> failwith "Error:  Cannot support importing a WASM 'table'.  WASM module must be self-contained."
+            )
 
 
 
 /// Do the action for all WASM globals, raising exception if an 
 /// imported global is seen, since these are not yet supported.
-let ForAllWasmGlobalsDo action globals =
+let MapAllWasmGlobals mapFunc globals =
 
-    globals |> Array.iteri (fun globalIndex g ->
+    globals 
+        |> Array.toList
+        |> List.mapi (fun globalIndex g ->
         match g with
             | InternalGlobal2 glo -> 
                 let initValue = StaticEvaluate glo.InitExpr
                 let globalIdx = GlobalIdx(U32(uint32 globalIndex))   // TODO: not ideal construction of temporary
                 let globalIdxNameString = (GlobalIdxNameString globalIdx)
-                action globalIdxNameString initValue
-            | ImportedGlobal2 glo -> failwith "Error:  Cannot support importing a WASM 'global'.  WASM module must be self-contained."
+                mapFunc globalIdxNameString initValue
+            | ImportedGlobal2 _ -> 
+                failwith "Error:  Cannot support importing a WASM 'global'.  WASM module must be self-contained."
         )
 
 
 
 /// Do the action for all WASM memories, raising exception if an 
 /// imported memory is seen, since these are not yet supported.
-let ForAllWasmMemsDo action mems =
+let MapAllWasmMems mapFunc mems =
 
-    mems |> Array.iteri (fun memIndex me ->
+    mems 
+        |> Array.toList
+        |> List.mapi (fun memIndex me ->
         match me with
-            | InternalMemory2 mem -> action memIndex mem
-            | ImportedMemory2 mem -> failwith "Error:  Cannot support importing a WASM 'memory'.  WASM module must be self-contained."
+            | InternalMemory2 mem -> mapFunc memIndex mem
+            | ImportedMemory2 _   -> failwith "Error:  Cannot support importing a WASM 'memory'.  WASM module must be self-contained."
         )
-
 
 
 /// Generate the initialisation function that arranges the statically-initialised
 /// data blocks in the memory space.
-let ForTheDataInitialisationFunctionDo writeOutCopyBlockCode (mems:Memory[]) =
+let DataInitialisationFunctionUsing copyBlockCode (mems:Memory[]) : string list =
 
-    let writeOutDataCopyCommand i (thisMem:InternalMemoryRecord) =
+    let dataCopyCode i (thisMem:InternalMemoryRecord) =
         if i<>0 then failwith "Cannot translate WASM module with more than one Linear Memory"
-        thisMem.InitData |> Array.iteri (fun j elem ->
+        thisMem.InitData 
+            |> Array.toList
+            |> List.mapi (fun j elem ->
                 let ofsExpr, byteArray = elem
                 let ofsValue = StaticEvaluate ofsExpr
-                writeOutCopyBlockCode i j ofsValue byteArray.Length
+                copyBlockCode i j ofsValue byteArray.Length
             )
+            |> List.concat
 
-    mems |> ForAllWasmMemsDo writeOutDataCopyCommand
+    mems 
+        |> MapAllWasmMems dataCopyCode
+        |> List.concat
 
 
 
 /// Output the "thunk in" sequence to load the base register with the address
 /// of the WASM memory data block.
-let WriteThunkIn writeOutIns thisFunc translate =  // TODO: unfortunate amount of parameters.
-    (translate thisFunc ThunkIn) |> List.iter writeOutIns
+let WriteThunkIn thisFunc translate : string list =  // TODO: unfortunate amount of parameters.  Is this really worth it?
+    translate thisFunc ThunkIn
 
 
 
