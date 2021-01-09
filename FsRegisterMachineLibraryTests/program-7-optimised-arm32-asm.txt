@@ -1,4 +1,4 @@
-DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-7.wasm (1862 bytes) 09/01/2021 18:38:16
+DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-7.wasm (1862 bytes) 09/01/2021 21:23:30
 DATA> format binary
 DATA> org 0x40000000
 DATA> db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
@@ -112,6 +112,7 @@ CODE>     str R0,[R9, #4]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l1:
 CODE> mov R13,R11
+CODE> pop {R11}
 CODE> pop {R14}
 CODE> bx lr
 CODE> 
@@ -184,8 +185,12 @@ CODE>     add R1,R1,R9
 CODE>     str R0,[R1, #12]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #+8]
+CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l2:
+CODE>     pop {R0}
 CODE> mov R13,R11
+CODE> pop {R11}
 CODE> bx lr
 CODE> 
 CODE> wasm_fn2:  ; (loc0: int, loc1: int, loc2: int, loc3: int, loc4: int)
@@ -1215,6 +1220,7 @@ CODE>     str R0,[R9, #4]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l3:
 CODE> mov R13,R11
+CODE> pop {R11}
 CODE> pop {R14}
 CODE> bx lr
 CODE> 
@@ -1331,6 +1337,7 @@ CODE>     str R0,[R9, #4]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l15:
 CODE> mov R13,R11
+CODE> pop {R11}
 CODE> pop {R14}
 CODE> bx lr
 CODE> 
@@ -1357,8 +1364,12 @@ CODE>     add R0,R0,#16 ; add
 CODE>     str R0,[R9, #4]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#0  ; mov 0 LSL 0
+CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l18:
+CODE>     pop {R0}
 CODE> mov R13,R11
+CODE> pop {R11}
 CODE> pop {R14}
 CODE> bx lr
 CODE> 
@@ -1586,6 +1597,7 @@ CODE>     wasm_l20:
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l19:
 CODE> mov R13,R11
+CODE> pop {R11}
 CODE> bx lr
 CODE> wasm_entry:
 CODE> push {r0-r12,r14}

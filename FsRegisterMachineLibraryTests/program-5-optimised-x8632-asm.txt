@@ -51,7 +51,7 @@ CODE>     mov EBX,[EBP+12]  ; @loc3
 CODE>     mov EAX,[EBP+8]  ; @loc4
 CODE>     mov [EDI+EBX],AX
 CODE>     ; ~~~ register barrier ~~~
-CODE>     add dword ptr [EBP+12],2  ; @loc3
+CODE>     add dword [EBP+12],2  ; @loc3
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-12]  ; @loc7
 CODE>     add EAX,-1
@@ -77,7 +77,7 @@ CODE>     setg AL
 CODE>     movzx EAX,AL
 CODE>     mov [EBP+12],EAX  ; @loc3
 CODE>     ; ~~~ register barrier ~~~
-CODE>     add dword ptr [EBP+16],-1  ; @loc2
+CODE>     add dword [EBP+16],-1  ; @loc2
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP+12]  ; @loc3
 CODE>     cmp EAX,0
@@ -118,8 +118,10 @@ CODE>     ; ~~~ register barrier ~~~
 CODE>     call wasm_fn0
 CODE>     add ESP,20
 CODE>     ; ~~~ register barrier ~~~
-CODE>     mov EAX,0
+CODE>     push 0
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l6:
+CODE>     pop EAX
 CODE> ret
 CODE> align 16
 CODE> wasm_entry:

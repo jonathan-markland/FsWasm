@@ -22,7 +22,10 @@ CODE>     ; ~~~ register barrier ~~~
 CODE>     movw R10,52445
 CODE>     movt R10,43707
 CODE>     ldr R0,[R9, R10]
+CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l1:
+CODE>     pop {R0}
 CODE> pop {R11}
 CODE> bx lr
 CODE> 
@@ -34,7 +37,10 @@ CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     bl wasm_fn0
 CODE>     add R13,R13,#4
+CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l2:
+CODE>     pop {R0}
 CODE> pop {R14}
 CODE> bx lr
 CODE> ; No WASM entry point (start record) in this translation

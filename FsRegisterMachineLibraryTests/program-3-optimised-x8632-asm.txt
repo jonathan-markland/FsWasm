@@ -43,7 +43,7 @@ CODE>     mov [EDI+4],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc0
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX],32
+CODE>     mov dword [EAX],32
 CODE>     ; ~~~ register barrier ~~~
 CODE>     push 16
 CODE>     ; ~~~ register barrier ~~~
@@ -58,8 +58,10 @@ CODE>     mov EAX,[EBP-4]  ; @loc0
 CODE>     add EAX,16
 CODE>     mov [EDI+4],EAX
 CODE>     ; ~~~ register barrier ~~~
-CODE>     mov EAX,100
+CODE>     push 100
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l1:
+CODE>     pop EAX
 CODE> mov ESP,EBP
 CODE> pop EBP
 CODE> ret

@@ -66,8 +66,12 @@ CODE>     add R0,R0,#16 ; add
 CODE>     str R0,[R9, #4]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#100  ; mov 100 LSL 0
+CODE>     push {R0}
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l1:
+CODE>     pop {R0}
 CODE> mov R13,R11
+CODE> pop {R11}
 CODE> pop {R14}
 CODE> bx lr
 CODE> ; No WASM entry point (start record) in this translation

@@ -1,4 +1,4 @@
-DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-7.wasm (1862 bytes) 09/01/2021 18:38:16
+DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-7.wasm (1862 bytes) 09/01/2021 21:23:30
 DATA> format binary
 DATA> use32
 DATA> org 0x40000000
@@ -52,7 +52,7 @@ CODE>     push EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
-CODE>     movsx EAX, byte ptr [EAX+31]
+CODE>     movsx EAX, byte [EAX+31]
 CODE>     push EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     call wasm_fn1
@@ -174,7 +174,10 @@ CODE>     pop EBX
 CODE>     mov [EDI+EBX+12],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP+12]  ; @loc1
+CODE>     push EAX
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l2:
+CODE>     pop EAX
 CODE> mov ESP,EBP
 CODE> pop EBP
 CODE> ret
@@ -427,7 +430,7 @@ CODE>     mov [EDI+EBX+44],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
-CODE>     mov byte ptr [EAX+43],1
+CODE>     mov byte [EAX+43],1
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
@@ -470,7 +473,7 @@ CODE>     mov [EDI+EBX+44],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
-CODE>     mov byte ptr [EAX+43],0
+CODE>     mov byte [EAX+43],0
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l9:
 CODE>     ; ~~~ register barrier ~~~
@@ -497,7 +500,7 @@ CODE>     mov [EDI+EBX+32],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX+28],0
+CODE>     mov dword [EAX+28],0
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     push EAX
@@ -519,7 +522,7 @@ CODE>     mov [EDI+EBX+20],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX+16],0
+CODE>     mov dword [EAX+16],0
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     push EAX
@@ -555,7 +558,7 @@ CODE>     mov [EDI+EBX+8],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX+4],6
+CODE>     mov dword [EAX+4],6
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     push EAX
@@ -594,7 +597,7 @@ CODE>     jg  wasm_l4
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
-CODE>     movzx EAX, byte ptr [EAX+43]
+CODE>     movzx EAX, byte [EAX+43]
 CODE>     and EAX,1
 CODE>     cmp EAX,0
 CODE>     setz AL
@@ -1186,7 +1189,7 @@ CODE>     mov [EDI+4],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-8]  ; @loc1
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX+28],16
+CODE>     mov dword [EAX+28],16
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l17:
 CODE>     ; ~~~ register barrier ~~~
@@ -1205,7 +1208,7 @@ CODE>     add EAX,EDI
 CODE>     mov EAX,[EAX+28]
 CODE>     mov [EBP-4],EAX  ; @loc0
 CODE>     add EAX,EDI
-CODE>     mov byte ptr [EAX],0
+CODE>     mov byte [EAX],0
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-8]  ; @loc1
 CODE>     push EAX
@@ -1222,19 +1225,19 @@ CODE>     wasm_l16:
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-8]  ; @loc1
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX+12],320
+CODE>     mov dword [EAX+12],320
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-8]  ; @loc1
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX+8],16
+CODE>     mov dword [EAX+8],16
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-8]  ; @loc1
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX+16],320
+CODE>     mov dword [EAX+16],320
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-8]  ; @loc1
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX+20],256
+CODE>     mov dword [EAX+20],256
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-8]  ; @loc1
 CODE>     add EAX,8
@@ -1287,7 +1290,7 @@ CODE>     mov [EDI+4],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc0
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX+12],0
+CODE>     mov dword [EAX+12],0
 CODE>     ; ~~~ register barrier ~~~
 CODE>     call wasm_fn3
 CODE>     add ESP,0
@@ -1296,8 +1299,10 @@ CODE>     mov EAX,[EBP-4]  ; @loc0
 CODE>     add EAX,16
 CODE>     mov [EDI+4],EAX
 CODE>     ; ~~~ register barrier ~~~
-CODE>     mov EAX,0
+CODE>     push 0
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l18:
+CODE>     pop EAX
 CODE> mov ESP,EBP
 CODE> pop EBP
 CODE> ret
@@ -1394,7 +1399,7 @@ CODE>     jg  wasm_l21
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc4
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX+24],0
+CODE>     mov dword [EAX+24],0
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l21:
 CODE>     ; ~~~ register barrier ~~~
@@ -1441,7 +1446,7 @@ CODE>     mov EAX,[EBP-4]  ; @loc4
 CODE>     add EAX,EDI
 CODE>     mov EAX,[EAX+16]
 CODE>     pop EBX
-CODE>     mul EAX,EBX
+CODE>     imul EAX,EBX
 CODE>     pop EBX
 CODE>     add EAX,EBX
 CODE>     push EAX
@@ -1499,7 +1504,7 @@ CODE>     mov [EBP+8],EAX  ; @loc3
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP+12]  ; @loc2
 CODE>     add EAX,EDI
-CODE>     movzx EAX, byte ptr [EAX]
+CODE>     movzx EAX, byte [EAX]
 CODE>     pop EBX
 CODE>     mov [EDI+EBX],AL
 CODE>     ; ~~~ register barrier ~~~

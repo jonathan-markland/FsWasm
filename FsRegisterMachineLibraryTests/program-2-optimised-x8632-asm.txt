@@ -17,10 +17,13 @@ CODE> push EBP
 CODE> mov EBP,ESP
 CODE>     mov EAX,[EBP+8]  ; @loc0
 CODE>     add EAX,EDI
-CODE>     mov dword ptr [EAX],305419896
+CODE>     mov dword [EAX],305419896
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EDI+2864434397]
+CODE>     push EAX
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l1:
+CODE>     pop EAX
 CODE> pop EBP
 CODE> ret
 CODE> 
@@ -30,6 +33,9 @@ CODE>     push -2005440939
 CODE>     ; ~~~ register barrier ~~~
 CODE>     call wasm_fn0
 CODE>     add ESP,4
+CODE>     push EAX
+CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l2:
+CODE>     pop EAX
 CODE> ret
 CODE> ; No WASM entry point (start record) in this translation

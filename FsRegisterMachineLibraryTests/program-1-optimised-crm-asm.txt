@@ -5,6 +5,9 @@ VAR >     align ptr
 VAR >     wasm_mem0: 65536
 CODE> procedure wasm_fn0  // : int
 CODE>     let A=42
+CODE>     push A
+CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l1
+CODE>     pop A
 CODE> ret
 CODE> // No WASM entry point (start record) in this translation
