@@ -45,8 +45,7 @@ CODE>     mov EAX,[EBP-4]  ; @loc0
 CODE>     add EAX,EDI
 CODE>     mov dword ptr [EAX],32
 CODE>     ; ~~~ register barrier ~~~
-CODE>     mov EAX,16
-CODE>     push EAX
+CODE>     push 16
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc0
 CODE>     push EAX
