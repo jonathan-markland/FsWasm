@@ -2,11 +2,8 @@
 open System.IO
 open WasmSerialiser
 open WasmFileReader
-open BetterWasmToJonathansAsm
-open BetterWasmToX86Asm
 open BetterWasmToArm32Asm
 open BWToCRMConfigurationTypes
-open CompilationOutputting
 open WasmToBetterWasm
 
 // Main  -- TODO: This is just a spike main program, essentially.

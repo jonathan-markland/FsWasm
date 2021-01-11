@@ -203,6 +203,9 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     let thisFunctionCallsOut = 
         crmInstructions |> CrmInstructionsListMakesCallsOut
 
+    let functionUsesStackPointerAtAddress4 =
+        crmInstructions |> CrmInstructionsUsesShadowStackAtAddress4  // TODO: Ideal to collect this up front but we don't have all the translated function bodies to hand when the file header is written out.
+
     let procedureCommand = 
         sprintf "%s%d:  ; %s" AsmInternalFuncNamePrefix funcIndex (FunctionSignatureAsComment f.FuncType)
 
@@ -260,7 +263,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     with
         | _ as ex -> failwith (sprintf "Error in %s:  %s" procedureCommand (ex.ToString()))
 
-    updatedTranslationState
+    (updatedTranslationState , functionUsesStackPointerAtAddress4)
 
 
 
@@ -289,9 +292,16 @@ let FilePrologue =
         "org 0x40000000"
         "db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)"
         "db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit"
+        "dq 1                  ; File Version"
         "dd 0x40000000         ; Origin address for this fixed executable."
         "dd TotalSize          ; Total size needed for this fixed flat image"
         "dd wasm_entry         ; Entry point address"  // TODO: If using WasmStartEntryPointIfPresent this will fail to resolve since the entry is optional.
+        sprintf "dd %s%d          ; Address of WASM linear memory" AsmMemPrefix 0
+    ]
+
+let FileEpilogue moduleUsesStackPointerAtAddress4 =
+    [
+        sprintf "dw %s                  ; 1=uses stack pointer at WASM linear memory address 4"  (if moduleUsesStackPointerAtAddress4 then "1" else "0")
     ]
 
 
@@ -329,7 +339,7 @@ let ArmDataInitialisation mems =
 
 
 
-let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
+let WriteOutWasm2AsArm32AssemblerText config headingText writeFileHeader writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
 
@@ -366,10 +376,10 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
 
     // --- Start ---
 
-    ("Translation of WASM module: " + headingText) |> toComment |> writeOutData
+    ("Translation of WASM module: " + headingText) |> toComment |> writeFileHeader
 
     FilePrologue 
-        |> List.iter writeOutData
+        |> List.iter writeFileHeader
 
     m.Tables
         |> MapAllWasmTables (MapWasmTable wasmTableHeading wasmTableRow)
@@ -399,13 +409,16 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
         |> List.iter writeOutCode
 
     let mutable moduleTranslationState = ModuleTranslationState(0)  // TODO: hide ideally
+    let mutable moduleUsesStackPointerAtAddress4 = false
 
     m.Funcs |> Array.iteri (fun i g ->
         match g with 
 
             | InternalFunction2(g) -> 
-                moduleTranslationState <- 
+                let newState, usesStackPointerAtAddress4 =
                     g |> WriteOutFunctionAndBranchTables writeOutCode writeOutData i m moduleTranslationState config
+                moduleTranslationState <- newState
+                moduleUsesStackPointerAtAddress4 <- moduleUsesStackPointerAtAddress4 || usesStackPointerAtAddress4
 
             | ImportedFunction2({Import={ImportModuleName=m; ImportName=n}}) ->
                 (sprintf "WASM Import: %s.%s" m n) |> toComment |> writeOutCode 
@@ -416,6 +429,10 @@ let WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCo
     WasmStartCode (branchToEntryLabel m.Mems) toComment m.Start m.Funcs entryPointConfig
         |> List.iter writeOutCode
 
+    FileEpilogue moduleUsesStackPointerAtAddress4
+        |> List.iter writeFileHeader
+
+
 
 
 let TranslateBetterWasmToArm32AssemblerStdOut config headingText (m:Module) =
@@ -423,16 +440,19 @@ let TranslateBetterWasmToArm32AssemblerStdOut config headingText (m:Module) =
     // TODO: I didn't really like having this front-end on, but it is
     //       better to have this in the translation module than outside.
 
+    let headerStringBuilder = new StringBuilder ()
     let dataStringBuilder = new StringBuilder ()
     let varStringBuilder  = new StringBuilder ()
     let codeStringBuilder = new StringBuilder ()
 
+    let writeFileHeader s = headerStringBuilder.AppendLine(s) |> ignore
     let writeOutData s = dataStringBuilder.AppendLine(s) |> ignore
     let writeOutVar  s = varStringBuilder.AppendLine(s)  |> ignore
     let writeOutCode s = codeStringBuilder.AppendLine(s) |> ignore
 
-    WriteOutWasm2AsArm32AssemblerText config headingText writeOutData writeOutCode writeOutVar m
+    WriteOutWasm2AsArm32AssemblerText config headingText writeFileHeader writeOutData writeOutCode writeOutVar m
 
+    printf "%s" (headerStringBuilder.ToString())
     printf "%s" (dataStringBuilder.ToString())
     printf "%s" (codeStringBuilder.ToString())
     printf "%s" (varStringBuilder.ToString())

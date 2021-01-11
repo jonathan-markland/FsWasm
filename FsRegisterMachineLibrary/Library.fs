@@ -385,3 +385,17 @@ let CrmInstructionsListMakesCallsOut crmInstructions =
             | CallTableIndirect _ -> true
             | _ -> false
     )
+
+
+
+/// Returns true if the CRM instruction sequence seems to use a stack pointer
+/// at address 4 into the WASM Linear memory.  (This may not ultimately be
+/// reliable, and not all C compilers may generate this technique).
+let CrmInstructionsUsesShadowStackAtAddress4 crmInstructions =   // TODO: Is there an official way of identifying this case?
+
+    crmInstructions |> List.exists (fun crmInstruction ->
+        match crmInstruction with
+            | Fetch32 (Y, U32 4u) -> true
+            | _ -> false
+    )
+    

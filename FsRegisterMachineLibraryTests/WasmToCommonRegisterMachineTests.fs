@@ -14,10 +14,11 @@ let WasmToCommonRegisterMachineText asAssemblyLanguage config paramFileName =
     let outputInOrderOfGeneration f =
         let resizeArray = new ResizeArray<string>();
         let append s1 s2 = resizeArray.Add(sprintf "%s> %s" s1 s2) |> ignore
+        let writeOutHead s = append "HEAD" s
         let writeOutData s = append "DATA" s
         let writeOutVar  s = append "VAR " s
         let writeOutCode s = append "CODE" s
-        f writeOutData writeOutCode writeOutVar
+        f writeOutHead writeOutData writeOutCode writeOutVar
         resizeArray.ToArray()
 
     try
@@ -35,9 +36,9 @@ let WasmToCommonRegisterMachineText asAssemblyLanguage config paramFileName =
 
         let headingText = (sprintf "%s (%d bytes) %s" fileName (fileImage.Length) fileDate)
 
-        let theProcess writeOutData writeOutCode writeOutVar =
+        let theProcess writeOutHead writeOutData writeOutCode writeOutVar =
             betterWasm
-                |> asAssemblyLanguage config headingText writeOutData writeOutCode writeOutVar
+                |> asAssemblyLanguage config headingText writeOutHead writeOutData writeOutCode writeOutVar
 
         outputInOrderOfGeneration theProcess
 

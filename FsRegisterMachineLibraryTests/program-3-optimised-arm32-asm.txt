@@ -1,11 +1,13 @@
-DATA> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-3.wasm (214 bytes) 26/01/2019 18:16:47
-DATA> format binary
-DATA> org 0x40000000
-DATA> db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
-DATA> db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit
-DATA> dd 0x40000000         ; Origin address for this fixed executable.
-DATA> dd TotalSize          ; Total size needed for this fixed flat image
-DATA> dd wasm_entry         ; Entry point address
+HEAD> ; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-3.wasm (214 bytes) 26/01/2019 18:16:47
+HEAD> format binary
+HEAD> org 0x40000000
+HEAD> db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
+HEAD> db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit
+HEAD> dq 1                  ; File Version
+HEAD> dd 0x40000000         ; Origin address for this fixed executable.
+HEAD> dd TotalSize          ; Total size needed for this fixed flat image
+HEAD> dd wasm_entry         ; Entry point address
+HEAD> dd wasm_mem0          ; Address of WASM linear memory
 VAR > align 4
 VAR > wasm_mem0: rb 65536 ; WASM linear memory reservation
 DATA> ; Data for WASM mem wasm_mem_init_data0
@@ -75,3 +77,4 @@ CODE> pop {R11}
 CODE> pop {R14}
 CODE> bx lr
 CODE> ; No WASM entry point (start record) in this translation
+HEAD> dw 1                  ; 1=uses stack pointer at WASM linear memory address 4
