@@ -8,6 +8,10 @@
 
 #define BASE_ADDRESS 0x40000000
 #define REGION_SIZE  0x100000
+#define FILE_VERSION 1
+#define IMAGE_FLAGS_MASK 1
+#define IMAGE_FLAG_USES_STACK_POINTER_AT_ADDRESS_4 1
+#define LINEAR_MEMORY_LOW_MASK 0xFFFF
 
 std::string GuestProgramPath = "program-7-Arm32.bin";
 
@@ -38,9 +42,20 @@ std::vector<uint8_t> LoadFileIntoVector(const char* filename)
 uint32_t mem32(const std::vector<uint8_t>& vec, size_t index)
 {
     auto sz = vec.size();
-    if (sz >= 4 && index < (sz - 3))
+    if (sz >= 4 && index < (sz - 3))  // TODO: constants
     {
         auto p = reinterpret_cast<const uint32_t*>(&vec[index]);
+        return *p;
+    }
+    throw std::runtime_error("Invalid index.");
+}
+
+uint64_t mem64(const std::vector<uint8_t>& vec, size_t index)
+{
+    auto sz = vec.size();
+    if (sz >= 8 && index < (sz - 7))  // TODO: constants
+    {
+        auto p = reinterpret_cast<const uint64_t*>(&vec[index]);
         return *p;
     }
     throw std::runtime_error("Invalid index.");
@@ -87,29 +102,23 @@ int main()
         guestExecutableImage[6] != 'v' ||
         guestExecutableImage[7] != '7')
     {
-        std::cout << "Executable file is not for 32-bit ARMv7." << std::endl;
+        std::cout << "Executable file is not for ARMv7." << std::endl;
         return 1;
     }
 
-    if (mem32(guestExecutableImage, 0x0C) != 0)
+    if (mem64(guestExecutableImage, 0x08) != FILE_VERSION)
     {
-        std::cout << "Base address is too large for 32-bit machine." << std::endl;
+        std::cout << "File version stamp doesn't match what this host supports." << std::endl;
         return 1;
     }
 
-    if (mem32(guestExecutableImage, 0x08) != BASE_ADDRESS)
+    if (mem64(guestExecutableImage, 0x10) != BASE_ADDRESS)
     {
         std::cout << "Base address isn't 1GB.  We don't support anything else at present." << std::endl;
         return 1;
     }
 
-    if (mem32(guestExecutableImage, 0x14) != 0)
-    {
-        std::cout << "End address is too large for 32-bit machine." << std::endl;
-        return 1;
-    }
-
-    auto endAddress = mem32(guestExecutableImage, 0x10);
+    auto endAddress = mem64(guestExecutableImage, 0x18);
     if (endAddress < BASE_ADDRESS)
     {
         std::cout << "End address before the base address." << std::endl;
@@ -123,13 +132,7 @@ int main()
         return 1;
     }
 
-    if (mem32(guestExecutableImage, 0x1C) != 0)
-    {
-        std::cout << "Entry address is too large for 32-bit machine." << std::endl;
-        return 1;
-    }
-
-    auto entryAddress = mem32(guestExecutableImage, 0x18);
+    auto entryAddress = mem32(guestExecutableImage, 0x20);
     if (entryAddress < BASE_ADDRESS)
     {
         std::cout << "Entry address is before the base address." << std::endl;
@@ -143,23 +146,46 @@ int main()
         return 1;
     }
 
+    auto linearMemoryAddress = mem64(guestExecutableImage, 0x28);
+    if (linearMemoryAddress < BASE_ADDRESS)
+    {
+        std::cout << "Linear memory address is before the base address." << std::endl;
+        return 1;
+    }
+
+    auto linearMemorySize = endAddress - linearMemoryAddress;
+    if ((linearMemorySize & LINEAR_MEMORY_LOW_MASK) != 0)
+    {
+        std::cout << "Linear memory length is not multiple of 64KB." << std::endl;
+        return 1;
+    }
+
+    auto imageFlags = mem32(guestExecutableImage, 0x30);
+    if ((imageFlags | IMAGE_FLAGS_MASK) ^ IMAGE_FLAGS_MASK)
+    {
+        std::cout << "Image flags have invalid bits set." << std::endl;
+        return 1;
+    }
+
+    auto useSp4 = (imageFlags & IMAGE_FLAG_USES_STACK_POINTER_AT_ADDRESS_4) != 0;
+
     memcpy(
         (void*)BASE_ADDRESS,
         (const void*)(&guestExecutableImage[0]),
         guestExecutableImage.size());
 
-    void(*f)() = (void(*)()) entryAddress;
+    if (useSp4)
+    {
+        std::cout << "Setting the stack pointer at address 4" << std::endl;
+        auto wasmLinearMemory = (uint32_t*)linearMemoryAddress;
+        auto initialSP = linearMemorySize;
+        wasmLinearMemory[1] = (uint32_t) initialSP;
+    }
 
-    // Completely hack the shadow stack pointer, AND rely on non-validation of the WASM Linear Memory limit(!):
-    // auto p = (uint32_t *) BASE
-
-    // uint32_t stackPointerInitialAddress = REGION_SIZE - 0x13ec;
-    // auto wasmLinearMemory = (uint32_t*)0x400013ec; // TODO! HACK for program-7 only!
-    // wasmLinearMemory[1] = stackPointerInitialAddress; // HACK for program-7 only!
-
+    void(*f)() = (void(*)()) (uint32_t) entryAddress;
     f();
 
-    // SaveMemoryToFile(wasmLinearMemory, 320 * 256, "ARM32WasmCircleDrawingOptimised.bin");
+    SaveMemoryToFile((const void*)linearMemoryAddress, (uint32_t)linearMemorySize, "WASMLinearMemoryDumpPostRun.bin");
 
     return 0;
 }
