@@ -3,7 +3,7 @@ HEAD> format binary
 HEAD> org 0x40000000
 HEAD> db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
 HEAD> db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit
-HEAD> dq 1                  ; File Version
+HEAD> dd 1                  ; File Version
 HEAD> dd 0x40000000         ; Origin address for this fixed executable.
 HEAD> dd TotalSize          ; Total size needed for this fixed flat image
 HEAD> dd wasm_entry         ; Entry point address

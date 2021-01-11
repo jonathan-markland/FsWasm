@@ -1,11 +1,14 @@
-; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsWasm\bin\Debug\netcoreapp2.0\program-7.wasm (1862 bytes) 09/01/2021 18:38:16
+; Translation of WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsWasm\bin\Debug\netcoreapp2.0\program-7.wasm (1862 bytes) 09/01/2021 21:23:30
 format binary
 org 0x40000000
 db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)
 db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit
+dd 1                  ; File Version
 dd 0x40000000         ; Origin address for this fixed executable.
 dd TotalSize          ; Total size needed for this fixed flat image
 dd wasm_entry         ; Entry point address
+dd wasm_mem0          ; Address of WASM linear memory
+dw 1                  ; 1=uses stack pointer at WASM linear memory address 4
 
 wasm_fn0:  ; (loc0: int, loc1: int, loc2: int, loc3: int, loc4: int)
 push {R14}

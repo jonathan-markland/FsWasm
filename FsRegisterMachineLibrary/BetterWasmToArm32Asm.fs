@@ -292,7 +292,7 @@ let FilePrologue =
         "org 0x40000000"
         "db 'F','#','F','X'    ; Indicates Jonathan's F# Web Assembly project executable file  (Fixed address executable)"
         "db 'A','R','v','7'    ; Indicates this is for ARMv7 32-bit"
-        "dq 1                  ; File Version"
+        "dd 1                  ; File Version"
         "dd 0x40000000         ; Origin address for this fixed executable."
         "dd TotalSize          ; Total size needed for this fixed flat image"
         "dd wasm_entry         ; Entry point address"  // TODO: If using WasmStartEntryPointIfPresent this will fail to resolve since the entry is optional.

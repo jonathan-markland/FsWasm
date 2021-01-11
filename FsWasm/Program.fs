@@ -3,6 +3,7 @@ open System.IO
 open WasmSerialiser
 open WasmFileReader
 open BetterWasmToArm32Asm
+open BetterWasmToX86Asm
 open BWToCRMConfigurationTypes
 open WasmToBetterWasm
 
