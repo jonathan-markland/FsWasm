@@ -6,8 +6,8 @@
 
 --- Types section ---
 
-TypeSec[0] = F32 F64 I32 I64 -> 
-TypeSec[1] = -> I32 
+TypeSec[0] = F32 F64 I32 I64 -> ()
+TypeSec[1] = () -> I32
 
 
 --- Imports section ---
@@ -16,8 +16,8 @@ TypeSec[1] = -> I32
 
 --- Funcs section ---
 
-FuncSec[0] => F32 F64 I32 I64 -> 
-FuncSec[1] => -> I32 
+FuncSec[0] => F32 F64 I32 I64 -> ()
+FuncSec[1] => () -> I32
 
 
 --- Tables section ---
@@ -37,8 +37,8 @@ MemSec[0] => [|1|] x 64KB
 --- Exports section ---
 
 ExportSec[0] => memory == MemSec[0] => [|1|] x 64KB
-ExportSec[1] => DoSomething == FuncSec[0] => F32 F64 I32 I64 -> 
-ExportSec[2] => main == FuncSec[1] => -> I32 
+ExportSec[1] => DoSomething == FuncSec[0] => F32 F64 I32 I64 -> ()
+ExportSec[2] => main == FuncSec[1] => () -> I32
 
 
 --- Start section ---
@@ -53,7 +53,7 @@ ExportSec[2] => main == FuncSec[1] => -> I32
 
 
 
-CodeSec[0]  (98 bytes)  F32 F64 I32 I64 -> 
+CodeSec[0]  (98 bytes) F32 F64 I32 I64 -> ()
 
         Param[0] F32
         Param[1] F64
@@ -98,9 +98,9 @@ CodeSec[0]  (98 bytes)  F32 F64 I32 I64 ->
    35 |     Const I64 123456789123456L
 
 
-CodeSec[1]  (24 bytes)  -> I32 
+CodeSec[1]  (24 bytes) () -> I32
 
-    0 | Call FuncIdx[0] F32 F64 I32 I64 -> 
+    0 | Call FuncIdx[0] F32 F64 I32 I64 -> ()
     1 |   Const F32 1.0f
     2 |   Const F64 2.0
     3 |   Const I32 3

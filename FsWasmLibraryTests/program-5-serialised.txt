@@ -6,8 +6,8 @@
 
 --- Types section ---
 
-TypeSec[0] = I32 I32 I32 I32 I32 -> 
-TypeSec[1] = -> I32 
+TypeSec[0] = I32 I32 I32 I32 I32 -> ()
+TypeSec[1] = () -> I32
 
 
 --- Imports section ---
@@ -16,8 +16,8 @@ TypeSec[1] = -> I32
 
 --- Funcs section ---
 
-FuncSec[0] => I32 I32 I32 I32 I32 -> 
-FuncSec[1] => -> I32 
+FuncSec[0] => I32 I32 I32 I32 I32 -> ()
+FuncSec[1] => () -> I32
 
 
 --- Tables section ---
@@ -37,8 +37,8 @@ MemSec[0] => [|1|] x 64KB
 --- Exports section ---
 
 ExportSec[0] => memory == MemSec[0] => [|1|] x 64KB
-ExportSec[1] => UncheckedPaintRectangle == FuncSec[0] => I32 I32 I32 I32 I32 -> 
-ExportSec[2] => main == FuncSec[1] => -> I32 
+ExportSec[1] => UncheckedPaintRectangle == FuncSec[0] => I32 I32 I32 I32 I32 -> ()
+ExportSec[2] => main == FuncSec[1] => () -> I32
 
 
 --- Start section ---
@@ -53,7 +53,7 @@ ExportSec[2] => main == FuncSec[1] => -> I32
 
 
 
-CodeSec[0]  (103 bytes)  I32 I32 I32 I32 I32 -> 
+CodeSec[0]  (103 bytes) I32 I32 I32 I32 I32 -> ()
 
         Param[0] I32
         Param[1] I32
@@ -118,15 +118,15 @@ CodeSec[0]  (103 bytes)  I32 I32 I32 I32 I32 ->
    51 |       Get Param[3]
 
 
-CodeSec[1]  (35 bytes)  -> I32 
+CodeSec[1]  (35 bytes) () -> I32
 
-    0 | Call FuncIdx[0] I32 I32 I32 I32 I32 -> 
+    0 | Call FuncIdx[0] I32 I32 I32 I32 I32 -> ()
     1 |   Const I32 16
     2 |   Const I32 80
     3 |   Const I32 25
     4 |   Const I32 80
     5 |   Const I32 8001
-    6 | Call FuncIdx[0] I32 I32 I32 I32 I32 -> 
+    6 | Call FuncIdx[0] I32 I32 I32 I32 I32 -> ()
     7 |   Const I32 516
     8 |   Const I32 40
     9 |   Const I32 5

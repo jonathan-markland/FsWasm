@@ -6,11 +6,11 @@
 
 --- Types section ---
 
-TypeSec[0] = I32 I32 I32 I32 I32 -> 
-TypeSec[1] = I32 I32 I32 -> I32 
-TypeSec[2] = -> 
-TypeSec[3] = -> I32 
-TypeSec[4] = I32 I32 I32 I32 -> 
+TypeSec[0] = I32 I32 I32 I32 I32 -> ()
+TypeSec[1] = I32 I32 I32 -> I32
+TypeSec[2] = () -> ()
+TypeSec[3] = () -> I32
+TypeSec[4] = I32 I32 I32 I32 -> ()
 
 
 --- Imports section ---
@@ -19,12 +19,12 @@ TypeSec[4] = I32 I32 I32 I32 ->
 
 --- Funcs section ---
 
-FuncSec[0] => I32 I32 I32 I32 I32 -> 
-FuncSec[1] => I32 I32 I32 -> I32 
-FuncSec[2] => I32 I32 I32 I32 I32 -> 
-FuncSec[3] => -> 
-FuncSec[4] => -> I32 
-FuncSec[5] => I32 I32 I32 I32 -> 
+FuncSec[0] => I32 I32 I32 I32 I32 -> ()
+FuncSec[1] => I32 I32 I32 -> I32
+FuncSec[2] => I32 I32 I32 I32 I32 -> ()
+FuncSec[3] => () -> ()
+FuncSec[4] => () -> I32
+FuncSec[5] => I32 I32 I32 I32 -> ()
 
 
 --- Tables section ---
@@ -44,9 +44,9 @@ MemSec[0] => [|2|] x 64KB
 --- Exports section ---
 
 ExportSec[0] => memory == MemSec[0] => [|2|] x 64KB
-ExportSec[1] => _Z6CircleP7Surfaceiiic == FuncSec[0] => I32 I32 I32 I32 I32 -> 
-ExportSec[2] => _Z4Demov == FuncSec[3] => -> 
-ExportSec[3] => main == FuncSec[4] => -> I32 
+ExportSec[1] => _Z6CircleP7Surfaceiiic == FuncSec[0] => I32 I32 I32 I32 I32 -> ()
+ExportSec[2] => _Z4Demov == FuncSec[3] => () -> ()
+ExportSec[3] => main == FuncSec[4] => () -> I32
 
 
 --- Start section ---
@@ -61,7 +61,7 @@ ExportSec[3] => main == FuncSec[4] => -> I32
 
 
 
-CodeSec[0]  (122 bytes)  I32 I32 I32 I32 I32 -> 
+CodeSec[0]  (122 bytes) I32 I32 I32 I32 I32 -> ()
 
         Param[0] I32
         Param[1] I32
@@ -93,7 +93,7 @@ CodeSec[0]  (122 bytes)  I32 I32 I32 I32 I32 ->
    20 |   Get Local[5]
    21 |   Get Param[4]
    22 | Set Param[3]
-   23 |   Call FuncIdx[1] I32 I32 I32 -> I32 
+   23 |   Call FuncIdx[1] I32 I32 I32 -> I32
    24 |     I32Add
    25 |       Get Local[5]
    26 |       Const I32 8
@@ -101,7 +101,7 @@ CodeSec[0]  (122 bytes)  I32 I32 I32 I32 I32 ->
    28 |       Get Local[5]
    29 |     I32Load8s +31 
    30 |       Get Local[5]
-   31 | Call FuncIdx[2] I32 I32 I32 I32 I32 -> 
+   31 | Call FuncIdx[2] I32 I32 I32 I32 I32 -> ()
    32 |   I32Sub
    33 |     Tee Param[2]
    34 |       I32Load +40 
@@ -128,7 +128,7 @@ CodeSec[0]  (122 bytes)  I32 I32 I32 I32 I32 ->
    55 |     Const I32 48
 
 
-CodeSec[1]  (82 bytes)  I32 I32 I32 -> I32 
+CodeSec[1]  (82 bytes) I32 I32 I32 -> I32
 
         Param[0] I32
         Param[1] I32
@@ -170,7 +170,7 @@ CodeSec[1]  (82 bytes)  I32 I32 I32 -> I32
    32 | Get Param[1]
 
 
-CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 -> 
+CodeSec[2]  (1048 bytes) I32 I32 I32 I32 I32 -> ()
 
         Param[0] I32
         Param[1] I32
@@ -389,7 +389,7 @@ CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 ->
   207 |               I32Load8u +43 
   208 |                 Get Local[5]
   209 |               Const I32 1
-  210 |         Call FuncIdx[5] I32 I32 I32 I32 -> 
+  210 |         Call FuncIdx[5] I32 I32 I32 I32 -> ()
   211 |           I32Load +60 
   212 |             Get Local[5]
   213 |           I32Sub
@@ -407,7 +407,7 @@ CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 ->
   225 |               Get Local[5]
   226 |             I32Load +20 
   227 |               Get Local[5]
-  228 |         Call FuncIdx[5] I32 I32 I32 I32 -> 
+  228 |         Call FuncIdx[5] I32 I32 I32 I32 -> ()
   229 |           I32Load +60 
   230 |             Get Local[5]
   231 |           I32Sub
@@ -425,7 +425,7 @@ CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 ->
   243 |               Get Local[5]
   244 |             I32Load +16 
   245 |               Get Local[5]
-  246 |         Call FuncIdx[5] I32 I32 I32 I32 -> 
+  246 |         Call FuncIdx[5] I32 I32 I32 I32 -> ()
   247 |           I32Load +60 
   248 |             Get Local[5]
   249 |           I32Sub
@@ -443,7 +443,7 @@ CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 ->
   261 |               Get Local[5]
   262 |             I32Load +20 
   263 |               Get Local[5]
-  264 |         Call FuncIdx[5] I32 I32 I32 I32 -> 
+  264 |         Call FuncIdx[5] I32 I32 I32 I32 -> ()
   265 |           I32Load +60 
   266 |             Get Local[5]
   267 |           I32Sub
@@ -462,7 +462,7 @@ CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 ->
   280 |             I32Load +16 
   281 |               Get Local[5]
   282 |         Br[1]
-  283 |       Call FuncIdx[5] I32 I32 I32 I32 -> 
+  283 |       Call FuncIdx[5] I32 I32 I32 I32 -> ()
   284 |         I32Load +60 
   285 |           Get Local[5]
   286 |         I32Sub
@@ -480,7 +480,7 @@ CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 ->
   298 |             Get Local[5]
   299 |           I32Load +28 
   300 |             Get Local[5]
-  301 |       Call FuncIdx[5] I32 I32 I32 I32 -> 
+  301 |       Call FuncIdx[5] I32 I32 I32 I32 -> ()
   302 |         I32Load +60 
   303 |           Get Local[5]
   304 |         I32Sub
@@ -498,7 +498,7 @@ CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 ->
   316 |             Get Local[5]
   317 |           I32Load +24 
   318 |             Get Local[5]
-  319 |       Call FuncIdx[5] I32 I32 I32 I32 -> 
+  319 |       Call FuncIdx[5] I32 I32 I32 I32 -> ()
   320 |         I32Load +60 
   321 |           Get Local[5]
   322 |         I32Sub
@@ -516,7 +516,7 @@ CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 ->
   334 |             Get Local[5]
   335 |           I32Load +28 
   336 |             Get Local[5]
-  337 |       Call FuncIdx[5] I32 I32 I32 I32 -> 
+  337 |       Call FuncIdx[5] I32 I32 I32 I32 -> ()
   338 |         I32Load +60 
   339 |           Get Local[5]
   340 |         I32Sub
@@ -658,7 +658,7 @@ CodeSec[2]  (1048 bytes)  I32 I32 I32 I32 I32 ->
   476 |     Const I32 80
 
 
-CodeSec[3]  (144 bytes)  -> 
+CodeSec[3]  (144 bytes) () -> ()
 
         Local[0] I32
         Local[1] I32
@@ -703,7 +703,7 @@ CodeSec[3]  (144 bytes)  ->
    37 | I32Store +20 
    38 |   Get Local[1]
    39 |   Const I32 256
-   40 | Call FuncIdx[0] I32 I32 I32 I32 I32 -> 
+   40 | Call FuncIdx[0] I32 I32 I32 I32 I32 -> ()
    41 |   I32Add
    42 |     Get Local[1]
    43 |     Const I32 8
@@ -711,7 +711,7 @@ CodeSec[3]  (144 bytes)  ->
    45 |   Const I32 100
    46 |   Const I32 80
    47 |   Const I32 -1
-   48 | Call FuncIdx[0] I32 I32 I32 I32 I32 -> 
+   48 | Call FuncIdx[0] I32 I32 I32 I32 I32 -> ()
    49 |   I32Add
    50 |     Get Local[1]
    51 |     Const I32 8
@@ -726,7 +726,7 @@ CodeSec[3]  (144 bytes)  ->
    60 |     Const I32 32
 
 
-CodeSec[4]  (40 bytes)  -> I32 
+CodeSec[4]  (40 bytes) () -> I32
 
         Local[0] I32
 
@@ -740,7 +740,7 @@ CodeSec[4]  (40 bytes)  -> I32
     7 | I32Store +12 
     8 |   Get Local[0]
     9 |   Const I32 0
-   10 | Call FuncIdx[3] -> 
+   10 | Call FuncIdx[3] () -> ()
    11 | I32Store +4 
    12 |   Const I32 0
    13 |   I32Add
@@ -749,7 +749,7 @@ CodeSec[4]  (40 bytes)  -> I32
    16 | Const I32 0
 
 
-CodeSec[5]  (247 bytes)  I32 I32 I32 I32 -> 
+CodeSec[5]  (247 bytes) I32 I32 I32 I32 -> ()
 
         Param[0] I32
         Param[1] I32

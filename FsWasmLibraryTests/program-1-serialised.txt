@@ -6,7 +6,7 @@
 
 --- Types section ---
 
-TypeSec[0] = -> I32 
+TypeSec[0] = () -> I32
 
 
 --- Imports section ---
@@ -15,7 +15,7 @@ TypeSec[0] = -> I32
 
 --- Funcs section ---
 
-FuncSec[0] => -> I32 
+FuncSec[0] => () -> I32
 
 
 --- Tables section ---
@@ -35,7 +35,7 @@ MemSec[0] => [|1|] x 64KB
 --- Exports section ---
 
 ExportSec[0] => memory == MemSec[0] => [|1|] x 64KB
-ExportSec[1] => main == FuncSec[0] => -> I32 
+ExportSec[1] => main == FuncSec[0] => () -> I32
 
 
 --- Start section ---
@@ -50,7 +50,7 @@ ExportSec[1] => main == FuncSec[0] => -> I32
 
 
 
-CodeSec[0]  (4 bytes)  -> I32 
+CodeSec[0]  (4 bytes) () -> I32
 
     0 | Const I32 42
 
