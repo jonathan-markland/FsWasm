@@ -74,8 +74,16 @@ let FilePassesTest fileNumber optimiseMode entryPointConfig =
 let ``Program 5 to CRM optimised`` () = 
     FilePassesTest 5 Optimised (ForceEntryPoint "main")
 
+[<Fact>] 
+let ``Program 7 to CRM optimised`` () = 
+    FilePassesTest 7 Optimised (ForceEntryPoint "main")
+
 
 [<Fact>] 
 let ``Program 5 to CRM unoptimised`` () = 
     FilePassesTest 5 Unoptimised (ForceEntryPoint "main")
+
+[<Fact>] 
+let ``Program 7 to CRM unoptimised`` () = 
+    FilePassesTest 7 Unoptimised (ForceEntryPoint "main")
 
