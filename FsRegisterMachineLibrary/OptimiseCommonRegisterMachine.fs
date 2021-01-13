@@ -2,7 +2,6 @@
 
 open CommonRegisterMachineTypes
 open PrivateOptimiseCommonRegisterMachine
-open WasmFileTypes
 
 
 let WithEmptyList _ _ = [||]

@@ -5,11 +5,9 @@ open WasmSerialiser
 open WasmFileReader
 open BWToCRMConfigurationTypes
 open WasmToBetterWasm
-open Xunit
 
 
-
-let WasmToCommonRegisterMachineText asAssemblyLanguage config paramFileName =
+let private WasmToCommonRegisterMachineText asAssemblyLanguage config paramFileName =
 
     let outputInOrderOfGeneration f =
         let resizeArray = new ResizeArray<string>();
