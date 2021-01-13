@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="program-5-optimised-crm-asm.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="program-5-unoptimised-crm-asm.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="program-1-optimised-arm32-asm.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -90,6 +96,7 @@
     <Compile Include="WasmToJonathansAsmTests.fs" />
     <Compile Include="WasmToArm32Tests.fs" />
     <Compile Include="WasmToX8632Tests.fs" />
+    <Compile Include="WasmToCrmTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

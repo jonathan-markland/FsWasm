@@ -1,0 +1,213 @@
+HEAD> Common Register Machine function serialisation from WASM module: C:\Users\Jonathan\Documents\Work\FsWasm\FsRegisterMachineLibraryTests\bin\Debug\netcoreapp3.1\program-5.wasm (266 bytes) 26/01/2019 18:34:43
+CODE> function wasm_fn0:
+CODE>         FetchLoc (A, LocalIdx (U32 2u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 1)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         Pop B
+CODE>         CmpLtsBA
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         BranchANZ (LabelName "wasm_l2")
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 1u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         AddAN (I32 1)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         StoreLoc (A, LocalIdx (U32 5u))
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 3u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 1)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         Pop B
+CODE>         Let (C, A)
+CODE>         ShlBC
+CODE>         Let (A, B)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         StoreLoc (A, LocalIdx (U32 6u))
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>     wasm_l3:
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 1u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 1)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         Pop B
+CODE>         CmpLtsBA
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         BranchANZ (LabelName "wasm_l4")
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 5u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         StoreLoc (A, LocalIdx (U32 7u))
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 0u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         StoreLoc (A, LocalIdx (U32 3u))
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>     wasm_l5:
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 3u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 4u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         Pop B
+CODE>         Add (B, Y)
+CODE>         Store16A (B, U32 0u)
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 3u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         AddAN (I32 2)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         StoreLoc (A, LocalIdx (U32 3u))
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 7u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         AddAN (I32 -1)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         PeekA
+CODE>         StoreLoc (A, LocalIdx (U32 7u))
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 1)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         Pop B
+CODE>         CmpGtsBA
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         BranchANZ (LabelName "wasm_l5")
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>     wasm_l4:
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 0u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 6u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         Pop B
+CODE>         Add (A, B)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         StoreLoc (A, LocalIdx (U32 0u))
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 2u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 1)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         Pop B
+CODE>         CmpGtsBA
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         StoreLoc (A, LocalIdx (U32 3u))
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 2u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         AddAN (I32 -1)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         StoreLoc (A, LocalIdx (U32 2u))
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         FetchLoc (A, LocalIdx (U32 3u))
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Pop A
+CODE>         BranchANZ (LabelName "wasm_l3")
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>     wasm_l2:
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>     wasm_l1:
+CODE> end function
+CODE> 
+CODE> 
+CODE> 
+CODE> function wasm_fn1:
+CODE>         Const (A, Const32 16)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 80)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 25)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 80)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 8001)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         CallFunc (LabelName "wasm_fn0")
+CODE>         Drop (U32 5u)
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 516)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 40)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 5)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 80)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 20290)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         CallFunc (LabelName "wasm_fn0")
+CODE>         Drop (U32 5u)
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         Const (A, Const32 0)
+CODE>         Push A
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>     wasm_l6:
+CODE>         Pop A
+CODE> end function
+CODE> 
+CODE> 
+CODE> 
