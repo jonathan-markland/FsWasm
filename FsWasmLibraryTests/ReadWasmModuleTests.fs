@@ -26,34 +26,35 @@ let filePassesTest n =
     let inputFile = (sprintf "program-%d.wasm" n)
     let expectationFile = (sprintf "program-%d-serialised.txt" n)
     serialisationMatchesOriginalWasmFile inputFile expectationFile
+        |> Assert.True
 
 
 
 
 [<Fact>]
 let ``program (1) loads and serialises to the expected text`` () =
-    Assert.True (filePassesTest 1)
+    filePassesTest 1
 
 [<Fact>]
 let ``program (2) loads and serialises to the expected text`` () =
-    Assert.True (filePassesTest 2)
+    filePassesTest 2
 
 [<Fact>]
 let ``program (3) loads and serialises to the expected text`` () =
-    Assert.True (filePassesTest 3)
+    filePassesTest 3
 
 [<Fact>]
 let ``program (4) loads and serialises to the expected text`` () =
-    Assert.True (filePassesTest 4)
+    filePassesTest 4
 
 [<Fact>]
 let ``program (5) loads and serialises to the expected text`` () =
-    Assert.True (filePassesTest 5)
+    filePassesTest 5
 
 [<Fact>]
 let ``program (6) loads and serialises to the expected text`` () =
-    Assert.True (filePassesTest 6)
+    filePassesTest 6
 
 [<Fact>]
 let ``program (7) loads and serialises to the expected text`` () =
-    Assert.True (filePassesTest 7)
+    filePassesTest 7

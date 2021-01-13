@@ -86,7 +86,6 @@
     <Content Include="program-6-unoptimised-jonathans-asm.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="WasmToBetterWasmTests.fs" />
     <Compile Include="SharedLibrary.fs" />
     <Compile Include="WasmToJonathansAsmTests.fs" />
     <Compile Include="WasmToArm32Tests.fs" />
