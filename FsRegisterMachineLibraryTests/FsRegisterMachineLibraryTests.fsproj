@@ -87,7 +87,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="WasmToBetterWasmTests.fs" />
-    <Compile Include="WasmToCommonRegisterMachineTests.fs" />
+    <Compile Include="SharedLibrary.fs" />
+    <Compile Include="WasmToJonathansAsmTests.fs" />
+    <Compile Include="WasmToArm32Tests.fs" />
+    <Compile Include="WasmToX8632Tests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
