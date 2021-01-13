@@ -339,7 +339,7 @@ let ArmDataInitialisation mems =
 
 
 
-let WriteOutWasm2AsArm32AssemblerText config headingText writeFileHeader writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
+let WriteOutBetterWasmAsArm32AssemblerText config headingText writeFileHeader writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
 
@@ -450,7 +450,7 @@ let TranslateBetterWasmToArm32AssemblerStdOut config headingText (m:Module) =
     let writeOutVar  s = varStringBuilder.AppendLine(s)  |> ignore
     let writeOutCode s = codeStringBuilder.AppendLine(s) |> ignore
 
-    WriteOutWasm2AsArm32AssemblerText config headingText writeFileHeader writeOutData writeOutCode writeOutVar m
+    WriteOutBetterWasmAsArm32AssemblerText config headingText writeFileHeader writeOutData writeOutCode writeOutVar m
 
     printf "%s" (headerStringBuilder.ToString())
     printf "%s" (dataStringBuilder.ToString())

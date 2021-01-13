@@ -251,7 +251,7 @@ let JonathansAsmDataInitialisation mems =
 
 
 
-let WriteOutWasm2AsJonathansAssemblerText config headingText _writeOutHead writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
+let WriteOutBetterWasmAsJonathansAssemblerText config headingText _writeOutHead writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
 

@@ -315,7 +315,7 @@ let X86DataInitialisation mems =
 
 
 
-let WriteOutWasm2AsX86AssemblerText config headingText writeFileHeader writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
+let WriteOutBetterWasmAsX86AssemblerText config headingText writeFileHeader writeOutData writeOutCode writeOutVar (m:Module) =   // TODO: rename because write out to text???
 
     // Start outputting ASM language text:
 
@@ -426,7 +426,7 @@ let TranslateBetterWasmToX86AssemblerStdOut config headingText (m:Module) =
     let writeOutVar  s = varStringBuilder.AppendLine(s)  |> ignore
     let writeOutCode s = codeStringBuilder.AppendLine(s) |> ignore
 
-    WriteOutWasm2AsX86AssemblerText config headingText writeFileHeader writeOutData writeOutCode writeOutVar m
+    WriteOutBetterWasmAsX86AssemblerText config headingText writeFileHeader writeOutData writeOutCode writeOutVar m
 
     printf "%s" (headerStringBuilder.ToString())
     printf "%s" (dataStringBuilder.ToString())

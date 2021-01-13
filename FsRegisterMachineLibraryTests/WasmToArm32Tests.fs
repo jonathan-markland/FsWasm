@@ -7,7 +7,7 @@ open BWToCRMConfigurationTypes
 
 let FilePassesTestARM = 
     FilePassesTestWhenTranslatedUsing 
-        "arm32" BetterWasmToArm32Asm.WriteOutWasm2AsArm32AssemblerText
+        "arm32" BetterWasmToArm32Asm.WriteOutBetterWasmAsArm32AssemblerText
 
 
 [<Fact>] 

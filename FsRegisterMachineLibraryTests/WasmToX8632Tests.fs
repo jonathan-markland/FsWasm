@@ -7,7 +7,7 @@ open BWToCRMConfigurationTypes
 
 let FilePassesTestX86 = 
     FilePassesTestWhenTranslatedUsing 
-        "x8632" BetterWasmToX86Asm.WriteOutWasm2AsX86AssemblerText
+        "x8632" BetterWasmToX86Asm.WriteOutBetterWasmAsX86AssemblerText
 
 
 [<Fact>] 
