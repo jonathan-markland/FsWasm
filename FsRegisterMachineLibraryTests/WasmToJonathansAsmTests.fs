@@ -9,7 +9,7 @@ open BWToCRMConfigurationTypes
 
 let FilePassesTest = 
     FilePassesTestWhenTranslatedUsing 
-        "crm" BetterWasmToJonathansAsm.WriteOutWasm2AsJonathansAssemblerText
+        "jonathans" BetterWasmToJonathansAsm.WriteOutWasm2AsJonathansAssemblerText
 
 
 [<Fact>] 
