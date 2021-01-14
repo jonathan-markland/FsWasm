@@ -31,16 +31,10 @@ let Optimise (originalList:CRMInstruction32 list) =
 
     let withCompareAndBranch branchingIfTrue (a:CRMInstruction32[]) i =
 
-        let oppositeOf = function
-            | CmpLtsBA -> CmpGesBA   | CmpGesBA -> CmpLtsBA
-            | CmpGtsBA -> CmpLesBA   | CmpLesBA -> CmpGtsBA
-            | CmpLtuBA -> CmpGeuBA   | CmpGeuBA -> CmpLtuBA
-            | CmpGtuBA -> CmpLeuBA   | CmpLeuBA -> CmpGtuBA
-            | CmpEqBA  -> CmpNeBA    | CmpNeBA  -> CmpEqBA
-            | _ -> failwith "Unexpected failure of pattern match" // should never happen
-
-        let branchToUse =
-            if branchingIfTrue then a.[i] else oppositeOf a.[i]
+        let branchCondition =
+            match a.[i] with
+                | CmpBA cond -> if branchingIfTrue then cond else OppositeCrmConditionFor cond
+                | _ -> failwith "Unexpected failure of pattern match"
 
         let targetLabel =
             match a.[i+1] with
@@ -49,7 +43,7 @@ let Optimise (originalList:CRMInstruction32 list) =
                 | _ -> failwith "Unexpected failure of pattern match" // should never happen
 
         [|
-            SecondaryCmpBranch (branchToUse , targetLabel)
+            SecondaryCmpBranch (branchCondition , targetLabel)
             Barrier
         |]
 

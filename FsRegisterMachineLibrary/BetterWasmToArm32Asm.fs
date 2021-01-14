@@ -22,6 +22,23 @@ let AsmArmBlockCopyLabel = "wasm_arm_block_copy"
 
 
 
+let ArmConditionCodeFor crmCondition = 
+    match crmCondition with
+        | CrmCondEq  -> "eq"
+        | CrmCondNe  -> "ne"
+        | CrmCondLts -> "lt"
+        | CrmCondLtu -> "lo"
+        | CrmCondGts -> "gt"
+        | CrmCondGtu -> "hi"
+        | CrmCondLes -> "le"
+        | CrmCondLeu -> "ls"
+        | CrmCondGes -> "ge"
+        | CrmCondGeu -> "hs"
+
+
+
+
+
 let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction =
 
     // TODO:  These translations can assume an ArmV7 target for now.
@@ -93,20 +110,8 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
             "-" + ((locNumber - paramCount) * StackSlotSizeU + StackSlotSizeU).ToString()
 
 
-    let translateSecondaryCmpBranch condInstruction (LabelName targetLabel) =
-        let branchInstruction =
-            match condInstruction with
-            | CmpEqBA           -> "beq "
-            | CmpNeBA           -> "bne "
-            | CmpLtsBA          -> "blt "
-            | CmpLtuBA          -> "blo "
-            | CmpGtsBA          -> "bgt "
-            | CmpGtuBA          -> "bhi "
-            | CmpLesBA          -> "ble "
-            | CmpLeuBA          -> "bls "
-            | CmpGesBA          -> "bge "
-            | CmpGeuBA          -> "bhs "
-            | _ -> failwith "Expected a compare instruction for compare-and-branch."
+    let translateSecondaryCmpBranch condition (LabelName targetLabel) =
+        let branchInstruction = sprintf "b%s " (ArmConditionCodeFor condition)
         [ "cmp R1,R0" ; (branchInstruction + targetLabel) ]
 
 
@@ -142,16 +147,7 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         | ShrsBC                -> [ "asr R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
         | ShruBC                -> [ "lsr R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
         | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
-        | CmpEqBA               -> [ "cmp R1,R0" ; "mov R0,#0" ; "moveq R0,#1" ]
-        | CmpNeBA               -> [ "cmp R1,R0" ; "mov R0,#0" ; "movne R0,#1" ]
-        | CmpLtsBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movlt R0,#1" ]
-        | CmpLtuBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movlo R0,#1" ]
-        | CmpGtsBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movgt R0,#1" ]
-        | CmpGtuBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movhi R0,#1" ]
-        | CmpLesBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movle R0,#1" ]
-        | CmpLeuBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movls R0,#1" ]
-        | CmpGesBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movge R0,#1" ]
-        | CmpGeuBA              -> [ "cmp R1,R0" ; "mov R0,#0" ; "movhs R0,#1" ]
+        | CmpBA crmCond         -> [ "cmp R1,R0" ; "mov R0,#0" ; (sprintf "mov%s R0,#1" (ArmConditionCodeFor crmCond)) ]
         | CmpAZ                 -> [ "cmp R0,0"  ; "mov R0,#0" ; "moveq R0,#1" ]
         | FetchLoc(r,i)         -> [ sprintf "ldr %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
         | StoreLoc(r,i)         -> [ sprintf "str %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
@@ -177,8 +173,8 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
                 sprintf "movt R9,(%s%d shr 16)"      AsmMemPrefix 0 
             ]
 
-        | SecondaryCmpBranch (condInstruction, targetLabel) -> 
-            translateSecondaryCmpBranch condInstruction targetLabel
+        | SecondaryCmpBranch (condition, targetLabel) -> 
+            translateSecondaryCmpBranch condition targetLabel
 
         | X8632Specific _ -> failwith "Unexpected usage of X86/32 optimisation!"
 

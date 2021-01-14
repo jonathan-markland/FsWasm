@@ -17,6 +17,21 @@ let LabelCommand labelNameString =
 
 
 
+let JonathansConditionCodeFor crmCondition = 
+    match crmCondition with
+        | CrmCondEq  -> "z"
+        | CrmCondNe  -> "nz"
+        | CrmCondLts -> "<"
+        | CrmCondLtu -> "<<"
+        | CrmCondGts -> ">"
+        | CrmCondGtu -> ">>"
+        | CrmCondLes -> "<="
+        | CrmCondLeu -> "<<="
+        | CrmCondGes -> ">="
+        | CrmCondGeu -> ">>="
+
+
+
 let TranslateInstructionToAsmSequence _thisFunc instruction =
 
     // TODO:  These translations can assume a 32-bit target for now.
@@ -54,20 +69,8 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
             sprintf "goto [A+%s0]" AsmTableNamePrefix  // WASM 1.0 always looks in table #0
         ]
 
-    let translateSecondaryCmpBranch condInstruction (LabelName targetLabel) =
-        let compareInstruction =
-            match condInstruction with
-            | CmpEqBA           -> "cmp B,A:if z goto "
-            | CmpNeBA           -> "cmp B,A:if nz goto "
-            | CmpLtsBA          -> "cmp B,A:if < goto "
-            | CmpLtuBA          -> "cmp B,A:if << goto "
-            | CmpGtsBA          -> "cmp B,A:if > goto "
-            | CmpGtuBA          -> "cmp B,A:if >> goto "
-            | CmpLesBA          -> "cmp B,A:if <= goto "
-            | CmpLeuBA          -> "cmp B,A:if <<= goto "
-            | CmpGesBA          -> "cmp B,A:if >= goto "
-            | CmpGeuBA          -> "cmp B,A:if >>= goto "
-            | _ -> failwith "Expected a compare instruction for compare-and-branch."
+    let translateSecondaryCmpBranch condition (LabelName targetLabel) =
+        let compareInstruction = sprintf "cmp B,A:if %s goto " (JonathansConditionCodeFor condition)
         [ compareInstruction + targetLabel ]
 
 
@@ -103,16 +106,7 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         | ShrsBC                -> [ "sar B,C" ]
         | ShruBC                -> [ "shr B,C" ]
         | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
-        | CmpEqBA               -> [ "cmp B,A:set z A" ]
-        | CmpNeBA               -> [ "cmp B,A:set nz A" ]
-        | CmpLtsBA              -> [ "cmp B,A:set < A" ]
-        | CmpLtuBA              -> [ "cmp B,A:set << A" ]
-        | CmpGtsBA              -> [ "cmp B,A:set > A" ]
-        | CmpGtuBA              -> [ "cmp B,A:set >> A" ]
-        | CmpLesBA              -> [ "cmp B,A:set <= A" ]
-        | CmpLeuBA              -> [ "cmp B,A:set <<= A" ]
-        | CmpGesBA              -> [ "cmp B,A:set >= A" ]
-        | CmpGeuBA              -> [ "cmp B,A:set >>= A" ]
+        | CmpBA crmCond         -> [ sprintf "cmp B,A:set %s A" (JonathansConditionCodeFor crmCond) ]
         | CmpAZ                 -> [ "cmp A,0:set z A" ]
         | FetchLoc(r,i)         -> [ sprintf "let %s=int[@%s]" (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
         | StoreLoc(r,i)         -> [ sprintf "let int[@%s]=%s" (LocalIdxNameString i) (regNameOf r) ]  // TODO: Assumes 32-bit target
@@ -135,8 +129,8 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
             [ sprintf "let Y=%s%d" AsmMemPrefix 0 ]
 
-        | SecondaryCmpBranch (condInstruction, targetLabel) -> 
-            translateSecondaryCmpBranch condInstruction targetLabel
+        | SecondaryCmpBranch (condition, targetLabel) -> 
+            translateSecondaryCmpBranch condition targetLabel
         
         | X8632Specific _ -> failwith "Unexpected usage of X86/32 optimisation!"
 

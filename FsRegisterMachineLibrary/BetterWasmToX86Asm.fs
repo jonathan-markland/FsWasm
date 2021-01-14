@@ -13,15 +13,23 @@ open OptimiseCommonRegisterMachine
 
 
 let StackSlotSizeU = 4u
-
-
-
-let LabelCommand labelNameString = 
-    labelNameString + ":"
-
-
-
+let LabelCommand labelNameString = labelNameString + ":"
 let CodeAlign = "align 16"
+
+
+
+let X86ConditionCodeFor crmCondition = 
+    match crmCondition with
+        | CrmCondEq  -> "z "   // (We can probably get away with the spaces)
+        | CrmCondNe  -> "nz"
+        | CrmCondLts -> "l "
+        | CrmCondLtu -> "b "
+        | CrmCondGts -> "g "
+        | CrmCondGtu -> "a "
+        | CrmCondLes -> "le"
+        | CrmCondLeu -> "be"
+        | CrmCondGes -> "ge"
+        | CrmCondGeu -> "ae"
 
 
 
@@ -79,20 +87,8 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         else
             "-" + ((locNumber - paramCount) * StackSlotSizeU + StackSlotSizeU).ToString()
 
-    let translateSecondaryCmpBranch condInstruction (LabelName targetLabel) =
-        let branchInstruction =
-            match condInstruction with
-            | CmpEqBA           -> "jz  "
-            | CmpNeBA           -> "jnz "
-            | CmpLtsBA          -> "jl  "
-            | CmpLtuBA          -> "jb  "
-            | CmpGtsBA          -> "jg  "
-            | CmpGtuBA          -> "ja  "
-            | CmpLesBA          -> "jle "
-            | CmpLeuBA          -> "jbe "
-            | CmpGesBA          -> "jge "
-            | CmpGeuBA          -> "jae "
-            | _ -> failwith "Expected a compare instruction for compare-and-branch."
+    let translateSecondaryCmpBranch condition (LabelName targetLabel) =
+        let branchInstruction = sprintf "j%s " (X86ConditionCodeFor condition)
         [ "cmp EBX,EAX" ; (branchInstruction + targetLabel) ]
 
 
@@ -128,16 +124,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | ShrsBC                -> [ "sar EBX,CL" ]
         | ShruBC                -> [ "shr EBX,CL" ]
         | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
-        | CmpEqBA               -> [ "cmp EBX,EAX" ; "setz AL"  ; "movzx EAX,AL" ]
-        | CmpNeBA               -> [ "cmp EBX,EAX" ; "setnz AL" ; "movzx EAX,AL" ]
-        | CmpLtsBA              -> [ "cmp EBX,EAX" ; "setl AL"  ; "movzx EAX,AL" ]
-        | CmpLtuBA              -> [ "cmp EBX,EAX" ; "setb AL"  ; "movzx EAX,AL" ]
-        | CmpGtsBA              -> [ "cmp EBX,EAX" ; "setg AL"  ; "movzx EAX,AL" ]
-        | CmpGtuBA              -> [ "cmp EBX,EAX" ; "seta AL"  ; "movzx EAX,AL" ]
-        | CmpLesBA              -> [ "cmp EBX,EAX" ; "setle AL" ; "movzx EAX,AL" ]
-        | CmpLeuBA              -> [ "cmp EBX,EAX" ; "setbe AL" ; "movzx EAX,AL" ]
-        | CmpGesBA              -> [ "cmp EBX,EAX" ; "setge AL" ; "movzx EAX,AL" ]
-        | CmpGeuBA              -> [ "cmp EBX,EAX" ; "setae AL" ; "movzx EAX,AL" ]
+        | CmpBA crmCond         -> [ "cmp EBX,EAX" ; (sprintf "set%s AL" (X86ConditionCodeFor crmCond)) ; "movzx EAX,AL" ]
         | CmpAZ                 -> [ "cmp EAX,0"   ; "setz AL"  ; "movzx EAX,AL" ]
         | FetchLoc(r,i)         -> [ sprintf "mov %s,[EBP%s]  ; @%s" (regNameOf r) (frameOffsetForLoc i) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
         | StoreLoc(r,i)         -> [ sprintf "mov [EBP%s],%s  ; @%s" (frameOffsetForLoc i) (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
@@ -160,8 +147,8 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
             [ sprintf "mov EDI,%s%d" AsmMemPrefix 0 ]
 
-        | SecondaryCmpBranch (condInstruction, targetLabel) -> 
-            translateSecondaryCmpBranch condInstruction targetLabel
+        | SecondaryCmpBranch (condition, targetLabel) -> 
+            translateSecondaryCmpBranch condition targetLabel
 
         | X8632Specific instruction ->
             match instruction with

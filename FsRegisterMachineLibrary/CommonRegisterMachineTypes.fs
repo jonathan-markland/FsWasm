@@ -38,10 +38,56 @@ type X8632SpecificCrmInstruction =
 
 
 
+/// Common Register Machine condition codes
+type CRMCondition =
+
+    /// Equal
+    | CrmCondEq
+
+    /// Not Equal
+    | CrmCondNe
+
+    /// Less-than (signed)
+    | CrmCondLts
+
+    /// Less-than (unsigned)
+    | CrmCondLtu  
+
+    /// Greater-than (signed)
+    | CrmCondGts   
+
+    /// Greater-than (unsigned)
+    | CrmCondGtu
+
+    /// Less-than-or-equal (signed)
+    | CrmCondLes    
+
+    /// Less-than-or-equal (unsigned)
+    | CrmCondLeu    
+
+    /// Greater-than-or-equal (signed)
+    | CrmCondGes    
+
+    /// Greater-than-or-equal (unsigned)
+    | CrmCondGeu    
 
 
 
-/// A 32-bit register machine instruction
+
+let OppositeCrmConditionFor crmCondition =
+    match crmCondition with
+    | CrmCondLts -> CrmCondGes   | CrmCondGes -> CrmCondLts
+    | CrmCondGts -> CrmCondLes   | CrmCondLes -> CrmCondGts
+    | CrmCondLtu -> CrmCondGeu   | CrmCondGeu -> CrmCondLtu
+    | CrmCondGtu -> CrmCondLeu   | CrmCondLeu -> CrmCondGtu
+    | CrmCondEq  -> CrmCondNe    | CrmCondNe  -> CrmCondEq
+
+
+
+
+
+/// A 32-bit register machine instruction.
+/// All of these need supporting on a new architecture, except those "Specific" ones.
 type CRMInstruction32 =
 
     /// Thunk In.  (Loads Y register to point to linear memory in this implementation).
@@ -157,38 +203,10 @@ type CRMInstruction32 =
     | RotrBC
 
 
-    /// Set A=1 when B == A, else set A=0
-    | CmpEqBA     
+    /// Compare B and A for the given condition, 
+    /// with B on the left, A on the right.
+    | CmpBA of CRMCondition
     
-    /// Set A=1 when B <> A, else set A=0
-    | CmpNeBA     
-    
-    /// Set A=1 when (signed   B) < (signed   A) , else set A=0
-    | CmpLtsBA    
-    
-    /// Set A=1 when (unsigned B) < (unsigned A) , else set A=0
-    | CmpLtuBA    
-    
-    /// Set A=1 when (signed   B) > (signed   A) , else set A=0
-    | CmpGtsBA    
-
-    
-    /// Set A=1 when (unsigned B) > (unsigned A) , else set A=0
-    | CmpGtuBA    
-    
-    /// Set A=1 when (signed   B) <= (signed   A), else set A=0
-    | CmpLesBA    
-    
-    /// Set A=1 when (unsigned B) <= (unsigned A), else set A=0
-    | CmpLeuBA    
-    
-    /// Set A=1 when (signed   B) >= (signed   A), else set A=0
-    | CmpGesBA    
-    
-    /// Set A=1 when (unsigned B) >= (unsigned A), else set A=0
-    | CmpGeuBA    
-
-
     /// Set A=1 when A == 0, else set A=0
     | CmpAZ                        
 
@@ -244,8 +262,7 @@ type CRMInstruction32 =
 
     /// Not part of primary generation.  Used to optimise.
     /// The operands are in B and A for left/right respectively.
-    /// cmpBAInstruction gives the condition.
-    | SecondaryCmpBranch of cmpBAInstruction:CRMInstruction32 * LABELNAME
+    | SecondaryCmpBranch of CRMCondition * LABELNAME
 
     // ==================================================================================
 

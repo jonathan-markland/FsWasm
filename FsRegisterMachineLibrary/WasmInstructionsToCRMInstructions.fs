@@ -317,16 +317,16 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
 
             | I32Eqz(operand) -> (translateInstr operand) @ [ Pop A ; CmpAZ ; Push A ; Barrier ]
 
-            | I32Eq(a,b)   -> compareOp a b CmpEqBA 
-            | I32Ne(a,b)   -> compareOp a b CmpNeBA
-            | I32Lts(a,b)  -> compareOp a b CmpLtsBA
-            | I32Ltu(a,b)  -> compareOp a b CmpLtuBA
-            | I32Gts(a,b)  -> compareOp a b CmpGtsBA
-            | I32Gtu(a,b)  -> compareOp a b CmpGtuBA
-            | I32Les(a,b)  -> compareOp a b CmpLesBA
-            | I32Leu(a,b)  -> compareOp a b CmpLeuBA
-            | I32Ges(a,b)  -> compareOp a b CmpGesBA
-            | I32Geu(a,b)  -> compareOp a b CmpGeuBA
+            | I32Eq(a,b)   -> compareOp a b (CmpBA CrmCondEq )
+            | I32Ne(a,b)   -> compareOp a b (CmpBA CrmCondNe )
+            | I32Lts(a,b)  -> compareOp a b (CmpBA CrmCondLts)
+            | I32Ltu(a,b)  -> compareOp a b (CmpBA CrmCondLtu)
+            | I32Gts(a,b)  -> compareOp a b (CmpBA CrmCondGts)
+            | I32Gtu(a,b)  -> compareOp a b (CmpBA CrmCondGtu)
+            | I32Les(a,b)  -> compareOp a b (CmpBA CrmCondLes)
+            | I32Leu(a,b)  -> compareOp a b (CmpBA CrmCondLeu)
+            | I32Ges(a,b)  -> compareOp a b (CmpBA CrmCondGes)
+            | I32Geu(a,b)  -> compareOp a b (CmpBA CrmCondGeu)
 
             | I32Add (a,I32Const n) -> binaryOpWithConst a (fun () -> AddAN n)
             | I32Sub (a,I32Const n) -> binaryOpWithConst a (fun () -> SubAN n)

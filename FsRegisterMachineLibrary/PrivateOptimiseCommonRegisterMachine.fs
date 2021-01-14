@@ -92,17 +92,8 @@ let IsAddSubAndOrXorAN = function
     | XorAN _ -> true
     | _ -> false
 
-let IsCmpBAGroup = function
-    | CmpEqBA     
-    | CmpNeBA     
-    | CmpLtsBA    
-    | CmpLtuBA    
-    | CmpGtsBA    
-    | CmpGtuBA    
-    | CmpLesBA    
-    | CmpLeuBA    
-    | CmpGesBA    
-    | CmpGeuBA    -> true
+let IsCmpBA = function
+    | CmpBA _ -> true
     | _ -> false
 
 let IsBranchANZ = function
@@ -154,7 +145,7 @@ let WhereCmpBAthenBranchANZ i (a:CRMInstruction32[]) =
     // BranchANZ (LabelName "wasm_l4")
     // Barrier   // Important: This barrier implies the target at wasm_l4 also does not receive registers.
 
-    IsCmpBAGroup a.[i]
+    IsCmpBA a.[i]
     && IsBranchANZ a.[i+1]
     && IsBarrier a.[i+2]
 
@@ -164,7 +155,7 @@ let WhereCmpBAthenBranchAZ i (a:CRMInstruction32[]) =
     // BranchAZ  (LabelName "wasm_l4")
     // Barrier   // Important: This barrier implies the target at wasm_l4 also does not receive registers.
 
-    IsCmpBAGroup a.[i]
+    IsCmpBA a.[i]
     && IsBranchAZ a.[i+1]
     && IsBarrier a.[i+2]
 
