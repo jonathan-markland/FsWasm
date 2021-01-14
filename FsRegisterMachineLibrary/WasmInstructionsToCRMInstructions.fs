@@ -175,7 +175,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                     Pop A  
                     Pop B  // val2  (desired if A == 0)
                     Pop C  // val1  (desired if A <> 0)
-                    BranchAZ l1
+                    BranchRegZNZ(A,BZero,l1)
                     Let (A,C)
                     Goto l2
                     Label l1
@@ -197,7 +197,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 let translatedBody = translateInstrList body
 
                 popLabel ()
-                [ Pop A ; BranchAZ skipLabel ] 
+                [ Pop A ; BranchRegZNZ(A,BZero,skipLabel) ] 
                     @ translatedBody 
                     @ [ Label skipLabel ; Barrier ]
                     
@@ -211,7 +211,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 let translatedElseBody = translateInstrList elsebody
                 popLabel ()
 
-                [ Pop A ; BranchAZ skipIfLabel ] 
+                [ Pop A ; BranchRegZNZ(A,BZero,skipIfLabel) ] 
                     @ translatedIfBody 
                     @ [ Goto skipElseLabel ; Label skipIfLabel ; Barrier ] 
                     @ translatedElseBody 
@@ -221,7 +221,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 [ Goto (labelFor target) ; Barrier ]
 
             | BrIf(cond,target) ->
-                translateInstr(cond) @ [ Pop A ; BranchANZ (labelFor target) ; Barrier ]
+                translateInstr(cond) @ [ Pop A ; BranchRegZNZ(A,BZero,(labelFor target)) ; Barrier ]
 
             | BrTable(indexExpression, labelArray, defaultLabel) -> 
                 let tableLabel = newLabel ()
@@ -279,36 +279,36 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                     // (Wouldn't fit my application anyway, since it will not be possible
                     // to guarantee contiguous extension of the Linear Memory).
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const O2, I32Const v) -> [ StoreConst8( Y, O -+- O2,v); Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst16(Y, O -+- O2,v); Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst32(Y, O -+- O2,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored8, Y, O -+- O2,v); Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored16, Y, O -+- O2,v); Barrier ]
+            | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored32, Y, O -+- O2,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; Add(A,Y) ; StoreConst8(A,O,v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; Add(A,Y) ; StoreConst16(A,O,v); Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; Add(A,Y) ; StoreConst32(A,O,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegReg(AddRbRa,A,Y) ; StoreConst(Stored8, A,O,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegReg(AddRbRa,A,Y) ; StoreConst(Stored16, A,O,v); Barrier ]
+            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegReg(AddRbRa,A,Y) ; StoreConst(Stored32, A,O,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store8A( Y,O -+- O2) ; Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store16A(Y,O -+- O2) ; Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store32A(Y,O -+- O2) ; Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored8, Y,O -+- O2) ; Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored16, Y,O -+- O2) ; Barrier ]
+            | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored32, Y,O -+- O2) ; Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; Add(B,Y) ; Store8A(B,O)  ; Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; Add(B,Y) ; Store16A(B,O) ; Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; Add(B,Y) ; Store32A(B,O) ; Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegReg(AddRbRa,B,Y) ; Store(A, Stored8, B,O)  ; Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegReg(AddRbRa,B,Y) ; Store(A, Stored16, B,O) ; Barrier ]
+            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegReg(AddRbRa,B,Y) ; Store(A, Stored32, B,O) ; Barrier ]
 
             | I32Store16( {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
-            | I32Load8s(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch8s( Y, O -+- O2) ; Push A ; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch8u( Y, O -+- O2) ; Push A ; Barrier ]
-            | I32Load16s( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch16s(Y, O -+- O2) ; Push A ; Barrier ]
-            | I32Load16u( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch16u(Y, O -+- O2) ; Push A ; Barrier ]
-            | I32Load(    {Align=U32 2u ; Offset=O}, I32Const O2) -> [ Fetch32( Y, O -+- O2) ; Push A ; Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, SignExt8,  Y, O -+- O2) ; Push A ; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt8,  Y, O -+- O2) ; Push A ; Barrier ]
+            | I32Load16s( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt16, Y, O -+- O2) ; Push A ; Barrier ]
+            | I32Load16u( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt16, Y, O -+- O2) ; Push A ; Barrier ]
+            | I32Load(    {Align=U32 2u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt32, Y, O -+- O2) ; Push A ; Barrier ]
 
-            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; Add(A,Y) ; Fetch8s(A,O)  ; Push A ; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; Add(A,Y) ; Fetch8u(A,O)  ; Push A ; Barrier ]
-            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; Add(A,Y) ; Fetch16s(A,O) ; Push A ; Barrier ]
-            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; Add(A,Y) ; Fetch16u(A,O) ; Push A ; Barrier ]
-            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; Add(A,Y) ; Fetch32(A,O)  ; Push A ; Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRbRa,A,Y) ; Fetch(A, SignExt8,  A,O) ; Push A ; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRbRa,A,Y) ; Fetch(A, ZeroExt8,  A,O) ; Push A ; Barrier ]
+            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRbRa,A,Y) ; Fetch(A, SignExt16, A,O) ; Push A ; Barrier ]
+            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRbRa,A,Y) ; Fetch(A, ZeroExt16, A,O) ; Push A ; Barrier ]
+            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRbRa,A,Y) ; Fetch(A, SignExt32, A,O) ; Push A ; Barrier ]
            
             // TODO: Could capitulate given X86 target, but make that configurable:
             | I32Load16s( {Align=U32 _ ; Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
@@ -328,27 +328,28 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             | I32Ges(a,b)  -> compareOp a b (CmpBA CrmCondGes)
             | I32Geu(a,b)  -> compareOp a b (CmpBA CrmCondGeu)
 
-            | I32Add (a,I32Const n) -> binaryOpWithConst a (fun () -> AddAN n)
-            | I32Sub (a,I32Const n) -> binaryOpWithConst a (fun () -> SubAN n)
-            | I32And (a,I32Const n) -> binaryOpWithConst a (fun () -> AndAN n)
-            | I32Or  (a,I32Const n) -> binaryOpWithConst a (fun () -> OrAN  n)
-            | I32Xor (a,I32Const n) -> binaryOpWithConst a (fun () -> XorAN n)
+            | I32Add (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcWithConst(AddRN,A,n))
+            | I32Sub (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcWithConst(SubRN,A,n))
+            | I32And (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcWithConst(AndRN,A,n))
+            | I32Or  (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcWithConst(OrRN,A,n))
+            | I32Xor (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcWithConst(XorRN,A,n))
 
-            | I32Add (a,b) -> binaryCommutativeOp     a b (Add(A,B))
-            | I32Sub (a,b) -> binaryNonCommutativeOp  a b SubBA
-            | I32Mul (a,b) -> binaryCommutativeOp     a b MulAB
-            | I32Divs(a,b) -> binaryNonCommutativeOp  a b DivsBA
-            | I32Divu(a,b) -> binaryNonCommutativeOp  a b DivuBA
-            | I32Rems(a,b) -> binaryNonCommutativeOp  a b RemsBA
-            | I32Remu(a,b) -> binaryNonCommutativeOp  a b RemuBA
-            | I32And (a,b) -> binaryCommutativeOp     a b AndAB
-            | I32Or  (a,b) -> binaryCommutativeOp     a b OrAB
-            | I32Xor (a,b) -> binaryCommutativeOp     a b XorAB
-            | I32Shl (a,b) -> shiftOp a b ShlBC
-            | I32Shrs(a,b) -> shiftOp a b ShrsBC
-            | I32Shru(a,b) -> shiftOp a b ShruBC
-            | I32Rotl(a,b) -> shiftOp a b RotlBC
-            | I32Rotr(a,b) -> shiftOp a b RotrBC
+            | I32Add (a,b) -> binaryCommutativeOp     a b (CalcRegReg (AddRbRa,A,B))
+            | I32Sub (a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (SubRbRa,B,A))
+            | I32Mul (a,b) -> binaryCommutativeOp     a b (CalcRegReg (MulRbRa,A,B)) 
+            | I32Divs(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (DivsRbRa,A,B))
+            | I32Divu(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (DivuRbRa,A,B))
+            | I32Rems(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (RemsRbRa,A,B))
+            | I32Remu(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (RemuRbRa,A,B))
+            | I32And (a,b) -> binaryCommutativeOp     a b (CalcRegReg (AndRbRa,A,B)) 
+            | I32Or  (a,b) -> binaryCommutativeOp     a b (CalcRegReg (OrRbRa,A,B))  
+            | I32Xor (a,b) -> binaryCommutativeOp     a b (CalcRegReg (XorRbRa,A,B)) 
+            
+            | I32Shl (a,b) -> shiftOp a b (ShiftRot Shl) 
+            | I32Shrs(a,b) -> shiftOp a b (ShiftRot Shrs)
+            | I32Shru(a,b) -> shiftOp a b (ShiftRot Shru)
+            | I32Rotl(a,b) -> shiftOp a b (ShiftRot Rotl)
+            | I32Rotr(a,b) -> shiftOp a b (ShiftRot Rotr)
 
             | _ -> failwith (sprintf "Cannot translate this instruction to simple 32-bit machine: %A" w)   // TODO: Possibly avoid %A
 

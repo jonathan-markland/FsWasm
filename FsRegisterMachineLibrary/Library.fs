@@ -395,7 +395,7 @@ let CrmInstructionsUsesShadowStackAtAddress4 crmInstructions =   // TODO: Is the
 
     crmInstructions |> List.exists (fun crmInstruction ->
         match crmInstruction with
-            | Fetch32 (Y, U32 4u) -> true
+            | Fetch(A, SignExt32, Y, U32 4u) -> true
             | _ -> false
     )
     

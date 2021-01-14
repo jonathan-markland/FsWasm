@@ -32,6 +32,29 @@ let X86ConditionCodeFor crmCondition =
         | CrmCondGeu -> "ae"
 
 
+let X86CalcInstruction ins =
+    match ins with
+        | AddRbRa -> "add"
+        | SubRbRa -> "sub"
+        | MulRbRa -> "mul"
+        | AndRbRa -> "and"
+        | OrRbRa  -> "or"
+        | XorRbRa -> "xor"
+        | DivsRbRa
+        | DivuRbRa
+        | RemsRbRa
+        | RemuRbRa -> failwith "Division or remainder instructions not yet translated"
+
+
+let X86ShiftInstruction ins =
+    match ins with
+        | Shl    -> "shl"
+        | Shrs   -> "sar"
+        | Shru   -> "shr"
+        | Rotl 
+        | Rotr   -> failwith "Rotate instructions are not yet translated"
+
+
 
 let TranslateInstructionToAsmSequence thisFunc instruction =
 
@@ -47,11 +70,41 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | U32 0u -> ""                   // indexed addressing not needed with zero offset
         | U32 n  -> "+" + n.ToString()   // indexed addressing needed
 
-    let translateREGU32 s1 r u s2 = 
+    let toX86StoreType = function
+        | Stored8  -> "byte"
+        | Stored16 -> "word"
+        | Stored32 -> "dword"
+
+    let toSXZX = function
+        | SignExt8  -> "sx"
+        | ZeroExt8  -> "zx"
+        | SignExt16 -> "sx"
+        | ZeroExt16 -> "zx"
+        | SignExt32 -> ""
+
+    let toX86FetchType = function
+        | SignExt8  -> "byte"
+        | ZeroExt8  -> "byte"
+        | SignExt16 -> "word"
+        | ZeroExt16 -> "word"
+        | SignExt32 -> "dword"
+
+    let X86AccumulatorByStoreType = function
+        | Stored8  -> "AL"
+        | Stored16 -> "AX"
+        | Stored32 -> "EAX"
+
+    let translateStore t r ofs = 
+        [ sprintf "mov [%s%s],%s" (regNameOf r) (offsetIfNeeded ofs) (t |> X86AccumulatorByStoreType) ]
+
+    let translateFetch t r ofs =
+        [ sprintf "mov%s EAX, %s [%s%s]" (t |> toSXZX) (t |> toX86FetchType) (regNameOf r) (offsetIfNeeded ofs) ]
+
+    let translateREGU32 s1 r u s2 =  // TODO: re-do this horrible named function 
         [ sprintf "%s%s%s%s" s1 (regNameOf r) (offsetIfNeeded u) s2 ]
 
-    let translateREGU32I32 s1 r u s2 n = 
-        [ sprintf "%s%s%s%s%d" s1 (regNameOf r) (offsetIfNeeded u) s2 n ]
+    let translateStoreConst t r u n = 
+        [ sprintf "mov %s [%s%s],%d" (t |> toX86StoreType) (regNameOf r) (offsetIfNeeded u) n ]
 
     let translateGotoIndex (LabelName tableLabel) numMax (LabelName defaultLabel) =
         [
@@ -91,57 +144,50 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         let branchInstruction = sprintf "j%s " (X86ConditionCodeFor condition)
         [ "cmp EBX,EAX" ; (branchInstruction + targetLabel) ]
 
+    let toX86MathMnemonic = function
+        | AddRN -> "add"
+        | SubRN -> "sub"
+        | AndRN -> "and"
+        | OrRN  -> "or"
+        | XorRN -> "xor"
+
+    let toX86ZNZMnemonic = function
+        | BZero     -> "z"
+        | BNonZero  -> "nz"
+
 
     match instruction with
-        | Barrier               -> [ "; ~~~ register barrier ~~~" ]
-        | Breakpoint            -> [ "int 3" ]
-        | Drop(U32 numSlots)    -> [ sprintf "add ESP,%d" (numSlots * StackSlotSizeU) ]
-        | Label(LabelName l)    -> [ LabelCommand l ]
-        | Const(r,Const32(n))   -> [ sprintf "mov %s,%d" (regNameOf r) n ]
-        | Goto(LabelName l)     -> [ ("jmp " + l) ; CodeAlign ]
-        | CallFunc(LabelName l) -> [ "call " + l ]
-        | CallTableIndirect     -> translateCallTableIndirect ()
-        | BranchAZ(LabelName l) -> [ "cmp EAX,0" ; "jz " + l ]
-        | BranchANZ(LabelName l)-> [ "cmp EAX,0" ; "jnz " + l ]
-        | GotoIndex(t,n,d,_)    -> translateGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
-        | Push(r)               -> [ sprintf "push %s" (regNameOf r) ]
-        | Pop(r)                -> [ sprintf "pop %s" (regNameOf r) ]
-        | PeekA                 -> [ "mov EAX,[ESP]" ]
-        | Let(r1,r2)            -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
-        | AddAN(I32(n))         -> [ sprintf "add EAX,%d" n ]
-        | SubAN(I32(n))         -> [ sprintf "sub EAX,%d" n ]
-        | AndAN(I32(n))         -> [ sprintf "and EAX,%d" n ]
-        | OrAN(I32(n))          -> [ sprintf "or EAX,%d"  n ]
-        | XorAN(I32(n))         -> [ sprintf "xor EAX,%d" n ]
-        | Add(r1,r2)            -> [ sprintf "add %s,%s" (regNameOf r1) (regNameOf r2) ]  // commutative
-        | SubBA                 -> [ "sub EBX,EAX" ]
-        | MulAB                 -> [ "imul EAX,EBX" ]  // commutative
-        | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have division or remainder instructions"
-        | AndAB                 -> [ "and EAX,EBX" ]  // commutative
-        | OrAB                  -> [ "or EAX,EBX" ]   // commutative
-        | XorAB                 -> [ "xor EAX,EBX" ]  // commutative
-        | ShlBC                 -> [ "shl EBX,CL" ]
-        | ShrsBC                -> [ "sar EBX,CL" ]
-        | ShruBC                -> [ "shr EBX,CL" ]
-        | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
-        | CmpBA crmCond         -> [ "cmp EBX,EAX" ; (sprintf "set%s AL" (X86ConditionCodeFor crmCond)) ; "movzx EAX,AL" ]
-        | CmpAZ                 -> [ "cmp EAX,0"   ; "setz AL"  ; "movzx EAX,AL" ]
-        | FetchLoc(r,i)         -> [ sprintf "mov %s,[EBP%s]  ; @%s" (regNameOf r) (frameOffsetForLoc i) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
-        | StoreLoc(r,i)         -> [ sprintf "mov [EBP%s],%s  ; @%s" (frameOffsetForLoc i) (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
-        | FetchGlo(r,i)         -> [ sprintf "mov %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
-        | StoreGlo(r,i)         -> [ sprintf "mov [%s],%s" (GlobalIdxNameString i) (regNameOf r) ]  // TODO: Eventually use the type rather than "int"
-        | StoreConst8(r,ofs,I32(v))   -> translateREGU32I32 "mov byte [" r ofs "]," v
-        | StoreConst16(r,ofs,I32(v))  -> translateREGU32I32 "mov word [" r ofs "]," v
-        | StoreConst32(r,ofs,I32(v))  -> translateREGU32I32 "mov dword [" r ofs "]," v  
-        | Store8A(r,ofs)       -> translateREGU32 "mov [" r ofs "],AL"  
-        | Store16A(r,ofs)      -> translateREGU32 "mov [" r ofs "],AX"
-        | Store32A(r,ofs)      -> translateREGU32 "mov [" r ofs "],EAX"  
-        | Fetch8s(r,ofs)       -> translateREGU32 "movsx EAX, byte [" r ofs "]" 
-        | Fetch8u(r,ofs)       -> translateREGU32 "movzx EAX, byte [" r ofs "]"  
-        | Fetch16s(r,ofs)      -> translateREGU32 "movsx EAX, word [" r ofs "]" 
-        | Fetch16u(r,ofs)      -> translateREGU32 "movzx EAX, word [" r ofs "]"
-        | Fetch32(r,ofs)       -> translateREGU32 "mov EAX,[" r ofs "]"  
-        | ThunkIn              -> 
+        | Barrier                    -> [ "; ~~~ register barrier ~~~" ]
+        | Breakpoint                 -> [ "int 3" ]
+        | Drop(U32 numSlots)         -> [ sprintf "add ESP,%d" (numSlots * StackSlotSizeU) ]
+        | Label(LabelName l)         -> [ LabelCommand l ]
+        | Const(r,Const32(n))        -> [ sprintf "mov %s,%d" (regNameOf r) n ]
+        | Goto(LabelName l)          -> [ ("jmp " + l) ; CodeAlign ]
+        | CallFunc(LabelName l)      -> [ "call " + l ]
+        | CallTableIndirect          -> translateCallTableIndirect ()
+        | BranchRegZNZ(A,c,LabelName l) -> [ "cmp EAX,0" ; (sprintf "j%s %s" (c |> toX86ZNZMnemonic) l) ]
+        | BranchRegZNZ _                -> failwith "Cannot translate branch"
+        | GotoIndex(t,n,d,_)         -> translateGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
+        | Push r                     -> [ sprintf "push %s" (regNameOf r) ]
+        | Pop r                      -> [ sprintf "pop %s" (regNameOf r) ]
+        | PeekA                      -> [ "mov EAX,[ESP]" ]
+        | Let(r1,r2)                 -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
+        | CalcWithConst(ins,A,I32 n) -> [ sprintf "%s EAX,%d" (ins |> toX86MathMnemonic) n ]
+        | CalcWithConst _            -> failwith "Cannot translate calculation with constant"
+        | CalcRegReg(ins,r1,r2)      -> [ sprintf "%s %s,%s" (ins |> X86CalcInstruction) (regNameOf r1) (regNameOf r2) ]
+        | ShiftRot ins               -> [ sprintf "%s EBX,CL" (ins |> X86ShiftInstruction) ]
+        | CmpBA crmCond              -> [ "cmp EBX,EAX" ; (sprintf "set%s AL" (X86ConditionCodeFor crmCond)) ; "movzx EAX,AL" ]
+        | CmpAZ                      -> [ "cmp EAX,0"   ; "setz AL"  ; "movzx EAX,AL" ]
+        | FetchLoc(r,i)              -> [ sprintf "mov %s,[EBP%s]  ; @%s" (regNameOf r) (frameOffsetForLoc i) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
+        | StoreLoc(r,i)              -> [ sprintf "mov [EBP%s],%s  ; @%s" (frameOffsetForLoc i) (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
+        | FetchGlo(r,i)              -> [ sprintf "mov %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
+        | StoreGlo(r,i)              -> [ sprintf "mov [%s],%s" (GlobalIdxNameString i) (regNameOf r) ]  // TODO: Eventually use the type rather than "int"
+        | StoreConst(t,r,ofs,I32 v)  -> translateStoreConst t r ofs v
+        | Store(A,t,r,ofs)           -> translateStore t r ofs
+        | Store _                    -> failwith "Cannot translate store instruction"
+        | Fetch(A,t,r,ofs)           -> translateFetch t r ofs
+        | Fetch _                    -> failwith "Cannot translate fetch instruction"
+        | ThunkIn                    -> 
             // The translated code requires the Y register to
             // point to the base of the linear memory region.
             // Note: There is only *one* linear memory supported in WASM 1.0  (mem #0)
