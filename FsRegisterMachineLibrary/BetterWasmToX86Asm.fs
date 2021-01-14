@@ -70,7 +70,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | U32 0u -> ""                   // indexed addressing not needed with zero offset
         | U32 n  -> "+" + n.ToString()   // indexed addressing needed
 
-    let toX86StoreType = function
+    let storeType = function
         | Stored8  -> "byte"
         | Stored16 -> "word"
         | Stored32 -> "dword"
@@ -82,29 +82,29 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | ZeroExt16 -> "zx"
         | SignExt32 -> ""
 
-    let toX86FetchType = function
+    let fetchType = function
         | SignExt8  -> "byte"
         | ZeroExt8  -> "byte"
         | SignExt16 -> "word"
         | ZeroExt16 -> "word"
         | SignExt32 -> "dword"
 
-    let X86AccumulatorByStoreType = function
+    let accumulatorByStoreType = function
         | Stored8  -> "AL"
         | Stored16 -> "AX"
         | Stored32 -> "EAX"
 
     let translateStore t r ofs = 
-        [ sprintf "mov [%s%s],%s" (regNameOf r) (offsetIfNeeded ofs) (t |> X86AccumulatorByStoreType) ]
+        [ sprintf "mov [%s%s],%s" (regNameOf r) (offsetIfNeeded ofs) (t |> accumulatorByStoreType) ]
 
     let translateFetch t r ofs =
-        [ sprintf "mov%s EAX, %s [%s%s]" (t |> toSXZX) (t |> toX86FetchType) (regNameOf r) (offsetIfNeeded ofs) ]
+        [ sprintf "mov%s EAX, %s [%s%s]" (t |> toSXZX) (t |> fetchType) (regNameOf r) (offsetIfNeeded ofs) ]
 
     let translateREGU32 s1 r u s2 =  // TODO: re-do this horrible named function 
         [ sprintf "%s%s%s%s" s1 (regNameOf r) (offsetIfNeeded u) s2 ]
 
     let translateStoreConst t r u n = 
-        [ sprintf "mov %s [%s%s],%d" (t |> toX86StoreType) (regNameOf r) (offsetIfNeeded u) n ]
+        [ sprintf "mov %s [%s%s],%d" (t |> storeType) (regNameOf r) (offsetIfNeeded u) n ]
 
     let translateGotoIndex (LabelName tableLabel) numMax (LabelName defaultLabel) =
         [
@@ -144,14 +144,14 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         let branchInstruction = sprintf "j%s " (X86ConditionCodeFor condition)
         [ "cmp EBX,EAX" ; (branchInstruction + targetLabel) ]
 
-    let toX86MathMnemonic = function
+    let toMathMnemonic = function
         | AddRN -> "add"
         | SubRN -> "sub"
         | AndRN -> "and"
         | OrRN  -> "or"
         | XorRN -> "xor"
 
-    let toX86ZNZMnemonic = function
+    let toZNZMnemonic = function
         | BZero     -> "z"
         | BNonZero  -> "nz"
 
@@ -165,14 +165,14 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | Goto(LabelName l)          -> [ ("jmp " + l) ; CodeAlign ]
         | CallFunc(LabelName l)      -> [ "call " + l ]
         | CallTableIndirect          -> translateCallTableIndirect ()
-        | BranchRegZNZ(A,c,LabelName l) -> [ "cmp EAX,0" ; (sprintf "j%s %s" (c |> toX86ZNZMnemonic) l) ]
+        | BranchRegZNZ(A,c,LabelName l) -> [ "cmp EAX,0" ; (sprintf "j%s %s" (c |> toZNZMnemonic) l) ]
         | BranchRegZNZ _                -> failwith "Cannot translate branch"
         | GotoIndex(t,n,d,_)         -> translateGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
         | Push r                     -> [ sprintf "push %s" (regNameOf r) ]
         | Pop r                      -> [ sprintf "pop %s" (regNameOf r) ]
         | PeekA                      -> [ "mov EAX,[ESP]" ]
         | Let(r1,r2)                 -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
-        | CalcWithConst(ins,A,I32 n) -> [ sprintf "%s EAX,%d" (ins |> toX86MathMnemonic) n ]
+        | CalcWithConst(ins,A,I32 n) -> [ sprintf "%s EAX,%d" (ins |> toMathMnemonic) n ]
         | CalcWithConst _            -> failwith "Cannot translate calculation with constant"
         | CalcRegReg(ins,r1,r2)      -> [ sprintf "%s %s,%s" (ins |> X86CalcInstruction) (regNameOf r1) (regNameOf r2) ]
         | ShiftRot ins               -> [ sprintf "%s EBX,CL" (ins |> X86ShiftInstruction) ]

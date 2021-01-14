@@ -144,38 +144,38 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         let branchInstruction = sprintf "b%s %s" (ArmConditionCodeFor condition) targetLabel
         [ "cmp R1,R0" ; branchInstruction ]
 
-    let toArmStoreType = function
+    let storeType = function
         | Stored8  -> ArmByte
         | Stored16 -> ArmHalfword
         | Stored32 -> ArmWord
 
-    let toArmStoreMnemonic = function
-        | Stored8  -> "strb"
-        | Stored16 -> "strh"
-        | Stored32 -> "strd"
-
-    let toArmFetchType = function
+    let fetchType = function
         | SignExt8  -> ArmByte
         | ZeroExt8  -> ArmByte
         | SignExt16 -> ArmHalfword
         | ZeroExt16 -> ArmHalfword
         | SignExt32 -> ArmWord 
 
-    let toArmFetchMnemonic = function
+    let storeMnemonic = function
+        | Stored8  -> "strb"
+        | Stored16 -> "strh"
+        | Stored32 -> "strd"
+
+    let fetchMnemonic = function
         | SignExt8  -> "ldrsb"
         | ZeroExt8  -> "ldrb"
         | SignExt16 -> "ldrsh"
         | ZeroExt16 -> "ldrh"
         | SignExt32 -> "ldr"
 
-    let toArmMathMnemonic = function
+    let mathMnemonic = function
         | AddRN -> "add"
         | SubRN -> "sub"
         | AndRN -> "and"
         | OrRN  -> "orr"
         | XorRN -> "eor"
 
-    let toArmZNZMnemonic = function
+    let toZNZMnemonic = function
         | BZero     -> "eq"
         | BNonZero  -> "ne"
 
@@ -189,14 +189,14 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         | Goto(LabelName l)             -> [ "b " + l ]
         | CallFunc(LabelName l)         -> [ "bl " + l ]
         | CallTableIndirect             -> translateCallTableIndirect ()
-        | BranchRegZNZ(A,c,LabelName l) -> [ "cmp R0,#0" ; (sprintf "b%s %s" (c |> toArmZNZMnemonic) l) ]
+        | BranchRegZNZ(A,c,LabelName l) -> [ "cmp R0,#0" ; (sprintf "b%s %s" (c |> toZNZMnemonic) l) ]
         | BranchRegZNZ _                -> failwith "Cannot translate branch"
         | GotoIndex(t,n,d,_)            -> translateGotoIndex t (uint32 n) d   // The ignored parameter is the lookup table, which we separately output.
         | Push r                        -> [ sprintf "push {%s}" (regNameOf r) ]
         | Pop r                         -> [ sprintf "pop {%s}" (regNameOf r) ]
         | PeekA                         -> [ "ldr R0,[R13]" ]
         | Let(r1,r2)                    -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
-        | CalcWithConst(ins,A,I32(n))   -> MathsWithConstant (ins |> toArmMathMnemonic) "R0" (uint32 n) armTempRegister
+        | CalcWithConst(ins,A,I32(n))   -> MathsWithConstant (ins |> mathMnemonic) "R0" (uint32 n) armTempRegister
         | CalcWithConst _               -> failwith "Cannot translate calculation with constant"
         | CalcRegReg(ins,r1,r2)         -> ArmRegRegInstructionToString ins r1 r2
         | ShiftRot ins                  -> ArmShiftInstructionToString ins // TODO: Still very X86
@@ -206,10 +206,10 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         | StoreLoc(r,i)                 -> [ sprintf "str %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
         | FetchGlo(r,i)                 -> [ sprintf "ldr %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
         | StoreGlo(r,i)                 -> [ sprintf "str %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
-        | StoreConst(t,r,U32 ofs,I32 v) -> storeConstant (t |> toArmStoreType) (t |> toArmStoreMnemonic) r ofs (uint32 v)
-        | Store(A,t,r,U32 ofs)          -> loadStoreRegOffset (t |> toArmStoreType) (t |> toArmStoreMnemonic) r ofs
+        | StoreConst(t,r,U32 ofs,I32 v) -> storeConstant (t |> storeType) (t |> storeMnemonic) r ofs (uint32 v)
+        | Store(A,t,r,U32 ofs)          -> loadStoreRegOffset (t |> storeType) (t |> storeMnemonic) r ofs
         | Store _                       -> failwith "Cannot translate store instruction"
-        | Fetch(A,t,r,U32 ofs)          -> loadStoreRegOffset (t |> toArmFetchType) (t |> toArmFetchMnemonic) r ofs
+        | Fetch(A,t,r,U32 ofs)          -> loadStoreRegOffset (t |> fetchType) (t |> fetchMnemonic) r ofs
         | Fetch _                       -> failwith "Cannot translate fetch instruction"
         | ThunkIn -> 
             // The translated code requires the Y register to
