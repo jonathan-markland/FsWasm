@@ -178,7 +178,7 @@ type CRMInstruction32 =
     /// Calculate A XOR B, result in A
     | XorAB
     
-    /// Calculate A AND B, result in A
+    /// Calculate A AND N, result in A
     | AndAN of I32
     
     /// Calculate A OR  N, result in A
