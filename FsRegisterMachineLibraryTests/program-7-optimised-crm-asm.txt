@@ -214,7 +214,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 68u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l4")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l4")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
@@ -225,7 +225,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 64u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l4")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l4")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
@@ -238,7 +238,7 @@ CODE>         Fetch32 (A, U32 60u)
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 8u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l4")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l4")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
@@ -247,7 +247,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpLtsBA, LabelName "wasm_l4")
+CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l4")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
@@ -260,7 +260,7 @@ CODE>         Fetch32 (A, U32 60u)
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 12u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l4")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l4")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
@@ -269,7 +269,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpLtsBA, LabelName "wasm_l4")
+CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l4")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
@@ -328,7 +328,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 68u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l6")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l6")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
@@ -377,7 +377,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 64u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l8")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l8")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
@@ -430,7 +430,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 44u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l9")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l9")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
@@ -591,7 +591,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 24u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGtsBA, LabelName "wasm_l4")
+CODE>         SecondaryCmpBranch (CrmCondGts, LabelName "wasm_l4")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
@@ -956,7 +956,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 48u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpLesBA, LabelName "wasm_l13")
+CODE>         SecondaryCmpBranch (CrmCondLes, LabelName "wasm_l13")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
@@ -996,7 +996,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 0)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l14")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l14")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
@@ -1139,7 +1139,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 48u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpLesBA, LabelName "wasm_l10")
+CODE>         SecondaryCmpBranch (CrmCondLes, LabelName "wasm_l10")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
@@ -1203,7 +1203,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 81936)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGeuBA, LabelName "wasm_l16")
+CODE>         SecondaryCmpBranch (CrmCondGeu, LabelName "wasm_l16")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Add (A, Y)
@@ -1343,7 +1343,7 @@ CODE>         Store32A (B, U32 16u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 3u))
 CODE>         Const (A, Const32 0)
-CODE>         SecondaryCmpBranch (CmpLtsBA, LabelName "wasm_l20")
+CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l20")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Add (A, Y)
@@ -1357,7 +1357,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 2u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 12u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l20")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l20")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Add (A, Y)
@@ -1368,7 +1368,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 20u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l20")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l20")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Add (A, Y)
@@ -1379,7 +1379,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 8u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGesBA, LabelName "wasm_l20")
+CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l20")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Add (A, Y)
@@ -1388,7 +1388,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpLtsBA, LabelName "wasm_l20")
+CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l20")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Add (A, Y)
@@ -1397,7 +1397,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 -1)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGtsBA, LabelName "wasm_l21")
+CODE>         SecondaryCmpBranch (CrmCondGts, LabelName "wasm_l21")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Add (A, Y)
@@ -1414,7 +1414,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 8u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpLesBA, LabelName "wasm_l22")
+CODE>         SecondaryCmpBranch (CrmCondLes, LabelName "wasm_l22")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
@@ -1497,7 +1497,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Add (A, Y)
 CODE>         Fetch32 (A, U32 8u)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGeuBA, LabelName "wasm_l20")
+CODE>         SecondaryCmpBranch (CrmCondGeu, LabelName "wasm_l20")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Add (A, Y)

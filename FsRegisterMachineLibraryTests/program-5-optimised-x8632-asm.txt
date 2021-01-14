@@ -75,7 +75,7 @@ CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EBX,[EBP+16]  ; @loc2
 CODE>     mov EAX,1
 CODE>     cmp EBX,EAX
-CODE>     setg AL
+CODE>     setg  AL
 CODE>     movzx EAX,AL
 CODE>     mov [EBP+12],EAX  ; @loc3
 CODE>     ; ~~~ register barrier ~~~

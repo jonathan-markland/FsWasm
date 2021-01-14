@@ -8,7 +8,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CmpLtsBA
+CODE>         CmpBA CrmCondLts
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
@@ -50,7 +50,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CmpLtsBA
+CODE>         CmpBA CrmCondLts
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
@@ -106,7 +106,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CmpGtsBA
+CODE>         CmpBA CrmCondGts
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
@@ -136,7 +136,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CmpGtsBA
+CODE>         CmpBA CrmCondGts
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A

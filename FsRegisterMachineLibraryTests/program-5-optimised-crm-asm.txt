@@ -2,7 +2,7 @@ HEAD> Common Register Machine function serialisation from WASM module: C:\Users\
 CODE> function wasm_fn0:
 CODE>         FetchLoc (B, LocalIdx (U32 2u))
 CODE>         Const (A, Const32 1)
-CODE>         SecondaryCmpBranch (CmpLtsBA, LabelName "wasm_l2")
+CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l2")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         AddAN (I32 1)
@@ -19,7 +19,7 @@ CODE>     wasm_l3:
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 1u))
 CODE>         Const (A, Const32 1)
-CODE>         SecondaryCmpBranch (CmpLtsBA, LabelName "wasm_l4")
+CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l4")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         StoreLoc (A, LocalIdx (U32 7u))
@@ -45,7 +45,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 7u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
-CODE>         SecondaryCmpBranch (CmpGtsBA, LabelName "wasm_l5")
+CODE>         SecondaryCmpBranch (CrmCondGts, LabelName "wasm_l5")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l4:
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,7 +56,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 0u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 2u))
 CODE>         Const (A, Const32 1)
-CODE>         CmpGtsBA
+CODE>         CmpBA CrmCondGts
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
