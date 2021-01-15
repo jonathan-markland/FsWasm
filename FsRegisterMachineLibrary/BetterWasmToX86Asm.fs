@@ -73,7 +73,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
     let storeType = function
         | Stored8  -> "byte"
         | Stored16 -> "word"
-        | Stored32 -> ""
+        | Stored32 -> "dword"
 
     let toSXZX = function
         | SignExt8  -> "sx"
@@ -98,7 +98,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         [ sprintf "mov [%s%s],%s" (regNameOf r) (offsetIfNeeded ofs) (t |> accumulatorByStoreType) ]
 
     let translateFetch t r ofs =
-        [ sprintf "mov%s EAX, %s [%s%s]" (t |> toSXZX) (t |> fetchType) (regNameOf r) (offsetIfNeeded ofs) ]
+        [ sprintf "mov%s EAX,%s[%s%s]" (t |> toSXZX) (t |> fetchType) (regNameOf r) (offsetIfNeeded ofs) ]
 
     let translateREGU32 s1 r u s2 =  // TODO: re-do this horrible named function 
         [ sprintf "%s%s%s%s" s1 (regNameOf r) (offsetIfNeeded u) s2 ]
