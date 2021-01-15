@@ -45,15 +45,9 @@ let IsLabelDeclaration i = match i with | Label _ -> true | _ -> false
 
 let IsRegisterPreserving = function
     | StoreLoc(_)
-    | Store16A(_)
     | StoreGlo(_)
-    | StoreConst8(_)
-    | StoreConst16(_)
-    | StoreConst32(_)
-    | Store8A(_)
-    | Store16A(_)
-    | Store32A(_)
-        -> true
+    | StoreConst(_)
+    | Store(_) -> true
     | _ -> false
 
 
@@ -70,13 +64,11 @@ let IsLoadConstantToA = function
     | _ -> false
 
 let IsAddBY = function
-    | Add(B,Y) -> true
+    | CalcRegReg (AddRegReg,B,Y) -> true
     | _ -> false
 
 let IsStoreOfAnySizeInAToB = function
-    | Store8A(B,_) -> true
-    | Store16A(B,_) -> true
-    | Store32A(B,_) -> true
+    | Store (A,_,B,_) -> true
     | _ -> false
 
 let IsFetchAndStoreUsingSameLocal i1 i2 =
@@ -85,11 +77,7 @@ let IsFetchAndStoreUsingSameLocal i1 i2 =
         | _ -> false
 
 let IsAddSubAndOrXorAN = function
-    | AddAN _ -> true
-    | SubAN _ -> true
-    | AndAN _ -> true
-    | OrAN  _ -> true
-    | XorAN _ -> true
+    | CalcRegNum _ -> true
     | _ -> false
 
 let IsCmpBA = function
@@ -97,11 +85,11 @@ let IsCmpBA = function
     | _ -> false
 
 let IsBranchANZ = function
-    | BranchANZ _ -> true
+    | BranchRegZNZ (A,BNonZero,_) -> true
     | _ -> false
 
 let IsBranchAZ = function
-    | BranchAZ _ -> true
+    | BranchRegZNZ (A,BZero,_) -> true
     | _ -> false
 
 

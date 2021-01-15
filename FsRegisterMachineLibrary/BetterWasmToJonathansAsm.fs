@@ -46,11 +46,38 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         | U32 0u -> ""                   // indexed addressing not needed with zero offset
         | U32 n  -> "+" + n.ToString()   // indexed addressing needed
 
+    let storeType = function
+        | Stored8  -> "byte"
+        | Stored16 -> "ushort"
+        | Stored32 -> "uint"
+
+    let fetchType = function
+        | SignExt8  -> "sbyte"
+        | ZeroExt8  -> "byte"
+        | SignExt16 -> "short"
+        | ZeroExt16 -> "ushort"
+        | SignExt32 -> "uint" // TODO: Doesn't matter for now, but this stops diffs with previous code gen.
+
+    let storeType = function
+        | Stored8  -> "byte"
+        | Stored16 -> "ushort"
+        | Stored32 -> "uint"
+
     let translateREGU32 s1 r u s2 = 
         [ sprintf "%s%s%s%s" s1 (regNameOf r) (offsetIfNeeded u) s2 ]
 
     let translateREGU32I32 s1 r u s2 n = 
         [ sprintf "%s%s%s%s%d" s1 (regNameOf r) (offsetIfNeeded u) s2 n ]
+
+    let translateStore t r ofs = 
+        [ sprintf "let %s[%s%s]=A" (t |> storeType) (regNameOf r) (offsetIfNeeded ofs) ]
+
+    let translateFetch t r ofs =
+        [ sprintf "let A=%s[%s%s]" (t |> fetchType) (regNameOf r) (offsetIfNeeded ofs) ]
+
+    let translateStoreConst t r u n = 
+        [ sprintf "let %s[%s%s]=%d" (t |> storeType) (regNameOf r) (offsetIfNeeded u) n ]
+
 
     let translateGotoIndex (LabelName tableLabel) numMax (LabelName defaultLabel) =
         [
@@ -73,56 +100,67 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         let compareInstruction = sprintf "cmp B,A:if %s goto " (JonathansConditionCodeFor condition)
         [ compareInstruction + targetLabel ]
 
+    let toMathMnemonic = function
+        | AddRegNum -> "add"
+        | SubRegNum -> "sub"
+        | AndRegNum -> "and"
+        | OrRegNum  -> "or"
+        | XorRegNum -> "xor"
+
+    let calcInstruction = function
+        | AddRegReg -> "add"
+        | SubRegReg -> "sub"
+        | MulRegReg -> "mul"
+        | AndRegReg -> "and"
+        | OrRegReg  -> "or"
+        | XorRegReg -> "xor"
+        | DivsRegReg
+        | DivuRegReg
+        | RemsRegReg
+        | RemuRegReg -> failwith "Division or remainder instructions not yet translated"
+
+    let shiftInstruction = function
+        | Shl    -> "shl"
+        | Shrs   -> "sar"
+        | Shru   -> "shr"
+        | Rotl 
+        | Rotr   -> failwith "Rotate instructions are not yet translated"
+
+    let toZNZMnemonic = function
+        | BZero     -> "z"
+        | BNonZero  -> "nz"
 
     match instruction with
-        | Barrier               -> [ "// ~~~ register barrier ~~~" ]
-        | Breakpoint            -> [ "break" ]
-        | Drop(U32 numSlots)    -> [ sprintf "add SP,%d" (numSlots * 4u) ]   // TODO: Assumes 32-bit target
-        | Label(LabelName l)    -> [ "label " + l ]   // TODO: sort out using the local label references in Jonathan's ASM
-        | Const(r,Const32(n))   -> [ sprintf "let %s=%d" (regNameOf r) n ]
-        | Goto(LabelName l)     -> [ "goto " + l ]
-        | CallFunc(LabelName l) -> [ "call " + l ]
-        | CallTableIndirect     -> translateCallTableIndirect ()
-        | BranchAZ(LabelName l) -> [ "cmp A,0:if z goto " + l ]
-        | BranchANZ(LabelName l)-> [ "cmp A,0:if nz goto " + l ]
-        | GotoIndex(t,n,d,_)    -> translateGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
-        | Push(r)               -> [ sprintf "push %s" (regNameOf r) ]
-        | Pop(r)                -> [ sprintf "pop %s" (regNameOf r) ]
-        | PeekA                 -> [ "let A=int [SP]" ]  // TODO: Assumes 32-bit target
-        | Let(r1,r2)            -> [ sprintf "let %s=%s" (regNameOf r1) (regNameOf r2) ]
-        | AddAN(I32(n))         -> [ sprintf "add A,%d" n ]
-        | SubAN(I32(n))         -> [ sprintf "sub A,%d" n ]
-        | AndAN(I32(n))         -> [ sprintf "and A,%d" n ]
-        | OrAN(I32(n))          -> [ sprintf "or A,%d"  n ]
-        | XorAN(I32(n))         -> [ sprintf "xor A,%d" n ]
-        | Add(r1,r2)            -> [ sprintf "add %s,%s" (regNameOf r1) (regNameOf r2) ]  // commutative
-        | SubBA                 -> [ "sub B,A" ]
-        | MulAB                 -> [ "mul A,B" ]  // commutative
-        | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have division or remainder instructions"
-        | AndAB                 -> [ "and A,B" ]  // commutative
-        | OrAB                  -> [ "or A,B" ]   // commutative
-        | XorAB                 -> [ "xor A,B" ]  // commutative
-        | ShlBC                 -> [ "shl B,C" ]
-        | ShrsBC                -> [ "sar B,C" ]
-        | ShruBC                -> [ "shr B,C" ]
-        | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
-        | CmpBA crmCond         -> [ sprintf "cmp B,A:set %s A" (JonathansConditionCodeFor crmCond) ]
-        | CmpAZ                 -> [ "cmp A,0:set z A" ]
-        | FetchLoc(r,i)         -> [ sprintf "let %s=int[@%s]" (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
-        | StoreLoc(r,i)         -> [ sprintf "let int[@%s]=%s" (LocalIdxNameString i) (regNameOf r) ]  // TODO: Assumes 32-bit target
-        | FetchGlo(r,i)         -> [ sprintf "let %s=int[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
-        | StoreGlo(r,i)         -> [ sprintf "let int[%s]=%s" (GlobalIdxNameString i) (regNameOf r) ]  // TODO: Eventually use the type rather than "int"
-        | StoreConst8(r,ofs,I32(v))   -> translateREGU32I32 "let byte[" r ofs "]=" v
-        | StoreConst16(r,ofs,I32(v))  -> translateREGU32I32 "let ushort[" r ofs "]=" v
-        | StoreConst32(r,ofs,I32(v))  -> translateREGU32I32 "let uint[" r ofs "]=" v  
-        | Store8A(r,ofs)       -> translateREGU32 "let byte[" r ofs "]=A"  
-        | Store16A(r,ofs)      -> translateREGU32 "let ushort[" r ofs "]=A"
-        | Store32A(r,ofs)      -> translateREGU32 "let uint[" r ofs "]=A"  
-        | Fetch8s(r,ofs)       -> translateREGU32 "let A=sbyte[" r ofs "]" 
-        | Fetch8u(r,ofs)       -> translateREGU32 "let A=byte[" r ofs "]"  
-        | Fetch16s(r,ofs)      -> translateREGU32 "let A=short[" r ofs "]" 
-        | Fetch16u(r,ofs)      -> translateREGU32 "let A=ushort[" r ofs "]"
-        | Fetch32(r,ofs)       -> translateREGU32 "let A=uint[" r ofs "]"  
+        | Barrier                     -> [ "// ~~~ register barrier ~~~" ]
+        | Breakpoint                  -> [ "break" ]
+        | Drop(U32 numSlots)          -> [ sprintf "add SP,%d" (numSlots * 4u) ]   // TODO: Assumes 32-bit target
+        | Label(LabelName l)          -> [ "label " + l ]   // TODO: sort out using the local label references in Jonathan's ASM
+        | Const(r,Const32(n))         -> [ sprintf "let %s=%d" (regNameOf r) n ]
+        | Goto(LabelName l)           -> [ "goto " + l ]
+        | CallFunc(LabelName l)       -> [ "call " + l ]
+        | CallTableIndirect           -> translateCallTableIndirect ()
+        | BranchRegZNZ(A,c,LabelName l) -> [ sprintf "cmp A,0:if %s goto %s" (c |> toZNZMnemonic) l ]
+        | BranchRegZNZ _              -> failwith "Cannot translate branch"
+        | GotoIndex(t,n,d,_)          -> translateGotoIndex t n d   // The ignored parameter is the lookup table, which we separately output.
+        | Push(r)                     -> [ sprintf "push %s" (regNameOf r) ]
+        | Pop(r)                      -> [ sprintf "pop %s" (regNameOf r) ]
+        | PeekA                       -> [ "let A=int [SP]" ]  // TODO: Assumes 32-bit target
+        | Let(r1,r2)                  -> [ sprintf "let %s=%s" (regNameOf r1) (regNameOf r2) ]
+        | CalcRegNum(ins,A,I32(n)) -> [ sprintf "%s A,%d" (ins |> toMathMnemonic) n ]
+        | CalcRegNum _             -> failwith "Cannot translate calculation with constant"
+        | CalcRegReg(ins,r1,r2)       -> [ sprintf "%s %s,%s" (ins |> calcInstruction) (regNameOf r1) (regNameOf r2) ]
+        | ShiftRot ins                -> [ sprintf "%s B,C" (ins |> shiftInstruction) ]
+        | CmpBA crmCond               -> [ sprintf "cmp B,A:set %s A" (JonathansConditionCodeFor crmCond) ]
+        | CmpAZ                       -> [ "cmp A,0:set z A" ]
+        | FetchLoc(r,i)               -> [ sprintf "let %s=int[@%s]" (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
+        | StoreLoc(r,i)               -> [ sprintf "let int[@%s]=%s" (LocalIdxNameString i) (regNameOf r) ]  // TODO: Assumes 32-bit target
+        | FetchGlo(r,i)               -> [ sprintf "let %s=int[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
+        | StoreGlo(r,i)               -> [ sprintf "let int[%s]=%s" (GlobalIdxNameString i) (regNameOf r) ]  // TODO: Eventually use the type rather than "int"
+        | StoreConst(t,r,ofs,I32 v)   -> translateStoreConst t r ofs v
+        | Store(A,t,r,ofs)            -> translateStore t r ofs
+        | Store _                     -> failwith "Cannot translate store instruction"
+        | Fetch(A,t,r,ofs)            -> translateFetch t r ofs
+        | Fetch _                     -> failwith "Cannot translate fetch instruction"
         | ThunkIn              -> 
             // The translated code requires the Y register to
             // point to the base of the linear memory region.

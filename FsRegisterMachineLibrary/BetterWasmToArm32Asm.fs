@@ -21,6 +21,12 @@ let CodeAlign = "align 4"
 let AsmArmBlockCopyLabel = "wasm_arm_block_copy"
 
 
+let regNameOf = function
+    | A -> "R0"
+    | B -> "R1"
+    | C -> "R2"
+    | Y -> "R9"  // Conventionally the "Static base" register
+
 
 let ArmConditionCodeFor crmCondition = 
     match crmCondition with
@@ -36,18 +42,39 @@ let ArmConditionCodeFor crmCondition =
         | CrmCondGeu -> "hs"
 
 
+let ArmCalcInstruction ins =
+    match ins with
+        | AddRegReg -> "add"
+        | SubRegReg -> "sub"
+        | MulRegReg -> "mul"
+        | AndRegReg -> "and"
+        | OrRegReg  -> "orr"
+        | XorRegReg -> "eor"
+        | DivsRegReg
+        | DivuRegReg
+        | RemsRegReg
+        | RemuRegReg -> failwith "Division or remainder instructions not yet translated"
+
+let ArmShiftInstruction ins =
+    match ins with
+        | Shl    -> "lsl"
+        | Shrs   -> "asr"
+        | Shru   -> "lsr"
+        | Rotl 
+        | Rotr   -> failwith "Rotate instructions are not yet translated"
+
+
+let ArmRegRegInstructionToString ins r1 r2 =
+    [ sprintf "%s %s,%s,%s" (ins |> ArmCalcInstruction) (regNameOf r1) (regNameOf r1) (regNameOf r2) ]
+    
+let ArmShiftInstructionToString ins =
+    [ sprintf "%s R1,R1,R2" (ins |> ArmShiftInstruction) ]
 
 
 
 let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction =
 
     // TODO:  These translations can assume an ArmV7 target for now.
-
-    let regNameOf = function
-        | A -> "R0"
-        | B -> "R1"
-        | C -> "R2"
-        | Y -> "R9"  // Conventionally the "Static base" register
 
     let loadConstant r value =
         LoadConstantInto (regNameOf r) value
@@ -59,19 +86,22 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         StoreConstant fetchStoreType armStoreInstruction (regNameOf addressReg) offsetDesired value offsetTempRegister armTempRegister
 
     let translateGotoIndex (LabelName tableLabel) numMax (LabelName defaultLabel) =
+        failwith "translateGotoIndex not yet done for ARM" // TODO
         // A is already the index to branch to
-        (MathsWithConstant "cmp" "R0" numMax armTempRegister) @  // ie: cmp R0,numMax
+        (* (MathsWithConstant "cmp" "R0" numMax armTempRegister) @  // ie: cmp R0,numMax
         [
             sprintf "bhs %s" defaultLabel
             sprintf "jmp [%s+R0*4]" tableLabel
-        ]
+        ] *)
 
     let translateCallTableIndirect () =
+        failwith "translateCallTableIndirect not yet done for ARM" // TODO
         // TODO: We really need to emit some code to validate the signatures.
         // A is already the index to call.
         // TODO: We need to validate index A lies within wasm table [0]
-        [ sprintf "jmp [%s0+R0*4]" AsmTableNamePrefix ] // WASM 1.0 always looks in table #0 
-
+        (* [ sprintf "jmp [%s0+R0*4]" AsmTableNamePrefix ] // WASM 1.0 always looks in table #0 
+        *)
+        
     (* TODO: consider:
         ldr r0, [pc, #xx] ; My constant
         add r0, r0, r0 ; try to use r0 straight away, incurring a 3 cycle wait on use of r0    
@@ -111,59 +141,76 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
 
 
     let translateSecondaryCmpBranch condition (LabelName targetLabel) =
-        let branchInstruction = sprintf "b%s " (ArmConditionCodeFor condition)
-        [ "cmp R1,R0" ; (branchInstruction + targetLabel) ]
+        let branchInstruction = sprintf "b%s %s" (ArmConditionCodeFor condition) targetLabel
+        [ "cmp R1,R0" ; branchInstruction ]
+
+    let storeType = function
+        | Stored8  -> ArmByte
+        | Stored16 -> ArmHalfword
+        | Stored32 -> ArmWord
+
+    let fetchType = function
+        | SignExt8  -> ArmByte
+        | ZeroExt8  -> ArmByte
+        | SignExt16 -> ArmHalfword
+        | ZeroExt16 -> ArmHalfword
+        | SignExt32 -> ArmWord 
+
+    let storeMnemonic = function
+        | Stored8  -> "strb"
+        | Stored16 -> "strh"
+        | Stored32 -> "str"
+
+    let fetchMnemonic = function
+        | SignExt8  -> "ldrsb"
+        | ZeroExt8  -> "ldrb"
+        | SignExt16 -> "ldrsh"
+        | ZeroExt16 -> "ldrh"
+        | SignExt32 -> "ldr"
+
+    let mathMnemonic = function
+        | AddRegNum -> "add"
+        | SubRegNum -> "sub"
+        | AndRegNum -> "and"
+        | OrRegNum  -> "orr"
+        | XorRegNum -> "eor"
+
+    let toZNZMnemonic = function
+        | BZero     -> "eq"
+        | BNonZero  -> "ne"
 
 
     match instruction with
-        | Barrier               -> [ "; ~~~ register barrier ~~~" ]
-        | Breakpoint            -> [ "bkpt #0" ]
-        | Drop(U32 numSlots)    -> [ sprintf "add R13,R13,#%d" (numSlots * StackSlotSizeU) ]
-        | Label(LabelName l)    -> [ LabelCommand l ]
-        | Const(r,Const32(n))   -> loadConstant r (uint32 n)
-        | Goto(LabelName l)     -> [ "b " + l ]
-        | CallFunc(LabelName l) -> [ "bl " + l ]
-        | CallTableIndirect     -> translateCallTableIndirect ()
-        | BranchAZ(LabelName l) -> [ "cmp R0,#0" ; "beq " + l ]
-        | BranchANZ(LabelName l)-> [ "cmp R0,#0" ; "bne " + l ]
-        | GotoIndex(t,n,d,_)    -> translateGotoIndex t (uint32 n) d   // The ignored parameter is the lookup table, which we separately output.
-        | Push(r)               -> [ sprintf "push {%s}" (regNameOf r) ]
-        | Pop(r)                -> [ sprintf "pop {%s}" (regNameOf r) ]
-        | PeekA                 -> [ "ldr R0,[R13]" ]
-        | Let(r1,r2)            -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
-        | AddAN(I32(n))         -> MathsWithConstant "add" "R0" (uint32 n) armTempRegister
-        | SubAN(I32(n))         -> MathsWithConstant "sub" "R0" (uint32 n) armTempRegister
-        | AndAN(I32(n))         -> MathsWithConstant "and" "R0" (uint32 n) armTempRegister
-        | OrAN(I32(n))          -> MathsWithConstant "orr" "R0" (uint32 n) armTempRegister
-        | XorAN(I32(n))         -> MathsWithConstant "eor" "R0" (uint32 n) armTempRegister
-        | Add(r1,r2)            -> [ sprintf "add %s,%s,%s" (regNameOf r1) (regNameOf r1) (regNameOf r2) ]
-        | SubBA                 -> [ "sub R1,R1,R0" ]  // TODO: ARM could put result in R0
-        | MulAB                 -> [ "mul R0,R0,R1" ]
-        | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have division or remainder instructions"
-        | AndAB                 -> [ "and R0,R0,R1" ]
-        | OrAB                  -> [ "orr R0,R0,R1" ]
-        | XorAB                 -> [ "eor R0,R0,R1" ]
-        | ShlBC                 -> [ "lsl R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
-        | ShrsBC                -> [ "asr R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
-        | ShruBC                -> [ "lsr R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
-        | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
-        | CmpBA crmCond         -> [ "cmp R1,R0" ; "mov R0,#0" ; (sprintf "mov%s R0,#1" (ArmConditionCodeFor crmCond)) ]
-        | CmpAZ                 -> [ "cmp R0,0"  ; "mov R0,#0" ; "moveq R0,#1" ]
-        | FetchLoc(r,i)         -> [ sprintf "ldr %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
-        | StoreLoc(r,i)         -> [ sprintf "str %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
-        | FetchGlo(r,i)         -> [ sprintf "ldr %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
-        | StoreGlo(r,i)         -> [ sprintf "str %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
-        | StoreConst8 (r,U32 ofs,I32 v) -> storeConstant ArmByte     "strb"  r ofs (uint32 v)
-        | StoreConst16(r,U32 ofs,I32 v) -> storeConstant ArmHalfword "strh"  r ofs (uint32 v)
-        | StoreConst32(r,U32 ofs,I32 v) -> storeConstant ArmWord     "str"   r ofs (uint32 v)
-        | Store8A (r,U32 ofs)   -> loadStoreRegOffset ArmByte     "strb"  r ofs
-        | Store16A(r,U32 ofs)   -> loadStoreRegOffset ArmHalfword "strh"  r ofs
-        | Store32A(r,U32 ofs)   -> loadStoreRegOffset ArmWord     "str"   r ofs
-        | Fetch8s (r,U32 ofs)   -> loadStoreRegOffset ArmByte     "ldrsb" r ofs
-        | Fetch8u (r,U32 ofs)   -> loadStoreRegOffset ArmByte     "ldrb"  r ofs
-        | Fetch16s(r,U32 ofs)   -> loadStoreRegOffset ArmHalfword "ldrsh" r ofs
-        | Fetch16u(r,U32 ofs)   -> loadStoreRegOffset ArmHalfword "ldrh"  r ofs
-        | Fetch32 (r,U32 ofs)   -> loadStoreRegOffset ArmWord     "ldr"   r ofs
+        | Barrier                       -> [ "; ~~~ register barrier ~~~" ]
+        | Breakpoint                    -> [ "bkpt #0" ]
+        | Drop(U32 numSlots)            -> [ sprintf "add R13,R13,#%d" (numSlots * StackSlotSizeU) ]
+        | Label(LabelName l)            -> [ LabelCommand l ]
+        | Const(r,Const32(n))           -> loadConstant r (uint32 n)
+        | Goto(LabelName l)             -> [ "b " + l ]
+        | CallFunc(LabelName l)         -> [ "bl " + l ]
+        | CallTableIndirect             -> translateCallTableIndirect ()
+        | BranchRegZNZ(A,c,LabelName l) -> [ "cmp R0,#0" ; (sprintf "b%s %s" (c |> toZNZMnemonic) l) ]
+        | BranchRegZNZ _                -> failwith "Cannot translate branch"
+        | GotoIndex(t,n,d,_)            -> translateGotoIndex t (uint32 n) d   // The ignored parameter is the lookup table, which we separately output.
+        | Push r                        -> [ sprintf "push {%s}" (regNameOf r) ]
+        | Pop r                         -> [ sprintf "pop {%s}" (regNameOf r) ]
+        | PeekA                         -> [ "ldr R0,[R13]" ]
+        | Let(r1,r2)                    -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
+        | CalcRegNum(ins,A,I32(n))   -> MathsWithConstant (ins |> mathMnemonic) "R0" (uint32 n) armTempRegister
+        | CalcRegNum _               -> failwith "Cannot translate calculation with constant"
+        | CalcRegReg(ins,r1,r2)         -> ArmRegRegInstructionToString ins r1 r2
+        | ShiftRot ins                  -> ArmShiftInstructionToString ins // TODO: Still very X86
+        | CmpBA crmCond                 -> [ "cmp R1,R0" ; "mov R0,#0" ; (sprintf "mov%s R0,#1" (ArmConditionCodeFor crmCond)) ]
+        | CmpAZ                         -> [ "cmp R0,0"  ; "mov R0,#0" ; "moveq R0,#1" ]
+        | FetchLoc(r,i)                 -> [ sprintf "ldr %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
+        | StoreLoc(r,i)                 -> [ sprintf "str %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
+        | FetchGlo(r,i)                 -> [ sprintf "ldr %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
+        | StoreGlo(r,i)                 -> [ sprintf "str %s,[%s]" (regNameOf r) (GlobalIdxNameString i) ]  // TODO: Eventually use the type rather than "int"
+        | StoreConst(t,r,U32 ofs,I32 v) -> storeConstant (t |> storeType) (t |> storeMnemonic) r ofs (uint32 v)
+        | Store(A,t,r,U32 ofs)          -> loadStoreRegOffset (t |> storeType) (t |> storeMnemonic) r ofs
+        | Store _                       -> failwith "Cannot translate store instruction"
+        | Fetch(A,t,r,U32 ofs)          -> loadStoreRegOffset (t |> fetchType) (t |> fetchMnemonic) r ofs
+        | Fetch _                       -> failwith "Cannot translate fetch instruction"
         | ThunkIn -> 
             // The translated code requires the Y register to
             // point to the base of the linear memory region.
@@ -177,6 +224,22 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
             translateSecondaryCmpBranch condition targetLabel
 
         | X8632Specific _ -> failwith "Unexpected usage of X86/32 optimisation!"
+
+
+(* TODO: for reference in case of later problems:
+        | SubBA                 -> [ "sub R1,R1,R0" ]  // TODO: ARM could put result in R0
+        | MulAB                 -> [ "mul R0,R0,R1" ]
+        | AndAB                 -> [ "and R0,R0,R1" ]
+        | OrAB                  -> [ "orr R0,R0,R1" ]
+        | XorAB                 -> [ "eor R0,R0,R1" ]
+        | ShlBC                 -> [ "lsl R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
+        | ShrsBC                -> [ "asr R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
+        | ShruBC                -> [ "lsr R1,R1,R2" ] // TODO: ARM is more flexible than X86, result could go into R0
+        | RotlBC | RotrBC       -> failwith "Assembler does not have a rotate instruction"
+        | DivsBA | DivuBA | RemsBA | RemuBA -> failwith "Assembler does not have division or remainder instructions"
+        *)
+        
+
 
 
 let ValTypeTranslationOf = function

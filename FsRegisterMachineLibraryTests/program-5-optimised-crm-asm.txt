@@ -5,13 +5,13 @@ CODE>         Const (A, Const32 1)
 CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l2")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
-CODE>         AddAN (I32 1)
+CODE>         CalcRegNum (AddRegNum, A, I32 1)
 CODE>         StoreLoc (A, LocalIdx (U32 5u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 3u))
 CODE>         Const (A, Const32 1)
 CODE>         Let (C, A)
-CODE>         ShlBC
+CODE>         ShiftRot Shl
 CODE>         Let (A, B)
 CODE>         StoreLoc (A, LocalIdx (U32 6u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,15 +31,15 @@ CODE>     wasm_l5:
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 3u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
-CODE>         Add (B, Y)
-CODE>         Store16A (B, U32 0u)
+CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         Store (A, Stored16, B, U32 0u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
-CODE>         AddAN (I32 2)
+CODE>         CalcRegNum (AddRegNum, A, I32 2)
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 7u))
-CODE>         AddAN (I32 -1)
+CODE>         CalcRegNum (AddRegNum, A, I32 -1)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 7u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -51,7 +51,7 @@ CODE>     wasm_l4:
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 0u))
 CODE>         FetchLoc (A, LocalIdx (U32 6u))
-CODE>         Add (A, B)
+CODE>         CalcRegReg (AddRegReg, A, B)
 CODE>         StoreLoc (A, LocalIdx (U32 0u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 2u))
@@ -60,11 +60,11 @@ CODE>         CmpBA CrmCondGts
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
-CODE>         AddAN (I32 -1)
+CODE>         CalcRegNum (AddRegNum, A, I32 -1)
 CODE>         StoreLoc (A, LocalIdx (U32 2u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
-CODE>         BranchANZ (LabelName "wasm_l3")
+CODE>         BranchRegZNZ (A, BNonZero, LabelName "wasm_l3")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l2:
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

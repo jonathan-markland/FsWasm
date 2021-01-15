@@ -38,8 +38,7 @@ let Optimise (originalList:CRMInstruction32 list) =
 
         let targetLabel =
             match a.[i+1] with
-                | BranchANZ labelIdx
-                | BranchAZ  labelIdx -> labelIdx
+                | BranchRegZNZ(_,_,name) -> name
                 | _ -> failwith "Unexpected failure of pattern match" // should never happen
 
         [|
@@ -74,9 +73,9 @@ let OptimiseX8632 (originalList:CRMInstruction32 list) =
         [|
             X8632Specific (
                 match a.[i+1] with
-                    | Store8A(B,ofs)  -> X8632StoreAatEBXplusEDIplusOffset (ofs, "AL")
-                    | Store16A(B,ofs) -> X8632StoreAatEBXplusEDIplusOffset (ofs, "AX")
-                    | Store32A(B,ofs) -> X8632StoreAatEBXplusEDIplusOffset (ofs, "EAX")
+                    | Store(A, Stored8,  B, ofs) -> X8632StoreAatEBXplusEDIplusOffset (ofs, "AL")
+                    | Store(A, Stored16, B, ofs) -> X8632StoreAatEBXplusEDIplusOffset (ofs, "AX")
+                    | Store(A, Stored32, B, ofs) -> X8632StoreAatEBXplusEDIplusOffset (ofs, "EAX")
                     | _ -> failwith "Unexpected failure of pattern match" // should never happen
                 )
             Barrier
@@ -91,11 +90,11 @@ let OptimiseX8632 (originalList:CRMInstruction32 list) =
 
         let opcode, value =
             match a.[i+1] with
-                | AddAN value -> "add", value
-                | SubAN value -> "sub", value
-                | AndAN value -> "and", value
-                | OrAN  value -> "or",  value
-                | XorAN value -> "xor", value
+                | CalcRegNum(AddRegNum, A, value) ->   "add", value
+                | CalcRegNum(SubRegNum, A, value) ->   "sub", value
+                | CalcRegNum(AndRegNum, A, value) ->   "and", value
+                | CalcRegNum(OrRegNum,  A, value) ->   "or",  value
+                | CalcRegNum(XorRegNum, A, value) ->   "xor", value
                 | _ -> failwith "Unexpected failure of pattern match" // should never happen
 
         [|

@@ -84,7 +84,79 @@ let OppositeCrmConditionFor crmCondition =
 
 
 
+type BranchZNZType = BZero | BNonZero
+type StoredType    = Stored8 | Stored16 | Stored32
+type FetchedType   = SignExt8 | ZeroExt8 | SignExt16 | ZeroExt16 | SignExt32
 
+type ShiftRotateType = 
+
+    /// Calculate (unsigned B) SHL C, result in B
+    | Shl
+
+    /// Calculate (signed   B) SHR C, result in B
+    | Shrs
+
+    /// Calculate (unsigned B) SHR C, result in B
+    | Shru
+
+    /// Calculate B ROL C, result in B
+    | Rotl
+
+    /// Calculate B ROR C, result in B
+    | Rotr
+
+
+type RegConstCalcType =
+
+    /// Calculate Reg+Num, result in Reg
+    | AddRegNum
+    
+    /// Calculate Reg-Num, result in Reg
+    | SubRegNum
+
+    /// Calculate Reg AND Num, result in Reg
+    | AndRegNum
+
+    /// Calculate Reg OR Num, result in Reg
+    | OrRegNum
+
+    /// Calculate Reg XOR Num, result in Reg
+    | XorRegNum
+
+    
+type TwoRegCalcType =
+
+    /// Add registers, result in left-side register.
+    | AddRegReg
+
+    /// Subtract registers, result in left-side register.
+    | SubRegReg       
+
+    /// Multiply registers, result in left-side register.
+    | MulRegReg     
+    
+    /// Divide registers (signed), (NOT IMPLEMENTED).
+    | DivsRegReg     
+    
+    /// Divide registers (unsigned), (NOT IMPLEMENTED).
+    | DivuRegReg
+    
+    /// Remainder (signed), (NOT IMPLEMENTED).
+    | RemsRegReg    
+    
+    /// Remainder (unsigned), (NOT IMPLEMENTED).
+    | RemuRegReg    
+    
+    /// AND registers together, result in left-side register.
+    | AndRegReg
+    
+    /// OR registers together, result in left-side register.
+    | OrRegReg
+    
+    /// XOR registers together, result in left-side register.
+    | XorRegReg
+   
+   
 
 /// A 32-bit register machine instruction.
 /// All of these need supporting on a new architecture, except those "Specific" ones.
@@ -108,6 +180,7 @@ type CRMInstruction32 =
     /// Load constant into given register
     | Const       of REG * CONST32      
 
+
     /// Go to given label
     | Goto        of LABELNAME    
 
@@ -117,11 +190,8 @@ type CRMInstruction32 =
     /// Reg A contains index into WASM Table[0]
     | CallTableIndirect
 
-    /// Branch to given label when A==0
-    | BranchAZ    of LABELNAME    
-
-    /// Branch to given label when A<>0
-    | BranchANZ   of LABELNAME    
+    /// Branch to given label when REG is zero or non-zero
+    | BranchRegZNZ of REG * BranchZNZType * LABELNAME    
 
     /// Reg A contains index.  Go to defaultLabel if out of range.
     /// The lookup table would be separately stored in the generated data section.
@@ -143,64 +213,13 @@ type CRMInstruction32 =
 
 
     /// Calculate sum of two registers, result in LHS
-    | Add of REG * REG
+    | CalcRegReg of TwoRegCalcType * REG * REG
     
-    /// Calculate A+n, result in A
-    | AddAN of I32
-    
-    /// Calculate B-A, result in A
-    | SubBA       
+    /// Calculate REG (op) n, result in REG
+    | CalcRegNum of RegConstCalcType * REG * I32
 
-    /// Calculate A-n, result in A
-    | SubAN of I32
-    
-    /// Calculate A*B, result in A
-    | MulAB       
-    
-    /// Calculate (signed   B) * (signed   A), result in A
-    | DivsBA      
-    
-    /// Calculate (unsigned B) * (unsigned A), result in A
-    | DivuBA      
-    
-    /// Calculate (signed   B) % (signed   A), result in A
-    | RemsBA      
-    
-    /// Calculate (unsigned B) % (unsigned A), result in A
-    | RemuBA      
-    
-    /// Calculate A AND B, result in A
-    | AndAB
-    
-    /// Calculate A OR  B, result in A
-    | OrAB
-    
-    /// Calculate A XOR B, result in A
-    | XorAB
-    
-    /// Calculate A AND N, result in A
-    | AndAN of I32
-    
-    /// Calculate A OR  N, result in A
-    | OrAN of I32
-    
-    /// Calculate A XOR N, result in A
-    | XorAN of I32
-    
-    /// Calculate (unsigned B) SHL C, result in B
-    | ShlBC
-    
-    /// Calculate (signed   B) SHR C, result in B
-    | ShrsBC
-    
-    /// Calculate (unsigned B) SHR C, result in B
-    | ShruBC
-    
-    /// Calculate B ROL C, result in B
-    | RotlBC
-    
-    /// Calculate B ROR C, result in B
-    | RotrBC
+    /// Shift and rotate
+    | ShiftRot of ShiftRotateType
 
 
     /// Compare B and A for the given condition, 
@@ -223,40 +242,17 @@ type CRMInstruction32 =
     /// Store given regiser to WASM global variable
     | StoreGlo      of REG * GlobalIdx   
 
-    /// Store 8-bit constant I32 to WASM linear memory, address given by REG+U32
-    | StoreConst8   of REG * U32 * I32   
 
-    /// Store 16-bit constant I32 to WASM linear memory, address given by REG+U32
-    | StoreConst16  of REG * U32 * I32         
+    /// Store constant I32 to WASM linear memory, address given by REG+U32
+    | StoreConst    of StoredType * REG * U32 * I32   
 
-    /// Store 32-bit constant I32 to WASM linear memory, address given by REG+U32
-    | StoreConst32  of REG * U32 * I32
+    /// Store of given size from least significant end of reg 'src' 
+    /// to WASM linear memory, address given by REG+U32
+    | Store         of src:REG * StoredType * adr:REG * U32         
 
-    /// Store least significant 8 bits of reg A to WASM linear memory, address given by REG+U32
-    | Store8A    of REG * U32         
-
-    /// Store least significant 16 bits of reg A to WASM linear memory, address given by REG+U32
-    | Store16A   of REG * U32         
-
-    /// Store 32 bits of reg A to WASM linear memory, address given by REG+U32
-    | Store32A   of REG * U32         
-
-
-
-    /// Fetch byte from WASM linear memory, address REG+U32, sign-extend with result in A
-    | Fetch8s  of REG * U32         
-
-    /// Fetch byte from WASM linear memory, address REG+U32, zero-extend with result in A
-    | Fetch8u  of REG * U32         
-
-    /// Fetch short from WASM linear memory, address REG+U32, sign-extend with result in A
-    | Fetch16s of REG * U32         
-
-    /// Fetch short from WASM linear memory, address REG+U32, zero-extend with result in A
-    | Fetch16u of REG * U32         
-
-    /// Fetch 32-bits from WASM linear memory, address REG+U32, into A
-    | Fetch32  of REG * U32         
+    /// Fetch from WASM linear memory to reg 'dest', with sign/zero extension if given.
+    /// Address is given by REG + U32
+    | Fetch         of dest:REG * FetchedType * adr:REG * U32         
 
     // ==================================================================================
 
