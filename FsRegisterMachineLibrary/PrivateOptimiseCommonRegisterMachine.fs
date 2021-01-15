@@ -77,7 +77,7 @@ let IsFetchAndStoreUsingSameLocal i1 i2 =
         | _ -> false
 
 let IsAddSubAndOrXorAN = function
-    | CalcWithConst _ -> true
+    | CalcRegNum _ -> true
     | _ -> false
 
 let IsCmpBA = function

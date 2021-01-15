@@ -172,8 +172,8 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | Pop r                      -> [ sprintf "pop %s" (regNameOf r) ]
         | PeekA                      -> [ "mov EAX,[ESP]" ]
         | Let(r1,r2)                 -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
-        | CalcWithConst(ins,A,I32 n) -> [ sprintf "%s EAX,%d" (ins |> toMathMnemonic) n ]
-        | CalcWithConst _            -> failwith "Cannot translate calculation with constant"
+        | CalcRegNum(ins,A,I32 n) -> [ sprintf "%s EAX,%d" (ins |> toMathMnemonic) n ]
+        | CalcRegNum _            -> failwith "Cannot translate calculation with constant"
         | CalcRegReg(ins,r1,r2)      -> [ sprintf "%s %s,%s" (ins |> X86CalcInstruction) (regNameOf r1) (regNameOf r2) ]
         | ShiftRot ins               -> [ sprintf "%s EBX,CL" (ins |> X86ShiftInstruction) ]
         | CmpBA crmCond              -> [ "cmp EBX,EAX" ; (sprintf "set%s AL" (X86ConditionCodeFor crmCond)) ; "movzx EAX,AL" ]

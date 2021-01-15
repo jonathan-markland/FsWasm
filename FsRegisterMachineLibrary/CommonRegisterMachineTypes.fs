@@ -216,7 +216,7 @@ type CRMInstruction32 =
     | CalcRegReg of TwoRegCalcType * REG * REG
     
     /// Calculate REG (op) n, result in REG
-    | CalcWithConst of RegConstCalcType * REG * I32
+    | CalcRegNum of RegConstCalcType * REG * I32
 
     /// Shift and rotate
     | ShiftRot of ShiftRotateType

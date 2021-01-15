@@ -328,11 +328,11 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             | I32Ges(a,b)  -> compareOp a b (CmpBA CrmCondGes)
             | I32Geu(a,b)  -> compareOp a b (CmpBA CrmCondGeu)
 
-            | I32Add (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcWithConst(AddRegNum,A,n))
-            | I32Sub (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcWithConst(SubRegNum,A,n))
-            | I32And (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcWithConst(AndRegNum,A,n))
-            | I32Or  (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcWithConst(OrRegNum,A,n))
-            | I32Xor (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcWithConst(XorRegNum,A,n))
+            | I32Add (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(AddRegNum,A,n))
+            | I32Sub (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(SubRegNum,A,n))
+            | I32And (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(AndRegNum,A,n))
+            | I32Or  (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(OrRegNum,A,n))
+            | I32Xor (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(XorRegNum,A,n))
 
             | I32Add (a,b) -> binaryCommutativeOp     a b (CalcRegReg (AddRegReg,A,B))
             | I32Sub (a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (SubRegReg,B,A))

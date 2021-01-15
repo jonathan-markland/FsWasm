@@ -196,8 +196,8 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         | Pop r                         -> [ sprintf "pop {%s}" (regNameOf r) ]
         | PeekA                         -> [ "ldr R0,[R13]" ]
         | Let(r1,r2)                    -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
-        | CalcWithConst(ins,A,I32(n))   -> MathsWithConstant (ins |> mathMnemonic) "R0" (uint32 n) armTempRegister
-        | CalcWithConst _               -> failwith "Cannot translate calculation with constant"
+        | CalcRegNum(ins,A,I32(n))   -> MathsWithConstant (ins |> mathMnemonic) "R0" (uint32 n) armTempRegister
+        | CalcRegNum _               -> failwith "Cannot translate calculation with constant"
         | CalcRegReg(ins,r1,r2)         -> ArmRegRegInstructionToString ins r1 r2
         | ShiftRot ins                  -> ArmShiftInstructionToString ins // TODO: Still very X86
         | CmpBA crmCond                 -> [ "cmp R1,R0" ; "mov R0,#0" ; (sprintf "mov%s R0,#1" (ArmConditionCodeFor crmCond)) ]

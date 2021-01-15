@@ -146,8 +146,8 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         | Pop(r)                      -> [ sprintf "pop %s" (regNameOf r) ]
         | PeekA                       -> [ "let A=int [SP]" ]  // TODO: Assumes 32-bit target
         | Let(r1,r2)                  -> [ sprintf "let %s=%s" (regNameOf r1) (regNameOf r2) ]
-        | CalcWithConst(ins,A,I32(n)) -> [ sprintf "%s A,%d" (ins |> toMathMnemonic) n ]
-        | CalcWithConst _             -> failwith "Cannot translate calculation with constant"
+        | CalcRegNum(ins,A,I32(n)) -> [ sprintf "%s A,%d" (ins |> toMathMnemonic) n ]
+        | CalcRegNum _             -> failwith "Cannot translate calculation with constant"
         | CalcRegReg(ins,r1,r2)       -> [ sprintf "%s %s,%s" (ins |> calcInstruction) (regNameOf r1) (regNameOf r2) ]
         | ShiftRot ins                -> [ sprintf "%s B,C" (ins |> shiftInstruction) ]
         | CmpBA crmCond               -> [ sprintf "cmp B,A:set %s A" (JonathansConditionCodeFor crmCond) ]
