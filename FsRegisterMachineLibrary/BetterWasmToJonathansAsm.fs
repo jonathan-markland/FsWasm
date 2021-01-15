@@ -101,23 +101,23 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         [ compareInstruction + targetLabel ]
 
     let toMathMnemonic = function
-        | AddRN -> "add"
-        | SubRN -> "sub"
-        | AndRN -> "and"
-        | OrRN  -> "or"
-        | XorRN -> "xor"
+        | AddRegNum -> "add"
+        | SubRegNum -> "sub"
+        | AndRegNum -> "and"
+        | OrRegNum  -> "or"
+        | XorRegNum -> "xor"
 
     let calcInstruction = function
-        | AddRbRa -> "add"
-        | SubRbRa -> "sub"
-        | MulRbRa -> "mul"
-        | AndRbRa -> "and"
-        | OrRbRa  -> "or"
-        | XorRbRa -> "xor"
-        | DivsRbRa
-        | DivuRbRa
-        | RemsRbRa
-        | RemuRbRa -> failwith "Division or remainder instructions not yet translated"
+        | AddRegReg -> "add"
+        | SubRegReg -> "sub"
+        | MulRegReg -> "mul"
+        | AndRegReg -> "and"
+        | OrRegReg  -> "or"
+        | XorRegReg -> "xor"
+        | DivsRegReg
+        | DivuRegReg
+        | RemsRegReg
+        | RemuRegReg -> failwith "Division or remainder instructions not yet translated"
 
     let shiftInstruction = function
         | Shl    -> "shl"

@@ -90,11 +90,11 @@ let OptimiseX8632 (originalList:CRMInstruction32 list) =
 
         let opcode, value =
             match a.[i+1] with
-                | CalcWithConst(AddRN, A, value) ->   "add", value
-                | CalcWithConst(SubRN, A, value) ->   "sub", value
-                | CalcWithConst(AndRN, A, value) ->   "and", value
-                | CalcWithConst(OrRN,  A, value) ->   "or",  value
-                | CalcWithConst(XorRN, A, value) ->   "xor", value
+                | CalcWithConst(AddRegNum, A, value) ->   "add", value
+                | CalcWithConst(SubRegNum, A, value) ->   "sub", value
+                | CalcWithConst(AndRegNum, A, value) ->   "and", value
+                | CalcWithConst(OrRegNum,  A, value) ->   "or",  value
+                | CalcWithConst(XorRegNum, A, value) ->   "xor", value
                 | _ -> failwith "Unexpected failure of pattern match" // should never happen
 
         [|

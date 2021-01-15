@@ -34,16 +34,16 @@ let X86ConditionCodeFor crmCondition =
 
 let X86CalcInstruction ins =
     match ins with
-        | AddRbRa -> "add"
-        | SubRbRa -> "sub"
-        | MulRbRa -> "mul"
-        | AndRbRa -> "and"
-        | OrRbRa  -> "or"
-        | XorRbRa -> "xor"
-        | DivsRbRa
-        | DivuRbRa
-        | RemsRbRa
-        | RemuRbRa -> failwith "Division or remainder instructions not yet translated"
+        | AddRegReg -> "add"
+        | SubRegReg -> "sub"
+        | MulRegReg -> "mul"
+        | AndRegReg -> "and"
+        | OrRegReg  -> "or"
+        | XorRegReg -> "xor"
+        | DivsRegReg
+        | DivuRegReg
+        | RemsRegReg
+        | RemuRegReg -> failwith "Division or remainder instructions not yet translated"
 
 
 let X86ShiftInstruction ins =
@@ -145,11 +145,11 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         [ "cmp EBX,EAX" ; (branchInstruction + targetLabel) ]
 
     let toMathMnemonic = function
-        | AddRN -> "add"
-        | SubRN -> "sub"
-        | AndRN -> "and"
-        | OrRN  -> "or"
-        | XorRN -> "xor"
+        | AddRegNum -> "add"
+        | SubRegNum -> "sub"
+        | AndRegNum -> "and"
+        | OrRegNum  -> "or"
+        | XorRegNum -> "xor"
 
     let toZNZMnemonic = function
         | BZero     -> "z"

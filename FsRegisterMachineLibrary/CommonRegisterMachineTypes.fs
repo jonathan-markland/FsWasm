@@ -109,52 +109,52 @@ type ShiftRotateType =
 type RegConstCalcType =
 
     /// Calculate R+n, result in R
-    | AddRN
+    | AddRegNum
     
     /// Calculate R-n, result in R
-    | SubRN
+    | SubRegNum
 
     /// Calculate R AND N, result in R
-    | AndRN
+    | AndRegNum
 
     /// Calculate R OR  N, result in R
-    | OrRN
+    | OrRegNum
 
     /// Calculate R XOR N, result in R
-    | XorRN
+    | XorRegNum
 
     
 type TwoRegCalcType =
 
     /// Calculate Rb+Ra, result in Ra
-    | AddRbRa
+    | AddRegReg
 
     /// Calculate Rb-Ra, result in Ra
-    | SubRbRa       
+    | SubRegReg       
 
     /// Calculate Ra*Rb, result in Ra
-    | MulRbRa     
+    | MulRegReg     
     
     /// Calculate (signed   Rb) * (signed   Ra), result in Ra
-    | DivsRbRa     
+    | DivsRegReg     
     
     /// Calculate (unsigned Rb) * (unsigned Ra), result in Ra
-    | DivuRbRa    
+    | DivuRegReg
     
     /// Calculate (signed   Rb) % (signed   Ra), result in Ra
-    | RemsRbRa    
+    | RemsRegReg    
     
     /// Calculate (unsigned Rb) % (unsigned Ra), result in Ra
-    | RemuRbRa    
+    | RemuRegReg    
     
     /// Calculate Ra AND Rb, result in Ra
-    | AndRbRa
+    | AndRegReg
     
     /// Calculate Ra OR  Rb, result in Ra
-    | OrRbRa
+    | OrRegReg
     
     /// Calculate Ra XOR Rb, result in Ra
-    | XorRbRa
+    | XorRegReg
    
    
 

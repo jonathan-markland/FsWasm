@@ -44,16 +44,16 @@ let ArmConditionCodeFor crmCondition =
 
 let ArmCalcInstruction ins =
     match ins with
-        | AddRbRa -> "add"
-        | SubRbRa -> "sub"
-        | MulRbRa -> "mul"
-        | AndRbRa -> "and"
-        | OrRbRa  -> "orr"
-        | XorRbRa -> "eor"
-        | DivsRbRa
-        | DivuRbRa
-        | RemsRbRa
-        | RemuRbRa -> failwith "Division or remainder instructions not yet translated"
+        | AddRegReg -> "add"
+        | SubRegReg -> "sub"
+        | MulRegReg -> "mul"
+        | AndRegReg -> "and"
+        | OrRegReg  -> "orr"
+        | XorRegReg -> "eor"
+        | DivsRegReg
+        | DivuRegReg
+        | RemsRegReg
+        | RemuRegReg -> failwith "Division or remainder instructions not yet translated"
 
 let ArmShiftInstruction ins =
     match ins with
@@ -169,11 +169,11 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         | SignExt32 -> "ldr"
 
     let mathMnemonic = function
-        | AddRN -> "add"
-        | SubRN -> "sub"
-        | AndRN -> "and"
-        | OrRN  -> "orr"
-        | XorRN -> "eor"
+        | AddRegNum -> "add"
+        | SubRegNum -> "sub"
+        | AndRegNum -> "and"
+        | OrRegNum  -> "orr"
+        | XorRegNum -> "eor"
 
     let toZNZMnemonic = function
         | BZero     -> "eq"
