@@ -36,7 +36,7 @@ let X86CalcInstruction ins =
     match ins with
         | AddRegReg -> "add"
         | SubRegReg -> "sub"
-        | MulRegReg -> "mul"
+        | MulRegReg -> "imul"
         | AndRegReg -> "and"
         | OrRegReg  -> "or"
         | XorRegReg -> "xor"
