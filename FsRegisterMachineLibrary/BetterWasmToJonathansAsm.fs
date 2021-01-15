@@ -56,7 +56,7 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         | ZeroExt8  -> "byte"
         | SignExt16 -> "short"
         | ZeroExt16 -> "ushort"
-        | SignExt32 -> "int"
+        | SignExt32 -> "uint" // TODO: Doesn't matter for now, but this stops diffs with previous code gen.
 
     let storeType = function
         | Stored8  -> "byte"
@@ -70,13 +70,13 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         [ sprintf "%s%s%s%s%d" s1 (regNameOf r) (offsetIfNeeded u) s2 n ]
 
     let translateStore t r ofs = 
-        [ sprintf "let %s [%s%s]=A" (t |> storeType) (regNameOf r) (offsetIfNeeded ofs) ]
+        [ sprintf "let %s[%s%s]=A" (t |> storeType) (regNameOf r) (offsetIfNeeded ofs) ]
 
     let translateFetch t r ofs =
-        [ sprintf "let A=%s [%s%s]" (t |> fetchType) (regNameOf r) (offsetIfNeeded ofs) ]
+        [ sprintf "let A=%s[%s%s]" (t |> fetchType) (regNameOf r) (offsetIfNeeded ofs) ]
 
     let translateStoreConst t r u n = 
-        [ sprintf "let %s [%s%s]=%d" (t |> storeType) (regNameOf r) (offsetIfNeeded u) n ]
+        [ sprintf "let %s[%s%s]=%d" (t |> storeType) (regNameOf r) (offsetIfNeeded u) n ]
 
 
     let translateGotoIndex (LabelName tableLabel) numMax (LabelName defaultLabel) =

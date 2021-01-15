@@ -221,7 +221,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 [ Goto (labelFor target) ; Barrier ]
 
             | BrIf(cond,target) ->
-                translateInstr(cond) @ [ Pop A ; BranchRegZNZ(A,BZero,(labelFor target)) ; Barrier ]
+                translateInstr(cond) @ [ Pop A ; BranchRegZNZ(A,BNonZero,(labelFor target)) ; Barrier ]
 
             | BrTable(indexExpression, labelArray, defaultLabel) -> 
                 let tableLabel = newLabel ()

@@ -159,7 +159,7 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
     let storeMnemonic = function
         | Stored8  -> "strb"
         | Stored16 -> "strh"
-        | Stored32 -> "strd"
+        | Stored32 -> "str"
 
     let fetchMnemonic = function
         | SignExt8  -> "ldrsb"

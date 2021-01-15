@@ -73,7 +73,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
     let storeType = function
         | Stored8  -> "byte"
         | Stored16 -> "word"
-        | Stored32 -> "dword"
+        | Stored32 -> ""
 
     let toSXZX = function
         | SignExt8  -> "sx"
@@ -87,7 +87,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | ZeroExt8  -> "byte"
         | SignExt16 -> "word"
         | ZeroExt16 -> "word"
-        | SignExt32 -> "dword"
+        | SignExt32 -> ""
 
     let accumulatorByStoreType = function
         | Stored8  -> "AL"
