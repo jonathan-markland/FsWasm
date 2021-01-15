@@ -12,13 +12,13 @@ CODE>         CmpBA CrmCondLts
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         BranchANZ (LabelName "wasm_l2")
+CODE>         BranchRegZNZ (A, BNonZero, LabelName "wasm_l2")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         AddAN (I32 1)
+CODE>         CalcRegNum (AddRegNum, A, I32 1)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
@@ -33,7 +33,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShlBC
+CODE>         ShiftRot Shl
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,7 +54,7 @@ CODE>         CmpBA CrmCondLts
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         BranchANZ (LabelName "wasm_l4")
+CODE>         BranchRegZNZ (A, BNonZero, LabelName "wasm_l4")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
@@ -78,14 +78,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         Add (B, Y)
-CODE>         Store16A (B, U32 0u)
+CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         Store (A, Stored16, B, U32 0u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         AddAN (I32 2)
+CODE>         CalcRegNum (AddRegNum, A, I32 2)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
@@ -95,7 +95,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 7u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         AddAN (I32 -1)
+CODE>         CalcRegNum (AddRegNum, A, I32 -1)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         PeekA
@@ -110,7 +110,7 @@ CODE>         CmpBA CrmCondGts
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         BranchANZ (LabelName "wasm_l5")
+CODE>         BranchRegZNZ (A, BNonZero, LabelName "wasm_l5")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l4:
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,7 +122,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         Add (A, B)
+CODE>         CalcRegReg (AddRegReg, A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
@@ -146,7 +146,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         AddAN (I32 -1)
+CODE>         CalcRegNum (AddRegNum, A, I32 -1)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
@@ -156,7 +156,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         BranchANZ (LabelName "wasm_l3")
+CODE>         BranchRegZNZ (A, BNonZero, LabelName "wasm_l3")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l2:
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

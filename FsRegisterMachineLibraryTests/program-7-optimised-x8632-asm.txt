@@ -54,7 +54,7 @@ CODE>     push EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
-CODE>     movsx EAX, byte [EAX+31]
+CODE>     movsx EAX,byte[EAX+31]
 CODE>     push EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     call wasm_fn1
@@ -599,7 +599,7 @@ CODE>     jg  wasm_l4
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
-CODE>     movzx EAX, byte [EAX+43]
+CODE>     movzx EAX,byte[EAX+43]
 CODE>     and EAX,1
 CODE>     cmp EAX,0
 CODE>     setz AL
@@ -1506,7 +1506,7 @@ CODE>     mov [EBP+8],EAX  ; @loc3
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP+12]  ; @loc2
 CODE>     add EAX,EDI
-CODE>     movzx EAX, byte [EAX]
+CODE>     movzx EAX,byte[EAX]
 CODE>     pop EBX
 CODE>     mov [EDI+EBX],AL
 CODE>     ; ~~~ register barrier ~~~
