@@ -108,52 +108,52 @@ type ShiftRotateType =
 
 type RegConstCalcType =
 
-    /// Calculate R+n, result in R
+    /// Calculate Reg+Num, result in Reg
     | AddRegNum
     
-    /// Calculate R-n, result in R
+    /// Calculate Reg-Num, result in Reg
     | SubRegNum
 
-    /// Calculate R AND N, result in R
+    /// Calculate Reg AND Num, result in Reg
     | AndRegNum
 
-    /// Calculate R OR  N, result in R
+    /// Calculate Reg OR Num, result in Reg
     | OrRegNum
 
-    /// Calculate R XOR N, result in R
+    /// Calculate Reg XOR Num, result in Reg
     | XorRegNum
 
     
 type TwoRegCalcType =
 
-    /// Calculate Rb+Ra, result in Ra
+    /// Add registers, result in left-side register.
     | AddRegReg
 
-    /// Calculate Rb-Ra, result in Ra
+    /// Subtract registers, result in left-side register.
     | SubRegReg       
 
-    /// Calculate Ra*Rb, result in Ra
+    /// Multiply registers, result in left-side register.
     | MulRegReg     
     
-    /// Calculate (signed   Rb) * (signed   Ra), result in Ra
+    /// Divide registers (signed), (NOT IMPLEMENTED).
     | DivsRegReg     
     
-    /// Calculate (unsigned Rb) * (unsigned Ra), result in Ra
+    /// Divide registers (unsigned), (NOT IMPLEMENTED).
     | DivuRegReg
     
-    /// Calculate (signed   Rb) % (signed   Ra), result in Ra
+    /// Remainder (signed), (NOT IMPLEMENTED).
     | RemsRegReg    
     
-    /// Calculate (unsigned Rb) % (unsigned Ra), result in Ra
+    /// Remainder (unsigned), (NOT IMPLEMENTED).
     | RemuRegReg    
     
-    /// Calculate Ra AND Rb, result in Ra
+    /// AND registers together, result in left-side register.
     | AndRegReg
     
-    /// Calculate Ra OR  Rb, result in Ra
+    /// OR registers together, result in left-side register.
     | OrRegReg
     
-    /// Calculate Ra XOR Rb, result in Ra
+    /// XOR registers together, result in left-side register.
     | XorRegReg
    
    
