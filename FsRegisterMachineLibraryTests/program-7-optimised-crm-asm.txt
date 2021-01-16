@@ -289,7 +289,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shrs
+CODE>         ShiftRot (Shrs, B, C, B)
 CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegReg (AddRegReg, B, Y)
@@ -313,7 +313,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shrs
+CODE>         ShiftRot (Shrs, B, C, B)
 CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegReg (AddRegReg, B, Y)
@@ -482,7 +482,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shl
+CODE>         ShiftRot (Shl, B, C, B)
 CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegReg (SubRegReg, B, A)
@@ -530,7 +530,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shrs
+CODE>         ShiftRot (Shrs, B, C, B)
 CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegReg (AddRegReg, B, Y)
@@ -547,7 +547,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shrs
+CODE>         ShiftRot (Shrs, B, C, B)
 CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegReg (AddRegReg, B, Y)
@@ -571,7 +571,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 2)
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shl
+CODE>         ShiftRot (Shl, B, C, B)
 CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegReg (SubRegReg, B, A)

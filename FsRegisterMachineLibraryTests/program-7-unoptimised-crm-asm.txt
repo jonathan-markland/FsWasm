@@ -557,7 +557,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shrs
+CODE>         ShiftRot (Shrs, B, C, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -596,7 +596,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shrs
+CODE>         ShiftRot (Shrs, B, C, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -897,7 +897,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shl
+CODE>         ShiftRot (Shl, B, C, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -975,7 +975,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shrs
+CODE>         ShiftRot (Shrs, B, C, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1001,7 +1001,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shrs
+CODE>         ShiftRot (Shrs, B, C, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1037,7 +1037,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
 CODE>         Let (C, A)
-CODE>         ShiftRot Shl
+CODE>         ShiftRot (Shl, B, C, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

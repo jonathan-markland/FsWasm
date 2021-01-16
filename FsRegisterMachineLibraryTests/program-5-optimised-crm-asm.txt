@@ -11,7 +11,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 3u))
 CODE>         Const (A, Const32 1)
 CODE>         Let (C, A)
-CODE>         ShiftRot Shl
+CODE>         ShiftRot (Shl, B, C, B)
 CODE>         Let (A, B)
 CODE>         StoreLoc (A, LocalIdx (U32 6u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
