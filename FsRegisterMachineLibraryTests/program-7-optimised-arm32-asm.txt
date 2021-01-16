@@ -117,6 +117,7 @@ CODE> pop {R14}
 CODE> bx lr
 CODE> 
 CODE> wasm_fn1:  ; (loc0: int, loc1: int, loc2: int): int
+CODE> ; Function makes no calls
 CODE> push {R11}
 CODE> mov R11,R13
 CODE> sub R13,R13,#8 ; sub
@@ -1342,6 +1343,7 @@ CODE> pop {R14}
 CODE> bx lr
 CODE> 
 CODE> wasm_fn5:  ; (loc0: int, loc1: int, loc2: int, loc3: int)
+CODE> ; Function makes no calls
 CODE> push {R11}
 CODE> mov R11,R13
 CODE> sub R13,R13,#8 ; sub

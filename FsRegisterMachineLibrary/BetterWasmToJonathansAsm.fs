@@ -8,7 +8,6 @@ open WasmInstructionsToCRMInstructions
 open Library
 open TextFormatting
 open BWToCRMConfigurationTypes
-open OptimiseCommonRegisterMachine
 
 
 

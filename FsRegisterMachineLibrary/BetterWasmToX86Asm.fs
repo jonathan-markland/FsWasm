@@ -12,6 +12,16 @@ open OptimiseCommonRegisterMachine
 
 
 
+    // EAX | Use to store operand in WASM instruction simulation
+    // EBX | Use to store operand in WASM instruction simulation
+    // ECX | Used for shift amounts
+    // EDX | spare
+    // ESI | spare
+    // EDI | Base of WASM linear memory
+    // EBP | Frame Pointer
+    // ESP | Stack Pointer
+
+
 let StackSlotSizeU = 4u
 let LabelCommand labelNameString = labelNameString + ":"
 let CodeAlign = "align 16"
@@ -183,8 +193,8 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | Pop r                      -> [ sprintf "pop %s" (regNameOf r) ]
         | PeekA                      -> [ "mov EAX,[ESP]" ]
         | Let(r1,r2)                 -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
-        | CalcRegNum(ins,A,I32 n) -> [ sprintf "%s EAX,%d" (ins |> toMathMnemonic) n ]
-        | CalcRegNum _            -> failwith "Cannot translate calculation with constant"
+        | CalcRegNum(ins,A,I32 n)    -> [ sprintf "%s EAX,%d" (ins |> toMathMnemonic) n ]
+        | CalcRegNum _               -> failwith "Cannot translate calculation with constant"
         | CalcRegs(ins,r1,r2,rr)     -> X86RegRegInstructionToString ins r1 r2 rr
         | ShiftRot(ins,B,C,B)        -> [ sprintf "%s EBX,CL" (ins |> X86ShiftInstruction) ]
         | ShiftRot _                 -> failwith "Shift instruction register combination not supported by target architecture"

@@ -9,8 +9,24 @@ open WasmInstructionsToCRMInstructions
 open Library
 open ArmSupportLibrary
 open BWToCRMConfigurationTypes
-open OptimiseCommonRegisterMachine
 
+
+    //  R0 | Use to store operand in WASM instruction simulation
+    //  R1 | Use to store operand in WASM instruction simulation
+    //  R2 | spare - but analogue ECX was used for shifts on x86
+    //  R3 | spare
+    //  R4 | spare
+    //  R5 | spare
+    //  R6 | spare
+    //  R7 | spare
+    //  R8 | Temp register
+    //  R9 | Base of WASM linear memory
+    // R10 | Offset temp register
+    // R11 | Frame Pointer
+    // R12 | spare
+    // R13 | Stack Pointer
+    // R14 | Link
+    // R15 | PC
 
 
 let StackSlotSizeU = 4u
@@ -196,8 +212,8 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         | Pop r                         -> [ sprintf "pop {%s}" (regNameOf r) ]
         | PeekA                         -> [ "ldr R0,[R13]" ]
         | Let(r1,r2)                    -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
-        | CalcRegNum(ins,A,I32(n))   -> MathsWithConstant (ins |> mathMnemonic) "R0" (uint32 n) armTempRegister
-        | CalcRegNum _               -> failwith "Cannot translate calculation with constant"
+        | CalcRegNum(ins,A,I32(n))      -> MathsWithConstant (ins |> mathMnemonic) "R0" (uint32 n) armTempRegister
+        | CalcRegNum _                  -> failwith "Cannot translate calculation with constant"
         | CalcRegs(ins,r1,r2,rr)        -> ArmRegRegInstructionToString ins r1 r2 rr
         | ShiftRot(ins,ra,rb,rr)        -> ArmShiftInstructionToString ins ra rb rr
         | CmpBA crmCond                 -> [ "cmp R1,R0" ; "mov R0,#0" ; (sprintf "mov%s R0,#1" (ArmConditionCodeFor crmCond)) ]
@@ -275,7 +291,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     let labelAndPrologueCode f =
         ["" ; procedureCommand]
         @
-        if thisFunctionCallsOut then ["push {R14}"] else []
+        if thisFunctionCallsOut then ["push {R14}"] else ["; Function makes no calls"]
         @
         if f |> HasParametersOrLocals then
             ["push {R11}" ; "mov R11,R13"]
