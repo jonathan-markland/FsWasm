@@ -148,7 +148,7 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         | Let(r1,r2)                  -> [ sprintf "let %s=%s" (regNameOf r1) (regNameOf r2) ]
         | CalcRegNum(ins,A,I32(n)) -> [ sprintf "%s A,%d" (ins |> toMathMnemonic) n ]
         | CalcRegNum _             -> failwith "Cannot translate calculation with constant"
-        | CalcRegReg(ins,r1,r2)       -> [ sprintf "%s %s,%s" (ins |> calcInstruction) (regNameOf r1) (regNameOf r2) ]
+        | CalcRegs(ins,r1,r2)       -> [ sprintf "%s %s,%s" (ins |> calcInstruction) (regNameOf r1) (regNameOf r2) ]
         | ShiftRot(ins,B,C,B)         -> [ sprintf "%s B,C" (ins |> shiftInstruction) ]
         | ShiftRot _                  -> failwith "Shift instruction register combination not supported by target architecture"
         | CmpBA crmCond               -> [ sprintf "cmp B,A:set %s A" (JonathansConditionCodeFor crmCond) ]

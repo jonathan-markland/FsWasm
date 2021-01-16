@@ -64,7 +64,7 @@ let IsLoadConstantToA = function
     | _ -> false
 
 let IsAddBY = function
-    | CalcRegReg (AddRegReg,B,Y) -> true
+    | CalcRegs (AddRegReg,B,Y) -> true
     | _ -> false
 
 let IsStoreOfAnySizeInAToB = function

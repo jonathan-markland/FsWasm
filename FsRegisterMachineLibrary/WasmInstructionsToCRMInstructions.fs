@@ -314,17 +314,17 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored16, Y, O -+- O2,v); Barrier ]
             | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored32, Y, O -+- O2,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; StoreConst(Stored8, A,O,v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; StoreConst(Stored16, A,O,v); Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; StoreConst(Stored32, A,O,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; StoreConst(Stored8, A,O,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; StoreConst(Stored16, A,O,v); Barrier ]
+            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; StoreConst(Stored32, A,O,v); Barrier ]
 
             | I32Store8(  {Align=_;       Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored8, Y,O -+- O2) ; Barrier ]   // TODO: separate routines!!
             | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored16, Y,O -+- O2) ; Barrier ]
             | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored32, Y,O -+- O2) ; Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegReg(AddRegReg,B,Y) ; Store(A, Stored8, B,O)  ; Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegReg(AddRegReg,B,Y) ; Store(A, Stored16, B,O) ; Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegReg(AddRegReg,B,Y) ; Store(A, Stored32, B,O) ; Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y) ; Store(A, Stored8, B,O)  ; Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y) ; Store(A, Stored16, B,O) ; Barrier ]
+            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y) ; Store(A, Stored32, B,O) ; Barrier ]
 
             | I32Store16( {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
@@ -339,11 +339,11 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
 
             // TODO: Could we extend Fetch() to have two registers, one optional?  Then avoid the addition and use Rn+Rm addressing mode instead.  (Should make that generation configurable).
 
-            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, SignExt8,  A,O) ; Push A ; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, ZeroExt8,  A,O) ; Push A ; Barrier ]
-            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, SignExt16, A,O) ; Push A ; Barrier ]
-            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, ZeroExt16, A,O) ; Push A ; Barrier ]
-            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, SignExt32, A,O) ; Push A ; Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; Fetch(A, SignExt8,  A,O) ; Push A ; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; Fetch(A, ZeroExt8,  A,O) ; Push A ; Barrier ]
+            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; Fetch(A, SignExt16, A,O) ; Push A ; Barrier ]
+            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; Fetch(A, ZeroExt16, A,O) ; Push A ; Barrier ]
+            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; Fetch(A, SignExt32, A,O) ; Push A ; Barrier ]
            
             // TODO: Could capitulate given X86 target, but make that configurable:
             | I32Load16s( {Align=U32 _ ; Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
@@ -369,16 +369,16 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             | I32Or  (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(OrRegNum,A,n))
             | I32Xor (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(XorRegNum,A,n))
 
-            | I32Add (a,b) -> binaryCommutativeOp     a b (CalcRegReg (AddRegReg,A,B))
-            | I32Sub (a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (SubRegReg,B,A))
-            | I32Mul (a,b) -> binaryCommutativeOp     a b (CalcRegReg (MulRegReg,A,B)) 
+            | I32Add (a,b) -> binaryCommutativeOp     a b (CalcRegs (AddRegReg,A,B))
+            | I32Sub (a,b) -> binaryNonCommutativeOp  a b (CalcRegs (SubRegReg,B,A))
+            | I32Mul (a,b) -> binaryCommutativeOp     a b (CalcRegs (MulRegReg,A,B)) 
             | I32Divs(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivsRegReg,A,B))
             | I32Divu(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivuRegReg,A,B))
             | I32Rems(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemsRegReg,A,B))
             | I32Remu(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemuRegReg,A,B))
-            | I32And (a,b) -> binaryCommutativeOp     a b (CalcRegReg (AndRegReg,A,B)) 
-            | I32Or  (a,b) -> binaryCommutativeOp     a b (CalcRegReg (OrRegReg,A,B))  
-            | I32Xor (a,b) -> binaryCommutativeOp     a b (CalcRegReg (XorRegReg,A,B)) 
+            | I32And (a,b) -> binaryCommutativeOp     a b (CalcRegs (AndRegReg,A,B)) 
+            | I32Or  (a,b) -> binaryCommutativeOp     a b (CalcRegs (OrRegReg,A,B))  
+            | I32Xor (a,b) -> binaryCommutativeOp     a b (CalcRegs (XorRegReg,A,B)) 
             
             | I32Shl (a,b) -> shiftOp a b Shl  
             | I32Shrs(a,b) -> shiftOp a b Shrs
