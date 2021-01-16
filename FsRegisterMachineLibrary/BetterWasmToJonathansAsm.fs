@@ -149,7 +149,8 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         | CalcRegNum(ins,A,I32(n)) -> [ sprintf "%s A,%d" (ins |> toMathMnemonic) n ]
         | CalcRegNum _             -> failwith "Cannot translate calculation with constant"
         | CalcRegReg(ins,r1,r2)       -> [ sprintf "%s %s,%s" (ins |> calcInstruction) (regNameOf r1) (regNameOf r2) ]
-        | ShiftRot ins                -> [ sprintf "%s B,C" (ins |> shiftInstruction) ]
+        | ShiftRot(ins,B,C,B)         -> [ sprintf "%s B,C" (ins |> shiftInstruction) ]
+        | ShiftRot _                  -> failwith "Shift instruction register combination not supported by target architecture"
         | CmpBA crmCond               -> [ sprintf "cmp B,A:set %s A" (JonathansConditionCodeFor crmCond) ]
         | CmpAZ                       -> [ "cmp A,0:set z A" ]
         | FetchLoc(r,i)               -> [ sprintf "let %s=int[@%s]" (regNameOf r) (LocalIdxNameString i) ]  // TODO: Assumes 32-bit target
@@ -200,7 +201,10 @@ let FunctionLocals (funcType:FuncType) funcLocals : string list =
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
     let wasmToCrmTranslationConfig = 
-        { ClearParametersAfterCall = false } 
+        { 
+            ClearParametersAfterCall = false 
+            ShiftStrategy            = RuntimeShiftCountMustBeInRegC
+        } 
 
     let crmInstructions, updatedTranslationState = 
         TranslateInstructionsAndApplyOptimisations

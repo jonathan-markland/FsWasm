@@ -67,8 +67,8 @@ let ArmShiftInstruction ins =
 let ArmRegRegInstructionToString ins r1 r2 =
     [ sprintf "%s %s,%s,%s" (ins |> ArmCalcInstruction) (regNameOf r1) (regNameOf r1) (regNameOf r2) ]
     
-let ArmShiftInstructionToString ins =
-    [ sprintf "%s R1,R1,R2" (ins |> ArmShiftInstruction) ]
+let ArmShiftInstructionToString ins rn rcount rout =
+    [ sprintf "%s %s,%s,%s" (ins |> ArmShiftInstruction) (regNameOf rout) (regNameOf rn) (regNameOf rcount) ]
 
 
 
@@ -199,7 +199,7 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         | CalcRegNum(ins,A,I32(n))   -> MathsWithConstant (ins |> mathMnemonic) "R0" (uint32 n) armTempRegister
         | CalcRegNum _               -> failwith "Cannot translate calculation with constant"
         | CalcRegReg(ins,r1,r2)         -> ArmRegRegInstructionToString ins r1 r2
-        | ShiftRot ins                  -> ArmShiftInstructionToString ins // TODO: Still very X86
+        | ShiftRot(ins,ra,rb,rr)        -> ArmShiftInstructionToString ins ra rb rr
         | CmpBA crmCond                 -> [ "cmp R1,R0" ; "mov R0,#0" ; (sprintf "mov%s R0,#1" (ArmConditionCodeFor crmCond)) ]
         | CmpAZ                         -> [ "cmp R0,0"  ; "mov R0,#0" ; "moveq R0,#1" ]
         | FetchLoc(r,i)                 -> [ sprintf "ldr %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
@@ -253,7 +253,10 @@ let ValTypeTranslationOf = function
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
     let wasmToCrmTranslationConfig = 
-        { ClearParametersAfterCall = true } 
+        { 
+            ClearParametersAfterCall = true
+            ShiftStrategy            = ShiftCountInAnyRegister
+        } 
 
     let crmInstructions, updatedTranslationState = 
         TranslateInstructionsAndApplyOptimisations 

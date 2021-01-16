@@ -219,7 +219,7 @@ type CRMInstruction32 =
     | CalcRegNum of RegConstCalcType * REG * I32
 
     /// Shift and rotate
-    | ShiftRot of ShiftRotateType
+    | ShiftRot of ShiftRotateType * source:REG * count:REG * out:REG
 
 
     /// Compare B and A for the given condition, 

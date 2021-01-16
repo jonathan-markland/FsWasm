@@ -31,12 +31,25 @@ type ModuleTranslationState =
 
 
 
+type ShiftGenerationStrategy = 
+
+    // (X86 but would work on ARM)
+    | RuntimeShiftCountMustBeInRegC 
+    
+    // (ARM preferred)
+    | ShiftCountInAnyRegister
+
+
+
 type WasmToCrmTranslationConfig =
     {
         /// Should a stack pointer adjustment Drop be generated
         /// after a call instruction, in order to clear off the
         /// parameters.
         ClearParametersAfterCall : bool
+
+        /// How shift instructions (and companions) are generated
+        ShiftStrategy : ShiftGenerationStrategy
     }
 
 
@@ -140,18 +153,31 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 Barrier 
             ]
 
-        let shiftOp lhs rhs op =   // TODO: Use config to activate a much better version for the ARM
-            (translateInstr lhs) @ 
-            (translateInstr rhs) @ 
-            [
-                Pop A       // RHS operand
-                Pop B       // LHS operand
-                Let (C,A)
-                op          // Result in B
-                Let (A,B)
-                Push A
-                Barrier 
-            ]
+        let shiftOp lhs rhs shiftRotateType =   // TODO: Use config to activate a much better version for the ARM
+
+            let shiftSequence =
+                match wasmToCrmTranslationConfig.ShiftStrategy with
+                    | RuntimeShiftCountMustBeInRegC ->
+                        [
+                            Pop A       // RHS operand
+                            Pop B       // LHS operand
+                            Let (C,A)
+                            ShiftRot (shiftRotateType, B,C, B) // Result in B
+                            Let (A,B)
+                            Push A
+                            Barrier 
+                        ]
+                        
+                    | ShiftCountInAnyRegister ->
+                        [
+                            Pop A       // RHS operand
+                            Pop B       // LHS operand
+                            ShiftRot (shiftRotateType, B,A, A)  // Result in B
+                            Push A
+                            Barrier 
+                        ]
+
+            (translateInstr lhs) @ (translateInstr rhs) @ shiftSequence
 
         let translateConstruct sourceBody putInOrder =
             let constructLabel = pushNewLabel ()
@@ -346,19 +372,19 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             | I32Add (a,b) -> binaryCommutativeOp     a b (CalcRegReg (AddRegReg,A,B))
             | I32Sub (a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (SubRegReg,B,A))
             | I32Mul (a,b) -> binaryCommutativeOp     a b (CalcRegReg (MulRegReg,A,B)) 
-            | I32Divs(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (DivsRegReg,A,B))
-            | I32Divu(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (DivuRegReg,A,B))
-            | I32Rems(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (RemsRegReg,A,B))
-            | I32Remu(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (RemuRegReg,A,B))
+            | I32Divs(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivsRegReg,A,B))
+            | I32Divu(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivuRegReg,A,B))
+            | I32Rems(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemsRegReg,A,B))
+            | I32Remu(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemuRegReg,A,B))
             | I32And (a,b) -> binaryCommutativeOp     a b (CalcRegReg (AndRegReg,A,B)) 
             | I32Or  (a,b) -> binaryCommutativeOp     a b (CalcRegReg (OrRegReg,A,B))  
             | I32Xor (a,b) -> binaryCommutativeOp     a b (CalcRegReg (XorRegReg,A,B)) 
             
-            | I32Shl (a,b) -> shiftOp a b (ShiftRot Shl) 
-            | I32Shrs(a,b) -> shiftOp a b (ShiftRot Shrs)
-            | I32Shru(a,b) -> shiftOp a b (ShiftRot Shru)
-            | I32Rotl(a,b) -> shiftOp a b (ShiftRot Rotl)
-            | I32Rotr(a,b) -> shiftOp a b (ShiftRot Rotr)
+            | I32Shl (a,b) -> shiftOp a b Shl  
+            | I32Shrs(a,b) -> shiftOp a b Shrs
+            | I32Shru(a,b) -> shiftOp a b Shru
+            | I32Rotl(a,b) -> shiftOp a b Rotl
+            | I32Rotr(a,b) -> shiftOp a b Rotr
 
             | _ -> failwith (sprintf "Cannot translate this instruction to simple 32-bit machine: %A" w)   // TODO: Possibly avoid %A
 
