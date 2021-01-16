@@ -127,18 +127,18 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             (translateInstr lhs) @ 
             (translateInstr rhs) @ 
             [
-                Pop A       // RHS operand
-                Pop B       // LHS operand
+                Pop A                  // RHS operand
+                Pop B                  // LHS operand
                 CalcRegs (op,A,B, A)   // Result in A
                 Push A 
                 Barrier 
             ]
 
-        let binaryOpWithConst lhs getOp =
+        let binaryOpWithConst lhs operation n =
             (translateInstr lhs) @ 
             [
-                Pop A       // LHS operand
-                getOp ()    // Result in A
+                Pop A                      // LHS operand
+                CalcRegNum (operation,A,n) // Result in A
                 Push A 
                 Barrier 
             ]
@@ -389,11 +389,11 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             | I32Ges(a,b)  -> compareOp a b CrmCondGes
             | I32Geu(a,b)  -> compareOp a b CrmCondGeu
 
-            | I32Add (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(AddRegNum,A,n))
-            | I32Sub (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(SubRegNum,A,n))
-            | I32And (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(AndRegNum,A,n))
-            | I32Or  (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(OrRegNum,A,n))
-            | I32Xor (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(XorRegNum,A,n))
+            | I32Add (a,I32Const n) -> binaryOpWithConst a AddRegNum n
+            | I32Sub (a,I32Const n) -> binaryOpWithConst a SubRegNum n
+            | I32And (a,I32Const n) -> binaryOpWithConst a AndRegNum n
+            | I32Or  (a,I32Const n) -> binaryOpWithConst a OrRegNum  n
+            | I32Xor (a,I32Const n) -> binaryOpWithConst a XorRegNum n
 
             | I32Add (a,b) -> binaryCommutativeOp     a b AddRegReg
             | I32Sub (a,b) -> binaryNonCommutativeOp  a b SubRegReg
