@@ -78,7 +78,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored16, B, U32 0u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
@@ -122,7 +122,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A

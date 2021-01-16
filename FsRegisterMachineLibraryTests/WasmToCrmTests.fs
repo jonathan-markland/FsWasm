@@ -19,7 +19,9 @@ let WriteOutFunctionAndBranchTables writeOutCode _writeOutTables (funcIndex:int)
 
             // TODO: A consequence of the recent configurability of the BetterWasm -> CRM translator
             // is that we have a case for testing the cartesian product of all these cases. ;(
+
             ShiftStrategy = RuntimeShiftCountMustBeInRegC   // <-- This is the legacy setting.
+            NonCommutativeOpStrategy = NonCommutativeOnTwoRegisterMachine
         } 
 
     let crmInstructions, updatedTranslationState = 

@@ -17,6 +17,28 @@ let LabelCommand labelNameString =
 
 
 
+let regNameOf = function
+    | A -> "A"
+    | B -> "B"
+    | C -> "C"
+    | Y -> "Y"
+
+
+
+let calcInstruction = function
+    | AddRegReg -> "add"
+    | SubRegReg -> "sub"
+    | MulRegReg -> "mul"
+    | AndRegReg -> "and"
+    | OrRegReg  -> "or"
+    | XorRegReg -> "xor"
+    | DivsRegReg
+    | DivuRegReg
+    | RemsRegReg
+    | RemuRegReg -> failwith "Division or remainder instructions not yet translated"
+
+
+
 let JonathansConditionCodeFor crmCondition = 
     match crmCondition with
         | CrmCondEq  -> "z"
@@ -32,15 +54,19 @@ let JonathansConditionCodeFor crmCondition =
 
 
 
+
+let JonathansRegRegInstructionToString ins r1 r2 rr =
+    if r1 = rr then
+        [ sprintf "%s %s,%s" (ins |> calcInstruction) (regNameOf r1) (regNameOf r2) ]
+    else
+        failwith "Targetting a specific output register is not supported"
+
+
+
+
 let TranslateInstructionToAsmSequence _thisFunc instruction =
 
     // TODO:  These translations can assume a 32-bit target for now.
-
-    let regNameOf = function
-        | A -> "A"
-        | B -> "B"
-        | C -> "C"
-        | Y -> "Y"
 
     let offsetIfNeeded = function
         | U32 0u -> ""                   // indexed addressing not needed with zero offset
@@ -62,12 +88,6 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         | Stored8  -> "byte"
         | Stored16 -> "ushort"
         | Stored32 -> "uint"
-
-    let translateREGU32 s1 r u s2 = 
-        [ sprintf "%s%s%s%s" s1 (regNameOf r) (offsetIfNeeded u) s2 ]
-
-    let translateREGU32I32 s1 r u s2 n = 
-        [ sprintf "%s%s%s%s%d" s1 (regNameOf r) (offsetIfNeeded u) s2 n ]
 
     let translateStore t r ofs = 
         [ sprintf "let %s[%s%s]=A" (t |> storeType) (regNameOf r) (offsetIfNeeded ofs) ]
@@ -107,18 +127,6 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         | OrRegNum  -> "or"
         | XorRegNum -> "xor"
 
-    let calcInstruction = function
-        | AddRegReg -> "add"
-        | SubRegReg -> "sub"
-        | MulRegReg -> "mul"
-        | AndRegReg -> "and"
-        | OrRegReg  -> "or"
-        | XorRegReg -> "xor"
-        | DivsRegReg
-        | DivuRegReg
-        | RemsRegReg
-        | RemuRegReg -> failwith "Division or remainder instructions not yet translated"
-
     let shiftInstruction = function
         | Shl    -> "shl"
         | Shrs   -> "sar"
@@ -146,9 +154,9 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         | Pop(r)                      -> [ sprintf "pop %s" (regNameOf r) ]
         | PeekA                       -> [ "let A=int [SP]" ]  // TODO: Assumes 32-bit target
         | Let(r1,r2)                  -> [ sprintf "let %s=%s" (regNameOf r1) (regNameOf r2) ]
-        | CalcRegNum(ins,A,I32(n)) -> [ sprintf "%s A,%d" (ins |> toMathMnemonic) n ]
-        | CalcRegNum _             -> failwith "Cannot translate calculation with constant"
-        | CalcRegs(ins,r1,r2)       -> [ sprintf "%s %s,%s" (ins |> calcInstruction) (regNameOf r1) (regNameOf r2) ]
+        | CalcRegNum(ins,A,I32(n))    -> [ sprintf "%s A,%d" (ins |> toMathMnemonic) n ]
+        | CalcRegNum _                -> failwith "Cannot translate calculation with constant"
+        | CalcRegs(ins,r1,r2,rr)      -> JonathansRegRegInstructionToString ins r1 r2 rr
         | ShiftRot(ins,B,C,B)         -> [ sprintf "%s B,C" (ins |> shiftInstruction) ]
         | ShiftRot _                  -> failwith "Shift instruction register combination not supported by target architecture"
         | CmpBA crmCond               -> [ sprintf "cmp B,A:set %s A" (JonathansConditionCodeFor crmCond) ]
@@ -204,6 +212,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         { 
             ClearParametersAfterCall = false 
             ShiftStrategy            = RuntimeShiftCountMustBeInRegC
+            NonCommutativeOpStrategy = NonCommutativeOnTwoRegisterMachine
         } 
 
     let crmInstructions, updatedTranslationState = 

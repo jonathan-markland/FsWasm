@@ -33,11 +33,21 @@ type ModuleTranslationState =
 
 type ShiftGenerationStrategy = 
 
-    // (X86 but would work on ARM)
+    /// (X86 but would work on ARM)
     | RuntimeShiftCountMustBeInRegC 
     
-    // (ARM preferred)
+    /// (ARM preferred)
     | ShiftCountInAnyRegister
+
+
+
+type NonCommutativeOpStrategy =
+
+    /// (X86 but would work on ARM)
+    | NonCommutativeOnTwoRegisterMachine
+
+    /// (ARM preferred)
+    | NonCommutativeOnThreeRegisterMachine
 
 
 
@@ -50,6 +60,9 @@ type WasmToCrmTranslationConfig =
 
         /// How shift instructions (and companions) are generated
         ShiftStrategy : ShiftGenerationStrategy
+
+        /// How subtract (and others) are generated
+        NonCommutativeOpStrategy : NonCommutativeOpStrategy
     }
 
 
@@ -116,7 +129,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             [
                 Pop A       // RHS operand
                 Pop B       // LHS operand
-                op          // Result in A
+                CalcRegs (op,A,B, A)   // Result in A
                 Push A 
                 Barrier 
             ]
@@ -142,16 +155,29 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             ]
 
         let binaryNonCommutativeOp lhs rhs op = 
-            (translateInstr lhs) @ 
-            (translateInstr rhs) @ 
-            [
-                Pop A       // RHS operand
-                Pop B       // LHS operand
-                op          // Result in B
-                Let (A,B)   // TODO: Favoured because "push A - barrier- pop A" is removed by peephole, but "push B - barrier - pop A" isn't yet.
-                Push A
-                Barrier 
-            ]
+
+            let operatorSequence =
+                match wasmToCrmTranslationConfig.NonCommutativeOpStrategy with
+                    | NonCommutativeOnTwoRegisterMachine ->
+                        [
+                            Pop A       // RHS operand
+                            Pop B       // LHS operand
+                            CalcRegs (SubRegReg,B,A, B)          // Result in B
+                            Let (A,B)   // TODO: Favoured because "push A - barrier- pop A" is removed by peephole, but "push B - barrier - pop A" isn't yet.
+                            Push A
+                            Barrier 
+                        ]
+
+                    | NonCommutativeOnThreeRegisterMachine ->
+                        [
+                            Pop A       // RHS operand
+                            Pop B       // LHS operand
+                            CalcRegs (SubRegReg,B,A, A)        // Result in A
+                            Push A
+                            Barrier 
+                        ]
+
+            (translateInstr lhs) @ (translateInstr rhs) @ operatorSequence
 
         let shiftOp lhs rhs shiftRotateType =   // TODO: Use config to activate a much better version for the ARM
 
@@ -314,17 +340,17 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored16, Y, O -+- O2,v); Barrier ]
             | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored32, Y, O -+- O2,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; StoreConst(Stored8, A,O,v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; StoreConst(Stored16, A,O,v); Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; StoreConst(Stored32, A,O,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored8, A,O,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored16, A,O,v); Barrier ]   // TODO: More effective use of addressing.
+            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored32, A,O,v); Barrier ]
 
             | I32Store8(  {Align=_;       Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored8, Y,O -+- O2) ; Barrier ]   // TODO: separate routines!!
             | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored16, Y,O -+- O2) ; Barrier ]
             | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored32, Y,O -+- O2) ; Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y) ; Store(A, Stored8, B,O)  ; Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y) ; Store(A, Stored16, B,O) ; Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y) ; Store(A, Stored32, B,O) ; Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored8,  B,O) ; Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored16, B,O) ; Barrier ]
+            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored32, B,O) ; Barrier ]
 
             | I32Store16( {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
@@ -339,11 +365,11 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
 
             // TODO: Could we extend Fetch() to have two registers, one optional?  Then avoid the addition and use Rn+Rm addressing mode instead.  (Should make that generation configurable).
 
-            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; Fetch(A, SignExt8,  A,O) ; Push A ; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; Fetch(A, ZeroExt8,  A,O) ; Push A ; Barrier ]
-            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; Fetch(A, SignExt16, A,O) ; Push A ; Barrier ]
-            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; Fetch(A, ZeroExt16, A,O) ; Push A ; Barrier ]
-            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y) ; Fetch(A, SignExt32, A,O) ; Push A ; Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt8,  A,O) ; Push A ; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, ZeroExt8,  A,O) ; Push A ; Barrier ]
+            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt16, A,O) ; Push A ; Barrier ]
+            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, ZeroExt16, A,O) ; Push A ; Barrier ]
+            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt32, A,O) ; Push A ; Barrier ]
            
             // TODO: Could capitulate given X86 target, but make that configurable:
             | I32Load16s( {Align=U32 _ ; Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
@@ -369,16 +395,16 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             | I32Or  (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(OrRegNum,A,n))
             | I32Xor (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(XorRegNum,A,n))
 
-            | I32Add (a,b) -> binaryCommutativeOp     a b (CalcRegs (AddRegReg,A,B))
-            | I32Sub (a,b) -> binaryNonCommutativeOp  a b (CalcRegs (SubRegReg,B,A))
-            | I32Mul (a,b) -> binaryCommutativeOp     a b (CalcRegs (MulRegReg,A,B)) 
+            | I32Add (a,b) -> binaryCommutativeOp     a b AddRegReg
+            | I32Sub (a,b) -> binaryNonCommutativeOp  a b SubRegReg
+            | I32Mul (a,b) -> binaryCommutativeOp     a b MulRegReg 
             | I32Divs(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivsRegReg,A,B))
             | I32Divu(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivuRegReg,A,B))
             | I32Rems(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemsRegReg,A,B))
             | I32Remu(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemuRegReg,A,B))
-            | I32And (a,b) -> binaryCommutativeOp     a b (CalcRegs (AndRegReg,A,B)) 
-            | I32Or  (a,b) -> binaryCommutativeOp     a b (CalcRegs (OrRegReg,A,B))  
-            | I32Xor (a,b) -> binaryCommutativeOp     a b (CalcRegs (XorRegReg,A,B)) 
+            | I32And (a,b) -> binaryCommutativeOp     a b AndRegReg
+            | I32Or  (a,b) -> binaryCommutativeOp     a b OrRegReg  
+            | I32Xor (a,b) -> binaryCommutativeOp     a b XorRegReg
             
             | I32Shl (a,b) -> shiftOp a b Shl  
             | I32Shrs(a,b) -> shiftOp a b Shrs

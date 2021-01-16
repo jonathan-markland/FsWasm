@@ -64,8 +64,8 @@ let ArmShiftInstruction ins =
         | Rotr   -> failwith "Rotate instructions are not yet translated"
 
 
-let ArmRegRegInstructionToString ins r1 r2 =
-    [ sprintf "%s %s,%s,%s" (ins |> ArmCalcInstruction) (regNameOf r1) (regNameOf r1) (regNameOf r2) ]
+let ArmRegRegInstructionToString ins r1 r2 rr =  // TODO: inconsistent parameter naming with routine below.
+    [ sprintf "%s %s,%s,%s" (ins |> ArmCalcInstruction) (regNameOf rr) (regNameOf r1) (regNameOf r2) ]
     
 let ArmShiftInstructionToString ins rn rcount rout =
     [ sprintf "%s %s,%s,%s" (ins |> ArmShiftInstruction) (regNameOf rout) (regNameOf rn) (regNameOf rcount) ]
@@ -198,7 +198,7 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         | Let(r1,r2)                    -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
         | CalcRegNum(ins,A,I32(n))   -> MathsWithConstant (ins |> mathMnemonic) "R0" (uint32 n) armTempRegister
         | CalcRegNum _               -> failwith "Cannot translate calculation with constant"
-        | CalcRegs(ins,r1,r2)         -> ArmRegRegInstructionToString ins r1 r2
+        | CalcRegs(ins,r1,r2,rr)        -> ArmRegRegInstructionToString ins r1 r2 rr
         | ShiftRot(ins,ra,rb,rr)        -> ArmShiftInstructionToString ins ra rb rr
         | CmpBA crmCond                 -> [ "cmp R1,R0" ; "mov R0,#0" ; (sprintf "mov%s R0,#1" (ArmConditionCodeFor crmCond)) ]
         | CmpAZ                         -> [ "cmp R0,0"  ; "mov R0,#0" ; "moveq R0,#1" ]
@@ -256,6 +256,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         { 
             ClearParametersAfterCall = true
             ShiftStrategy            = ShiftCountInAnyRegister
+            NonCommutativeOpStrategy = NonCommutativeOnThreeRegisterMachine
         } 
 
     let crmInstructions, updatedTranslationState = 

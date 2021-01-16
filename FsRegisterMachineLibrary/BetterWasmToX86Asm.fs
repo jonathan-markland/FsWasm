@@ -18,6 +18,14 @@ let CodeAlign = "align 16"
 
 
 
+let regNameOf = function
+    | A -> "EAX"
+    | B -> "EBX"
+    | C -> "ECX"
+    | Y -> "EDI"
+
+
+
 let X86ConditionCodeFor crmCondition = 
     match crmCondition with
         | CrmCondEq  -> "z "   // (We can probably get away with the spaces)
@@ -56,15 +64,18 @@ let X86ShiftInstruction ins =
 
 
 
+
+let X86RegRegInstructionToString ins r1 r2 rr =
+    if r1 = rr then
+        [ sprintf "%s %s,%s" (ins |> X86CalcInstruction) (regNameOf r1) (regNameOf r2) ]
+    else
+        failwith "X86 does not support targetting a specific output register"
+
+
+
 let TranslateInstructionToAsmSequence thisFunc instruction =
 
     // TODO:  These translations can assume a 32-bit target for now.
-
-    let regNameOf = function
-        | A -> "EAX"
-        | B -> "EBX"
-        | C -> "ECX"
-        | Y -> "EDI"
 
     let offsetIfNeeded = function
         | U32 0u -> ""                   // indexed addressing not needed with zero offset
@@ -174,7 +185,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
         | Let(r1,r2)                 -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
         | CalcRegNum(ins,A,I32 n) -> [ sprintf "%s EAX,%d" (ins |> toMathMnemonic) n ]
         | CalcRegNum _            -> failwith "Cannot translate calculation with constant"
-        | CalcRegs(ins,r1,r2)      -> [ sprintf "%s %s,%s" (ins |> X86CalcInstruction) (regNameOf r1) (regNameOf r2) ]
+        | CalcRegs(ins,r1,r2,rr)     -> X86RegRegInstructionToString ins r1 r2 rr
         | ShiftRot(ins,B,C,B)        -> [ sprintf "%s EBX,CL" (ins |> X86ShiftInstruction) ]
         | ShiftRot _                 -> failwith "Shift instruction register combination not supported by target architecture"
         | CmpBA crmCond              -> [ "cmp EBX,EAX" ; (sprintf "set%s AL" (X86ConditionCodeFor crmCond)) ; "movzx EAX,AL" ]
@@ -216,6 +227,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
         { 
             ClearParametersAfterCall = true 
             ShiftStrategy            = RuntimeShiftCountMustBeInRegC
+            NonCommutativeOpStrategy = NonCommutativeOnTwoRegisterMachine
         } 
 
     let crmInstructions, updatedTranslationState = 

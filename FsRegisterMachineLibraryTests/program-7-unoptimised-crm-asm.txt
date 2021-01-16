@@ -21,7 +21,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 44u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -32,7 +32,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 40u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -43,7 +43,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 36u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -54,7 +54,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 32u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -65,7 +65,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored8, B, U32 31u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -79,7 +79,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,7 +87,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt8, A, U32 31u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,7 +102,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 40u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -113,7 +113,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 32u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,7 +122,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 4u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -130,7 +130,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 36u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -142,7 +142,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -154,7 +154,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
@@ -165,7 +165,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
@@ -205,7 +205,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
@@ -216,7 +216,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
@@ -227,14 +227,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored8, B, U32 7u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -246,7 +246,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored8, B, U32 0u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
@@ -256,7 +256,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -265,7 +265,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 2u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 4u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
@@ -275,13 +275,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
@@ -291,18 +291,18 @@ CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
@@ -336,7 +336,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 76u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -347,7 +347,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 72u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -358,7 +358,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 68u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -369,7 +369,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 64u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -380,14 +380,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 60u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 76u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -395,7 +395,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 68u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -411,7 +411,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 72u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -419,7 +419,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 64u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -435,7 +435,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 76u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -443,12 +443,12 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -464,7 +464,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 68u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -483,7 +483,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 72u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -491,12 +491,12 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -512,7 +512,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 64u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -534,7 +534,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 76u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -542,13 +542,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 68u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
@@ -563,7 +563,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 56u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -573,7 +573,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 72u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -581,13 +581,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 64u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Const (A, Const32 1)
@@ -602,14 +602,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 52u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 76u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -617,7 +617,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 68u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -633,7 +633,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 68u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -641,13 +641,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -663,7 +663,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 76u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -671,13 +671,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -694,14 +694,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 48u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 72u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -709,7 +709,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 64u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -725,7 +725,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 64u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -733,13 +733,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -755,7 +755,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 72u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -763,13 +763,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -786,21 +786,21 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 44u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored8, A, U32 43u, I32 1)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -808,7 +808,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -827,13 +827,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 36u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -843,13 +843,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 48u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -859,20 +859,20 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 36u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 44u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored8, A, U32 43u, I32 0)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l9:
@@ -887,7 +887,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -903,20 +903,20 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 32u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 28u, I32 0)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -926,13 +926,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 24u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -942,20 +942,20 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 20u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 16u, I32 0)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -965,7 +965,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -981,7 +981,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -991,7 +991,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1007,14 +1007,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 4u, I32 6)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -1027,7 +1027,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1043,13 +1043,13 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 0u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l10:
@@ -1058,7 +1058,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1066,7 +1066,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1082,7 +1082,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, ZeroExt8, A, U32 43u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1101,7 +1101,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1109,7 +1109,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1120,7 +1120,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1129,7 +1129,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1141,14 +1141,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1156,13 +1156,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         CallFunc (LabelName "wasm_fn5")
@@ -1172,7 +1172,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1180,7 +1180,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1191,7 +1191,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1200,7 +1200,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1212,14 +1212,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1227,13 +1227,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         CallFunc (LabelName "wasm_fn5")
@@ -1243,7 +1243,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1251,7 +1251,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1262,7 +1262,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1271,7 +1271,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1283,14 +1283,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1298,13 +1298,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1315,7 +1315,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1323,7 +1323,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1334,7 +1334,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1343,7 +1343,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1355,14 +1355,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1370,13 +1370,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1392,7 +1392,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1400,7 +1400,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1411,7 +1411,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1420,7 +1420,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1432,14 +1432,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1447,13 +1447,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         CallFunc (LabelName "wasm_fn5")
@@ -1463,7 +1463,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1471,7 +1471,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1482,7 +1482,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1491,7 +1491,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1503,14 +1503,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1518,13 +1518,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         CallFunc (LabelName "wasm_fn5")
@@ -1534,7 +1534,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1542,7 +1542,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1553,7 +1553,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1562,7 +1562,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1574,14 +1574,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1589,13 +1589,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1606,7 +1606,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1614,7 +1614,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1625,7 +1625,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1634,7 +1634,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1646,14 +1646,14 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1661,13 +1661,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1683,7 +1683,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1691,13 +1691,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         PeekA
@@ -1705,7 +1705,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 4u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
@@ -1715,7 +1715,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1734,7 +1734,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1744,7 +1744,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 16u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -1754,7 +1754,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1762,19 +1762,19 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l13:
@@ -1783,7 +1783,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 32u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1805,7 +1805,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 32u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1813,18 +1813,18 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 4u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 32u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -1834,7 +1834,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 4u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1844,7 +1844,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 4u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -1854,7 +1854,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 0u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1864,7 +1864,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 0u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -1874,7 +1874,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1884,7 +1884,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 28u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Goto (LabelName "wasm_l10")
@@ -1899,7 +1899,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 32u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1907,18 +1907,18 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 0u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 32u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -1928,7 +1928,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 4u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1938,7 +1938,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 4u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -1948,7 +1948,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 0u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1958,7 +1958,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 0u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -1968,7 +1968,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1978,7 +1978,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 28u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -1988,7 +1988,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1998,7 +1998,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 24u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -2008,7 +2008,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2016,13 +2016,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         PeekA
@@ -2030,7 +2030,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 4u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
@@ -2040,7 +2040,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2059,7 +2059,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2069,7 +2069,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 20u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
@@ -2079,7 +2079,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2087,19 +2087,19 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Goto (LabelName "wasm_l10")
@@ -2140,7 +2140,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 28u, I32 16)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l17:
@@ -2149,7 +2149,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2168,7 +2168,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2176,7 +2176,7 @@ CODE>         PeekA
 CODE>         StoreLoc (A, LocalIdx (U32 0u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored8, A, U32 0u, I32 0)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
@@ -2191,7 +2191,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 28u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Goto (LabelName "wasm_l17")
@@ -2203,28 +2203,28 @@ CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 12u, I32 320)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 8u, I32 16)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 16u, I32 320)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 20u, I32 256)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
@@ -2304,7 +2304,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 12u, I32 0)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         CallFunc (LabelName "wasm_fn3")
@@ -2345,7 +2345,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 28u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
@@ -2356,7 +2356,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 24u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
@@ -2367,7 +2367,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 20u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
@@ -2378,7 +2378,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 16u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
@@ -2399,7 +2399,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2407,7 +2407,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2415,7 +2415,7 @@ CODE>         PeekA
 CODE>         StoreLoc (A, LocalIdx (U32 2u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2431,7 +2431,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2439,7 +2439,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2455,7 +2455,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2463,7 +2463,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2479,7 +2479,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2498,7 +2498,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2517,7 +2517,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 24u, I32 0)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l21:
@@ -2526,7 +2526,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2534,7 +2534,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2553,13 +2553,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 20u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l22:
@@ -2571,7 +2571,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 4u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2579,7 +2579,7 @@ CODE>         PeekA
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 0u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2587,7 +2587,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 4u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2595,31 +2595,31 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (MulRegReg, A, B)
+CODE>         CalcRegs (MulRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         PeekA
@@ -2627,7 +2627,7 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
@@ -2640,7 +2640,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2648,24 +2648,24 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (SubRegReg, B, A)
+CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l23:
@@ -2674,7 +2674,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2682,7 +2682,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2698,7 +2698,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2709,13 +2709,13 @@ CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
-CODE>         CalcRegReg (AddRegReg, A, Y)
+CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, ZeroExt8, A, U32 0u)
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored8, B, U32 0u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
@@ -2730,7 +2730,7 @@ CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Pop A
 CODE>         Pop B
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         Goto (LabelName "wasm_l23")
