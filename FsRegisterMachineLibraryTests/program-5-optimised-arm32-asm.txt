@@ -27,9 +27,7 @@ CODE>     str R0,[R11, #-4]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
 CODE>     mov R0,#1  ; mov 1 LSL 0
-CODE>     mov R2,R0
-CODE>     lsl R1,R1,R2
-CODE>     mov R0,R1
+CODE>     lsl R0,R1,R0
 CODE>     str R0,[R11, #-8]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l3:
