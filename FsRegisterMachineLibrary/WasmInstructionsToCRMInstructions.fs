@@ -8,15 +8,19 @@ open AsmPrefixes
 
 
 
+/// Addition operation that performs type conversion for convenience.
 let (-+-) (U32 a) (I32 b) =
     U32 (a + uint32 b)
 
 
 
+/// Return the assembly language function label name for the given Function.
 let FuncLabelFor func =
     match func with
+
         | ImportedFunction2({Import={ImportModuleName=m; ImportName=n}}) -> 
             LabelName(AsmInternalFuncNamePrefix + m + "_" + n)
+
         | InternalFunction2({ModuleLocalFuncIdx=(FuncIdx (U32 i))}) ->
             LabelName(AsmInternalFuncNamePrefix + i.ToString()) 
 
@@ -41,7 +45,7 @@ type WasmToCrmTranslationConfig =
 let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToCrmTranslationConfig (ws:WasmFileTypes.Instr list) =
 
     let mutable (ModuleTranslationState labelCount) = translationState
-    let mutable labelStack = new ResizeArray<LABELNAME>()
+    let mutable labelStack = new ResizeArray<LABELNAME>()  // TODO: Can we use a cons list
 
     let newLabel () =
         labelCount <- labelCount + 1
@@ -58,7 +62,8 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
     let labelFor (LabelIdx (U32 i)) =
         labelStack.[labelStack.Count - (1 + (int i))]
 
-    let returnLabel = newLabel ()
+    let returnLabel = 
+        newLabel ()
 
     let getFunc (FuncIdx (U32 i)) =
         moduleFuncsArray.[int i]
@@ -130,12 +135,12 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 Pop A       // RHS operand
                 Pop B       // LHS operand
                 op          // Result in B
-                Let (A,B)
+                Let (A,B)   // TODO: Favoured because "push A - barrier- pop A" is removed by peephole, but "push B - barrier - pop A" isn't yet.
                 Push A
                 Barrier 
             ]
 
-        let shiftOp lhs rhs op = 
+        let shiftOp lhs rhs op =   // TODO: Use config to activate a much better version for the ARM
             (translateInstr lhs) @ 
             (translateInstr rhs) @ 
             [
@@ -276,8 +281,8 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 (translateInstr v) @ [ Pop A ; StoreGlo(A,g) ; Barrier ]
 
                     // TODO: runtime restriction of addressing to the Linear Memory extent.
-                    // (Wouldn't fit my application anyway, since it will not be possible
-                    // to guarantee contiguous extension of the Linear Memory).
+
+            // TODO: Can use use the new Stored8/16/32 type to collapse the size of this table?
 
             | I32Store8(  {Align=_;       Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored8, Y, O -+- O2,v); Barrier ]   // TODO: separate routines!!
             | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored16, Y, O -+- O2,v); Barrier ]
@@ -298,11 +303,15 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             | I32Store16( {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
+            // TODO: Can use use the new SignExt8 (and companions) to collapse the size of this table?
+
             | I32Load8s(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, SignExt8,  Y, O -+- O2) ; Push A ; Barrier ]
             | I32Load8u(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt8,  Y, O -+- O2) ; Push A ; Barrier ]
             | I32Load16s( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt16, Y, O -+- O2) ; Push A ; Barrier ]
             | I32Load16u( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt16, Y, O -+- O2) ; Push A ; Barrier ]
             | I32Load(    {Align=U32 2u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt32, Y, O -+- O2) ; Push A ; Barrier ]
+
+            // TODO: Could we extend Fetch() to have two registers, one optional?  Then avoid the addition and use Rn+Rm addressing mode instead.  (Should make that generation configurable).
 
             | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, SignExt8,  A,O) ; Push A ; Barrier ]
             | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, ZeroExt8,  A,O) ; Push A ; Barrier ]
