@@ -143,13 +143,13 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 Barrier 
             ]
 
-        let compareOp lhs rhs op = 
+        let compareOp lhs rhs cond = 
             (translateInstr lhs) @ 
             (translateInstr rhs) @ 
             [
                 Pop A       // RHS operand
                 Pop B       // LHS operand
-                op          // Compare B (LHS) with A (RHS) and set boolean into A
+                CmpBA cond  // Compare B (LHS) with A (RHS) and set boolean into A
                 Push A 
                 Barrier 
             ]
@@ -378,16 +378,16 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
 
             | I32Eqz(operand) -> (translateInstr operand) @ [ Pop A ; CmpAZ ; Push A ; Barrier ]
 
-            | I32Eq(a,b)   -> compareOp a b (CmpBA CrmCondEq )
-            | I32Ne(a,b)   -> compareOp a b (CmpBA CrmCondNe )
-            | I32Lts(a,b)  -> compareOp a b (CmpBA CrmCondLts)
-            | I32Ltu(a,b)  -> compareOp a b (CmpBA CrmCondLtu)
-            | I32Gts(a,b)  -> compareOp a b (CmpBA CrmCondGts)
-            | I32Gtu(a,b)  -> compareOp a b (CmpBA CrmCondGtu)
-            | I32Les(a,b)  -> compareOp a b (CmpBA CrmCondLes)
-            | I32Leu(a,b)  -> compareOp a b (CmpBA CrmCondLeu)
-            | I32Ges(a,b)  -> compareOp a b (CmpBA CrmCondGes)
-            | I32Geu(a,b)  -> compareOp a b (CmpBA CrmCondGeu)
+            | I32Eq(a,b)   -> compareOp a b CrmCondEq 
+            | I32Ne(a,b)   -> compareOp a b CrmCondNe 
+            | I32Lts(a,b)  -> compareOp a b CrmCondLts
+            | I32Ltu(a,b)  -> compareOp a b CrmCondLtu
+            | I32Gts(a,b)  -> compareOp a b CrmCondGts
+            | I32Gtu(a,b)  -> compareOp a b CrmCondGtu
+            | I32Les(a,b)  -> compareOp a b CrmCondLes
+            | I32Leu(a,b)  -> compareOp a b CrmCondLeu
+            | I32Ges(a,b)  -> compareOp a b CrmCondGes
+            | I32Geu(a,b)  -> compareOp a b CrmCondGeu
 
             | I32Add (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(AddRegNum,A,n))
             | I32Sub (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(SubRegNum,A,n))
