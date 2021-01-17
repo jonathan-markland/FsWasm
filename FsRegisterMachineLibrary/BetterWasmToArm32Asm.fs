@@ -197,7 +197,7 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
 
 
     match instruction with
-        | Barrier                       -> [ "; ~~~ register barrier ~~~" ]
+        | Barrier _                     -> [ "; ~~~ register barrier ~~~" ]
         | Breakpoint                    -> [ "bkpt #0" ]
         | Drop(U32 numSlots)            -> [ sprintf "add R13,R13,#%d" (numSlots * StackSlotSizeU) ]
         | Label(LabelName l)            -> [ LabelCommand l ]

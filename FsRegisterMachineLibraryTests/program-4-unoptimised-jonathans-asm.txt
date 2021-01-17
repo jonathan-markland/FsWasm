@@ -44,7 +44,6 @@ CODE>     pop A
 CODE>     let int[@loc0]=A
 CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l2
-CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc1]
 CODE>     push A
 CODE>     // ~~~ register barrier ~~~

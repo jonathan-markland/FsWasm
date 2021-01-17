@@ -2,164 +2,162 @@ HEAD> Common Register Machine function serialisation from WASM module: C:\Users\
 CODE> function wasm_fn0:
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 2u))
 CODE>         Const (A, Const32 1)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 1)
 CODE>         Pop A
 CODE>         Pop B
 CODE>         CmpBA CrmCondLts
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Lts (GetLocal (LocalIdx (U32 2u)), I32Const (I32 1))
 CODE>         Pop A
 CODE>         BranchRegZNZ (A, BNonZero, LabelName "wasm_l2")
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  BrIf (I32Lts (GetLocal (LocalIdx (U32 2u)), I32Const (I32 1)), LabelIdx (U32 0u))
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 1u))
 CODE>         Pop A
 CODE>         CalcRegNum (AddRegNum, A, I32 1)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 1u)), I32Const (I32 1))
 CODE>         Pop A
 CODE>         StoreLoc (A, LocalIdx (U32 5u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 5u), I32Add (GetLocal (LocalIdx (U32 1u)), I32Const (I32 1)))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 3u))
 CODE>         Const (A, Const32 1)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 1)
 CODE>         Pop A
 CODE>         Pop B
 CODE>         Let (C, A)
 CODE>         ShiftRot (Shl, B, C, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Shl (GetLocal (LocalIdx (U32 3u)), I32Const (I32 1))
 CODE>         Pop A
 CODE>         StoreLoc (A, LocalIdx (U32 6u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 6u), I32Shl (GetLocal (LocalIdx (U32 3u)), I32Const (I32 1)))
 CODE>     wasm_l3:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 1u))
 CODE>         Const (A, Const32 1)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 1)
 CODE>         Pop A
 CODE>         Pop B
 CODE>         CmpBA CrmCondLts
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Lts (GetLocal (LocalIdx (U32 1u)), I32Const (I32 1))
 CODE>         Pop A
 CODE>         BranchRegZNZ (A, BNonZero, LabelName "wasm_l4")
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  BrIf (I32Lts (GetLocal (LocalIdx (U32 1u)), I32Const (I32 1)), LabelIdx (U32 0u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         Pop A
 CODE>         StoreLoc (A, LocalIdx (U32 7u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 7u), GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 0u))
 CODE>         Pop A
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 3u), GetLocal (LocalIdx (U32 0u)))
 CODE>     wasm_l5:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 3u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 4u))
 CODE>         Pop A
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored16, B, U32 0u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store16 ({ Align = U32 1u Offset = U32 0u }, GetLocal (LocalIdx (U32 3u)), GetLocal (LocalIdx (U3...
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 3u))
 CODE>         Pop A
 CODE>         CalcRegNum (AddRegNum, A, I32 2)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 3u)), I32Const (I32 2))
 CODE>         Pop A
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 3u), I32Add (GetLocal (LocalIdx (U32 3u)), I32Const (I32 2)))
 CODE>         FetchLoc (A, LocalIdx (U32 7u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 7u))
 CODE>         Pop A
 CODE>         CalcRegNum (AddRegNum, A, I32 -1)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 7u)), I32Const (I32 -1))
 CODE>         PeekA
 CODE>         StoreLoc (A, LocalIdx (U32 7u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 7u), I32Add (GetLocal (LocalIdx (U32 7u)), I32Const (I32 -1)))
 CODE>         Const (A, Const32 1)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 1)
 CODE>         Pop A
 CODE>         Pop B
 CODE>         CmpBA CrmCondGts
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Gts (TeeLocal (LocalIdx (U32 7u), I32Add (GetLocal (LocalIdx (U32 7u)), I32Const (I32 -1))), I32C...
 CODE>         Pop A
 CODE>         BranchRegZNZ (A, BNonZero, LabelName "wasm_l5")
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  BrIf (I32Gts (TeeLocal (LocalIdx (U32 7u), I32Add (GetLocal (LocalIdx (U32 7u)), I32Const (I32 -1)))...
 CODE>     wasm_l4:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Lts (GetLocal (LocalIdx (U32 1u)), I32Const (I32 1)), LabelIdx (U32...
 CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 0u))
 CODE>         FetchLoc (A, LocalIdx (U32 6u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 6u))
 CODE>         Pop A
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 0u)), GetLocal (LocalIdx (U32 6u)))
 CODE>         Pop A
 CODE>         StoreLoc (A, LocalIdx (U32 0u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 0u), I32Add (GetLocal (LocalIdx (U32 0u)), GetLocal (LocalIdx (U32 6u))))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 2u))
 CODE>         Const (A, Const32 1)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 1)
 CODE>         Pop A
 CODE>         Pop B
 CODE>         CmpBA CrmCondGts
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Gts (GetLocal (LocalIdx (U32 2u)), I32Const (I32 1))
 CODE>         Pop A
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 3u), I32Gts (GetLocal (LocalIdx (U32 2u)), I32Const (I32 1)))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 2u))
 CODE>         Pop A
 CODE>         CalcRegNum (AddRegNum, A, I32 -1)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 2u)), I32Const (I32 -1))
 CODE>         Pop A
 CODE>         StoreLoc (A, LocalIdx (U32 2u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 2u), I32Add (GetLocal (LocalIdx (U32 2u)), I32Const (I32 -1)))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 3u))
 CODE>         Pop A
 CODE>         BranchRegZNZ (A, BNonZero, LabelName "wasm_l3")
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  BrIf (GetLocal (LocalIdx (U32 3u)), LabelIdx (U32 0u))
 CODE>     wasm_l2:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Lts (GetLocal (LocalIdx (U32 2u)), I32Const (I32 1)), LabelIdx (U32...
 CODE>     wasm_l1:
 CODE> end function
 CODE> 
@@ -168,43 +166,43 @@ CODE>
 CODE> function wasm_fn1:
 CODE>         Const (A, Const32 16)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 16)
 CODE>         Const (A, Const32 80)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 80)
 CODE>         Const (A, Const32 25)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 25)
 CODE>         Const (A, Const32 80)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 80)
 CODE>         Const (A, Const32 8001)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 8001)
 CODE>         CallFunc (LabelName "wasm_fn0")
 CODE>         Drop (U32 5u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 0u), [I32Const (I32 16); I32Const (I32 80); I32Const (I32 25); I32Const (I32 80);...
 CODE>         Const (A, Const32 516)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 516)
 CODE>         Const (A, Const32 40)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 40)
 CODE>         Const (A, Const32 5)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 5)
 CODE>         Const (A, Const32 80)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 80)
 CODE>         Const (A, Const32 20290)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 20290)
 CODE>         CallFunc (LabelName "wasm_fn0")
 CODE>         Drop (U32 5u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 0u), [I32Const (I32 516); I32Const (I32 40); I32Const (I32 5); I32Const (I32 80);...
 CODE>         Const (A, Const32 0)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 0)
 CODE>     wasm_l6:
 CODE>         Pop A
 CODE> end function

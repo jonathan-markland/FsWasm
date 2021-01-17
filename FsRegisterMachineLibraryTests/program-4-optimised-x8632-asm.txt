@@ -47,7 +47,6 @@ CODE>     mov EAX,0
 CODE>     mov [EBP-4],EAX  ; @loc0
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l2:
-CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-8]  ; @loc1
 CODE>     add EAX,EDI
 CODE>     mov dword [EAX],32

@@ -599,7 +599,6 @@ CODE>     add R1,R1,R9
 CODE>     str R0,[R1]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l10:
-CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #28]
@@ -1209,7 +1208,6 @@ CODE>     mov R8,#16  ; mov 16 LSL 0
 CODE>     str R8,[R0, #28]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l17:
-CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #-8]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #28]
@@ -1525,7 +1523,6 @@ CODE>     add R1,R1,R9
 CODE>     str R0,[R1, #8]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l23:
-CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #12]

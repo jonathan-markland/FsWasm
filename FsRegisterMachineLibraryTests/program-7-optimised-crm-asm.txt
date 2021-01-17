@@ -4,56 +4,56 @@ CODE>         Fetch (A, SignExt32, Y, U32 4u)
 CODE>         CalcRegNum (SubRegNum, A, I32 48)
 CODE>         StoreLoc (A, LocalIdx (U32 5u))
 CODE>         Store (A, Stored32, Y, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, I32Const (I32 0), TeeLocal (LocalIdx (U32 5u), I32Sub ...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 44u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 44u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 40u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 40u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 36u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 36u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 32u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 32u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored8, B, U32 31u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store8 ({ Align = U32 0u Offset = U32 31u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U3...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegNum (AddRegNum, A, I32 8)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 5u)), I32Const (I32 8))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 44u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt8, A, U32 31u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load8s ({ Align = U32 0u Offset = U32 31u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         CallFunc (LabelName "wasm_fn1")
 CODE>         Drop (U32 3u)
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 3u), Call (FuncIdx (U32 1u), [I32Add (GetLocal (LocalIdx (U32 5u)), I32Const...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 40u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 2u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 2u), I32Load ({ Align = U32 2u Offset = U32 40u }, GetLocal (LocalIdx (U32 5...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 32u)
@@ -62,39 +62,39 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (TeeLocal (LocalIdx (U32 2u), I32Load ({ Align = U32 2u Offset = U32 40u }, GetLocal (LocalId...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 36u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 1u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 1u), I32Load ({ Align = U32 2u Offset = U32 36u }, GetLocal (LocalIdx (U32 5...
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (TeeLocal (LocalIdx (U32 1u), I32Load ({ Align = U32 2u Offset = U32 36u }, GetLocal (LocalId...
 CODE>         FetchLoc (B, LocalIdx (U32 2u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 2u)), GetLocal (LocalIdx (U32 4u)))
 CODE>         FetchLoc (B, LocalIdx (U32 1u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 1u)), GetLocal (LocalIdx (U32 4u)))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 3u))
 CODE>         CallFunc (LabelName "wasm_fn2")
 CODE>         Drop (U32 5u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 2u), [I32Sub (TeeLocal (LocalIdx (U32 2u), I32Load ({ Align = U32 2u Offset = U32...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegNum (AddRegNum, A, I32 48)
 CODE>         Store (A, Stored32, Y, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, I32Const (I32 0), I32Add (GetLocal (LocalIdx (U32 5u))...
 CODE>     wasm_l1:
 CODE> end function
 CODE> 
@@ -105,36 +105,36 @@ CODE>         Fetch (A, SignExt32, Y, U32 4u)
 CODE>         CalcRegNum (SubRegNum, A, I32 16)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 3u), I32Sub (I32Load ({ Align = U32 2u Offset = U32 4u }, I32Const (I32 0)),...
 CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 12u }, TeeLocal (LocalIdx (U32 3u), I32Sub (I32Load ({ Align...
 CODE>         FetchLoc (B, LocalIdx (U32 3u))
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 8u }, GetLocal (LocalIdx (U32 3u)), GetLocal (LocalIdx (U32 ...
 CODE>         FetchLoc (B, LocalIdx (U32 3u))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored8, B, U32 7u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store8 ({ Align = U32 0u Offset = U32 7u }, GetLocal (LocalIdx (U32 3u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 1u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 1u), I32Load ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 3...
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored8, B, U32 0u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store8 ({ Align = U32 0u Offset = U32 0u }, TeeLocal (LocalIdx (U32 1u), I32Load ({ Align = U32 2...
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 1u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
@@ -142,20 +142,20 @@ CODE>         StoreLoc (A, LocalIdx (U32 2u))
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, GetLocal (LocalIdx (U32 1u)), TeeLocal (LocalIdx (U32 ...
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 1u))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 8u }, GetLocal (LocalIdx (U32 1u)), I32Load ({ Align = U32 2...
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 1u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
@@ -164,10 +164,10 @@ CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 1u)), I32Load ({ Align = U32 ...
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 1u))
 CODE>     wasm_l2:
 CODE>         Pop A
 CODE> end function
@@ -179,37 +179,37 @@ CODE>         Fetch (A, SignExt32, Y, U32 4u)
 CODE>         CalcRegNum (SubRegNum, A, I32 80)
 CODE>         StoreLoc (A, LocalIdx (U32 5u))
 CODE>         Store (A, Stored32, Y, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, I32Const (I32 0), TeeLocal (LocalIdx (U32 5u), I32Sub ...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 76u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 76u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 72u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 72u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 68u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 68u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 64u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 64u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 60u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 76u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 76u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 68u)
@@ -220,7 +220,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 72u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 72u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 64u)
@@ -231,7 +231,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 76u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 76u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
@@ -244,7 +244,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 68u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 68u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l4")
@@ -253,7 +253,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 72u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 72u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
@@ -266,26 +266,26 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 64u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 64u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l4")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 76u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 76u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 68u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (I32Load ({ Align = U32 2u Offset = U32 76u }, GetLocal (LocalIdx (U32 5u))), I32Load ({ Alig...
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         Let (C, A)
@@ -294,22 +294,22 @@ CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 56u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalIdx (U32 5u)), I32Shrs (I32Add (I32Loa...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 72u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 72u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 64u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (I32Load ({ Align = U32 2u Offset = U32 72u }, GetLocal (LocalIdx (U32 5u))), I32Load ({ Alig...
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         Let (C, A)
@@ -318,12 +318,12 @@ CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 52u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u)), I32Shrs (I32Add (I32Loa...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 76u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 76u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 68u)
@@ -334,7 +334,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 68u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 68u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
@@ -342,17 +342,17 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 4u), I32Sub (I32Load ({ Align = U32 2u Offset = U32 68u }, GetLocal (LocalId...
 CODE>         Goto (LabelName "wasm_l5")
 CODE> 
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Br (LabelIdx (U32 1u))
 CODE>     wasm_l6:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Ges (I32Load ({ Align = U32 2u Offset = U32 76u }, GetLocal (LocalI...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 76u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 76u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
@@ -360,19 +360,19 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 4u), I32Sub (I32Load ({ Align = U32 2u Offset = U32 76u }, GetLocal (LocalId...
 CODE>     wasm_l5:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [Block (EmptyBlockType, [BrIf (I32Ges (I32Load ({ Align = U32 2u Offset = U32...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 48u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 48u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 72u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 72u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 64u)
@@ -383,7 +383,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 64u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 64u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
@@ -391,17 +391,17 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 4u), I32Sub (I32Load ({ Align = U32 2u Offset = U32 64u }, GetLocal (LocalId...
 CODE>         Goto (LabelName "wasm_l7")
 CODE> 
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Br (LabelIdx (U32 1u))
 CODE>     wasm_l8:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Ges (I32Load ({ Align = U32 2u Offset = U32 72u }, GetLocal (LocalI...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 72u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 72u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
@@ -409,23 +409,23 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  SetLocal (LocalIdx (U32 4u), I32Sub (I32Load ({ Align = U32 2u Offset = U32 72u }, GetLocal (LocalId...
 CODE>     wasm_l7:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [Block (EmptyBlockType, [BrIf (I32Ges (I32Load ({ Align = U32 2u Offset = U32...
 CODE>         FetchLoc (B, LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 44u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 44u }, GetLocal (LocalIdx (U32 5u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored8, A, U32 43u, I32 1)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store8 ({ Align = U32 0u Offset = U32 43u }, GetLocal (LocalIdx (U32 5u)), I32Const (I32 1))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 48u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
@@ -434,51 +434,51 @@ CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l9")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 36u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 36u }, GetLocal (LocalIdx (U32 5u)), I32Load ({ Align = U32 ...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 48u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 48u }, GetLocal (LocalIdx (U32 5u)), I32Load ({ Align = U32 ...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 36u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 44u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 44u }, GetLocal (LocalIdx (U32 5u)), I32Load ({ Align = U32 ...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored8, A, U32 43u, I32 0)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store8 ({ Align = U32 0u Offset = U32 43u }, GetLocal (LocalIdx (U32 5u)), I32Const (I32 0))
 CODE>     wasm_l9:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Ges (I32Load ({ Align = U32 2u Offset = U32 48u }, GetLocal (LocalI...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         Const (A, Const32 3)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 3)
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 48u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         Let (C, A)
@@ -490,43 +490,43 @@ CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 32u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 32u }, GetLocal (LocalIdx (U32 5u)), I32Sub (I32Const (I32 3...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 28u, I32 0)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 28u }, GetLocal (LocalIdx (U32 5u)), I32Const (I32 0))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 24u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 24u }, GetLocal (LocalIdx (U32 5u)), I32Load ({ Align = U32 ...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 20u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 20u }, GetLocal (LocalIdx (U32 5u)), I32Load ({ Align = U32 ...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 16u, I32 0)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 16u }, GetLocal (LocalIdx (U32 5u)), I32Const (I32 0))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 48u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         Let (C, A)
@@ -535,15 +535,15 @@ CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 5u)), I32Shrs (I32Load ({ Ali...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 48u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         Let (C, A)
@@ -552,22 +552,22 @@ CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 8u }, GetLocal (LocalIdx (U32 5u)), I32Shrs (I32Load ({ Alig...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 4u, I32 6)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, GetLocal (LocalIdx (U32 5u)), I32Const (I32 6))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         Const (A, Const32 10)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 10)
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 48u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         Const (A, Const32 2)
 CODE>         Pop B
 CODE>         Let (C, A)
@@ -579,14 +579,13 @@ CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 0u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 0u }, GetLocal (LocalIdx (U32 5u)), I32Sub (I32Const (I32 10...
 CODE>     wasm_l10:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 28u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
@@ -599,18 +598,18 @@ CODE>         Fetch (A, ZeroExt8, A, U32 43u)
 CODE>         CalcRegNum (AndRegNum, A, I32 1)
 CODE>         CmpAZ
 CODE>         BranchRegZNZ (A, BNonZero, LabelName "wasm_l12")
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  BrIf (I32Eqz (I32And (I32Load8u ({ Align = U32 0u Offset = U32 43u }, GetLocal (LocalIdx (U32 5u))),...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalIdx (U32 5...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
@@ -619,38 +618,38 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalId...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32 3u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u))), I32Load ({ Alig...
 CODE>         CallFunc (LabelName "wasm_fn5")
 CODE>         Drop (U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 5u), [I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalIdx (U32 5...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
@@ -659,38 +658,38 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalId...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32 3u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u))), I32Load ({ Alig...
 CODE>         CallFunc (LabelName "wasm_fn5")
 CODE>         Drop (U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 5u), [I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalIdx (U32 5...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
@@ -699,17 +698,17 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalId...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32 3u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
@@ -717,21 +716,21 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u))), I32Load ({ Alig...
 CODE>         CallFunc (LabelName "wasm_fn5")
 CODE>         Drop (U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 5u), [I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalIdx (U32 5...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
@@ -740,17 +739,17 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalId...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32 3u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
@@ -758,26 +757,26 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u))), I32Load ({ Alig...
 CODE>         CallFunc (LabelName "wasm_fn5")
 CODE>         Drop (U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 5u), [I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))...
 CODE>         Goto (LabelName "wasm_l11")
 CODE> 
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Br (LabelIdx (U32 1u))
 CODE>     wasm_l12:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Eqz (I32And (I32Load8u ({ Align = U32 0u Offset = U32 43u }, GetLoc...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalIdx (U32 5...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
@@ -786,38 +785,38 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalId...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32 3u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u))), I32Load ({ Alig...
 CODE>         CallFunc (LabelName "wasm_fn5")
 CODE>         Drop (U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 5u), [I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalIdx (U32 5...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
@@ -826,38 +825,38 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalId...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32 3u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u))), I32Load ({ Alig...
 CODE>         CallFunc (LabelName "wasm_fn5")
 CODE>         Drop (U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 5u), [I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalIdx (U32 5...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
@@ -866,17 +865,17 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalId...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32 3u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
@@ -884,21 +883,21 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u))), I32Load ({ Alig...
 CODE>         CallFunc (LabelName "wasm_fn5")
 CODE>         Drop (U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 5u), [I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 60u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 56u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalIdx (U32 5...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
@@ -907,17 +906,17 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (TeeLocal (LocalIdx (U32 4u), I32Load ({ Align = U32 2u Offset = U32 56u }, GetLocal (LocalId...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32 3u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 52u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
@@ -925,20 +924,20 @@ CODE>         Pop B
 CODE>         CalcRegs (SubRegReg, B, A, B)
 CODE>         Let (A, B)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Sub (I32Load ({ Align = U32 2u Offset = U32 52u }, GetLocal (LocalIdx (U32 5u))), I32Load ({ Alig...
 CODE>         CallFunc (LabelName "wasm_fn5")
 CODE>         Drop (U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 5u), [I32Load ({ Align = U32 2u Offset = U32 60u }, GetLocal (LocalIdx (U32 5u)))...
 CODE>     wasm_l11:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [Block (EmptyBlockType, [BrIf (I32Eqz (I32And (I32Load8u ({ Align = U32 0u Of...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 8u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
@@ -948,10 +947,10 @@ CODE>         StoreLoc (A, LocalIdx (U32 4u))
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 8u }, GetLocal (LocalIdx (U32 5u)), TeeLocal (LocalIdx (U32 ...
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
@@ -960,7 +959,7 @@ CODE>         SecondaryCmpBranch (CrmCondLes, LabelName "wasm_l13")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
@@ -968,15 +967,15 @@ CODE>         CalcRegNum (AddRegNum, A, I32 1)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 16u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 16u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Alig...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 8u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
@@ -986,26 +985,26 @@ CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 8u }, GetLocal (LocalIdx (U32 5u)), I32Sub (I32Load ({ Align...
 CODE>     wasm_l13:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Les (GetLocal (LocalIdx (U32 4u)), I32Load ({ Align = U32 2u Offset...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 32u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 32u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         Const (A, Const32 0)
 CODE>         Pop B
 CODE>         SecondaryCmpBranch (CrmCondGes, LabelName "wasm_l14")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 32u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 32u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 4u)
@@ -1014,10 +1013,10 @@ CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 32u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 32u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Alig...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 4u)
@@ -1025,10 +1024,10 @@ CODE>         CalcRegNum (AddRegNum, A, I32 4)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Align...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 0u)
@@ -1036,10 +1035,10 @@ CODE>         CalcRegNum (AddRegNum, A, I32 4)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 0u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 0u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Align...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
@@ -1047,20 +1046,20 @@ CODE>         CalcRegNum (AddRegNum, A, I32 1)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 28u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 28u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Alig...
 CODE>         Goto (LabelName "wasm_l10")
 CODE> 
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Br (LabelIdx (U32 1u))
 CODE>     wasm_l14:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Ges (I32Load ({ Align = U32 2u Offset = U32 32u }, GetLocal (LocalI...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 32u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 32u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 0u)
@@ -1069,10 +1068,10 @@ CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 32u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 32u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Alig...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 4u)
@@ -1080,10 +1079,10 @@ CODE>         CalcRegNum (AddRegNum, A, I32 4)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Align...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 0u)
@@ -1091,10 +1090,10 @@ CODE>         CalcRegNum (AddRegNum, A, I32 8)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 0u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 0u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Align...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
@@ -1102,10 +1101,10 @@ CODE>         CalcRegNum (AddRegNum, A, I32 1)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 28u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 28u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Alig...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
@@ -1113,15 +1112,15 @@ CODE>         CalcRegNum (AddRegNum, A, I32 -1)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 24u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 24u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Alig...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 44u)
@@ -1131,10 +1130,10 @@ CODE>         StoreLoc (A, LocalIdx (U32 4u))
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 5u)), TeeLocal (LocalIdx (U32...
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
@@ -1143,7 +1142,7 @@ CODE>         SecondaryCmpBranch (CrmCondLes, LabelName "wasm_l10")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
@@ -1151,15 +1150,15 @@ CODE>         CalcRegNum (AddRegNum, A, I32 -1)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 20u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 20u }, GetLocal (LocalIdx (U32 5u)), I32Add (I32Load ({ Alig...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 5u))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 5u)))
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 48u)
@@ -1169,16 +1168,16 @@ CODE>         Let (A, B)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 5u)), I32Sub (I32Load ({ Alig...
 CODE>         Goto (LabelName "wasm_l10")
 CODE> 
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Br (LabelIdx (U32 0u))
 CODE>     wasm_l4:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Ges (I32Load ({ Align = U32 2u Offset = U32 76u }, GetLocal (LocalI...
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         CalcRegNum (AddRegNum, A, I32 80)
 CODE>         Store (A, Stored32, Y, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, I32Const (I32 0), I32Add (GetLocal (LocalIdx (U32 5u))...
 CODE>     wasm_l3:
 CODE> end function
 CODE> 
@@ -1189,18 +1188,17 @@ CODE>         Fetch (A, SignExt32, Y, U32 4u)
 CODE>         CalcRegNum (SubRegNum, A, I32 32)
 CODE>         StoreLoc (A, LocalIdx (U32 1u))
 CODE>         Store (A, Stored32, Y, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, I32Const (I32 0), TeeLocal (LocalIdx (U32 1u), I32Sub ...
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 28u, I32 16)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 28u }, GetLocal (LocalIdx (U32 1u)), I32Const (I32 16))
 CODE>     wasm_l17:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 28u }, GetLocal (LocalIdx (U32 1u)))
 CODE>         Const (A, Const32 81936)
 CODE>         Pop B
 CODE>         SecondaryCmpBranch (CrmCondGeu, LabelName "wasm_l16")
@@ -1211,79 +1209,79 @@ CODE>         Fetch (A, SignExt32, A, U32 28u)
 CODE>         StoreLoc (A, LocalIdx (U32 0u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored8, A, U32 0u, I32 0)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store8 ({ Align = U32 0u Offset = U32 0u }, TeeLocal (LocalIdx (U32 0u), I32Load ({ Align = U32 2...
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 1u))
 CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         CalcRegNum (AddRegNum, A, I32 1)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 28u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 28u }, GetLocal (LocalIdx (U32 1u)), I32Add (GetLocal (Local...
 CODE>         Goto (LabelName "wasm_l17")
 CODE> 
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Br (LabelIdx (U32 0u))
 CODE>     wasm_l16:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [Loop (EmptyBlockType, [BrIf (I32Geu (I32Load ({ Align = U32 2u Offset = U32 ...
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 12u, I32 320)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 1u)), I32Const (I32 320))
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 8u, I32 16)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 8u }, GetLocal (LocalIdx (U32 1u)), I32Const (I32 16))
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 16u, I32 320)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 16u }, GetLocal (LocalIdx (U32 1u)), I32Const (I32 320))
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 20u, I32 256)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 20u }, GetLocal (LocalIdx (U32 1u)), I32Const (I32 256))
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegNum (AddRegNum, A, I32 8)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 1u)), I32Const (I32 8))
 CODE>         Const (A, Const32 160)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 160)
 CODE>         Const (A, Const32 100)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 100)
 CODE>         Const (A, Const32 80)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 80)
 CODE>         Const (A, Const32 -1)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 -1)
 CODE>         CallFunc (LabelName "wasm_fn0")
 CODE>         Drop (U32 5u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 0u), [I32Add (GetLocal (LocalIdx (U32 1u)), I32Const (I32 8)); I32Const (I32 160)...
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegNum (AddRegNum, A, I32 8)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (GetLocal (LocalIdx (U32 1u)), I32Const (I32 8))
 CODE>         Const (A, Const32 160)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 160)
 CODE>         Const (A, Const32 100)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 100)
 CODE>         Const (A, Const32 40)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 40)
 CODE>         Const (A, Const32 -64)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 -64)
 CODE>         CallFunc (LabelName "wasm_fn0")
 CODE>         Drop (U32 5u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 0u), [I32Add (GetLocal (LocalIdx (U32 1u)), I32Const (I32 8)); I32Const (I32 160)...
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegNum (AddRegNum, A, I32 32)
 CODE>         Store (A, Stored32, Y, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, I32Const (I32 0), I32Add (GetLocal (LocalIdx (U32 1u))...
 CODE>     wasm_l15:
 CODE> end function
 CODE> 
@@ -1294,21 +1292,21 @@ CODE>         Fetch (A, SignExt32, Y, U32 4u)
 CODE>         CalcRegNum (SubRegNum, A, I32 16)
 CODE>         StoreLoc (A, LocalIdx (U32 0u))
 CODE>         Store (A, Stored32, Y, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, I32Const (I32 0), TeeLocal (LocalIdx (U32 0u), I32Sub ...
 CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 12u, I32 0)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 0u)), I32Const (I32 0))
 CODE>         CallFunc (LabelName "wasm_fn3")
 CODE>         Drop (U32 0u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Call (FuncIdx (U32 3u), [])
 CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         CalcRegNum (AddRegNum, A, I32 16)
 CODE>         Store (A, Stored32, Y, U32 4u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 4u }, I32Const (I32 0), I32Add (GetLocal (LocalIdx (U32 0u))...
 CODE>         Const (A, Const32 0)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Const (I32 0)
 CODE>     wasm_l18:
 CODE>         Pop A
 CODE> end function
@@ -1320,27 +1318,27 @@ CODE>         Fetch (A, SignExt32, Y, U32 4u)
 CODE>         CalcRegNum (SubRegNum, A, I32 32)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 4u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 4u), I32Sub (I32Load ({ Align = U32 2u Offset = U32 4u }, I32Const (I32 0)),...
 CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 28u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 28u }, TeeLocal (LocalIdx (U32 4u), I32Sub (I32Load ({ Align...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 24u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 24u }, GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 20u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 20u }, GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 16u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 16u }, GetLocal (LocalIdx (U32 4u)), GetLocal (LocalIdx (U32...
 CODE>         FetchLoc (B, LocalIdx (U32 3u))
 CODE>         Const (A, Const32 0)
 CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l20")
@@ -1349,7 +1347,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 16u }, GetLocal (LocalIdx (U32 4u)))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 28u)
@@ -1363,7 +1361,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 24u }, GetLocal (LocalIdx (U32 4u)))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
@@ -1374,7 +1372,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 24u }, GetLocal (LocalIdx (U32 4u)))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
@@ -1385,7 +1383,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 20u }, GetLocal (LocalIdx (U32 4u)))
 CODE>         Const (A, Const32 1)
 CODE>         Pop B
 CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l20")
@@ -1394,7 +1392,7 @@ CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 24u }, GetLocal (LocalIdx (U32 4u)))
 CODE>         Const (A, Const32 -1)
 CODE>         Pop B
 CODE>         SecondaryCmpBranch (CrmCondGts, LabelName "wasm_l21")
@@ -1402,14 +1400,14 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 24u, I32 0)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 24u }, GetLocal (LocalIdx (U32 4u)), I32Const (I32 0))
 CODE>     wasm_l21:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Gts (I32Load ({ Align = U32 2u Offset = U32 24u }, GetLocal (LocalI...
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 20u }, GetLocal (LocalIdx (U32 4u)))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
@@ -1418,19 +1416,19 @@ CODE>         SecondaryCmpBranch (CrmCondLes, LabelName "wasm_l22")
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 20u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 20u }, GetLocal (LocalIdx (U32 4u)), I32Load ({ Align = U32 ...
 CODE>     wasm_l22:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Les (I32Load ({ Align = U32 2u Offset = U32 20u }, GetLocal (LocalI...
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 4u)
@@ -1438,12 +1436,12 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 0u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 0u }, TeeLocal (LocalIdx (U32 3u), I32Load ({ Align = U32 2u ...
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 4u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 4u }, GetLocal (LocalIdx (U32 3u)))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 16u)
@@ -1452,7 +1450,7 @@ CODE>         CalcRegs (MulRegReg, A, B, A)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Add (I32Load ({ Align = U32 2u Offset = U32 0u }, TeeLocal (LocalIdx (U32 3u), I32Load ({ Align =...
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
@@ -1462,18 +1460,18 @@ CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 4u)), TeeLocal (LocalIdx (U32...
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 3u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 20u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 20u }, GetLocal (LocalIdx (U32 4u)))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 24u)
@@ -1485,14 +1483,13 @@ CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 8u }, GetLocal (LocalIdx (U32 4u)), I32Add (GetLocal (LocalI...
 CODE>     wasm_l23:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Load ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 4u)))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 8u)
@@ -1504,28 +1501,28 @@ CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, SignExt32, A, U32 12u)
 CODE>         Push A
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TeeLocal (LocalIdx (U32 3u), I32Load ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 4...
 CODE>         FetchLoc (A, LocalIdx (U32 2u))
 CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         Fetch (A, ZeroExt8, A, U32 0u)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored8, B, U32 0u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store8 ({ Align = U32 0u Offset = U32 0u }, TeeLocal (LocalIdx (U32 3u), I32Load ({ Align = U32 2...
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  GetLocal (LocalIdx (U32 4u))
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         CalcRegNum (AddRegNum, A, I32 1)
 CODE>         Pop B
 CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 12u)
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  I32Store ({ Align = U32 2u Offset = U32 12u }, GetLocal (LocalIdx (U32 4u)), I32Add (GetLocal (Local...
 CODE>         Goto (LabelName "wasm_l23")
 CODE> 
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Br (LabelIdx (U32 0u))
 CODE>     wasm_l20:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Block (EmptyBlockType, [BrIf (I32Lts (GetLocal (LocalIdx (U32 3u)), I32Const (I32 0)), LabelIdx (U32...
 CODE>     wasm_l19:
 CODE> end function
 CODE> 

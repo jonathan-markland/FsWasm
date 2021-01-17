@@ -38,7 +38,7 @@ let IsPushA   i = match i with | Push(A)       -> true | _ -> false
 let IsPeekA   i = match i with | PeekA         -> true | _ -> false
 let IsPopA    i = match i with | Pop(A)        -> true | _ -> false
 let IsPopB    i = match i with | Pop(B)        -> true | _ -> false
-let IsBarrier i = match i with | Barrier       -> true | _ -> false
+let IsBarrier i = match i with | Barrier _     -> true | _ -> false
 let IsDropOne i = match i with | Drop (U32 1u) -> true | _ -> false
 
 let IsLabelDeclaration i = match i with | Label _ -> true | _ -> false

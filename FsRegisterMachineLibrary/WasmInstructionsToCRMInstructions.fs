@@ -67,6 +67,16 @@ type WasmToCrmTranslationConfig =
 
 
 
+let EndsWithBarrier crmInstructions =
+    match crmInstructions with
+        | [] -> false
+        | _  -> 
+            match crmInstructions |> List.last with
+                | Barrier _ -> true
+                | _ -> false
+
+
+
 /// Translate WASM instruction body tree to Common Register Machine (CRM) list.
 let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToCrmTranslationConfig (ws:WasmFileTypes.Instr list) =
 
@@ -131,7 +141,17 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
 
         List.concat (ws |> List.map translateInstr)
 
-    and translateInstr w =
+    and translateInstr (w:Instr) =
+
+        let translatedList = translateInstrWithoutBarrier w
+
+        // Avoid unnecessary repeats when we return back out of two or more nested levels in one go:
+        if translatedList |> EndsWithBarrier then 
+            translatedList 
+        else 
+            translatedList @ [ Barrier (Some w) ]
+
+    and translateInstrWithoutBarrier (w:Instr) =
 
         let binaryCommutativeOp lhs rhs op = 
             (translateInstr lhs) @ 
@@ -141,7 +161,6 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 Pop B                  // LHS operand
                 CalcRegs (op,A,B, A)   // Result in A
                 Push A 
-                Barrier 
             ]
 
         let binaryOpWithConst lhs operation n =
@@ -150,7 +169,6 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 Pop A                      // LHS operand
                 CalcRegNum (operation,A,n) // Result in A
                 Push A 
-                Barrier 
             ]
 
         let compareOp lhs rhs cond = 
@@ -161,7 +179,6 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 Pop B       // LHS operand
                 CmpBA cond  // Compare B (LHS) with A (RHS) and set boolean into A
                 Push A 
-                Barrier 
             ]
 
         let binaryNonCommutativeOp lhs rhs op = 
@@ -175,7 +192,6 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                             CalcRegs (SubRegReg,B,A, B)          // Result in B
                             Let (A,B)   // TODO: Favoured because "push A - barrier- pop A" is removed by peephole, but "push B - barrier - pop A" isn't yet.
                             Push A
-                            Barrier 
                         ]
 
                     | NonCommutativeOnThreeRegisterMachine ->
@@ -184,7 +200,6 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                             Pop B       // LHS operand
                             CalcRegs (SubRegReg,B,A, A)        // Result in A
                             Push A
-                            Barrier 
                         ]
 
             (translateInstr lhs) @ (translateInstr rhs) @ operatorSequence
@@ -201,7 +216,6 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                             ShiftRot (shiftRotateType, B,C, B) // Result in B
                             Let (A,B)
                             Push A
-                            Barrier 
                         ]
                         
                     | ShiftCountInAnyRegister ->
@@ -210,7 +224,6 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                             Pop B       // LHS operand
                             ShiftRot (shiftRotateType, B,A, A)  // Result in B
                             Push A
-                            Barrier 
                         ]
 
             (translateInstr lhs) @ (translateInstr rhs) @ shiftSequence
@@ -219,18 +232,18 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             let constructLabel = pushNewLabel ()
             let translatedBody = translateInstrList sourceBody
             popLabel ()
-            putInOrder translatedBody [ Label(constructLabel) ]
+            putInOrder translatedBody [ Label constructLabel ]
 
         match w with
 
             | Unreachable -> 
-                [ Breakpoint ; Barrier ]
+                [ Breakpoint ]
 
             | Nop -> 
                 []
 
             | Instr.Drop(ins) -> 
-                translateInstr(ins) @ [ Drop (U32 1u) ; Barrier ]
+                translateInstr(ins) @ [ Drop (U32 1u) ]
         
             | Select(a,b,c) -> 
                 let l1 = newLabel ()
@@ -249,14 +262,13 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                     Let (A,B)
                     Label l2
                     Push A
-                    Barrier
                 ]
    
             | Block(_, body) -> 
-                translateConstruct body (List.append) @ [Barrier]
+                translateConstruct body (List.append)
 
             | Loop(_, body) -> 
-                translateConstruct body (fun a b -> List.append (b @ [Barrier]) a)
+                translateConstruct body (fun a b -> List.append b a)
 
             | If(_, body) -> 
 
@@ -266,7 +278,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 popLabel ()
                 [ Pop A ; BranchRegZNZ(A,BZero,skipLabel) ] 
                     @ translatedBody 
-                    @ [ Label skipLabel ; Barrier ]
+                    @ [ Label skipLabel ]
                     
             | IfElse(_, ifbody, elsebody) ->
 
@@ -280,15 +292,19 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
 
                 [ Pop A ; BranchRegZNZ(A,BZero,skipIfLabel) ] 
                     @ translatedIfBody 
-                    @ [ Goto skipElseLabel ; Label skipIfLabel ; Barrier ] 
+                    @ [ Goto skipElseLabel ; Label skipIfLabel ] 
                     @ translatedElseBody 
-                    @ [ Label skipElseLabel ; Barrier ]
+                    @ [ Label skipElseLabel ]
 
             | Br(target) -> 
-                [ Goto (labelFor target) ; Barrier ]
+                [ Goto (labelFor target) ]
 
             | BrIf(cond,target) ->
-                translateInstr(cond) @ [ Pop A ; BranchRegZNZ(A,BNonZero,(labelFor target)) ; Barrier ]
+                translateInstr(cond) @ 
+                [ 
+                    Pop A
+                    BranchRegZNZ(A,BNonZero,(labelFor target)) 
+                ]
 
             | BrTable(indexExpression, labelArray, defaultLabel) -> 
                 let tableLabel = newLabel ()
@@ -296,11 +312,10 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 [
                     Pop A
                     GotoIndex (tableLabel, labelArray.Length, labelFor defaultLabel, Array.map labelFor labelArray)
-                    Barrier
                 ]
 
             | Return -> 
-                [ Goto returnLabel ; Barrier ]
+                [ Goto returnLabel ]
             
             | Call(funcIdx, argsList) -> 
                 let codeToPushArguments = argsList |> translateInstrList
@@ -310,7 +325,6 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                     @ (thunkInIfNeeded funcIdx) 
                     @ (stackCleanupAfterCall funcType)
                     @ (pushAnyReturn funcType) 
-                    @ [ Barrier ]
 
             | CallIndirect(funcType, argsList, indexExpr) ->
                 // TODO: runtime validation of funcType, in order to be safe per-spec
@@ -322,71 +336,70 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                     // TODO: Do we ever need to do this? I suppose it depends on what the table points to!   @ (thunkInIfNeeded funcIdx) 
                     @ (stackCleanupAfterCall funcType)
                     @ (pushAnyReturn funcType)
-                    @ [ Barrier ]
 
             | I32Const(I32(c)) -> 
-                [ Const (A, Const32 c) ; Push A ; Barrier ]
+                [ Const (A, Const32 c) ; Push A ]
 
             | GetLocal(l) -> 
-                [ FetchLoc(A,l) ; Push A ; Barrier ]
+                [ FetchLoc(A,l) ; Push A ]
 
             | SetLocal(l,v) -> 
-                (translateInstr v) @ [ Pop A ; StoreLoc(A,l) ; Barrier ]
+                (translateInstr v) @ [ Pop A ; StoreLoc(A,l) ]
 
             | TeeLocal(l,v) ->
-                (translateInstr v) @ [ PeekA ; StoreLoc(A,l) ; Barrier ]
+                (translateInstr v) @ [ PeekA ; StoreLoc(A,l) ]
         
             | GetGlobal(g) ->
-                [ FetchGlo(A,g) ; Push A ; Barrier ]
+                [ FetchGlo(A,g) ; Push A ]
 
             | SetGlobal(g,v) ->
-                (translateInstr v) @ [ Pop A ; StoreGlo(A,g) ; Barrier ]
+                (translateInstr v) @ [ Pop A ; StoreGlo(A,g) ]
 
                     // TODO: runtime restriction of addressing to the Linear Memory extent.
 
             // TODO: Can use use the new Stored8/16/32 type to collapse the size of this table?
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored8, Y, O -+- O2,v); Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored16, Y, O -+- O2,v); Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored32, Y, O -+- O2,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored8, Y, O -+- O2,v) ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored16, Y, O -+- O2,v) ]
+            | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored32, Y, O -+- O2,v) ]
 
-            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored8, A,O,v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored16, A,O,v); Barrier ]   // TODO: More effective use of addressing.
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored32, A,O,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored8, A,O,v) ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored16, A,O,v) ]   // TODO: More effective use of addressing.
+            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored32, A,O,v) ]
 
-            | I32Store8(  {Align=_;       Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored8, Y,O -+- O2) ; Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored16, Y,O -+- O2) ; Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored32, Y,O -+- O2) ; Barrier ]
+            | I32Store8(  {Align=_;       Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored8, Y,O -+- O2) ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored16, Y,O -+- O2) ]
+            | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored32, Y,O -+- O2) ]
 
-            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored8,  B,O) ; Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored16, B,O) ; Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored32, B,O) ; Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored8,  B,O) ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored16, B,O) ]
+            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored32, B,O) ]
 
             | I32Store16( {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
 
             // TODO: Can use use the new SignExt8 (and companions) to collapse the size of this table?
 
-            | I32Load8s(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, SignExt8,  Y, O -+- O2) ; Push A ; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt8,  Y, O -+- O2) ; Push A ; Barrier ]
-            | I32Load16s( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt16, Y, O -+- O2) ; Push A ; Barrier ]
-            | I32Load16u( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt16, Y, O -+- O2) ; Push A ; Barrier ]
-            | I32Load(    {Align=U32 2u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt32, Y, O -+- O2) ; Push A ; Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, SignExt8,  Y, O -+- O2) ; Push A ]
+            | I32Load8u(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt8,  Y, O -+- O2) ; Push A ]
+            | I32Load16s( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt16, Y, O -+- O2) ; Push A ]
+            | I32Load16u( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt16, Y, O -+- O2) ; Push A ]
+            | I32Load(    {Align=U32 2u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt32, Y, O -+- O2) ; Push A ]
 
             // TODO: Could we extend Fetch() to have two registers, one optional?  Then avoid the addition and use Rn+Rm addressing mode instead.  (Should make that generation configurable).
 
-            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt8,  A,O) ; Push A ; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, ZeroExt8,  A,O) ; Push A ; Barrier ]
-            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt16, A,O) ; Push A ; Barrier ]
-            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, ZeroExt16, A,O) ; Push A ; Barrier ]
-            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt32, A,O) ; Push A ; Barrier ]
+            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt8,  A,O) ; Push A ]
+            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, ZeroExt8,  A,O) ; Push A ]
+            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt16, A,O) ; Push A ]
+            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, ZeroExt16, A,O) ; Push A ]
+            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt32, A,O) ; Push A ]
            
             // TODO: Could capitulate given X86 target, but make that configurable:
             | I32Load16s( {Align=U32 _ ; Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
             | I32Load16u( {Align=U32 _ ; Offset=_}, _) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
             | I32Load(    {Align=U32 _ ; Offset=_}, _) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
 
-            | I32Eqz(operand) -> (translateInstr operand) @ [ Pop A ; CmpAZ ; Push A ; Barrier ]
+            | I32Eqz(operand) -> (translateInstr operand) @ [ Pop A ; CmpAZ ; Push A ]
 
             | I32Eq(a,b)   -> compareOp a b CrmCondEq 
             | I32Ne(a,b)   -> compareOp a b CrmCondNe 

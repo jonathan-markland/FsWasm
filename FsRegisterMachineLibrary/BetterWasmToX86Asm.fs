@@ -178,7 +178,7 @@ let TranslateInstructionToAsmSequence thisFunc instruction =
 
 
     match instruction with
-        | Barrier                    -> [ "; ~~~ register barrier ~~~" ]
+        | Barrier _                  -> [ "; ~~~ register barrier ~~~" ]
         | Breakpoint                 -> [ "int 3" ]
         | Drop(U32 numSlots)         -> [ sprintf "add ESP,%d" (numSlots * StackSlotSizeU) ]
         | Label(LabelName l)         -> [ LabelCommand l ]

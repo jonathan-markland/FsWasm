@@ -43,7 +43,7 @@ let Optimise (originalList:CRMInstruction32 list) =
 
         [|
             SecondaryCmpBranch (branchCondition , targetLabel)
-            Barrier
+            Barrier None
         |]
 
                 
@@ -66,7 +66,7 @@ let OptimiseX8632 (originalList:CRMInstruction32 list) =
 
     let withX8632PushConstant (a:CRMInstruction32[]) i =
         match a.[i] with
-            | Const (A,value) -> [| X8632Specific (X8632PushConstant value) ; Barrier |]  // Keep the barrier because we're not saying we drop registers through.  We don't.
+            | Const (A,value) -> [| X8632Specific (X8632PushConstant value) ; Barrier None |]  // Keep the barrier because we're not saying we drop registers through.  We don't.
             | _ -> failwith "Unexpected failure of pattern match" // should never happen
 
     let withX8632TwoRegisterEffectiveAddress (a:CRMInstruction32[]) i =
@@ -78,7 +78,7 @@ let OptimiseX8632 (originalList:CRMInstruction32 list) =
                     | Store(A, Stored32, B, ofs) -> X8632StoreAatEBXplusEDIplusOffset (ofs, "EAX")
                     | _ -> failwith "Unexpected failure of pattern match" // should never happen
                 )
-            Barrier
+            Barrier None
         |]
 
     let withX8632OperateOnLocal32 (a:CRMInstruction32[]) i =
@@ -99,7 +99,7 @@ let OptimiseX8632 (originalList:CRMInstruction32 list) =
 
         [|
             X8632Specific (X8632OperateOnLocal32 (opcode, localIndex, value))
-            Barrier
+            Barrier None
         |]
         
 

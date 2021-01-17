@@ -33,7 +33,6 @@ CODE>     let A=0
 CODE>     let int[@loc0]=A
 CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l2
-CODE>     // ~~~ register barrier ~~~
 CODE>     let A=int[@loc1]
 CODE>     add A,Y
 CODE>     let uint[A]=32
