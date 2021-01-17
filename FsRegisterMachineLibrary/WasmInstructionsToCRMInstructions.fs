@@ -8,15 +8,19 @@ open AsmPrefixes
 
 
 
+/// Addition operation that performs type conversion for convenience.
 let (-+-) (U32 a) (I32 b) =
     U32 (a + uint32 b)
 
 
 
+/// Return the assembly language function label name for the given Function.
 let FuncLabelFor func =
     match func with
+
         | ImportedFunction2({Import={ImportModuleName=m; ImportName=n}}) -> 
             LabelName(AsmInternalFuncNamePrefix + m + "_" + n)
+
         | InternalFunction2({ModuleLocalFuncIdx=(FuncIdx (U32 i))}) ->
             LabelName(AsmInternalFuncNamePrefix + i.ToString()) 
 
@@ -27,12 +31,38 @@ type ModuleTranslationState =
 
 
 
+type ShiftGenerationStrategy = 
+
+    /// (X86 but would work on ARM)
+    | RuntimeShiftCountMustBeInRegC 
+    
+    /// (ARM preferred)
+    | ShiftCountInAnyRegister
+
+
+
+type NonCommutativeOpStrategy =
+
+    /// (X86 but would work on ARM)
+    | NonCommutativeOnTwoRegisterMachine
+
+    /// (ARM preferred)
+    | NonCommutativeOnThreeRegisterMachine
+
+
+
 type WasmToCrmTranslationConfig =
     {
         /// Should a stack pointer adjustment Drop be generated
         /// after a call instruction, in order to clear off the
         /// parameters.
         ClearParametersAfterCall : bool
+
+        /// How shift instructions (and companions) are generated
+        ShiftStrategy : ShiftGenerationStrategy
+
+        /// How subtract (and others) are generated
+        NonCommutativeOpStrategy : NonCommutativeOpStrategy
     }
 
 
@@ -40,25 +70,36 @@ type WasmToCrmTranslationConfig =
 /// Translate WASM instruction body tree to Common Register Machine (CRM) list.
 let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToCrmTranslationConfig (ws:WasmFileTypes.Instr list) =
 
-    let mutable (ModuleTranslationState labelCount) = translationState
-    let mutable labelStack = new ResizeArray<LABELNAME>()
+    let mutable (ModuleTranslationState labelAllocatorCount) = translationState
+    let mutable labelStack = []
 
     let newLabel () =
-        labelCount <- labelCount + 1
-        LabelName(sprintf "%s%d" AsmCodeLabelPrefix labelCount)
+        labelAllocatorCount <- labelAllocatorCount + 1
+        LabelName (sprintf "%s%d" AsmCodeLabelPrefix labelAllocatorCount)
 
     let pushNewLabel () =
         let l = newLabel ()
-        labelStack.Add l
+        labelStack <- l :: labelStack
         l
 
     let popLabel () =
-        labelStack.RemoveAt(labelStack.Count - 1)
+        labelStack <-
+            match labelStack with
+                | [] -> failwith "Internal error:  Too many labels popped from internal label stack!"
+                | _::tail -> tail
 
     let labelFor (LabelIdx (U32 i)) =
-        labelStack.[labelStack.Count - (1 + (int i))]
 
-    let returnLabel = newLabel ()
+        let rec recurse lst i =
+            match  i , lst with
+                |  _ , []      -> failwith "Internal error:  Insufficient labels for reverse-indexing attempt."
+                | 0u , head::_ -> head
+                |  n , _::tail -> recurse tail (n-1u)
+
+        recurse labelStack i
+
+    let returnLabel = 
+        newLabel ()
 
     let getFunc (FuncIdx (U32 i)) =
         moduleFuncsArray.[int i]
@@ -96,57 +137,83 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             (translateInstr lhs) @ 
             (translateInstr rhs) @ 
             [
-                Pop A       // RHS operand
-                Pop B       // LHS operand
-                op          // Result in A
+                Pop A                  // RHS operand
+                Pop B                  // LHS operand
+                CalcRegs (op,A,B, A)   // Result in A
                 Push A 
                 Barrier 
             ]
 
-        let binaryOpWithConst lhs getOp =
+        let binaryOpWithConst lhs operation n =
             (translateInstr lhs) @ 
             [
-                Pop A       // LHS operand
-                getOp ()    // Result in A
+                Pop A                      // LHS operand
+                CalcRegNum (operation,A,n) // Result in A
                 Push A 
                 Barrier 
             ]
 
-        let compareOp lhs rhs op = 
+        let compareOp lhs rhs cond = 
             (translateInstr lhs) @ 
             (translateInstr rhs) @ 
             [
                 Pop A       // RHS operand
                 Pop B       // LHS operand
-                op          // Compare B (LHS) with A (RHS) and set boolean into A
+                CmpBA cond  // Compare B (LHS) with A (RHS) and set boolean into A
                 Push A 
                 Barrier 
             ]
 
         let binaryNonCommutativeOp lhs rhs op = 
-            (translateInstr lhs) @ 
-            (translateInstr rhs) @ 
-            [
-                Pop A       // RHS operand
-                Pop B       // LHS operand
-                op          // Result in B
-                Let (A,B)
-                Push A
-                Barrier 
-            ]
 
-        let shiftOp lhs rhs op = 
-            (translateInstr lhs) @ 
-            (translateInstr rhs) @ 
-            [
-                Pop A       // RHS operand
-                Pop B       // LHS operand
-                Let (C,A)
-                op          // Result in B
-                Let (A,B)
-                Push A
-                Barrier 
-            ]
+            let operatorSequence =
+                match wasmToCrmTranslationConfig.NonCommutativeOpStrategy with
+                    | NonCommutativeOnTwoRegisterMachine ->
+                        [
+                            Pop A       // RHS operand
+                            Pop B       // LHS operand
+                            CalcRegs (SubRegReg,B,A, B)          // Result in B
+                            Let (A,B)   // TODO: Favoured because "push A - barrier- pop A" is removed by peephole, but "push B - barrier - pop A" isn't yet.
+                            Push A
+                            Barrier 
+                        ]
+
+                    | NonCommutativeOnThreeRegisterMachine ->
+                        [
+                            Pop A       // RHS operand
+                            Pop B       // LHS operand
+                            CalcRegs (SubRegReg,B,A, A)        // Result in A
+                            Push A
+                            Barrier 
+                        ]
+
+            (translateInstr lhs) @ (translateInstr rhs) @ operatorSequence
+
+        let shiftOp lhs rhs shiftRotateType =   // TODO: Use config to activate a much better version for the ARM
+
+            let shiftSequence =
+                match wasmToCrmTranslationConfig.ShiftStrategy with
+                    | RuntimeShiftCountMustBeInRegC ->
+                        [
+                            Pop A       // RHS operand
+                            Pop B       // LHS operand
+                            Let (C,A)
+                            ShiftRot (shiftRotateType, B,C, B) // Result in B
+                            Let (A,B)
+                            Push A
+                            Barrier 
+                        ]
+                        
+                    | ShiftCountInAnyRegister ->
+                        [
+                            Pop A       // RHS operand
+                            Pop B       // LHS operand
+                            ShiftRot (shiftRotateType, B,A, A)  // Result in B
+                            Push A
+                            Barrier 
+                        ]
+
+            (translateInstr lhs) @ (translateInstr rhs) @ shiftSequence
 
         let translateConstruct sourceBody putInOrder =
             let constructLabel = pushNewLabel ()
@@ -276,27 +343,29 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                 (translateInstr v) @ [ Pop A ; StoreGlo(A,g) ; Barrier ]
 
                     // TODO: runtime restriction of addressing to the Linear Memory extent.
-                    // (Wouldn't fit my application anyway, since it will not be possible
-                    // to guarantee contiguous extension of the Linear Memory).
+
+            // TODO: Can use use the new Stored8/16/32 type to collapse the size of this table?
 
             | I32Store8(  {Align=_;       Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored8, Y, O -+- O2,v); Barrier ]   // TODO: separate routines!!
             | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored16, Y, O -+- O2,v); Barrier ]
             | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored32, Y, O -+- O2,v); Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; StoreConst(Stored8, A,O,v);  Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; StoreConst(Stored16, A,O,v); Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; StoreConst(Stored32, A,O,v); Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored8, A,O,v);  Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored16, A,O,v); Barrier ]   // TODO: More effective use of addressing.
+            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored32, A,O,v); Barrier ]
 
             | I32Store8(  {Align=_;       Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored8, Y,O -+- O2) ; Barrier ]   // TODO: separate routines!!
             | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored16, Y,O -+- O2) ; Barrier ]
             | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored32, Y,O -+- O2) ; Barrier ]
 
-            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegReg(AddRegReg,B,Y) ; Store(A, Stored8, B,O)  ; Barrier ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegReg(AddRegReg,B,Y) ; Store(A, Stored16, B,O) ; Barrier ]
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegReg(AddRegReg,B,Y) ; Store(A, Stored32, B,O) ; Barrier ]
+            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored8,  B,O) ; Barrier ]   // TODO: separate routines!!
+            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored16, B,O) ; Barrier ]
+            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored32, B,O) ; Barrier ]
 
             | I32Store16( {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
             | I32Store(   {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
+
+            // TODO: Can use use the new SignExt8 (and companions) to collapse the size of this table?
 
             | I32Load8s(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, SignExt8,  Y, O -+- O2) ; Push A ; Barrier ]
             | I32Load8u(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt8,  Y, O -+- O2) ; Push A ; Barrier ]
@@ -304,11 +373,13 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             | I32Load16u( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt16, Y, O -+- O2) ; Push A ; Barrier ]
             | I32Load(    {Align=U32 2u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt32, Y, O -+- O2) ; Push A ; Barrier ]
 
-            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, SignExt8,  A,O) ; Push A ; Barrier ]
-            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, ZeroExt8,  A,O) ; Push A ; Barrier ]
-            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, SignExt16, A,O) ; Push A ; Barrier ]
-            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, ZeroExt16, A,O) ; Push A ; Barrier ]
-            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegReg(AddRegReg,A,Y) ; Fetch(A, SignExt32, A,O) ; Push A ; Barrier ]
+            // TODO: Could we extend Fetch() to have two registers, one optional?  Then avoid the addition and use Rn+Rm addressing mode instead.  (Should make that generation configurable).
+
+            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt8,  A,O) ; Push A ; Barrier ]
+            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, ZeroExt8,  A,O) ; Push A ; Barrier ]
+            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt16, A,O) ; Push A ; Barrier ]
+            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, ZeroExt16, A,O) ; Push A ; Barrier ]
+            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt32, A,O) ; Push A ; Barrier ]
            
             // TODO: Could capitulate given X86 target, but make that configurable:
             | I32Load16s( {Align=U32 _ ; Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
@@ -317,45 +388,45 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
 
             | I32Eqz(operand) -> (translateInstr operand) @ [ Pop A ; CmpAZ ; Push A ; Barrier ]
 
-            | I32Eq(a,b)   -> compareOp a b (CmpBA CrmCondEq )
-            | I32Ne(a,b)   -> compareOp a b (CmpBA CrmCondNe )
-            | I32Lts(a,b)  -> compareOp a b (CmpBA CrmCondLts)
-            | I32Ltu(a,b)  -> compareOp a b (CmpBA CrmCondLtu)
-            | I32Gts(a,b)  -> compareOp a b (CmpBA CrmCondGts)
-            | I32Gtu(a,b)  -> compareOp a b (CmpBA CrmCondGtu)
-            | I32Les(a,b)  -> compareOp a b (CmpBA CrmCondLes)
-            | I32Leu(a,b)  -> compareOp a b (CmpBA CrmCondLeu)
-            | I32Ges(a,b)  -> compareOp a b (CmpBA CrmCondGes)
-            | I32Geu(a,b)  -> compareOp a b (CmpBA CrmCondGeu)
+            | I32Eq(a,b)   -> compareOp a b CrmCondEq 
+            | I32Ne(a,b)   -> compareOp a b CrmCondNe 
+            | I32Lts(a,b)  -> compareOp a b CrmCondLts
+            | I32Ltu(a,b)  -> compareOp a b CrmCondLtu
+            | I32Gts(a,b)  -> compareOp a b CrmCondGts
+            | I32Gtu(a,b)  -> compareOp a b CrmCondGtu
+            | I32Les(a,b)  -> compareOp a b CrmCondLes
+            | I32Leu(a,b)  -> compareOp a b CrmCondLeu
+            | I32Ges(a,b)  -> compareOp a b CrmCondGes
+            | I32Geu(a,b)  -> compareOp a b CrmCondGeu
 
-            | I32Add (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(AddRegNum,A,n))
-            | I32Sub (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(SubRegNum,A,n))
-            | I32And (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(AndRegNum,A,n))
-            | I32Or  (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(OrRegNum,A,n))
-            | I32Xor (a,I32Const n) -> binaryOpWithConst a (fun () -> CalcRegNum(XorRegNum,A,n))
+            | I32Add (a,I32Const n) -> binaryOpWithConst a AddRegNum n
+            | I32Sub (a,I32Const n) -> binaryOpWithConst a SubRegNum n
+            | I32And (a,I32Const n) -> binaryOpWithConst a AndRegNum n
+            | I32Or  (a,I32Const n) -> binaryOpWithConst a OrRegNum  n
+            | I32Xor (a,I32Const n) -> binaryOpWithConst a XorRegNum n
 
-            | I32Add (a,b) -> binaryCommutativeOp     a b (CalcRegReg (AddRegReg,A,B))
-            | I32Sub (a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (SubRegReg,B,A))
-            | I32Mul (a,b) -> binaryCommutativeOp     a b (CalcRegReg (MulRegReg,A,B)) 
-            | I32Divs(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (DivsRegReg,A,B))
-            | I32Divu(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (DivuRegReg,A,B))
-            | I32Rems(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (RemsRegReg,A,B))
-            | I32Remu(a,b) -> binaryNonCommutativeOp  a b (CalcRegReg (RemuRegReg,A,B))
-            | I32And (a,b) -> binaryCommutativeOp     a b (CalcRegReg (AndRegReg,A,B)) 
-            | I32Or  (a,b) -> binaryCommutativeOp     a b (CalcRegReg (OrRegReg,A,B))  
-            | I32Xor (a,b) -> binaryCommutativeOp     a b (CalcRegReg (XorRegReg,A,B)) 
+            | I32Add (a,b) -> binaryCommutativeOp     a b AddRegReg
+            | I32Sub (a,b) -> binaryNonCommutativeOp  a b SubRegReg
+            | I32Mul (a,b) -> binaryCommutativeOp     a b MulRegReg 
+            | I32Divs(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivsRegReg,A,B))
+            | I32Divu(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivuRegReg,A,B))
+            | I32Rems(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemsRegReg,A,B))
+            | I32Remu(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemuRegReg,A,B))
+            | I32And (a,b) -> binaryCommutativeOp     a b AndRegReg
+            | I32Or  (a,b) -> binaryCommutativeOp     a b OrRegReg  
+            | I32Xor (a,b) -> binaryCommutativeOp     a b XorRegReg
             
-            | I32Shl (a,b) -> shiftOp a b (ShiftRot Shl) 
-            | I32Shrs(a,b) -> shiftOp a b (ShiftRot Shrs)
-            | I32Shru(a,b) -> shiftOp a b (ShiftRot Shru)
-            | I32Rotl(a,b) -> shiftOp a b (ShiftRot Rotl)
-            | I32Rotr(a,b) -> shiftOp a b (ShiftRot Rotr)
+            | I32Shl (a,b) -> shiftOp a b Shl  
+            | I32Shrs(a,b) -> shiftOp a b Shrs
+            | I32Shru(a,b) -> shiftOp a b Shru
+            | I32Rotl(a,b) -> shiftOp a b Rotl
+            | I32Rotr(a,b) -> shiftOp a b Rotr
 
             | _ -> failwith (sprintf "Cannot translate this instruction to simple 32-bit machine: %A" w)   // TODO: Possibly avoid %A
 
     // Do the translation with the above nested functions:
 
     let finalTranslation = (translateInstrList ws) @ [ Label returnLabel ] 
-    let updatedTranslationState = ModuleTranslationState(labelCount)
+    let updatedTranslationState = ModuleTranslationState(labelAllocatorCount)
 
     (finalTranslation, updatedTranslationState)

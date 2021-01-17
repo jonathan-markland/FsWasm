@@ -63,8 +63,7 @@ sub R13,R13,#8 ; sub
     ldr R0,[R0, #32]
     str R0,[R11, #+8]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     ldr R0,[R11, #-4]
     add R0,R0,R9
@@ -73,8 +72,7 @@ sub R13,R13,#8 ; sub
     str R0,[R11, #+20]
     ldr R0,[R11, #+8]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     ldr R1,[R11, #+16]
     ldr R0,[R11, #+8]
@@ -264,9 +262,7 @@ sub R13,R13,#8 ; sub
     push {R0}
     mov R0,#1  ; mov 1 LSL 0
     pop {R1}
-    mov R2,R0
-    asr R1,R1,R2
-    mov R0,R1
+    asr R0,R1,R0
     pop {R1}
     add R1,R1,R9
     str R0,[R1, #56]
@@ -284,9 +280,7 @@ sub R13,R13,#8 ; sub
     push {R0}
     mov R0,#1  ; mov 1 LSL 0
     pop {R1}
-    mov R2,R0
-    asr R1,R1,R2
-    mov R0,R1
+    asr R0,R1,R0
     pop {R1}
     add R1,R1,R9
     str R0,[R1, #52]
@@ -308,8 +302,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #56]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     str R0,[R11, #+8]
     b wasm_l5
     wasm_l6:
@@ -321,8 +314,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #56]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     str R0,[R11, #+8]
     wasm_l5:
     ldr R1,[R11, #-4]
@@ -347,8 +339,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #52]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     str R0,[R11, #+8]
     b wasm_l7
     wasm_l8:
@@ -360,8 +351,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #52]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     str R0,[R11, #+8]
     wasm_l7:
     ldr R1,[R11, #-4]
@@ -421,12 +411,9 @@ sub R13,R13,#8 ; sub
     push {R0}
     mov R0,#1  ; mov 1 LSL 0
     pop {R1}
-    mov R2,R0
-    lsl R1,R1,R2
-    mov R0,R1
+    lsl R0,R1,R0
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     pop {R1}
     add R1,R1,R9
     str R0,[R1, #32]
@@ -462,9 +449,7 @@ sub R13,R13,#8 ; sub
     push {R0}
     mov R0,#1  ; mov 1 LSL 0
     pop {R1}
-    mov R2,R0
-    asr R1,R1,R2
-    mov R0,R1
+    asr R0,R1,R0
     pop {R1}
     add R1,R1,R9
     str R0,[R1, #12]
@@ -476,9 +461,7 @@ sub R13,R13,#8 ; sub
     push {R0}
     mov R0,#1  ; mov 1 LSL 0
     pop {R1}
-    mov R2,R0
-    asr R1,R1,R2
-    mov R0,R1
+    asr R0,R1,R0
     pop {R1}
     add R1,R1,R9
     str R0,[R1, #8]
@@ -496,12 +479,9 @@ sub R13,R13,#8 ; sub
     push {R0}
     mov R0,#2  ; mov 2 LSL 0
     pop {R1}
-    mov R2,R0
-    lsl R1,R1,R2
-    mov R0,R1
+    lsl R0,R1,R0
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     pop {R1}
     add R1,R1,R9
     str R0,[R1]
@@ -539,8 +519,7 @@ sub R13,R13,#8 ; sub
     ldr R0,[R0, #28]
     str R0,[R11, #+12]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     ldr R1,[R11, #+8]
     ldr R0,[R11, #+12]
@@ -572,8 +551,7 @@ sub R13,R13,#8 ; sub
     ldr R0,[R0, #24]
     str R0,[R11, #+12]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     ldr R1,[R11, #+8]
     ldr R0,[R11, #+12]
@@ -605,8 +583,7 @@ sub R13,R13,#8 ; sub
     ldr R0,[R0, #28]
     str R0,[R11, #+12]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     ldr R1,[R11, #+8]
     ldr R0,[R11, #+12]
@@ -620,8 +597,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #20]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     bl wasm_fn5
     add R13,R13,#16
@@ -639,8 +615,7 @@ sub R13,R13,#8 ; sub
     ldr R0,[R0, #24]
     str R0,[R11, #+12]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     ldr R1,[R11, #+8]
     ldr R0,[R11, #+12]
@@ -654,8 +629,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #16]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     bl wasm_fn5
     add R13,R13,#16
@@ -675,8 +649,7 @@ sub R13,R13,#8 ; sub
     ldr R0,[R0, #20]
     str R0,[R11, #+12]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     ldr R1,[R11, #+8]
     ldr R0,[R11, #+12]
@@ -708,8 +681,7 @@ sub R13,R13,#8 ; sub
     ldr R0,[R0, #16]
     str R0,[R11, #+12]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     ldr R1,[R11, #+8]
     ldr R0,[R11, #+12]
@@ -741,8 +713,7 @@ sub R13,R13,#8 ; sub
     ldr R0,[R0, #20]
     str R0,[R11, #+12]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     ldr R1,[R11, #+8]
     ldr R0,[R11, #+12]
@@ -756,8 +727,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #28]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     bl wasm_fn5
     add R13,R13,#16
@@ -775,8 +745,7 @@ sub R13,R13,#8 ; sub
     ldr R0,[R0, #16]
     str R0,[R11, #+12]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     ldr R1,[R11, #+8]
     ldr R0,[R11, #+12]
@@ -790,8 +759,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #24]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     push {R0}
     bl wasm_fn5
     add R13,R13,#16
@@ -838,8 +806,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #48]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     pop {R1}
     add R1,R1,R9
     str R0,[R1, #8]
@@ -987,8 +954,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #48]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     pop {R1}
     add R1,R1,R9
     str R0,[R1, #12]
@@ -1263,8 +1229,7 @@ sub R13,R13,#8 ; sub
     add R0,R0,R9
     ldr R0,[R0, #24]
     pop {R1}
-    sub R1,R1,R0
-    mov R0,R1
+    sub R0,R1,R0
     pop {R1}
     add R0,R0,R1
     pop {R1}

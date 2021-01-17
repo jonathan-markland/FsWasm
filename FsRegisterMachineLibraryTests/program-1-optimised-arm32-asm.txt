@@ -13,6 +13,7 @@ VAR > wasm_mem0: rb 65536 ; WASM linear memory reservation
 VAR > TotalSize:
 CODE> 
 CODE> wasm_fn0:  ; : int
+CODE> ; Function makes no calls
 CODE>     mov R0,#42  ; mov 42 LSL 0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~

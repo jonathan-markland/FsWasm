@@ -11,7 +11,7 @@ CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 3u))
 CODE>         Const (A, Const32 1)
 CODE>         Let (C, A)
-CODE>         ShiftRot Shl
+CODE>         ShiftRot (Shl, B, C, B)
 CODE>         Let (A, B)
 CODE>         StoreLoc (A, LocalIdx (U32 6u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,7 +31,7 @@ CODE>     wasm_l5:
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 3u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
-CODE>         CalcRegReg (AddRegReg, B, Y)
+CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored16, B, U32 0u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
@@ -51,7 +51,7 @@ CODE>     wasm_l4:
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 0u))
 CODE>         FetchLoc (A, LocalIdx (U32 6u))
-CODE>         CalcRegReg (AddRegReg, A, B)
+CODE>         CalcRegs (AddRegReg, A, B, A)
 CODE>         StoreLoc (A, LocalIdx (U32 0u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 2u))

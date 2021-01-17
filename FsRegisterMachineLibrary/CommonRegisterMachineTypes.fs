@@ -124,7 +124,7 @@ type RegConstCalcType =
     | XorRegNum
 
     
-type TwoRegCalcType =
+type CalcRegsOp =
 
     /// Add registers, result in left-side register.
     | AddRegReg
@@ -213,13 +213,13 @@ type CRMInstruction32 =
 
 
     /// Calculate sum of two registers, result in LHS
-    | CalcRegReg of TwoRegCalcType * REG * REG
+    | CalcRegs of CalcRegsOp * lhs:REG * rhs:REG * out:REG
     
     /// Calculate REG (op) n, result in REG
     | CalcRegNum of RegConstCalcType * REG * I32
 
     /// Shift and rotate
-    | ShiftRot of ShiftRotateType
+    | ShiftRot of ShiftRotateType * source:REG * count:REG * out:REG
 
 
     /// Compare B and A for the given condition, 

@@ -13,6 +13,7 @@ VAR > wasm_mem0: rb 65536 ; WASM linear memory reservation
 VAR > TotalSize:
 CODE> 
 CODE> wasm_fn0:  ; (loc0: int, loc1: int, loc2: int, loc3: int, loc4: int)
+CODE> ; Function makes no calls
 CODE> push {R11}
 CODE> mov R11,R13
 CODE> sub R13,R13,#16 ; sub
@@ -27,9 +28,7 @@ CODE>     str R0,[R11, #-4]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
 CODE>     mov R0,#1  ; mov 1 LSL 0
-CODE>     mov R2,R0
-CODE>     lsl R1,R1,R2
-CODE>     mov R0,R1
+CODE>     lsl R0,R1,R0
 CODE>     str R0,[R11, #-8]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l3:

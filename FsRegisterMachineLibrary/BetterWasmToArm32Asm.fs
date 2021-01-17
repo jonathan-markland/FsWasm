@@ -9,8 +9,24 @@ open WasmInstructionsToCRMInstructions
 open Library
 open ArmSupportLibrary
 open BWToCRMConfigurationTypes
-open OptimiseCommonRegisterMachine
 
+
+    //  R0 | Use to store operand in WASM instruction simulation
+    //  R1 | Use to store operand in WASM instruction simulation
+    //  R2 | spare - but analogue ECX was used for shifts on x86
+    //  R3 | spare
+    //  R4 | spare
+    //  R5 | spare
+    //  R6 | spare
+    //  R7 | spare
+    //  R8 | Temp register
+    //  R9 | Base of WASM linear memory
+    // R10 | Offset temp register
+    // R11 | Frame Pointer
+    // R12 | spare
+    // R13 | Stack Pointer
+    // R14 | Link
+    // R15 | PC
 
 
 let StackSlotSizeU = 4u
@@ -64,11 +80,11 @@ let ArmShiftInstruction ins =
         | Rotr   -> failwith "Rotate instructions are not yet translated"
 
 
-let ArmRegRegInstructionToString ins r1 r2 =
-    [ sprintf "%s %s,%s,%s" (ins |> ArmCalcInstruction) (regNameOf r1) (regNameOf r1) (regNameOf r2) ]
+let ArmRegRegInstructionToString ins r1 r2 rr =  // TODO: inconsistent parameter naming with routine below.
+    [ sprintf "%s %s,%s,%s" (ins |> ArmCalcInstruction) (regNameOf rr) (regNameOf r1) (regNameOf r2) ]
     
-let ArmShiftInstructionToString ins =
-    [ sprintf "%s R1,R1,R2" (ins |> ArmShiftInstruction) ]
+let ArmShiftInstructionToString ins rn rcount rout =
+    [ sprintf "%s %s,%s,%s" (ins |> ArmShiftInstruction) (regNameOf rout) (regNameOf rn) (regNameOf rcount) ]
 
 
 
@@ -196,10 +212,10 @@ let TranslateInstructionToAsmSequence thisFunctionCallsOut thisFunc instruction 
         | Pop r                         -> [ sprintf "pop {%s}" (regNameOf r) ]
         | PeekA                         -> [ "ldr R0,[R13]" ]
         | Let(r1,r2)                    -> [ sprintf "mov %s,%s" (regNameOf r1) (regNameOf r2) ]
-        | CalcRegNum(ins,A,I32(n))   -> MathsWithConstant (ins |> mathMnemonic) "R0" (uint32 n) armTempRegister
-        | CalcRegNum _               -> failwith "Cannot translate calculation with constant"
-        | CalcRegReg(ins,r1,r2)         -> ArmRegRegInstructionToString ins r1 r2
-        | ShiftRot ins                  -> ArmShiftInstructionToString ins // TODO: Still very X86
+        | CalcRegNum(ins,A,I32(n))      -> MathsWithConstant (ins |> mathMnemonic) "R0" (uint32 n) armTempRegister
+        | CalcRegNum _                  -> failwith "Cannot translate calculation with constant"
+        | CalcRegs(ins,r1,r2,rr)        -> ArmRegRegInstructionToString ins r1 r2 rr
+        | ShiftRot(ins,ra,rb,rr)        -> ArmShiftInstructionToString ins ra rb rr
         | CmpBA crmCond                 -> [ "cmp R1,R0" ; "mov R0,#0" ; (sprintf "mov%s R0,#1" (ArmConditionCodeFor crmCond)) ]
         | CmpAZ                         -> [ "cmp R0,0"  ; "mov R0,#0" ; "moveq R0,#1" ]
         | FetchLoc(r,i)                 -> [ sprintf "ldr %s,[R11, #%s]" (regNameOf r) (frameOffsetForLoc i) ]  // TODO: We only support WASM 32-bit integer type for now.
@@ -253,7 +269,11 @@ let ValTypeTranslationOf = function
 let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
     let wasmToCrmTranslationConfig = 
-        { ClearParametersAfterCall = true } 
+        { 
+            ClearParametersAfterCall = true
+            ShiftStrategy            = ShiftCountInAnyRegister
+            NonCommutativeOpStrategy = NonCommutativeOnThreeRegisterMachine
+        } 
 
     let crmInstructions, updatedTranslationState = 
         TranslateInstructionsAndApplyOptimisations 
@@ -271,7 +291,7 @@ let WriteOutFunctionAndBranchTables writeOutCode writeOutTables funcIndex (m:Mod
     let labelAndPrologueCode f =
         ["" ; procedureCommand]
         @
-        if thisFunctionCallsOut then ["push {R14}"] else []
+        if thisFunctionCallsOut then ["push {R14}"] else ["; Function makes no calls"]
         @
         if f |> HasParametersOrLocals then
             ["push {R11}" ; "mov R11,R13"]

@@ -76,8 +76,7 @@ CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #32]
 CODE>     str R0,[R11, #+8]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #-4]
@@ -88,8 +87,7 @@ CODE>     str R0,[R11, #+20]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R0,[R11, #+8]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+16]
@@ -119,6 +117,7 @@ CODE> pop {R14}
 CODE> bx lr
 CODE> 
 CODE> wasm_fn1:  ; (loc0: int, loc1: int, loc2: int): int
+CODE> ; Function makes no calls
 CODE> push {R11}
 CODE> mov R11,R13
 CODE> sub R13,R13,#8 ; sub
@@ -319,9 +318,7 @@ CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     pop {R1}
-CODE>     mov R2,R0
-CODE>     asr R1,R1,R2
-CODE>     mov R0,R1
+CODE>     asr R0,R1,R0
 CODE>     pop {R1}
 CODE>     add R1,R1,R9
 CODE>     str R0,[R1, #56]
@@ -343,9 +340,7 @@ CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     pop {R1}
-CODE>     mov R2,R0
-CODE>     asr R1,R1,R2
-CODE>     mov R0,R1
+CODE>     asr R0,R1,R0
 CODE>     pop {R1}
 CODE>     add R1,R1,R9
 CODE>     str R0,[R1, #52]
@@ -371,8 +366,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #56]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     str R0,[R11, #+8]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     b wasm_l5
@@ -388,8 +382,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #56]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     str R0,[R11, #+8]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l5:
@@ -420,8 +413,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #52]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     str R0,[R11, #+8]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     b wasm_l7
@@ -437,8 +429,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #52]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     str R0,[R11, #+8]
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l7:
@@ -515,12 +506,9 @@ CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     pop {R1}
-CODE>     mov R2,R0
-CODE>     lsl R1,R1,R2
-CODE>     mov R0,R1
+CODE>     lsl R0,R1,R0
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     pop {R1}
 CODE>     add R1,R1,R9
 CODE>     str R0,[R1, #32]
@@ -565,9 +553,7 @@ CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     pop {R1}
-CODE>     mov R2,R0
-CODE>     asr R1,R1,R2
-CODE>     mov R0,R1
+CODE>     asr R0,R1,R0
 CODE>     pop {R1}
 CODE>     add R1,R1,R9
 CODE>     str R0,[R1, #12]
@@ -582,9 +568,7 @@ CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#1  ; mov 1 LSL 0
 CODE>     pop {R1}
-CODE>     mov R2,R0
-CODE>     asr R1,R1,R2
-CODE>     mov R0,R1
+CODE>     asr R0,R1,R0
 CODE>     pop {R1}
 CODE>     add R1,R1,R9
 CODE>     str R0,[R1, #8]
@@ -607,12 +591,9 @@ CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     mov R0,#2  ; mov 2 LSL 0
 CODE>     pop {R1}
-CODE>     mov R2,R0
-CODE>     lsl R1,R1,R2
-CODE>     mov R0,R1
+CODE>     lsl R0,R1,R0
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     pop {R1}
 CODE>     add R1,R1,R9
 CODE>     str R0,[R1]
@@ -657,8 +638,7 @@ CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #28]
 CODE>     str R0,[R11, #+12]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
@@ -697,8 +677,7 @@ CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #24]
 CODE>     str R0,[R11, #+12]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
@@ -737,8 +716,7 @@ CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #28]
 CODE>     str R0,[R11, #+12]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
@@ -755,8 +733,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #20]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     bl wasm_fn5
@@ -778,8 +755,7 @@ CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #24]
 CODE>     str R0,[R11, #+12]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
@@ -796,8 +772,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #16]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     bl wasm_fn5
@@ -823,8 +798,7 @@ CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #20]
 CODE>     str R0,[R11, #+12]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
@@ -863,8 +837,7 @@ CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #16]
 CODE>     str R0,[R11, #+12]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
@@ -903,8 +876,7 @@ CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #20]
 CODE>     str R0,[R11, #+12]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
@@ -921,8 +893,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #28]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     bl wasm_fn5
@@ -944,8 +915,7 @@ CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #16]
 CODE>     str R0,[R11, #+12]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     ldr R1,[R11, #+8]
@@ -962,8 +932,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #24]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     push {R0}
 CODE>     ; ~~~ register barrier ~~~
 CODE>     bl wasm_fn5
@@ -1022,8 +991,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #48]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     pop {R1}
 CODE>     add R1,R1,R9
 CODE>     str R0,[R1, #8]
@@ -1206,8 +1174,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #48]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     pop {R1}
 CODE>     add R1,R1,R9
 CODE>     str R0,[R1, #12]
@@ -1376,6 +1343,7 @@ CODE> pop {R14}
 CODE> bx lr
 CODE> 
 CODE> wasm_fn5:  ; (loc0: int, loc1: int, loc2: int, loc3: int)
+CODE> ; Function makes no calls
 CODE> push {R11}
 CODE> mov R11,R13
 CODE> sub R13,R13,#8 ; sub
@@ -1549,8 +1517,7 @@ CODE>     ldr R0,[R11, #-4]
 CODE>     add R0,R0,R9
 CODE>     ldr R0,[R0, #24]
 CODE>     pop {R1}
-CODE>     sub R1,R1,R0
-CODE>     mov R0,R1
+CODE>     sub R0,R1,R0
 CODE>     pop {R1}
 CODE>     add R0,R0,R1
 CODE>     pop {R1}
