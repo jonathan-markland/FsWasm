@@ -11,6 +11,16 @@ open AsmPrefixes
 
 
 
+let TidySerialisationOf x =
+    let minSize = 100
+    let text = sprintf "%A" x
+    let text = text.Replace("\r","").Replace("\n", " ")
+    let text = System.Text.RegularExpressions.Regex.Replace(text, "[ ]+", " ")
+    if text.Length < minSize then text else text.Substring(0,minSize) + "..."
+
+
+
+
 let WriteOutFunctionAndBranchTables writeOutCode _writeOutTables (funcIndex:int) (m:Module) translationState config (f:InternalFunctionRecord) =   // TODO: module only needed to query function metadata in TranslateInstructions
 
     let wasmToCrmTranslationConfig = 
@@ -33,7 +43,12 @@ let WriteOutFunctionAndBranchTables writeOutCode _writeOutTables (funcIndex:int)
         let defaultFormat instruction = sprintf "        %A" instruction
 
         match instruction with 
-            | Barrier                -> ["        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"]
+            | Barrier optionalWasmInstr -> 
+                let traceBackText =
+                    match optionalWasmInstr with
+                        | None -> ""
+                        | Some wasmInstr -> sprintf "  %s" (TidySerialisationOf wasmInstr)
+                ["        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" + traceBackText]
             | Label (LabelName name) -> ["    " + name + ":"]
             | Goto _                 -> [instruction |> defaultFormat ; ""]
             | _                      -> [instruction |> defaultFormat]
