@@ -74,7 +74,6 @@ let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationC
     let actualFileImage = actual |> String.concat "\r\n"  // This is useful for developing a new test case.
 
     let expectationFile = (sprintf "program-%d-%s-%s-asm.txt" n fileSubType cpuKind)
-    let expected = System.IO.File.ReadAllLines expectationFile  // TODO: More detail on failed comparison.
 
     // Side-effect of test:  Save out the actual file as an update candidate:
     Directory.CreateDirectory(updateCandidatesFolder) |> ignore
@@ -82,6 +81,7 @@ let FilePassesTestWhenTranslatedUsing cpuKind asAssemblyLanguage n optimisationC
     File.WriteAllText(replaceFile, actualFileImage) |> ignore
 
     // Expectation test:
+    let expected = System.IO.File.ReadAllLines expectationFile  // TODO: More detail on failed comparison.
     let b = (actual = expected)
     b
 

@@ -138,7 +138,7 @@ let TranslateInstructionToAsmSequence _thisFunc instruction =
         | BNonZero  -> "nz"
 
     match instruction with
-        | Barrier                     -> [ "// ~~~ register barrier ~~~" ]
+        | Barrier _                   -> [ "// ~~~ register barrier ~~~" ]
         | Breakpoint                  -> [ "break" ]
         | Drop(U32 numSlots)          -> [ sprintf "add SP,%d" (numSlots * 4u) ]   // TODO: Assumes 32-bit target
         | Label(LabelName l)          -> [ "label " + l ]   // TODO: sort out using the local label references in Jonathan's ASM

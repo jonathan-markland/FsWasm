@@ -72,7 +72,7 @@ let EndsWithBarrier crmInstructions =
         | [] -> false
         | _  -> 
             match crmInstructions |> List.last with
-                | Barrier -> true
+                | Barrier _ -> true
                 | _ -> false
 
 
@@ -141,7 +141,7 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
 
         List.concat (ws |> List.map translateInstr)
 
-    and translateInstr w =
+    and translateInstr (w:Instr) =
 
         let translatedList = translateInstrWithoutBarrier w
 
@@ -149,9 +149,9 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
         if translatedList |> EndsWithBarrier then 
             translatedList 
         else 
-            translatedList @ [ Barrier ]   
+            translatedList @ [ Barrier (Some w) ]
 
-    and translateInstrWithoutBarrier w =
+    and translateInstrWithoutBarrier (w:Instr) =
 
         let binaryCommutativeOp lhs rhs op = 
             (translateInstr lhs) @ 

@@ -166,7 +166,8 @@ type CRMInstruction32 =
     | ThunkIn
 
     /// Marks where all registers are unassigned.  Used to make peephole optimisation reliable.
-    | Barrier     
+    /// Includes a link to the WASM instruction that was translated in the block above, for traceability.
+    | Barrier     of forTraceability:Instr option
 
     /// Breakpoint instruction
     | Breakpoint  
