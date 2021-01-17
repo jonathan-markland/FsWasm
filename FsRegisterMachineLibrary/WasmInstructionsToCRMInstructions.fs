@@ -70,23 +70,33 @@ type WasmToCrmTranslationConfig =
 /// Translate WASM instruction body tree to Common Register Machine (CRM) list.
 let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToCrmTranslationConfig (ws:WasmFileTypes.Instr list) =
 
-    let mutable (ModuleTranslationState labelCount) = translationState
-    let mutable labelStack = new ResizeArray<LABELNAME>()  // TODO: Can we use a cons list
+    let mutable (ModuleTranslationState labelAllocatorCount) = translationState
+    let mutable labelStack = []
 
     let newLabel () =
-        labelCount <- labelCount + 1
-        LabelName(sprintf "%s%d" AsmCodeLabelPrefix labelCount)
+        labelAllocatorCount <- labelAllocatorCount + 1
+        LabelName (sprintf "%s%d" AsmCodeLabelPrefix labelAllocatorCount)
 
     let pushNewLabel () =
         let l = newLabel ()
-        labelStack.Add l
+        labelStack <- l :: labelStack
         l
 
     let popLabel () =
-        labelStack.RemoveAt(labelStack.Count - 1)
+        labelStack <-
+            match labelStack with
+                | [] -> failwith "Internal error:  Too many labels popped from internal label stack!"
+                | _::tail -> tail
 
     let labelFor (LabelIdx (U32 i)) =
-        labelStack.[labelStack.Count - (1 + (int i))]
+
+        let rec recurse lst i =
+            match  i , lst with
+                |  _ , []      -> failwith "Internal error:  Insufficient labels for reverse-indexing attempt."
+                | 0u , head::_ -> head
+                |  n , _::tail -> recurse tail (n-1u)
+
+        recurse labelStack i
 
     let returnLabel = 
         newLabel ()
@@ -417,6 +427,6 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
     // Do the translation with the above nested functions:
 
     let finalTranslation = (translateInstrList ws) @ [ Label returnLabel ] 
-    let updatedTranslationState = ModuleTranslationState(labelCount)
+    let updatedTranslationState = ModuleTranslationState(labelAllocatorCount)
 
     (finalTranslation, updatedTranslationState)
