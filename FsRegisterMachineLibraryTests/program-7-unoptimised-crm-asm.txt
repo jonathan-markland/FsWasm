@@ -1053,7 +1053,6 @@ CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 0u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l10:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 5u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2144,7 +2143,6 @@ CODE>         CalcRegs (AddRegReg, A, Y, A)
 CODE>         StoreConst (Stored32, A, U32 28u, I32 16)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l17:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2669,7 +2667,6 @@ CODE>         CalcRegs (AddRegReg, B, Y, B)
 CODE>         Store (A, Stored32, B, U32 8u)
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l23:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

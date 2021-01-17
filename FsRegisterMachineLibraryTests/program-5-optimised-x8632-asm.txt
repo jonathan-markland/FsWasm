@@ -35,7 +35,6 @@ CODE>     mov EAX,EBX
 CODE>     mov [EBP-8],EAX  ; @loc6
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l3:
-CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EBX,[EBP+20]  ; @loc1
 CODE>     mov EAX,1
 CODE>     cmp EBX,EAX
@@ -48,7 +47,6 @@ CODE>     mov EAX,[EBP+24]  ; @loc0
 CODE>     mov [EBP+12],EAX  ; @loc3
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l5:
-CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EBX,[EBP+12]  ; @loc3
 CODE>     mov EAX,[EBP+8]  ; @loc4
 CODE>     mov [EDI+EBX],AX

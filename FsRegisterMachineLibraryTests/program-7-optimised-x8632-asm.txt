@@ -584,7 +584,6 @@ CODE>     pop EBX
 CODE>     mov [EDI+EBX],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l10:
-CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc5
 CODE>     add EAX,EDI
 CODE>     mov EAX,[EAX+28]
@@ -1194,7 +1193,6 @@ CODE>     add EAX,EDI
 CODE>     mov dword [EAX+28],16
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l17:
-CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-8]  ; @loc1
 CODE>     add EAX,EDI
 CODE>     mov EAX,[EAX+28]
@@ -1485,7 +1483,6 @@ CODE>     pop EBX
 CODE>     mov [EDI+EBX+8],EAX
 CODE>     ; ~~~ register barrier ~~~
 CODE>     wasm_l23:
-CODE>     ; ~~~ register barrier ~~~
 CODE>     mov EAX,[EBP-4]  ; @loc4
 CODE>     add EAX,EDI
 CODE>     mov EAX,[EAX+12]

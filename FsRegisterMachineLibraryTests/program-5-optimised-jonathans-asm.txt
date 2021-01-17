@@ -24,7 +24,6 @@ CODE>     let A=B
 CODE>     let int[@loc6]=A
 CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l3
-CODE>     // ~~~ register barrier ~~~
 CODE>     let B=int[@loc1]
 CODE>     let A=1
 CODE>     cmp B,A:if < goto wasm_l4
@@ -36,7 +35,6 @@ CODE>     let A=int[@loc0]
 CODE>     let int[@loc3]=A
 CODE>     // ~~~ register barrier ~~~
 CODE>     label wasm_l5
-CODE>     // ~~~ register barrier ~~~
 CODE>     let B=int[@loc3]
 CODE>     let A=int[@loc4]
 CODE>     add B,Y

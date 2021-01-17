@@ -41,7 +41,6 @@ CODE>         Pop A
 CODE>         StoreLoc (A, LocalIdx (U32 6u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l3:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 1u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,7 +68,6 @@ CODE>         Pop A
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l5:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (A, LocalIdx (U32 3u))
 CODE>         Push A
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

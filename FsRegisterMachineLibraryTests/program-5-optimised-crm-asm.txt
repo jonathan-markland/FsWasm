@@ -16,7 +16,6 @@ CODE>         Let (A, B)
 CODE>         StoreLoc (A, LocalIdx (U32 6u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l3:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 1u))
 CODE>         Const (A, Const32 1)
 CODE>         SecondaryCmpBranch (CrmCondLts, LabelName "wasm_l4")
@@ -28,7 +27,6 @@ CODE>         FetchLoc (A, LocalIdx (U32 0u))
 CODE>         StoreLoc (A, LocalIdx (U32 3u))
 CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>     wasm_l5:
-CODE>         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CODE>         FetchLoc (B, LocalIdx (U32 3u))
 CODE>         FetchLoc (A, LocalIdx (U32 4u))
 CODE>         CalcRegs (AddRegReg, B, Y, B)
