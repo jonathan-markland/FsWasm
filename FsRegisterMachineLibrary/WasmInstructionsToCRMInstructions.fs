@@ -229,10 +229,77 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
             (translateInstr lhs) @ (translateInstr rhs) @ shiftSequence
 
         let translateConstruct sourceBody putInOrder =
+
             let constructLabel = pushNewLabel ()
             let translatedBody = translateInstrList sourceBody
             popLabel ()
             putInOrder translatedBody [ Label constructLabel ]
+
+        let fetchInstruction fetchedType {Align=al ; Offset=O} adr =
+
+            match (fetchedType , al) with
+                | (SignExt8  , _)     
+                | (ZeroExt8  , _)     
+                | (SignExt16 , U32 1u)
+                | (ZeroExt16 , U32 1u)
+                | (SignExt32 , U32 2u) -> ()
+                | _ -> failwith "Cannot translate fetch with given alignment"
+
+            match adr with
+                
+                | I32Const O2 -> 
+                    [ 
+                        Fetch (A, fetchedType, Y, O -+- O2)
+                        Push A 
+                    ]
+
+                | _ ->
+                    (translateInstr adr) @ 
+                    [ 
+                        Pop A
+                        CalcRegs (AddRegReg,A,Y, A)
+                        Fetch (A, fetchedType, A,O)    // TODO: Could we extend Fetch() to have two registers, one optional?  Then avoid the addition and use Rn+Rm addressing mode instead.  (Should make that generation configurable).
+                        Push A
+                    ]
+
+        let storeInstruction storedType {Align=al ; Offset=O} lhs rhs =
+
+            match (storedType , al) with
+                | (Stored8,  _)
+                | (Stored16, U32 1u)
+                | (Stored32, U32 2u) -> ()
+                | _ -> failwith "Cannot translate store with given alignment"
+
+            match lhs,rhs with
+                
+                | I32Const O2, I32Const v -> 
+                    [ StoreConst (storedType, Y, O -+- O2,v) ]
+
+                | _, I32Const v -> 
+                    (translateInstr lhs) @ 
+                    [ 
+                        Pop A
+                        CalcRegs (AddRegReg,A,Y,A)      // TODO: More effective use of addressing.
+                        StoreConst (storedType,A,O,v) 
+                    ]
+
+                | I32Const O2, _ -> 
+                    (translateInstr rhs) @ 
+                    [ 
+                        Pop A
+                        Store (A, storedType, Y,O -+- O2)
+                    ]
+
+                | _,_ -> 
+                    (translateInstr lhs) @ 
+                    (translateInstr rhs) @ 
+                    [ 
+                        Pop A
+                        Pop B
+                        CalcRegs (AddRegReg,B,Y,B)
+                        Store (A, storedType, B,O)
+                    ]
+
 
         match w with
 
@@ -337,103 +404,62 @@ let TranslateInstructions (moduleFuncsArray:Function[]) translationState wasmToC
                     @ (stackCleanupAfterCall funcType)
                     @ (pushAnyReturn funcType)
 
-            | I32Const(I32(c)) -> 
-                [ Const (A, Const32 c) ; Push A ]
-
-            | GetLocal(l) -> 
-                [ FetchLoc(A,l) ; Push A ]
-
-            | SetLocal(l,v) -> 
-                (translateInstr v) @ [ Pop A ; StoreLoc(A,l) ]
-
-            | TeeLocal(l,v) ->
-                (translateInstr v) @ [ PeekA ; StoreLoc(A,l) ]
-        
-            | GetGlobal(g) ->
-                [ FetchGlo(A,g) ; Push A ]
-
-            | SetGlobal(g,v) ->
-                (translateInstr v) @ [ Pop A ; StoreGlo(A,g) ]
-
-                    // TODO: runtime restriction of addressing to the Linear Memory extent.
-
-            // TODO: Can use use the new Stored8/16/32 type to collapse the size of this table?
-
-            | I32Store8(  {Align=_;       Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored8, Y, O -+- O2,v) ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored16, Y, O -+- O2,v) ]
-            | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2, I32Const v) -> [ StoreConst(Stored32, Y, O -+- O2,v) ]
-
-            | I32Store8(  {Align=_;       Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored8, A,O,v) ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored16, A,O,v) ]   // TODO: More effective use of addressing.
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs, I32Const v) -> (translateInstr lhs) @ [ Pop A ; CalcRegs(AddRegReg,A,Y,A) ; StoreConst(Stored32, A,O,v) ]
-
-            | I32Store8(  {Align=_;       Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored8, Y,O -+- O2) ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored16, Y,O -+- O2) ]
-            | I32Store(   {Align=U32 2u ; Offset=O}, I32Const O2,        rhs) -> (translateInstr rhs) @ [ Pop A ; Store(A, Stored32, Y,O -+- O2) ]
-
-            | I32Store8(  {Align=_;       Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored8,  B,O) ]   // TODO: separate routines!!
-            | I32Store16( {Align=U32 1u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored16, B,O) ]
-            | I32Store(   {Align=U32 2u ; Offset=O},         lhs,        rhs) -> (translateInstr lhs) @ (translateInstr rhs) @ [ Pop A ; Pop B ; CalcRegs(AddRegReg,B,Y,B) ; Store(A, Stored32, B,O) ]
-
-            | I32Store16( {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 16-bit store unless alignment is 2 bytes"
-            | I32Store(   {Align=U32 _ ;  Offset=_},   _,   _) -> failwith "Cannot translate 32-bit store unless alignment is 4 bytes"
-
-            // TODO: Can use use the new SignExt8 (and companions) to collapse the size of this table?
-
-            | I32Load8s(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, SignExt8,  Y, O -+- O2) ; Push A ]
-            | I32Load8u(  {Align=_;       Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt8,  Y, O -+- O2) ; Push A ]
-            | I32Load16s( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt16, Y, O -+- O2) ; Push A ]
-            | I32Load16u( {Align=U32 1u ; Offset=O}, I32Const O2) -> [ Fetch(A, ZeroExt16, Y, O -+- O2) ; Push A ]
-            | I32Load(    {Align=U32 2u ; Offset=O}, I32Const O2) -> [ Fetch(A, SignExt32, Y, O -+- O2) ; Push A ]
-
-            // TODO: Could we extend Fetch() to have two registers, one optional?  Then avoid the addition and use Rn+Rm addressing mode instead.  (Should make that generation configurable).
-
-            | I32Load8s(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt8,  A,O) ; Push A ]
-            | I32Load8u(  {Align=_;       Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, ZeroExt8,  A,O) ; Push A ]
-            | I32Load16s( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt16, A,O) ; Push A ]
-            | I32Load16u( {Align=U32 1u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, ZeroExt16, A,O) ; Push A ]
-            | I32Load(    {Align=U32 2u ; Offset=O}, operand) -> (translateInstr operand) @ [ Pop A ; CalcRegs(AddRegReg,A,Y, A) ; Fetch(A, SignExt32, A,O) ; Push A ]
-           
-            // TODO: Could capitulate given X86 target, but make that configurable:
-            | I32Load16s( {Align=U32 _ ; Offset=_}, _) -> failwith "Cannot translate 16-bit sign-extended load unless alignment is 2 bytes"
-            | I32Load16u( {Align=U32 _ ; Offset=_}, _) -> failwith "Cannot translate 16-bit unsigned load unless alignment is 2 bytes"
-            | I32Load(    {Align=U32 _ ; Offset=_}, _) -> failwith "Cannot translate 32-bit load unless alignment is 4 bytes"
-
-            | I32Eqz(operand) -> (translateInstr operand) @ [ Pop A ; CmpAZ ; Push A ]
-
-            | I32Eq(a,b)   -> compareOp a b CrmCondEq 
-            | I32Ne(a,b)   -> compareOp a b CrmCondNe 
-            | I32Lts(a,b)  -> compareOp a b CrmCondLts
-            | I32Ltu(a,b)  -> compareOp a b CrmCondLtu
-            | I32Gts(a,b)  -> compareOp a b CrmCondGts
-            | I32Gtu(a,b)  -> compareOp a b CrmCondGtu
-            | I32Les(a,b)  -> compareOp a b CrmCondLes
-            | I32Leu(a,b)  -> compareOp a b CrmCondLeu
-            | I32Ges(a,b)  -> compareOp a b CrmCondGes
-            | I32Geu(a,b)  -> compareOp a b CrmCondGeu
-
-            | I32Add (a,I32Const n) -> binaryOpWithConst a AddRegNum n
-            | I32Sub (a,I32Const n) -> binaryOpWithConst a SubRegNum n
-            | I32And (a,I32Const n) -> binaryOpWithConst a AndRegNum n
-            | I32Or  (a,I32Const n) -> binaryOpWithConst a OrRegNum  n
-            | I32Xor (a,I32Const n) -> binaryOpWithConst a XorRegNum n
-
-            | I32Add (a,b) -> binaryCommutativeOp     a b AddRegReg
-            | I32Sub (a,b) -> binaryNonCommutativeOp  a b SubRegReg
-            | I32Mul (a,b) -> binaryCommutativeOp     a b MulRegReg 
-            | I32Divs(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivsRegReg,A,B))
-            | I32Divu(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivuRegReg,A,B))
-            | I32Rems(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemsRegReg,A,B))
-            | I32Remu(a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemuRegReg,A,B))
-            | I32And (a,b) -> binaryCommutativeOp     a b AndRegReg
-            | I32Or  (a,b) -> binaryCommutativeOp     a b OrRegReg  
-            | I32Xor (a,b) -> binaryCommutativeOp     a b XorRegReg
+            | I32Const (I32(c)) -> [ Const (A, Const32 c) ; Push A ]
             
-            | I32Shl (a,b) -> shiftOp a b Shl  
-            | I32Shrs(a,b) -> shiftOp a b Shrs
-            | I32Shru(a,b) -> shiftOp a b Shru
-            | I32Rotl(a,b) -> shiftOp a b Rotl
-            | I32Rotr(a,b) -> shiftOp a b Rotr
+            | GetLocal (l)      -> [ FetchLoc (A,l) ; Push A ]
+            | SetLocal (l,v)    -> (translateInstr v) @ [ Pop A ; StoreLoc (A,l) ]
+            | TeeLocal (l,v)    -> (translateInstr v) @ [ PeekA ; StoreLoc (A,l) ]
+            
+            | GetGlobal (g)     -> [ FetchGlo (A,g) ; Push A ]
+            | SetGlobal (g,v)   -> (translateInstr v) @ [ Pop A ; StoreGlo (A,g) ]
+
+            // TODO: runtime restriction of addressing to the Linear Memory extent.
+
+            | I32Store8  (memArg, lhs, rhs) -> storeInstruction Stored8  memArg lhs rhs
+            | I32Store16 (memArg, lhs, rhs) -> storeInstruction Stored16 memArg lhs rhs
+            | I32Store   (memArg, lhs, rhs) -> storeInstruction Stored32 memArg lhs rhs
+
+            | I32Load8s  (memArg, adr) -> fetchInstruction SignExt8  memArg adr
+            | I32Load8u  (memArg, adr) -> fetchInstruction ZeroExt8  memArg adr
+            | I32Load16s (memArg, adr) -> fetchInstruction SignExt16 memArg adr
+            | I32Load16u (memArg, adr) -> fetchInstruction ZeroExt16 memArg adr
+            | I32Load    (memArg, adr) -> fetchInstruction SignExt32 memArg adr
+
+            | I32Eqz operand -> (translateInstr operand) @ [ Pop A ; CmpAZ ; Push A ]
+
+            | I32Eq  (a,b)  -> compareOp a b CrmCondEq 
+            | I32Ne  (a,b)  -> compareOp a b CrmCondNe 
+            | I32Lts (a,b)  -> compareOp a b CrmCondLts
+            | I32Ltu (a,b)  -> compareOp a b CrmCondLtu
+            | I32Gts (a,b)  -> compareOp a b CrmCondGts
+            | I32Gtu (a,b)  -> compareOp a b CrmCondGtu
+            | I32Les (a,b)  -> compareOp a b CrmCondLes
+            | I32Leu (a,b)  -> compareOp a b CrmCondLeu
+            | I32Ges (a,b)  -> compareOp a b CrmCondGes
+            | I32Geu (a,b)  -> compareOp a b CrmCondGeu
+
+            | I32Add  (a,I32Const n) -> binaryOpWithConst a AddRegNum n
+            | I32Sub  (a,I32Const n) -> binaryOpWithConst a SubRegNum n
+            | I32And  (a,I32Const n) -> binaryOpWithConst a AndRegNum n
+            | I32Or   (a,I32Const n) -> binaryOpWithConst a OrRegNum  n
+            | I32Xor  (a,I32Const n) -> binaryOpWithConst a XorRegNum n
+
+            | I32Add  (a,b) -> binaryCommutativeOp     a b AddRegReg
+            | I32Sub  (a,b) -> binaryNonCommutativeOp  a b SubRegReg
+            | I32Mul  (a,b) -> binaryCommutativeOp     a b MulRegReg 
+            | I32Divs (a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivsRegReg,A,B))
+            | I32Divu (a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (DivuRegReg,A,B))
+            | I32Rems (a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemsRegReg,A,B))
+            | I32Remu (a,b) -> failwith "Division and remainder not supported yet"  // binaryNonCommutativeOp  a b (CalcRegReg (RemuRegReg,A,B))
+            | I32And  (a,b) -> binaryCommutativeOp     a b AndRegReg
+            | I32Or   (a,b) -> binaryCommutativeOp     a b OrRegReg  
+            | I32Xor  (a,b) -> binaryCommutativeOp     a b XorRegReg
+            
+            | I32Shl  (a,b) -> shiftOp a b Shl  
+            | I32Shrs (a,b) -> shiftOp a b Shrs
+            | I32Shru (a,b) -> shiftOp a b Shru
+            | I32Rotl (a,b) -> shiftOp a b Rotl
+            | I32Rotr (a,b) -> shiftOp a b Rotr
 
             | _ -> failwith (sprintf "Cannot translate this instruction to simple 32-bit machine: %A" w)   // TODO: Possibly avoid %A
 
